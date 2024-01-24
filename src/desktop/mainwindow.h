@@ -85,6 +85,7 @@ private slots:
 
     void showSettings(const QString &page = { });
     void show3DSettings();
+    QCoro::Task<> saveAllDocuments();
 
     void goHome(bool home);
     void repositionHomeWidget();

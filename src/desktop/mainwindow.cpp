@@ -925,34 +925,8 @@ void MainWindow::createActions()
     ActionManager::ActionTable actionTable = {
         { "go_home", [this](bool b) { goHome(b); } },
         { "document_save_all", [this](bool) -> QCoro::Task<> {
-              auto oldView = m_activeView;
-              auto oldViewPane = m_activeViewPane;
-              const auto docs = DocumentList::inst()->documents();
-
-              for (const auto doc : docs) {
-                  if (doc->model()->isModified()) {
-                      if (doc->filePath().isEmpty()) {
-                          QVector<ViewPane *> possibleVPs;
-                          for (const auto &vp : std::as_const(m_allViewPanes)) {
-                              if (vp->viewForDocument(doc))
-                                  possibleVPs << vp;
-                          }
-                          if (!possibleVPs.contains(m_activeViewPane)) {
-                              Q_ASSERT(!possibleVPs.isEmpty());
-                              setActiveViewPane(possibleVPs.constFirst());
-                          }
-                          m_activeViewPane->activateDocument(doc);
-                      }
-
-                      co_await doc->save(false /* saveas */);
-
-                      if (m_activeViewPane != oldViewPane) {
-                          setActiveViewPane(oldViewPane);
-                      }
-                  }
-              }
-              if (m_activeView != oldView)
-                  setActiveView(oldView);
+             // this is a member function because of GCC-10 bug #96517
+             co_await saveAllDocuments();
         } },
         { "document_import_bl_inv", [this](bool) {
               if (!m_importinventory_dialog)
@@ -1276,6 +1250,38 @@ void MainWindow::showSettings(const QString &page)
 void MainWindow::show3DSettings()
 {
     RenderSettingsDialog::inst()->show();
+}
+
+QCoro::Task<> MainWindow::saveAllDocuments()
+{
+    auto oldView = m_activeView;
+    auto oldViewPane = m_activeViewPane;
+    const auto docs = DocumentList::inst()->documents();
+
+    for (const auto doc : docs) {
+        if (doc->model()->isModified()) {
+            if (doc->filePath().isEmpty()) {
+                QVector<ViewPane *> possibleVPs;
+                for (const auto &vp : std::as_const(m_allViewPanes)) {
+                    if (vp->viewForDocument(doc))
+                        possibleVPs << vp;
+                }
+                if (!possibleVPs.contains(m_activeViewPane)) {
+                    Q_ASSERT(!possibleVPs.isEmpty());
+                    setActiveViewPane(possibleVPs.constFirst());
+                }
+                m_activeViewPane->activateDocument(doc);
+            }
+
+            co_await doc->save(false /* saveas */);
+
+            if (m_activeViewPane != oldViewPane) {
+                setActiveViewPane(oldViewPane);
+            }
+        }
+    }
+    if (m_activeView != oldView)
+        setActiveView(oldView);
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)
