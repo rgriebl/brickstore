@@ -25,8 +25,14 @@ CameraPreviewWidget::CameraPreviewWidget(QQmlEngine *engine, QWidget *parent)
     m_widget->setClearColor(Qt::black);
     m_widget->setSource(u"qrc:/Scanner/CameraPreview.qml"_qs);
 
-    connect(m_widget->rootObject(), SIGNAL(clicked()), // clazy:exclude=old-style-connect
-            this, SIGNAL(clicked()));
+    if (auto *ro = m_widget->rootObject()) {
+        connect(ro, SIGNAL(clicked()), this, SIGNAL(clicked())); // clazy:exclude=old-style-connect
+    } else {
+        qWarning() << "CameraPreviewWidget: failed to load QML file:";
+        const auto errors = m_widget->errors();
+        for (const auto &err : errors)
+            qWarning() << "  " << err.toString();
+    }
 
     int videoWidth = logicalDpiX() * 3; // ~7.5cm on-screen
     m_widget->setMinimumSize(videoWidth, videoWidth * 9 / 16);
@@ -41,12 +47,13 @@ CameraPreviewWidget::~CameraPreviewWidget()
 
 bool CameraPreviewWidget::isActive() const
 {
-    return m_widget->rootObject()->property("active").toBool();
+    return m_widget->rootObject() ? m_widget->rootObject()->property("active").toBool() : false;
 }
 
 void CameraPreviewWidget::setActive(bool newActive)
 {
-    m_widget->rootObject()->setProperty("active", newActive);
+    if (m_widget->rootObject())
+        m_widget->rootObject()->setProperty("active", newActive);
 }
 
 QObject *CameraPreviewWidget::videoOutput() const

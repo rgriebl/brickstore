@@ -18,7 +18,7 @@ env:
       qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
       qt6-gtk-platformtheme libqt6svg6 qt6-multimedia-dev
       qt6-image-formats-plugins
-      qml6-module-qt5compat-graphicaleffects
+      qml6-module-qt5compat-graphicaleffects qml6-module-qtmultimedia
       qml6-module-qtqml-workerscript qml6-module-quick3d
   BRICKSTORE_GUI_QT6_INSTALLER_MODULES: >-
       qtquick3d qtshadertools qtquicktimeline qt5compat qtimageformats qtmultimedia
@@ -294,7 +294,7 @@ jobs:
         sudo DEBIAN_FRONTEND=noninteractive apt -y update
         sudo DEBIAN_FRONTEND=noninteractive apt -y install \
             g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
-            libxcb-\* libpulse-dev libgstreamer\*1.0-dev libsecret-1-dev
+            libxcb-\* libpulse-dev libgstreamer\*1.0-dev libsecret-1-dev libva-dev
         ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
@@ -327,13 +327,16 @@ jobs:
         chmod +x .linuxdeploy/linuxdeploy-x86_64.AppImage
         wget  -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
         chmod +x .linuxdeploy/linuxdeploy-plugin-qt-x86_64.AppImage
-        env VERSION=`cat VERSION_NUMBER` QML_SOURCES_PATHS=src/ldraw EXTRA_QT_PLUGINS=svg \
+        env VERSION=`cat VERSION_NUMBER` QML_SOURCES_PATHS=src EXTRA_QT_PLUGINS=svg \
             "QMAKE=${Qt6_DIR}/bin/qmake" "LD_LIBRARY_PATH=${Qt6_DIR}/lib" \
             .linuxdeploy/linuxdeploy-x86_64.AppImage \
                 --appdir=build/BrickStore-Install \
                 -e build/bin/brickstore \
                 -i assets/generated-app-icons/brickstore.png \
                 -d unix/brickstore.desktop \
+                -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva.so \
+                -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva-drm.so \
+                -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva-x11.so \
                 --plugin qt \
                 --output appimage
       shell: bash
@@ -354,10 +357,13 @@ jobs:
         chmod +x .linuxdeploy/linuxdeploy-x86_64.AppImage
         wget  -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
         chmod +x .linuxdeploy/linuxdeploy-plugin-qt-x86_64.AppImage
-        env VERSION=`cat VERSION_NUMBER` QML_SOURCES_PATHS=src/ldraw EXTRA_QT_PLUGINS=svg \
+        env VERSION=`cat VERSION_NUMBER` QML_SOURCES_PATHS=src EXTRA_QT_PLUGINS=svg \
             "QMAKE=${Qt6_DIR}/bin/qmake" "LD_LIBRARY_PATH=${Qt6_DIR}/lib" \
             .linuxdeploy/linuxdeploy-x86_64.AppImage \
                 --appdir=build/BrickStore-Install \
+                -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva.so \
+                -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva-drm.so \
+                -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva-x11.so \
                 --plugin qt
         find build/BrickStore-Install -maxdepth 1 -iname "AppRun*" -or -not -type d | xargs rm -rf
         # cqtdeployer would be much faster, but doesn't run on 20.04
