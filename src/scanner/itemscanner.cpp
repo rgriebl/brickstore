@@ -43,6 +43,7 @@ public:
     }
 
     uint nextId = 0;
+    QHash<QByteArray, bool> scanning;
 };
 
 
@@ -98,6 +99,12 @@ uint ItemScanner::scan(const QImage &image, char itemTypeId, const QByteArray &b
     if (!backend)
         return 0;
 
+    if (d->scanning.contains(backend->id)) {
+        qCCritical(LogScanner) << "Called scan while another scan is still is progress";
+        return 0;
+    }
+    d->scanning[backend->id] = true;
+
     int scanId = ++d->nextId;
 
     if (backend->id == "brickognize") {
@@ -127,14 +134,15 @@ uint ItemScanner::scan(const QImage &image, char itemTypeId, const QByteArray &b
         imagePart.setHeader(QNetworkRequest::ContentTypeHeader, u"image/jpg"_qs);
         imagePart.setHeader(QNetworkRequest::ContentLengthHeader, data.size());
         imagePart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                            u"form-data; name=\"query_image\"; filename=\"capture.png\""_qs);
+                            u"form-data; name=\"query_image\"; filename=\"capture.jpg\""_qs);
         imagePart.setBody(data);
         multiPart->append(imagePart);
 
         auto reply = d->nam->post(req, multiPart);
+
         multiPart->setParent(reply);
 
-        connect(reply, &QNetworkReply::finished, this, [this, reply, scanId]() {
+        connect(reply, &QNetworkReply::finished, this, [this, reply, scanId, backendId = backend->id]() {
             auto statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt();
 
             if (!statusCode) {
@@ -185,8 +193,8 @@ uint ItemScanner::scan(const QImage &image, char itemTypeId, const QByteArray &b
 
                     if (auto item = BrickLink::core()->item(itemTypeId, itemId.toLatin1())) {
                         itemsAndScores.emplace_back(item, score);
-                        qCDebug(LogScanner) << "Match:" << item->itemTypeId() << itemId
-                                            << " Score:" << score;
+                        // qCDebug(LogScanner) << "Match:" << item->itemTypeId() << itemId
+                        //                     << " Score:" << score;
                     } else {
                         qCWarning(LogScanner) << "Brickognize returned an invalid match! type:"
                                               << type << "id:" << itemId;
@@ -198,6 +206,7 @@ uint ItemScanner::scan(const QImage &image, char itemTypeId, const QByteArray &b
 
                 emit scanFinished(scanId, itemsAndScores);
             }
+            d->scanning.remove(backendId);
             reply->deleteLater();
         });
     }

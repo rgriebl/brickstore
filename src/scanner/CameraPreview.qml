@@ -20,7 +20,7 @@ VideoOutput {
         Image {
             id: play
             anchors.centerIn: parent
-            source: "./media-playback-start"
+            source: "media-playback-start.svg"
             property int size: Math.min(root.width, root.height) / 3
             sourceSize.width: size
             sourceSize.height: size

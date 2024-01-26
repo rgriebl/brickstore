@@ -10,6 +10,7 @@
 #include <QCamera>
 #include <QElapsedTimer>
 #include <QTimer>
+#include <QDeadlineTimer>
 
 #include "bricklink/global.h"
 #include "scanner/itemscanner.h"
@@ -53,6 +54,8 @@ private:
     void updateCamera(const QByteArray &cameraId);
     void updateCameraResolution(int preferredImageSize);
     void updateBackend(const QByteArray &backendId);
+    void setupCapture();
+    bool canCapture() const;
     void capture();
     void onScanFinished(uint id, const QVector<ItemScanner::Result> &itemsAndScores);
     void onScanFailed(uint id, const QString &error);
@@ -77,6 +80,8 @@ private:
     QStackedLayout *m_bottomStack;
     QToolButton *m_pinWindow;
 
+    std::optional<int> m_currentCaptureId;
+    QDeadlineTimer m_tryCaptureBefore;
     uint m_currentScan = 0;
     static int s_averageScanTime;
     QElapsedTimer m_lastScanTime;
@@ -86,8 +91,9 @@ private:
     QTimer m_errorMessageTimeout;
 
     enum class State : int {
-        Idle,         // -> Scanning / Window inactive -> SoonInactive
-        Scaning,      // -> Idle | NoMatch | Error
+        Idle,         // -> Capturing / Window inactive -> SoonInactive
+        Capturing,    // -> Scanning | Error
+        Scanning,     // -> Idle | NoMatch | Error
         NoMatch,      // 10sec -> Idle
         Error,        // 10sec -> Idle
         SoonInactive, // 10sec -> Inactive / Window active -> Idle

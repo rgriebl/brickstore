@@ -146,6 +146,7 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
 
     m_imageCapture = new QImageCapture(m_captureSession);
     m_captureSession->setImageCapture(m_imageCapture);
+    setupCapture();
 
     m_progress = new QProgressBar(this);
     m_progress->setTextVisible(false);
@@ -314,12 +315,34 @@ void ItemScannerDialog::updateCamera(const QByteArray &cameraId)
 
 
     updateCameraResolution(1920);
+}
+
+void ItemScannerDialog::setupCapture()
+{
+    connect(m_imageCapture, &QImageCapture::errorOccurred,
+            this, [this](int id, QImageCapture::Error error, const QString &errorString) {
+        Q_UNUSED(error);
+
+        if (!m_currentCaptureId.has_value() || m_currentCaptureId.value() != id) {
+            qCritical() << "SCANNERDLG" << "Ignoring errorOccurred(id:" << id << "), current:"
+                        << m_currentCaptureId.value_or(-1);
+            return;
+        }
+        m_currentCaptureId.reset();
+        m_lastError = errorString;
+        setState(State::Error);
+    });
 
     connect(m_imageCapture, &QImageCapture::imageCaptured,
             this, [this](int id, const QImage &img) {
-        Q_UNUSED(id)
-
+        if (!m_currentCaptureId.has_value() || m_currentCaptureId.value() != id) {
+            qCritical() << "SCANNERDLG" << "Ignoring imageCaptured(id:" << id << "), current:"
+                        << m_currentCaptureId.value_or(-1);
+            return;
+        }
+        m_currentCaptureId.reset();
         m_lastScanTime.restart();
+
         m_currentScan = ItemScanner::inst()->scan(img, char(m_selectItemType->checkedId()),
                                                   m_selectBackend->currentData().toByteArray());
 
@@ -330,8 +353,33 @@ void ItemScannerDialog::updateCamera(const QByteArray &cameraId)
 
         m_progress->setValue(0);
         m_progress->setRange(0, s_averageScanTime);
-        setState(State::Scaning);
+        setState(State::Scanning);
     });
+
+    connect(m_imageCapture, &QImageCapture::readyForCaptureChanged,
+            this, [this](bool ready) {
+        if (ready && !m_tryCaptureBefore.hasExpired())
+            capture();
+    });
+}
+
+bool ItemScannerDialog::canCapture() const
+{
+    return (m_state != State::Scanning) && (m_state != State::Capturing);
+}
+
+void ItemScannerDialog::capture()
+{
+    if (canCapture()) {
+        if (m_imageCapture->isReadyForCapture()) {
+            setState(State::Capturing);
+            m_currentCaptureId = m_imageCapture->capture();
+        } else {
+            // The cam might not be ready yet (e.g. window activation). Wait for it to become ready
+            // and try again.
+            m_tryCaptureBefore = QDeadlineTimer(1000);
+        }
+    }
 }
 
 void ItemScannerDialog::updateCameraResolution(int preferredImageSize)
@@ -406,25 +454,6 @@ void ItemScannerDialog::hideEvent(QHideEvent *e)
     QDialog::hideEvent(e);
 }
 
-void ItemScannerDialog::capture()
-{
-    if (!m_currentScan) {
-        if (m_imageCapture->isReadyForCapture()) {
-            m_imageCapture->capture();
-        } else {
-            // The cam might not be ready yet (e.g. window activation). Wait for it to become ready
-            // and try again.
-            QElapsedTimer timer;
-            timer.start();
-            connect(m_imageCapture, &QImageCapture::readyForCaptureChanged,
-                    this, [this, timer]() {
-                if (!timer.hasExpired(1000) && !m_currentScan && m_imageCapture->isReadyForCapture())
-                    m_imageCapture->capture();
-            });
-        }
-    }
-}
-
 void ItemScannerDialog::onScanFinished(uint id, const QVector<ItemScanner::Result> &itemsAndScores)
 {
     if (id == m_currentScan) {
@@ -488,7 +517,9 @@ void ItemScannerDialog::setState(State newState)
         if (m_camera && m_camera->isActive())
             m_camera->stop();
         break;
-    case State::Scaning:
+    case State::Capturing:
+        break;
+    case State::Scanning:
         break;
     case State::NoMatch:
         m_status->setText(u"<b>" + tr("No matching item found - try again.") + u"</b>");
@@ -502,7 +533,7 @@ void ItemScannerDialog::setState(State newState)
     if (newState == m_state)
         return;
 
-    if (newState == State::Scaning) {
+    if (newState == State::Scanning) {
         m_progressTimer->start();
         m_bottomStack->setCurrentWidget(m_progress);
     } else {
