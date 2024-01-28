@@ -152,7 +152,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     m_copyImage = new QAction(QIcon::fromTheme(u"edit-copy"_qs), { }, this);
     connect(m_copyImage, &QAction::triggered, this, [this]() -> QCoro::Task<> {
         QImage img;
-        if (w_ldraw->isVisible()) {
+        if (w_stackLayout->currentWidget() == w_ldraw) {
             if (w_ldraw->startGrab()) {
                 img = co_await qCoro(w_ldraw, &LDraw::RenderWidget::grabFinished);
             }
@@ -166,7 +166,7 @@ PictureWidget::PictureWidget(QWidget *parent)
     m_saveImageAs = new QAction(QIcon::fromTheme(u"document-save"_qs), { }, this);
     connect(m_saveImageAs, &QAction::triggered, this, [this]() -> QCoro::Task<> {
         QImage img;
-        if (w_ldraw->isVisible()) {
+        if (w_stackLayout->currentWidget() == w_ldraw) {
             if (w_ldraw->startGrab()) {
                 img = co_await qCoro(w_ldraw, &LDraw::RenderWidget::grabFinished);
             }
