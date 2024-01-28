@@ -7,7 +7,6 @@
 #include <QtQml/QQmlProperty>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
-#include <QtSvg>  // because deployment sometimes just forgets to include this lib otherwise
 
 #include "common/actionmanager.h"
 #include "common/config.h"
@@ -21,6 +20,7 @@
 #if defined(Q_OS_ANDROID)
 #  include <jni.h>
 #  include <QJniObject>
+#  include <QFileOpenEvent>
 
 extern "C" JNIEXPORT void JNICALL
 Java_de_brickforge_brickstore_ExtendedQtActivity_openUrl(JNIEnv *env, jobject, jstring jurl)

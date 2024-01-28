@@ -24,6 +24,7 @@
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQuick3D/QQuick3D>
+#include <QtSvg>  // because deployment sometimes just forgets to include this lib otherwise
 #if defined(BS_MOBILE)
 #  include <QtQuickControls2Impl/private/qquickiconimage_p.h>
 #endif

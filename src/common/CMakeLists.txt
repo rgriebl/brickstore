@@ -78,6 +78,7 @@ endif()
 if (BS_DESKTOP OR BS_MOBILE)
     target_link_libraries(common_module PRIVATE
         QCoro6::Qml
+        Qt6::Svg # force deployment
     )
 endif()
 

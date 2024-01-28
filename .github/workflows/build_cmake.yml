@@ -16,7 +16,7 @@ env:
       libsecret-1-dev
       qt6-declarative-dev qt6-declarative-private-dev
       qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
-      qt6-gtk-platformtheme libqt6svg6 qt6-multimedia-dev
+      qt6-gtk-platformtheme libqt6svg6-dev qt6-multimedia-dev
       qt6-image-formats-plugins
       qml6-module-qt5compat-graphicaleffects qml6-module-qtmultimedia
       qml6-module-qtqml-workerscript qml6-module-quick3d
