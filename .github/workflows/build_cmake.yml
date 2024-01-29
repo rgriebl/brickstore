@@ -68,13 +68,13 @@ jobs:
 
         - name: "Ubuntu 22.04 64bit"
           artifact: "Ubuntu-22.04"
-          runs-on: ubuntu-20.04
+          runs-on: ubuntu-22.04
           os: linux
           debian_container: "buildpack-deps:22.04"
 
         - name: "Debian 12 Backend 64bit"
           artifact: "Debian-12-Backend"
-          runs-on: ubuntu-20.04
+          runs-on: ubuntu-22.04
           os: linux
           debian_container: "buildpack-deps:bookworm"
           cmake_extra_config: "-DBACKEND_ONLY=ON"
@@ -93,7 +93,7 @@ jobs:
 
         - name: "Ubuntu Snap 64bit"
           artifact: "Linux-Snap"
-          runs-on: ubuntu-20.04
+          runs-on: ubuntu-22.04
           os: linux
           snap: true
           qt_tools: tools_opensslv3_src
@@ -288,8 +288,8 @@ jobs:
     # Build for Linux (AppImage / Snap)
     #################################################
 
-    - name: Build for Linux (AppImage / Snap)
-      if: matrix.config.appimage || matrix.config.snap
+    - name: Build for Linux (AppImage)
+      if: matrix.config.appimage
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y update
         sudo DEBIAN_FRONTEND=noninteractive apt -y install \
@@ -297,6 +297,19 @@ jobs:
             libxcb-\* libpulse-dev libgstreamer\*1.0-dev libsecret-1-dev libva-dev
         ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 \
+            ${{ matrix.config.cmake_extra_config }} -B build -S .
+        cmake --build build --config RelWithDebInfo --parallel --verbose
+        env DESTDIR=build/BrickStore-Install cmake --install build --config RelWithDebInfo --prefix /usr
+      shell: bash
+
+    - name: Build for Linux (Snap)
+      if: matrix.config.snap
+      run: |
+        sudo DEBIAN_FRONTEND=noninteractive apt -y update
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install \
+            g++ cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
+            libxcb-\* libpulse-dev libgstreamer\*1.0-dev libsecret-1-dev libva-dev
+        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         cmake --build build --config RelWithDebInfo --parallel --verbose
         env DESTDIR=build/BrickStore-Install cmake --install build --config RelWithDebInfo --prefix /usr
@@ -351,7 +364,7 @@ jobs:
     - name: Create Linux Snap 1
       if: matrix.config.snap
       run: |
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install lxd snapcraft
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install libfuse2
         mkdir -p .linuxdeploy
         wget  -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
         chmod +x .linuxdeploy/linuxdeploy-x86_64.AppImage

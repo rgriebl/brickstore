@@ -7,7 +7,7 @@ version: @VERSION@
 summary: @DESCRIPTION@
 grade: stable
 confinement: strict
-base: core20
+base: core22
 description: |
   See https://@BRICKSTORE_URL@ for more information.
 compression: lzo
@@ -20,7 +20,7 @@ apps:
   brickstore:
     command: usr/bin/brickstore
     desktop: usr/share/applications/brickstore.desktop
-    extensions: [ gnome-3-38 ]
+    extensions: [ gnome ]
     environment:
       QT_QPA_PLATFORMTHEME: gtk3
       DISABLE_WAYLAND: 1
@@ -28,12 +28,13 @@ apps:
       - x11
       - unity7
       - network
-      - network-bind
+      - network-manager-observe
       - network-status
       - home
       - removable-media
       - cups-control
       - camera
+      - password-manager-service
 
 parts:
   brickstore:
