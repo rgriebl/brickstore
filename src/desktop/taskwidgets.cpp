@@ -39,11 +39,15 @@ TaskPriceGuideWidget::TaskPriceGuideWidget(QWidget *parent)
     m_delayTimer.setInterval(120ms);
 
     connect(&m_delayTimer, &QTimer::timeout, this, [this]() {
-        bool ok = (m_document && (m_selection.count() == 1));
-
-        setPriceGuide(ok ? BrickLink::core()->priceGuideCache()->priceGuide(m_selection.constFirst()->item(),
-                                                                            m_selection.constFirst()->color(), true)
-                         : nullptr);
+        const Lot *selected = nullptr;
+        if (m_document) {
+            const auto selection = m_document->selectedLots();
+            if (selection.size() == 1)
+                selected = selection.constFirst();
+        }
+        setPriceGuide(selected ? BrickLink::core()->priceGuideCache()->priceGuide(selected->item(),
+                                                                                  selected->color(), true)
+                               : nullptr);
     });
 
     connect(MainWindow::inst(), &MainWindow::documentActivated,
@@ -70,7 +74,7 @@ void TaskPriceGuideWidget::documentUpdate(Document *document)
     }
 
     setCurrencyCode(m_document ? m_document->model()->currencyCode() : Config::inst()->defaultCurrencyCode());
-    selectionUpdate(m_document ? m_document->selectedLots() : LotList());
+    selectionUpdate();
 }
 
 void TaskPriceGuideWidget::currencyUpdate(const QString &ccode)
@@ -78,9 +82,8 @@ void TaskPriceGuideWidget::currencyUpdate(const QString &ccode)
     setCurrencyCode(ccode);
 }
 
-void TaskPriceGuideWidget::selectionUpdate(const LotList &list)
+void TaskPriceGuideWidget::selectionUpdate()
 {
-    m_selection = list;
     m_delayTimer.start();
 }
 
@@ -208,24 +211,23 @@ void TaskInfoWidget::documentUpdate(Document *document)
                 this, &TaskInfoWidget::currencyUpdate);
     }
 
-    selectionUpdate(m_document ? m_document->selectedLots() : LotList());
+    selectionUpdate();
 }
 
 void TaskInfoWidget::currencyUpdate()
 {
-    selectionUpdate(m_document ? m_document->selectedLots() : LotList());
+    selectionUpdate();
 }
 
 void TaskInfoWidget::statisticsUpdate()
 {
     // only relevant, if we are showing the current document info
-    if (m_selection.isEmpty())
-        selectionUpdate(m_selection);
+    if (m_document && (currentWidget() == m_text))
+        selectionUpdate();
 }
 
-void TaskInfoWidget::selectionUpdate(const LotList &list)
+void TaskInfoWidget::selectionUpdate()
 {
-    m_selection = list;
     m_delayTimer.start();
 }
 
@@ -235,21 +237,24 @@ void TaskInfoWidget::delayedSelectionUpdate()
         m_pic->setItemAndColor(nullptr);
         m_text->clear();
         setCurrentWidget(m_text);
-    } else if (m_selection.count() == 1) {
-        m_pic->setItemAndColor(m_selection.constFirst()->item(), m_selection.constFirst()->color());
-        setCurrentWidget(m_pic);
     } else {
-        auto stat = m_document->model()->statistics(m_selection.isEmpty() ? m_document->model()->lots()
-                                                                          : m_selection,
-                                                    false /* ignoreExcluded */);
+        const auto selection = m_document->selectedLots();
+        if (selection.count() == 1) {
+            m_pic->setItemAndColor(selection.constFirst()->item(), selection.constFirst()->color());
+            setCurrentWidget(m_pic);
+        } else {
+            auto stat = m_document->model()->statistics(selection.isEmpty() ? m_document->model()->lots()
+                                                                            : selection,
+                                                        false /* ignoreExcluded */);
 
-        QString s = u"<h3>%1</h3>"_qs
-                .arg(m_selection.isEmpty() ? tr("Document statistics") : tr("Multiple lots selected"))
-                + stat.asHtmlTable();
+            QString s = u"<h3>%1</h3>"_qs
+                            .arg(selection.isEmpty() ? tr("Document statistics") : tr("Multiple lots selected"))
+                        + stat.asHtmlTable();
 
-        m_pic->setItemAndColor(nullptr);
-        m_text->setText(s);
-        setCurrentWidget(m_text);
+            m_pic->setItemAndColor(nullptr);
+            m_text->setText(s);
+            setCurrentWidget(m_text);
+        }
     }
 }
 
@@ -260,8 +265,7 @@ void TaskInfoWidget::languageChange()
 
 void TaskInfoWidget::refresh()
 {
-    if (m_document)
-        selectionUpdate(m_document->selectedLots());
+    selectionUpdate();
 }
 
 void TaskInfoWidget::changeEvent(QEvent *e)
@@ -288,12 +292,14 @@ TaskInventoryWidget::TaskInventoryWidget(QWidget *parent)
     m_delayTimer.setInterval(120ms);
 
     connect(&m_delayTimer, &QTimer::timeout, this, [this]() {
-        if (!m_document || m_selection.isEmpty())
+        const LotList selection = m_document ? m_document->selectedLots() : LotList { };
+
+        if (!m_document || selection.isEmpty())
             setItem(nullptr, nullptr);
-        else if (m_selection.count() == 1)
-            setItem(m_selection.constFirst()->item(), m_selection.constFirst()->color());
+        else if (selection.count() == 1)
+            setItem(selection.constFirst()->item(), selection.constFirst()->color());
         else
-            setItems(m_selection);
+            setItems(selection);
     });
 
     m_invGoToAction = new QAction(this);
@@ -328,12 +334,11 @@ void TaskInventoryWidget::documentUpdate(Document *document)
                 this, &TaskInventoryWidget::selectionUpdate);
     }
 
-    selectionUpdate(m_document ? m_document->selectedLots() : LotList());
+    selectionUpdate();
 }
 
-void TaskInventoryWidget::selectionUpdate(const LotList &list)
+void TaskInventoryWidget::selectionUpdate()
 {
-    m_selection = list;
     m_delayTimer.start();
 }
 

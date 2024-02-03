@@ -27,7 +27,7 @@ public:
 
 protected slots:
     void documentUpdate(Document *document);
-    void selectionUpdate(const BrickLink::LotList &list);
+    void selectionUpdate();
     void currencyUpdate(const QString &ccode);
     virtual void topLevelChanged(bool);
     virtual void dockLocationChanged(Qt::DockWidgetArea);
@@ -42,7 +42,6 @@ private:
     QPointer<Document> m_document;
     QDockWidget *m_dock;
     QTimer m_delayTimer;
-    LotList m_selection;
 };
 
 
@@ -61,7 +60,7 @@ public:
 
 protected slots:
     void documentUpdate(Document *document);
-    void selectionUpdate(const BrickLink::LotList &list);
+    void selectionUpdate();
     void statisticsUpdate();
     void currencyUpdate();
 
@@ -78,7 +77,6 @@ private:
     PictureWidget *m_pic;
     QPointer<Document> m_document;
     QTimer m_delayTimer;
-    LotList m_selection;
 };
 
 
@@ -96,7 +94,7 @@ public:
 
 protected slots:
     void documentUpdate(Document *document);
-    void selectionUpdate(const BrickLink::LotList &list);
+    void selectionUpdate();
 
 protected:
     void languageChange();
@@ -105,7 +103,6 @@ protected:
 private:
     QPointer<Document> m_document;
     QTimer m_delayTimer;
-    LotList m_selection;
     QAction *m_invGoToAction;
 };
 
