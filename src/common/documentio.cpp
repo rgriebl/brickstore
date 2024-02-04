@@ -258,11 +258,16 @@ bool DocumentIO::parseLDrawModel(QFile *f, bool isStudio, BrickLink::IO::ParseRe
                 for (int j = i + 1; j < ldrawLots.count(); ++j) {
                     if (auto *&otherLot = ldrawLots[j]) {
                         bool mergeable = false;
+
                         if (!lot->isIncomplete() && !otherLot->isIncomplete()) {
+                            // item AND color are non-null and match
                             mergeable = (lot->item() == otherLot->item())
-                                    && (lot->color() == otherLot->color());
+                                        && (lot->color() == otherLot->color());
+
                         } else if (lot->isIncomplete() && otherLot->isIncomplete()) {
-                            mergeable = (*lot->isIncomplete() == *otherLot->isIncomplete());
+                            // either item AND color are null on both, or one is non-null and matches
+                            if ((lot->item() == otherLot->item()) && (lot->color() == otherLot->color()))
+                                mergeable = (*lot->isIncomplete() == *otherLot->isIncomplete());
                         }
 
                         if (mergeable) {
