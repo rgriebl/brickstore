@@ -927,19 +927,25 @@ InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<SimpleLo
     }
     connect(core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
             this, [this](Picture *pic) {
-        if (!pic || !pic->item() || pic->color() != pic->item()->defaultColor())
+        if (!pic || !pic->item())
             return;
 
         QVector<QModelIndex> indexes;
+
+        auto pictureMatch = [](const Entry *entry, const Picture *picture) {
+            return (entry->m_item == picture->item())
+                   && ((entry->m_color && (entry->m_color == picture->color()))
+                       || (!entry->m_color && (picture->color() == entry->m_item->defaultColor())));
+        };
 
         for (int row = 0; row < m_entries.size(); ++row) {
             auto *e = m_entries.at(row);
             if (e->isSection()) {
                 for (int srow = 0; srow < e->m_sectionEntries.size(); ++srow) {
-                    if (e->m_sectionEntries.at(srow)->m_item == pic->item())
+                    if (pictureMatch(e->m_sectionEntries.at(srow), pic))
                         indexes << index(srow, InventoryModel::PictureColumn, index(row, 0));
                 }
-            } else if (e->m_item == pic->item()) {
+            } else if (pictureMatch(e, pic)) {
                 indexes << index(row, InventoryModel::PictureColumn); // clazy:exclude=reserve-candidates
             }
         }
