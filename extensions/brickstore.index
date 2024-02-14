@@ -72,15 +72,6 @@
                 <parameter type="string" name="fromCode" default=""/>
                 <parameter type="string" name="toCode" default=""/>
             </function>
-            <function name="nameFiltersForBrickLinkXML" fullname="BrickStore.BrickStore.nameFiltersForBrickLinkXML" href="qml-brickstore-brickstore.html#nameFiltersForBrickLinkXML-method" status="active" access="public" documented="true" meta="qmlmethod" type="stringlist">
-                <parameter type="bool" name="includeAll" default="false"/>
-            </function>
-            <function name="nameFiltersForBrickStoreXML" fullname="BrickStore.BrickStore.nameFiltersForBrickStoreXML" href="qml-brickstore-brickstore.html#nameFiltersForBrickStoreXML-method" status="active" access="public" documented="true" meta="qmlmethod" type="stringlist">
-                <parameter type="bool" name="includeAll" default="false"/>
-            </function>
-            <function name="nameFiltersForLDraw" fullname="BrickStore.BrickStore.nameFiltersForLDraw" href="qml-brickstore-brickstore.html#nameFiltersForLDraw-method" status="active" access="public" documented="true" meta="qmlmethod" type="stringlist">
-                <parameter type="bool" name="includeAll" default="false"/>
-            </function>
             <function name="symbolForCurrencyCode" fullname="BrickStore.BrickStore.symbolForCurrencyCode" href="qml-brickstore-brickstore.html#symbolForCurrencyCode-method" status="active" access="public" documented="true" meta="qmlmethod" type="string">
                 <parameter type="string" name="currencyCode" default=""/>
             </function>
