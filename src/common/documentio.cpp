@@ -31,33 +31,23 @@
 #include "common/uihelpers.h"
 
 
-QStringList DocumentIO::nameFiltersForBrickLinkXML(bool includeAll)
+QList<QPair<QString, QStringList>> DocumentIO::nameFiltersForBrickLinkXML()
 {
-    QStringList filters;
-    filters << tr("BrickLink XML File") + u" (*.xml)";
-    if (includeAll)
-        filters << tr("All Files") + u"(*)";
-    return filters;
+    return { { u"BrickLink XML"_qs, {  u"xml"_qs } } };
 }
 
-QStringList DocumentIO::nameFiltersForBrickStoreXML(bool includeAll)
+QList<QPair<QString, QStringList>> DocumentIO::nameFiltersForBrickStoreXML()
 {
-    QStringList filters;
-    filters << tr("BrickStore XML Data") + u" (*.bsx)";
-    if (includeAll)
-        filters << tr("All Files") + u"(*)";
-    return filters;
+    return { { tr("BrickStore Files"), { u"bsx"_qs } } };
 }
 
-QStringList DocumentIO::nameFiltersForLDraw(bool includeAll)
+QList<QPair<QString, QStringList>> DocumentIO::nameFiltersForLDraw()
 {
-    QStringList filters;
-    filters << tr("All Models") + u" (*.dat *.ldr *.mpd *.io)";
-    filters << tr("LDraw Models") + u" (*.dat *.ldr *.mpd)";
-    filters << tr("BrickLink Studio Models") + u" (*.io)";
-    if (includeAll)
-        filters << tr("All Files") + u" (*)";
-    return filters;
+    return {
+        { tr("All Models"), { u"dat"_qs, u"ldr"_qs, u"mpd"_qs, u"io"_qs } },
+        { tr("LDraw Models"), { u"dat"_qs, u"ldr"_qs, u"mpd"_qs } },
+        { tr("BrickLink Studio Models"), { u"io"_qs } }
+    };
 }
 
 Document *DocumentIO::importBrickLinkStore(BrickLink::Store *store)
@@ -130,7 +120,7 @@ QCoro::Task<Document *> DocumentIO::importBrickLinkXML(QString fileName)
 {
     QString fn = fileName;
     if (fn.isEmpty()) {
-        if (auto f = co_await UIHelpers::getOpenFileName(DocumentIO::nameFiltersForBrickLinkXML(true),
+        if (auto f = co_await UIHelpers::getOpenFileName(DocumentIO::nameFiltersForBrickLinkXML(),
                                                          tr("Import File"))) {
             fn = *f;
         }
@@ -162,7 +152,7 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
 {
     QString fn = fileName;
     if (fn.isEmpty()) {
-        if (auto f = co_await UIHelpers::getOpenFileName(DocumentIO::nameFiltersForLDraw(true),
+        if (auto f = co_await UIHelpers::getOpenFileName(DocumentIO::nameFiltersForLDraw(),
                                                          tr("Import File"))) {
             fn = *f;
         }

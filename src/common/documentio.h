@@ -25,9 +25,9 @@ class DocumentIO
     Q_DECLARE_TR_FUNCTIONS(DocumentIO)
 
 public:
-    static QStringList nameFiltersForBrickLinkXML(bool includeAll = false);
-    static QStringList nameFiltersForBrickStoreXML(bool includeAll = false);
-    static QStringList nameFiltersForLDraw(bool includeAll = false);
+    static QList<QPair<QString, QStringList>> nameFiltersForBrickLinkXML();
+    static QList<QPair<QString, QStringList>> nameFiltersForBrickStoreXML();
+    static QList<QPair<QString, QStringList>> nameFiltersForLDraw();
 
     class BsxContents : public BrickLink::IO::ParseResult
     {

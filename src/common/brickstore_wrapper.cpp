@@ -219,39 +219,6 @@ QString QmlBrickStore::toWeightString(double value, bool showUnit) const
 }
 
 
-/*! \qmlmethod stringlist BrickStore::nameFiltersForBrickLinkXML(bool includeAll = false)
-
-    Returns a list of file extension that can be used when creating a FileDialog to open
-    BrickLink XML files. If \a includeAll is set, a match-everything filter \c * will be added to
-    this list.
-*/
-QStringList QmlBrickStore::nameFiltersForBrickLinkXML(bool includeAll) const
-{
-    return DocumentIO::nameFiltersForBrickLinkXML(includeAll);
-}
-
-/*! \qmlmethod stringlist BrickStore::nameFiltersForBrickStoreXML(bool includeAll = false)
-
-    Returns a list of file extension that can be used when creating a FileDialog to open
-    BrickStore document files. If \a includeAll is set, a match-everything filter \c * will be
-    added to this list.
-*/
-QStringList QmlBrickStore::nameFiltersForBrickStoreXML(bool includeAll) const
-{
-    return DocumentIO::nameFiltersForBrickStoreXML(includeAll);
-}
-
-/*! \qmlmethod stringlist BrickStore::nameFiltersForLDraw(bool includeAll = false)
-
-    Returns a list of file extension that can be used when creating a FileDialog to open
-    LDraw files. If \a includeAll is set, a match-everything filter \c * will be added to this
-    list.
-*/
-QStringList QmlBrickStore::nameFiltersForLDraw(bool includeAll) const
-{
-    return DocumentIO::nameFiltersForLDraw(includeAll);
-}
-
 void QmlBrickStore::importBrickLinkStore(BrickLink::Store *store)
 {
     DocumentIO::importBrickLinkStore(store);

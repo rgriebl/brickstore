@@ -59,10 +59,17 @@ UIHelpers *UIHelpers::inst()
 
 QCoro::Task<std::optional<QString> > UIHelpers::getFileNameHelper(bool doSave, QString fileName,
                                                                   QString fileTitle,
-                                                                  QStringList filters,
+                                                                  QList<QPair<QString, QStringList>> filters,
                                                                   QString title)
 {
     QString fn = Config::inst()->lastDirectory();
+
+    QStringList nameFilters;
+    nameFilters.reserve(filters.size());
+    for (const auto &[filterName, filterSuffixes] : std::as_const(filters))
+        nameFilters.append(filterName + u" (*." + filterSuffixes.join(u" *.") + u')');
+    if (!doSave)
+        nameFilters.append(tr("All Files") + u" (*)");
 
     if (doSave) {
         if (!fileName.isEmpty())
@@ -71,7 +78,7 @@ QCoro::Task<std::optional<QString> > UIHelpers::getFileNameHelper(bool doSave, Q
             fn = fn + u'/' + sanitizeFileName(fileTitle);
     }
 
-    auto result = co_await getFileName(doSave, fn, filters, title);
+    auto result = co_await getFileName(doSave, fn, nameFilters, title);
 
     if (result && !result->isEmpty()) {
         fn = *result;

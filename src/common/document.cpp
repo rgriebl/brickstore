@@ -28,6 +28,7 @@
 #include "actionmanager.h"
 #include "config.h"
 #include "document.h"
+#include "documentio.h"
 #include "documentlist.h"
 #include "recentfiles.h"
 #include "uihelpers.h"
@@ -1538,7 +1539,7 @@ QCoro::Task<> Document::exportBrickLinkXMLToFile()
         co_return;
 
     QString fn;
-    if (auto f = co_await UIHelpers::getSaveFileName(fn, DocumentIO::nameFiltersForBrickLinkXML(false),
+    if (auto f = co_await UIHelpers::getSaveFileName(fn, DocumentIO::nameFiltersForBrickLinkXML(),
                                                      tr("Export File"))) {
         fn = *f;
     }
@@ -1654,13 +1655,35 @@ QCoro::Task<Document *> Document::load(QString fileName)
 {
     QString fn = fileName;
     if (fn.isEmpty()) {
-        if (auto f = co_await UIHelpers::getOpenFileName(DocumentIO::nameFiltersForBrickStoreXML(true),
-                                                         tr("Open File"))) {
+        auto nameFilters = DocumentIO::nameFiltersForBrickStoreXML()
+                           + DocumentIO::nameFiltersForBrickLinkXML()
+                           + DocumentIO::nameFiltersForLDraw();
+        QStringList allExtensions;
+        for (const auto &filter : nameFilters)
+            allExtensions += filter.second;
+        allExtensions.removeDuplicates();
+        nameFilters.prepend({ tr("All Supported Files"), allExtensions });
+
+        if (auto f = co_await UIHelpers::getOpenFileName(nameFilters, tr("Open File"))) {
             fn = *f;
         }
     }
     if (fn.isEmpty())
         co_return nullptr;
+
+    auto nameFilterMatch = [](const QString &fileName, const QList<QPair<QString, QStringList>> &nameFilters) {
+        const auto suffix = fileName.section(u'.', -1);
+        for (const auto &filter : nameFilters) {
+            if (filter.second.contains(suffix, Qt::CaseInsensitive))
+                return true;
+        }
+        return false;
+    };
+
+    if (nameFilterMatch(fn, DocumentIO::nameFiltersForBrickLinkXML()))
+        co_return co_await DocumentIO::importBrickLinkXML(fn);
+    else if (nameFilterMatch(fn, DocumentIO::nameFiltersForLDraw()))
+        co_return co_await DocumentIO::importLDrawModel(fn);
 
     if (auto *existingDocument = DocumentList::inst()->documentForFile(fn)) {
         emit existingDocument->requestActivation();
@@ -1698,7 +1721,7 @@ Document *Document::loadFromFile(const QString &fileName)
 QCoro::Task<bool> Document::save(bool saveAs)
 {
     QString fn;
-    const auto filters = DocumentIO::nameFiltersForBrickStoreXML(false);
+    const auto filters = DocumentIO::nameFiltersForBrickStoreXML();
 
     if (saveAs || filePath().isEmpty()) {
         fn = filePath();
@@ -1721,9 +1744,9 @@ QCoro::Task<bool> Document::save(bool saveAs)
 
     if (!fn.isEmpty()) {
 #if !defined(Q_OS_ANDROID)
-        QString suffix = filters.at(0).right(5).left(4);
+        QString suffix = u'.' + filters.at(0).second.at(0);
 
-        if (fn.right(4) != suffix)
+        if (fn.right(suffix.length()) != suffix)
             fn = fn + suffix;
 #endif
         try {

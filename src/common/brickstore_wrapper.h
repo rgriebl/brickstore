@@ -540,10 +540,6 @@ public:
     Q_INVOKABLE QString toCurrencyString(double value, const QString &symbol = { }, int precision = 3) const;
     Q_INVOKABLE QString toWeightString(double value, bool showUnit = false) const;
 
-    Q_INVOKABLE QStringList nameFiltersForBrickLinkXML(bool includeAll = false) const;
-    Q_INVOKABLE QStringList nameFiltersForBrickStoreXML(bool includeAll = false) const;
-    Q_INVOKABLE QStringList nameFiltersForLDraw(bool includeAll = false) const;
-
     Q_INVOKABLE void importBrickLinkStore(BrickLink::Store *store);
     Q_INVOKABLE void importBrickLinkOrder(BrickLink::Order *order);
     Q_INVOKABLE void importBrickLinkCart(BrickLink::Cart *cart);

@@ -86,6 +86,8 @@ public:
 
     static QString defaultTitle();
 
+    static QStringList createNameFilters(const QVector<std::pair<QString, QStringList>> &filters);
+
     static QCoro::Task<StandardButton> information(QString text, StandardButtons buttons = Ok,
                                                    StandardButton defaultButton = NoButton,
                                                    QString title = { }) {
@@ -138,13 +140,13 @@ public:
     }
 
     static QCoro::Task<std::optional<QString>> getSaveFileName(QString fileName,
-                                                               QStringList filters,
+                                                               QList<QPair<QString, QStringList>> filters,
                                                                QString title = { },
                                                                QString fileTitle = { }) {
         return inst()->getFileNameHelper(true, fileName, fileTitle, filters, title);
     }
 
-    static QCoro::Task<std::optional<QString>> getOpenFileName(QStringList filters,
+    static QCoro::Task<std::optional<QString>> getOpenFileName(QList<QPair<QString, QStringList>> filters,
                                                                QString title = { }) {
         return inst()->getFileNameHelper(false, { }, { }, filters, title);
     }
@@ -199,9 +201,10 @@ protected:
                                                             QStringList filters,
                                                             QString title) = 0;
 
-    QCoro::Task<std::optional<QString>> getFileNameHelper(bool doSave, QString fileName,
+    QCoro::Task<std::optional<QString>> getFileNameHelper(bool doSave,
+                                                          QString fileName,
                                                           QString fileTitle,
-                                                          QStringList filters,
+                                                          QList<QPair<QString, QStringList>> filters,
                                                           QString title);
 
     void showToastMessageHelper(const QString &message, int timeout);
