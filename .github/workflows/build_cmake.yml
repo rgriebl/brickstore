@@ -151,6 +151,13 @@ jobs:
 
     steps:
 
+    # Checkout
+    #################################################
+
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
     # Get Qt
     #################################################
 
@@ -170,18 +177,18 @@ jobs:
       run: |
         python3 -m pip install aqtinstall
         if [ "${{ matrix.config.qt_host_arch }}" != "" ]; then
-          python3 -m aqt install-qt -O "${{ runner.workspace }}/Qt/" \
+          python3 -m aqt -c .github/aqt-settings.ini install-qt -O "${{ runner.workspace }}/Qt/" \
                          ${{ matrix.config.qt_host }} desktop \
                          ${{ matrix.config.qt_version }} ${{ matrix.config.qt_host_arch }} \
                          -m $BRICKSTORE_GUI_QT6_INSTALLER_MODULES
         fi
         for arch in ${{ matrix.config.qt_arch }} ${{ matrix.config.qt_extra_archs }}; do
-          python3 -m aqt install-qt -O "${{ runner.workspace }}/Qt/" \
+          python3 -m aqt -c .github/aqt-settings.ini install-qt -O "${{ runner.workspace }}/Qt/" \
                          ${{ matrix.config.qt_host }} ${{ matrix.config.qt_target || 'desktop' }} \
                          ${{ matrix.config.qt_version }} $arch \
                          -m $BRICKSTORE_GUI_QT6_INSTALLER_MODULES
           if [ "${{ matrix.config.qt_tools }}" != "" ]; then
-            python3 -m aqt install-tool -O "${{ runner.workspace }}/Qt/" \
+            python3 -m aqt -c .github/aqt-settings.ini install-tool -O "${{ runner.workspace }}/Qt/" \
                            ${{ matrix.config.qt_host }} ${{ matrix.config.qt_target || 'desktop' }} \
                            ${{ matrix.config.qt_tools }}
           fi
@@ -231,13 +238,6 @@ jobs:
             $BRICKSTORE_GUI_QT6_DEB_PACKAGES \
             debhelper lsb-release fakeroot build-essential
       shell: bash
-
-    # Checkout
-    #################################################
-
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
 
     # Build for Windows
     #################################################
