@@ -253,7 +253,7 @@ qt_add_lrelease(${PROJECT_NAME}
 # let lupdate itself scan recursively
 add_custom_target(${PROJECT_NAME}_lupdate
     COMMAND ${QT_CMAKE_EXPORT_NAMESPACE}::lupdate "${CMAKE_SOURCE_DIR}"
-            -locations relative -ts ${TS_FILES}
+            -locations relative -no-ui-lines -ts ${TS_FILES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMAND_EXPAND_LISTS
     VERBATIM

@@ -4,34 +4,14 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../src/desktop/aboutdialog.ui" line="+14"/>
+        <location filename="../src/desktop/aboutdialog.ui"/>
         <location filename="../src/mobile/AboutDialog.qml" line="+10"/>
         <source>About</source>
         <translation>A propos de</translation>
     </message>
-    <message>
-        <source>Copyright &amp;copy; %1</source>
-        <translation type="vanished">Copyright &amp;copy; %1</translation>
-    </message>
-    <message>
-        <source>Version %1 (build: %2)</source>
-        <translation type="vanished">Version %1 (build: %2)</translation>
-    </message>
-    <message>
-        <source>Visit %1</source>
-        <translation type="vanished">Visiter %1</translation>
-    </message>
-    <message>
-        <source>Translators</source>
-        <translation type="vanished">Traducteurs</translation>
-    </message>
 </context>
 <context>
     <name>ActionManager</name>
-    <message>
-        <source>Go to the Quickstart page</source>
-        <translation type="vanished">Aller à la page de démarrage rapide</translation>
-    </message>
     <message>
         <location filename="../src/common/actionmanager.cpp" line="+334"/>
         <source>HomePage</source>
@@ -454,11 +434,6 @@
         <location line="+2"/>
         <source>Settings...</source>
         <translation>Options...</translation>
-    </message>
-    <message>
-        <source>Ctrl+,</source>
-        <comment>ExQT_TR_NOOPas|Settings</comment>
-        <translation type="vanished">Ctrl+,</translation>
     </message>
     <message>
         <location line="+0"/>
@@ -932,35 +907,6 @@
         <translation>Ajout d&apos;articles à %1</translation>
     </message>
     <message>
-        <source>&amp;Quantity</source>
-        <translation type="vanished">&amp;Quantité</translation>
-    </message>
-    <message>
-        <source>&amp;Bulk</source>
-        <translatorcomment>Warning &amp;L is used by Conso&amp;lidate</translatorcomment>
-        <translation type="vanished">L&amp;ots</translation>
-    </message>
-    <message>
-        <source>&amp;Cost</source>
-        <translation type="vanished">&amp;Coût</translation>
-    </message>
-    <message>
-        <source>Complete</source>
-        <translation type="vanished">Complet</translation>
-    </message>
-    <message>
-        <source>Incomplete</source>
-        <translation type="vanished">Incomplet</translation>
-    </message>
-    <message>
-        <source>Sealed</source>
-        <translation type="vanished">Scellé</translation>
-    </message>
-    <message>
-        <source>&amp;Price (%1)</source>
-        <translation type="vanished">&amp;Prix (%1)</translation>
-    </message>
-    <message>
         <location line="-39"/>
         <source>Click to go back one item, hold to see history</source>
         <translation>Clique pour revenir en arrière d&apos;un élément, maintiens la souris enfoncée pour voir l&apos;historique.</translation>
@@ -999,34 +945,6 @@
         <location line="+1"/>
         <source>Conso&amp;lidate</source>
         <translation>Conso&amp;lider</translation>
-    </message>
-    <message>
-        <source>&amp;Tiered prices</source>
-        <translation type="vanished">&amp;Paliers de prix</translation>
-    </message>
-    <message>
-        <source>%</source>
-        <translation type="vanished">%</translation>
-    </message>
-    <message>
-        <source>Condition</source>
-        <translation type="vanished">Etat</translation>
-    </message>
-    <message>
-        <source>&amp;New</source>
-        <translation type="vanished">&amp;Neuf</translation>
-    </message>
-    <message>
-        <source>&amp;Used</source>
-        <translation type="vanished">&amp;Usagé</translation>
-    </message>
-    <message>
-        <source>Co&amp;mments</source>
-        <translation type="vanished">Co&amp;mmentaires</translation>
-    </message>
-    <message>
-        <source>&amp;Remarks</source>
-        <translation type="vanished">&amp;Remarques</translation>
     </message>
     <message>
         <location line="-122"/>
@@ -1072,72 +990,72 @@
 <context>
     <name>AddItemWidget</name>
     <message>
-        <location filename="../src/desktop/additemwidget.ui" line="+29"/>
+        <location filename="../src/desktop/additemwidget.ui"/>
         <source>&amp;Quantity</source>
         <translation>&amp;Quantité</translation>
     </message>
     <message>
-        <location line="+29"/>
+        <location/>
         <source>&amp;Bulk</source>
         <translation>L&amp;ots</translation>
     </message>
     <message>
-        <location line="+35"/>
+        <location/>
         <source>&amp;Price (%1)</source>
         <translation>&amp;Prix (%1)</translation>
     </message>
     <message>
-        <location line="+29"/>
+        <location/>
         <source>&amp;Cost</source>
         <translation>&amp;Coût</translation>
     </message>
     <message>
-        <location line="+29"/>
+        <location/>
         <source>&amp;Tiered prices</source>
         <translation>&amp;Paliers de prix</translation>
     </message>
     <message>
-        <location line="+121"/>
+        <location/>
         <source>%</source>
         <translation>%</translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location/>
         <source>Condition</source>
         <translation>Etat</translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location/>
         <source>&amp;New</source>
         <translation>&amp;Neuf</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location/>
         <source>&amp;Used</source>
         <translation>&amp;Usagé</translation>
     </message>
     <message>
-        <location line="+30"/>
+        <location/>
         <source>Complete</source>
         <translation>Complet</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location/>
         <source>Incomplete</source>
         <translation>Incomplet</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location/>
         <source>Sealed</source>
         <translation>Scellé</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location/>
         <source>Co&amp;mments</source>
         <translation>Co&amp;mmentaires</translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location/>
         <source>&amp;Remarks</source>
         <translation>&amp;Remarques</translation>
     </message>
@@ -1164,22 +1082,6 @@
 <context>
     <name>AppearsInWidget</name>
     <message>
-        <source>Part out Item...</source>
-        <translation type="vanished">Inventorier l&apos;article...</translation>
-    </message>
-    <message>
-        <source>Show BrickLink Catalog Info...</source>
-        <translation type="vanished">Ouvrir le catalogue sur BrickLink...</translation>
-    </message>
-    <message>
-        <source>Show BrickLink Price Guide Info...</source>
-        <translation type="vanished">Ouvrir le guide des prix sur BrickLink...</translation>
-    </message>
-    <message>
-        <source>Show Lots for Sale on BrickLink...</source>
-        <translation type="vanished">Ouvrir lots en vente sur BrickLink...</translation>
-    </message>
-    <message>
         <location filename="../src/mobile/AppearsInWidget.qml" line="+35"/>
         <source>No matches found</source>
         <translation>Aucun résultat n&apos;a été trouvé</translation>
@@ -1188,7 +1090,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="+162"/>
+        <location filename="../src/common/application.cpp" line="+163"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Ton installation est cassée&#x202f;: il manque des plugins de format d&apos;image&#x202f;!</translation>
     </message>
@@ -1211,10 +1113,6 @@
         <location line="+1"/>
         <source>Importing BrickLink Store</source>
         <translation>Import de la boutique BrickLink</translation>
-    </message>
-    <message>
-        <source>Store %1</source>
-        <translation type="vanished">Boutique %1</translation>
     </message>
     <message>
         <location line="+50"/>
@@ -1329,14 +1227,6 @@
         <source>The price-guide download mechanism changed. Please make sure your VAT setup is still correct on the BrickLink page in the Settings dialog.</source>
         <translation>Le mécanisme de téléchargement du guide des prix a changé. Vérifie que ta configuration de la TVA est toujours correcte sur la page BrickLink dans la boîte de dialogue Paramètres.</translation>
     </message>
-    <message>
-        <source>Could not initialize the JavaScript scripting environment.</source>
-        <translation type="vanished">N&apos;est pas arrivé à initialiser l&apos;environnement de script JavaScript.</translation>
-    </message>
-    <message>
-        <source>Could not initialize the BrickLink kernel:&lt;br /&gt;&lt;br /&gt;%1</source>
-        <translation type="vanished">N&apos;est pas arrivé à initialiser le noyau BrickLink: &lt;br /&gt;&lt;br /&gt;%1</translation>
-    </message>
 </context>
 <context>
     <name>BrickLink::Carts</name>
@@ -1350,7 +1240,7 @@
         <source>%n lot(s) of your Shopping Cart could not be imported.</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>%n lots de ton panier n&apos;ont pas pu être importés.</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -1415,10 +1305,6 @@
 <context>
     <name>BrickLink::ColorModel</name>
     <message>
-        <source>RGB</source>
-        <translation type="vanished">RGB</translation>
-    </message>
-    <message>
         <location line="-226"/>
         <source>Color by %1</source>
         <translation>Couleur par %1</translation>
@@ -1473,28 +1359,9 @@
     </message>
 </context>
 <context>
-    <name>BrickLink::InternalAppearsInModel</name>
-    <message>
-        <source>Qty.</source>
-        <translation type="vanished">Qté</translation>
-    </message>
-    <message>
-        <source>Description</source>
-        <translation type="obsolete">Description</translation>
-    </message>
-    <message>
-        <source>Set</source>
-        <translation type="vanished">Set</translation>
-    </message>
-    <message>
-        <source>Name</source>
-        <translation type="vanished">Nom</translation>
-    </message>
-</context>
-<context>
     <name>BrickLink::InternalInventoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="+1158"/>
+        <location filename="../src/bricklink/model.cpp" line="+1164"/>
         <source>Qty.</source>
         <translation>Qté</translation>
     </message>
@@ -1525,11 +1392,7 @@
 <context>
     <name>BrickLink::ItemModel</name>
     <message>
-        <source>Part #</source>
-        <translation type="vanished">Référence</translation>
-    </message>
-    <message>
-        <location filename="../src/bricklink/model.cpp" line="-610"/>
+        <location filename="../src/bricklink/model.cpp" line="-616"/>
         <source>Description</source>
         <translation>Description</translation>
     </message>
@@ -1618,7 +1481,7 @@
 <context>
     <name>BrickLink::PriceGuideCache</name>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="+803"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="+811"/>
         <source>VAT is included</source>
         <translation>La TVA est incluse</translation>
     </message>
@@ -1668,7 +1531,7 @@
         <source>%n lot(s) of your Wanted List could not be imported.</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>%n lots de ta liste de recherche n&apos;ont pas pu être importés.</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -1727,47 +1590,47 @@
 <context>
     <name>ChangeCurrencyDialog</name>
     <message>
-        <location filename="../src/desktop/changecurrencydialog.ui" line="+14"/>
+        <location filename="../src/desktop/changecurrencydialog.ui"/>
         <source>Change Currency</source>
         <translation>Changement de devise</translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location/>
         <source>Current currency</source>
         <translation>Monnaie courante</translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location/>
         <source>New currency</source>
         <translation>Nouvelle monnaie</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location/>
         <source>Exchange rate</source>
         <translation>Taux de change</translation>
     </message>
     <message>
-        <location line="+197"/>
+        <location/>
         <source>From V1 BrickStore/Stock: USD 1 equals %1 %2</source>
         <translation>De V1 BrickStore/Stock&#x202f;: 1 USD équivaut à %1 %2</translation>
     </message>
     <message>
-        <location line="-137"/>
+        <location/>
         <source>Reload cross rates from the ECB</source>
         <translation>Recharge les taux croisés de la BCE</translation>
     </message>
     <message>
-        <location line="-23"/>
+        <location/>
         <source>From the &lt;a href=&quot;https://www.ecb.eu&quot;&gt;ECB&lt;/a&gt;: %1 1 equals %2 %3</source>
         <translation>Extrait du site &lt;a href=&quot;https://www.ecb.eu&quot;&gt;BCE&lt;/a&gt;: %1 1 égale %2 %3</translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location/>
         <source>Reload</source>
         <translation>Recharge</translation>
     </message>
     <message>
-        <location line="+57"/>
+        <location/>
         <source>Custom: %1 1 equals %2</source>
         <translation>Personnalisé&#x202f;: %1 1 est égal à %2</translation>
     </message>
@@ -1823,7 +1686,7 @@
 <context>
     <name>ColumnCmd</name>
     <message>
-        <location filename="../src/common/document.cpp" line="+62"/>
+        <location filename="../src/common/document.cpp" line="+63"/>
         <source>Moved column %1</source>
         <translation>Colonne déplacée %1</translation>
     </message>
@@ -1849,78 +1712,77 @@
 <context>
     <name>ConsolidateDialog</name>
     <message>
-        <location filename="../src/desktop/consolidatedialog.ui" line="+14"/>
+        <location filename="../src/desktop/consolidatedialog.ui"/>
         <source>Consolidate lots</source>
         <translation>Consolider les lots</translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location/>
         <source>Please choose how you want to resolve them</source>
         <translation>Choisis la façon dont tu veux les résoudre</translation>
     </message>
     <message>
-        <location line="+43"/>
+        <location/>
         <source>Use the same options to consolidate all lots</source>
         <translation>Utilise les mêmes options pour consolider tous les lots</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location/>
         <source>Ctrl+S</source>
         <translation>Ctrl+S</translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location/>
         <source>Consolidate each lot individually</source>
         <translation>Consolider chaque lot individuellement</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location/>
         <source>Ctrl+I</source>
         <translation>Ctrl+I</translation>
     </message>
     <message>
-        <location line="-26"/>
+        <location/>
         <source>A quick way to consolidate a large number of lots, but you are restricted when it comes to merge destinations and options.</source>
         <translation>Un moyen rapide de consolider un grand nombre de lots, mais tu es limité en ce qui concerne les destinations et les options de fusion.</translation>
     </message>
     <message>
-        <location line="+29"/>
+        <location/>
         <source>A step-by-step guide through each single consolidation, asking for your input on merge destinations and options.</source>
         <translation>Un guide étape par étape pour chaque consolidation unique, te demandant ton avis sur les destinations et les options de fusion.</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location/>
         <source>Just add the new lots</source>
         <translation>Ajoute simplement les nouveaux lots</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location/>
         <source>Ctrl+A</source>
         <translation>Ctrl+A</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location/>
         <source>No consolidation will be done at all. The new lots will just be added to the document.</source>
         <translation>Aucun regroupement ne sera effectué. Les nouveaux lots seront simplement ajoutés au document.</translation>
     </message>
     <message>
-        <location line="+69"/>
+        <location/>
         <source>Each merge operation has at least one source and exactly one destination lot. Please select how to determine the destination:</source>
         <translation>Chaque opération de fusion comporte au moins un lot source et exactement un lot de destination. Choisis comment déterminer la destination&#x202f;:</translation>
     </message>
     <message>
-        <location line="+52"/>
+        <location/>
         <source>How exactly should the lots be merged:</source>
         <translation>Comment exactement les lots doivent-ils être fusionnés&#x202f;:</translation>
     </message>
     <message>
-        <location line="+22"/>
-        <location line="+122"/>
+        <location/>
         <source>Do not delete source lots, but set their quantity to zero</source>
         <translation>Ne pas supprimer les lots sources, mais mettre leur quantité à zéro.</translation>
     </message>
     <message>
-        <location line="-28"/>
+        <location/>
         <source>More options</source>
         <translation>Plus d&apos;options</translation>
     </message>
@@ -1929,7 +1791,7 @@
         <source>There are %n possible consolidation(s)</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>Il y a %n consolidations possibles</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -2004,18 +1866,7 @@
     </message>
 </context>
 <context>
-    <name>ConsolidateItemsDialog</name>
-    <message>
-        <source>Consolidate Items</source>
-        <translation type="vanished">Consolidation des articles</translation>
-    </message>
-</context>
-<context>
     <name>Currency</name>
-    <message>
-        <source>There was an error downloading the exchange rates from the ECB server:&lt;br&gt;%1</source>
-        <translation type="vanished">Il y a eu une erreur lors du téléchargement des taux de change sur le serveur ECB:&lt;br&gt;%1</translation>
-    </message>
     <message>
         <location filename="../src/common/currency.cpp" line="+163"/>
         <source>There was an error downloading the exchange rates from the ECB server:</source>
@@ -2083,72 +1934,10 @@
 </context>
 <context>
     <name>Document</name>
-    <message numerus="yes">
-        <source>Added %n item(s)</source>
-        <translation type="vanished">
-            <numerusform>Ajouté %n article</numerusform>
-            <numerusform>Ajouté %n articles</numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>Removed %n item(s)</source>
-        <translation type="vanished">
-            <numerusform>Supprimé %n article</numerusform>
-            <numerusform>Supprimé %n articles</numerusform>
-        </translation>
-    </message>
-    <message>
-        <source>I</source>
-        <comment>Filter&gt;Status&gt;Include</comment>
-        <translation type="vanished">I</translation>
-    </message>
-    <message>
-        <source>X</source>
-        <comment>Filter&gt;Status&gt;Extra</comment>
-        <translation type="vanished">X</translation>
-    </message>
-    <message>
-        <source>E</source>
-        <comment>Filter&gt;Status&gt;Exclude</comment>
-        <translation type="vanished">E</translation>
-    </message>
-    <message>
-        <source>N</source>
-        <comment>Filter&gt;Condition&gt;New</comment>
-        <translation type="vanished">N</translation>
-    </message>
-    <message>
-        <source>U</source>
-        <comment>Filter&gt;Condition&gt;Used</comment>
-        <translation type="vanished">U</translation>
-    </message>
-    <message>
-        <source>N</source>
-        <comment>Filter&gt;Stockroom&gt;None</comment>
-        <translation type="vanished">N</translation>
-    </message>
-    <message>
-        <source>Y</source>
-        <comment>Filter&gt;Retain&gt;Yes</comment>
-        <translation type="vanished">Y</translation>
-    </message>
-    <message>
-        <source>N</source>
-        <comment>Filter&gt;Retain&gt;No</comment>
-        <translation type="vanished">N</translation>
-    </message>
     <message>
         <location filename="../src/common/document.cpp" line="+96"/>
         <source>Untitled</source>
         <translation>Sans titre</translation>
-    </message>
-    <message>
-        <source>Store %1</source>
-        <translation type="vanished">Boutique %1</translation>
-    </message>
-    <message>
-        <source>Order %1 (%2)</source>
-        <translation type="vanished">Commande %1 (%2)</translation>
     </message>
     <message>
         <location line="+69"/>
@@ -2251,7 +2040,7 @@
         <source>This file contains %n unknown item(s).</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>Ce fichier contient %n éléments inconnus.</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
@@ -2259,7 +2048,7 @@
         <source>%n outdated item or color reference(s) in this file have been updated according to the BrickLink catalog.</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>%n les références d&apos;articles ou de couleurs périmées dans ce fichier ont été mises à jour en fonction du catalogue BrickLink.</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -2282,7 +2071,7 @@
         <source>Duplicated %Ln item(s)</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>Éléments %Ln dupliqués</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -2310,7 +2099,7 @@
         <source>Set price to guide on %n item(s)</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>Fixe un prix indicatif pour %n articles</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -2328,7 +2117,7 @@
         <source>The quantities of %n lot(s) are not divisible without remainder by %1.&lt;br /&gt;&lt;br /&gt;Nothing has been modified.</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>Les quantités de %n lots ne sont pas divisibles sans reste par %1.&lt;br /&gt;&lt;br /&gt;Rien n&apos;a été modifié.</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
@@ -2336,7 +2125,7 @@
         <source>The quantities of %n lot(s) would exceed the maximum allowed item quantity (%2) when multiplied by %1.&lt;br&gt;&lt;br&gt;Nothing has been modified.</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>Les quantités de %n lots dépasseraient la quantité maximale d&apos;articles autorisée (%2) lorsqu&apos;elles sont multipliées par %1.&lt;br&gt;&lt;br&gt;Rien n&apos;a été modifié.</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -2366,12 +2155,17 @@
         <translation>Entrez le numéro d&apos;ID de la liste des articles désirés (laisser vide pour liste par défaut)</translation>
     </message>
     <message>
-        <location line="+33"/>
+        <location line="+39"/>
+        <source>All Supported Files</source>
+        <translation>Tous les fichiers supportés</translation>
+    </message>
+    <message>
+        <location line="+2"/>
         <source>Open File</source>
         <translation>Ouvrir un fichier</translation>
     </message>
     <message>
-        <location line="+35"/>
+        <location line="+49"/>
         <source>Failed to load document %1: %2</source>
         <translation>Échec du chargement du document %1&#x202f;: %2</translation>
     </message>
@@ -2391,10 +2185,6 @@
         <translation>Échec de l&apos;enregistrement du document</translation>
     </message>
     <message>
-        <source>Cart in store %1</source>
-        <translation type="vanished">Panier d&apos;achat dans la boutique %1</translation>
-    </message>
-    <message>
         <location line="+25"/>
         <source>Inventory for %1</source>
         <translation>Inventaire pour %1</translation>
@@ -2409,16 +2199,12 @@
         <source>This list contains lots with errors.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Cette liste contient beaucoup d&apos;erreurs.&lt;br&gt;&lt;br&gt;Veux-tu quand même exporter cette liste&#x202f;?</translation>
     </message>
-    <message>
-        <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="vanished">Cette liste contient des articles avec des erreurs.&lt;br /&gt;&lt;br /&gt;Voulez-vous vraiment exporter cette liste?</translation>
-    </message>
     <message numerus="yes">
         <location line="+79"/>
         <source>Copied or merged %n item(s)</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>Copié ou fusionné %n éléments</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
@@ -2426,7 +2212,7 @@
         <source>Subtracted %n item(s)</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>Soustrait %n éléments</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -2464,203 +2250,6 @@
         <source>RESTORED</source>
         <comment>Tag for document restored from autosave</comment>
         <translation>RESTAURÉ</translation>
-    </message>
-    <message>
-        <source>Index</source>
-        <translation type="vanished">Index</translation>
-    </message>
-    <message>
-        <source>Status</source>
-        <translation type="vanished">Statut</translation>
-    </message>
-    <message>
-        <source>Include</source>
-        <translation type="vanished">Inclus</translation>
-    </message>
-    <message>
-        <source>Exclude</source>
-        <translation type="vanished">Exclus</translation>
-    </message>
-    <message>
-        <source>Extra</source>
-        <translation type="vanished">Extra</translation>
-    </message>
-    <message>
-        <source>Image</source>
-        <translation type="vanished">Image</translation>
-    </message>
-    <message>
-        <source>Part #</source>
-        <translation type="vanished">Réf</translation>
-    </message>
-    <message>
-        <source>Description</source>
-        <translation type="vanished">Description</translation>
-    </message>
-    <message>
-        <source>Comments</source>
-        <translation type="vanished">Commentaires</translation>
-    </message>
-    <message>
-        <source>Remarks</source>
-        <translation type="vanished">Remarques</translation>
-    </message>
-    <message>
-        <source>Qty.Orig</source>
-        <translation type="vanished">Qté orig</translation>
-    </message>
-    <message>
-        <source>Qty.Diff</source>
-        <translation type="vanished">Diff qté</translation>
-    </message>
-    <message>
-        <source>Qty.</source>
-        <translation type="vanished">Qté</translation>
-    </message>
-    <message>
-        <source>Bulk</source>
-        <translation type="vanished">Lots</translation>
-    </message>
-    <message>
-        <source>Pr.Orig</source>
-        <translation type="vanished">Px orig</translation>
-    </message>
-    <message>
-        <source>Pr.Diff</source>
-        <translation type="vanished">Diff px</translation>
-    </message>
-    <message>
-        <source>Cost</source>
-        <translation type="vanished">Coût</translation>
-    </message>
-    <message>
-        <source>Price</source>
-        <translation type="vanished">Prix</translation>
-    </message>
-    <message>
-        <source>Total</source>
-        <translation type="vanished">Total</translation>
-    </message>
-    <message>
-        <source>Sale</source>
-        <translation type="vanished">Remise</translation>
-    </message>
-    <message>
-        <source>Cond.</source>
-        <translation type="vanished">Etat</translation>
-    </message>
-    <message>
-        <source>New</source>
-        <translation type="vanished">Neuf</translation>
-    </message>
-    <message>
-        <source>Used</source>
-        <translation type="vanished">Usagé</translation>
-    </message>
-    <message>
-        <source>Color</source>
-        <translation type="vanished">Couleur</translation>
-    </message>
-    <message>
-        <source>Category</source>
-        <translation type="vanished">Catégorie</translation>
-    </message>
-    <message>
-        <source>Item Type</source>
-        <translation type="vanished">Type</translation>
-    </message>
-    <message>
-        <source>Tier Q1</source>
-        <translation type="vanished">Palier Q1</translation>
-    </message>
-    <message>
-        <source>Tier P1</source>
-        <translation type="vanished">Palier P1</translation>
-    </message>
-    <message>
-        <source>Tier Q2</source>
-        <translation type="vanished">Palier Q2</translation>
-    </message>
-    <message>
-        <source>Tier P2</source>
-        <translation type="vanished">Palier P2</translation>
-    </message>
-    <message>
-        <source>Tier Q3</source>
-        <translation type="vanished">Palier Q3</translation>
-    </message>
-    <message>
-        <source>Tier P3</source>
-        <translation type="vanished">Palier P3</translation>
-    </message>
-    <message>
-        <source>Lot Id</source>
-        <translation type="vanished">ID</translation>
-    </message>
-    <message>
-        <source>Retain</source>
-        <translation type="vanished">Conservé</translation>
-    </message>
-    <message>
-        <source>Yes</source>
-        <translation type="vanished">Oui</translation>
-    </message>
-    <message>
-        <source>No</source>
-        <translation type="vanished">Non</translation>
-    </message>
-    <message>
-        <source>Yes</source>
-        <comment>Filter&gt;Retain&gt;Yes</comment>
-        <translation type="vanished">Oui</translation>
-    </message>
-    <message>
-        <source>No</source>
-        <comment>Filter&gt;Retain&gt;No</comment>
-        <translation type="vanished">Non</translation>
-    </message>
-    <message>
-        <source>Stockroom</source>
-        <translatorcomment>Fine translation is &quot;Entrepôt&quot;, but NO ONE will understand this in France.</translatorcomment>
-        <translation type="vanished">Stockroom</translation>
-    </message>
-    <message>
-        <source>None</source>
-        <translation type="vanished">Néant</translation>
-    </message>
-    <message>
-        <source>None</source>
-        <comment>Filter&gt;Stockroom&gt;None</comment>
-        <translation type="vanished">Néant</translation>
-    </message>
-    <message>
-        <source>Reserved</source>
-        <translation type="vanished">Réservé</translation>
-    </message>
-    <message>
-        <source>Weight</source>
-        <translation type="vanished">Poids</translation>
-    </message>
-    <message>
-        <source>Year</source>
-        <translation type="vanished">Année</translation>
-    </message>
-    <message>
-        <source>This document has no differences that could be exported.</source>
-        <translation type="vanished">Ce document ne présente pas de différence qui puisse être exportée.</translation>
-    </message>
-    <message>
-        <source>This list contains items without a BrickLink Lot-ID.</source>
-        <translation type="vanished">Cette liste contient des articles sans leur ID de lot BrickLink.</translation>
-    </message>
-    <message>
-        <source>This list contains items with duplicate BrickLink Lot-IDs.</source>
-        <translation type="vanished">Cette liste contient des articles avec de doublons d&apos;ID de lot BrickLink.</translation>
-    </message>
-    <message>
-        <source>Any</source>
-        <translatorcomment>Filter tooltip, for &quot;Any field&quot;</translatorcomment>
-        <translation type="vanished">Tous</translation>
     </message>
 </context>
 <context>
@@ -2815,61 +2404,9 @@
 <context>
     <name>DocumentIO</name>
     <message>
-        <source>Untitled</source>
-        <translation type="vanished">Sans titre</translation>
-    </message>
-    <message>
-        <location filename="../src/common/documentio.cpp" line="+46"/>
-        <source>BrickStore XML Data</source>
-        <translation>Données BrickStore XML</translation>
-    </message>
-    <message>
-        <location line="-7"/>
-        <location line="+9"/>
-        <location line="+11"/>
-        <source>All Files</source>
-        <translation>Tous les fichiers</translation>
-    </message>
-    <message>
-        <source>Open File</source>
-        <translation type="vanished">Ouvrir un fichier</translation>
-    </message>
-    <message>
-        <source>Inventory for %1</source>
-        <translation type="vanished">Inventaire pour %1</translation>
-    </message>
-    <message>
-        <source>Internal error: Could not create an Inventory object for item %1</source>
-        <translation type="vanished">Erreur interne: n&apos;est pas arrivé à créer un objet inventaire pour l&apos;article %1</translation>
-    </message>
-    <message>
-        <source>Import BrickLink Store Inventory</source>
-        <translation type="vanished">Importer inventaire boutique BrickLink</translation>
-    </message>
-    <message>
-        <source>Importing BrickLink Store</source>
-        <translation type="vanished">Import de la boutique BrickLink</translation>
-    </message>
-    <message>
-        <source>Download: %p</source>
-        <translation type="vanished">Téléchargement: %p</translation>
-    </message>
-    <message>
-        <source>Failed to download the store inventory.</source>
-        <translation type="vanished">Echec lors du téléchargement de l&apos;inventaire de la boutique.</translation>
-    </message>
-    <message>
-        <source>Either your username or password are incorrect.</source>
-        <translation type="vanished">Votre nom utilisateur et/ou votre mot de passe est erroné.</translation>
-    </message>
-    <message>
-        <location line="+15"/>
+        <location filename="../src/common/documentio.cpp" line="+64"/>
         <source>Store %1</source>
         <translation>Boutique %1</translation>
-    </message>
-    <message>
-        <source>Failed to import store inventory</source>
-        <translation type="vanished">Echec lors de l&apos;import de l&apos;inventaire de la boutique</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -2882,12 +2419,12 @@
         <translation>Panier d&apos;achat dans la boutique %1</translation>
     </message>
     <message>
-        <location line="-70"/>
-        <source>BrickLink XML File</source>
-        <translation>Fichier XML BrickLink</translation>
+        <location line="-56"/>
+        <source>BrickStore Files</source>
+        <translation>Fichiers BrickStore</translation>
     </message>
     <message>
-        <location line="+87"/>
+        <location line="+73"/>
         <source>Wanted List %1</source>
         <translation>Liste des personnes recherchées %1</translation>
     </message>
@@ -2934,16 +2471,7 @@
         <translation>Échec de l&apos;importation du modèle LDraw/Studio %1</translation>
     </message>
     <message>
-        <source>This document has no differences that could be exported.</source>
-        <translation type="vanished">Ce document ne présente pas de différence qui puisse être exportée.</translation>
-    </message>
-    <message>
-        <source>This XML document is not a valid BrickStoreXML file.</source>
-        <translatorcomment>Assuming BrickStoreXML is a format name?</translatorcomment>
-        <translation type="vanished">Ce document XML n&apos;est pas un fichier BrickStoreXML valide.</translation>
-    </message>
-    <message>
-        <location line="-161"/>
+        <location line="-159"/>
         <source>All Models</source>
         <translatorcomment>@rgriebl context? -&gt; the file type filters selection in the open file dialog for &quot;import ldraw models&quot;</translatorcomment>
         <translation>Tous les modèles</translation>
@@ -2955,46 +2483,10 @@
         <translation>Modèles de BrickLink Studio</translation>
     </message>
     <message>
-        <source>This list contains items without a BrickLink Lot-ID.</source>
-        <translation type="vanished">Cette liste contient des articles sans leur ID de lot BrickLink.</translation>
-    </message>
-    <message>
-        <source>This list contains items with duplicate BrickLink Lot-IDs.</source>
-        <translation type="vanished">Cette liste contient des articles avec de doublons d&apos;ID de lot BrickLink.</translation>
-    </message>
-    <message>
-        <source>There are problems: %1Do you really want to export this list?</source>
-        <translation type="vanished">Il y a des erreurs non résolues: %1Voulez-vous vraiment exporter cette liste?</translation>
-    </message>
-    <message>
         <location line="-1"/>
         <source>LDraw Models</source>
         <translatorcomment>@rgriebl context? -&gt; again file dialog type filters</translatorcomment>
         <translation>Modèles LDraw</translation>
-    </message>
-    <message>
-        <source>Could not parse the LDraw model in file %1.</source>
-        <translation type="vanished">N&apos;est pas arrivé à interpréter le modèle LDraw du fichier %1.</translation>
-    </message>
-    <message>
-        <source>Save File as</source>
-        <translation type="vanished">Enregistrer le fichier sous</translation>
-    </message>
-    <message>
-        <source>Failed to save data to file %1.</source>
-        <translation type="vanished">Echec lors de l&apos;enregistrement des données du fichier %1.</translation>
-    </message>
-    <message>
-        <source>Failed to open file %1 for writing.</source>
-        <translation type="vanished">Echec lors de l&apos;ouverture pour écriture du fichier %1.</translation>
-    </message>
-    <message>
-        <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
-        <translation type="vanished">Entrez le numéro d&apos;ID de la liste des articles désirés (laisser vide pour liste par défaut)</translation>
-    </message>
-    <message>
-        <source>Export File</source>
-        <translation type="vanished">Exporter un fichier</translation>
     </message>
 </context>
 <context>
@@ -3025,7 +2517,7 @@
         <source>Consolidated %n item(s)</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>Consolidé %n éléments</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
@@ -3034,7 +2526,7 @@
         <extracomment>Generic undo/redo text: %1 == action name (e.g. &quot;Set price&quot;)</extracomment>
         <translation>
             <numerusform></numerusform>
-            <numerusform>%1 sur %Ln éléments</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -3334,10 +2826,6 @@
         <translation>Total (min.)&#x202f;:</translation>
     </message>
     <message>
-        <source>Value:</source>
-        <translation type="vanished">Prix:</translation>
-    </message>
-    <message>
         <location line="+1"/>
         <source>Cost:</source>
         <translation>Coût:</translation>
@@ -3504,519 +2992,6 @@
     </message>
 </context>
 <context>
-    <name>FrameWork</name>
-    <message>
-        <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
-        <translation type="vanished">N&apos;est pas arrivé à charger la base de données BrickLink.&lt;br /&gt;&lt;br /&gt;Ce programme ne peut pas fonctionner sans ces fichiers.</translation>
-    </message>
-    <message>
-        <source>Could not initialize the JavaScript scripting environment.</source>
-        <translation type="vanished">N&apos;est pas arrivé à initialiser l&apos;environnement de script JavaScript.</translation>
-    </message>
-    <message>
-        <source>Toolbar</source>
-        <translation type="vanished">Barre d&apos;outils</translation>
-    </message>
-    <message>
-        <source>Info</source>
-        <translation type="vanished">Informations</translation>
-    </message>
-    <message>
-        <source>Price Guide</source>
-        <translation type="vanished">Guide des prix</translation>
-    </message>
-    <message>
-        <source>Appears In Sets</source>
-        <translation type="vanished">Présent dans les sets</translation>
-    </message>
-    <message>
-        <source>Error Log</source>
-        <translation type="vanished">Journal d&apos;erreurs</translation>
-    </message>
-    <message>
-        <source>Filter</source>
-        <translation type="vanished">Filtre</translation>
-    </message>
-    <message>
-        <source>Offline</source>
-        <translation type="vanished">Hors ligne</translation>
-    </message>
-    <message>
-        <source>No outstanding jobs</source>
-        <translation type="vanished">Aucune tâche à effectuer</translation>
-    </message>
-    <message>
-        <source>Downloading...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; finished&lt;br&gt;(%v of %m)</source>
-        <translation type="vanished">Téléchargement...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; terminé&lt;br&gt;(%v of %m)</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation type="vanished">&amp;Fichier</translation>
-    </message>
-    <message>
-        <source>New</source>
-        <comment>File|New</comment>
-        <translation type="vanished">Nouveau</translation>
-    </message>
-    <message>
-        <source>Open...</source>
-        <translation type="vanished">Ouvrir...</translation>
-    </message>
-    <message>
-        <source>Open Recent</source>
-        <translation type="vanished">Ouvrir récents</translation>
-    </message>
-    <message>
-        <source>Save</source>
-        <translation type="vanished">Enregistrer</translation>
-    </message>
-    <message>
-        <source>Save As...</source>
-        <translation type="vanished">Enregistrer sous...</translation>
-    </message>
-    <message>
-        <source>Print...</source>
-        <translation type="vanished">Imprimer...</translation>
-    </message>
-    <message>
-        <source>Print to PDF...</source>
-        <translation type="vanished">Imprimer en PDF...</translation>
-    </message>
-    <message>
-        <source>Import</source>
-        <translation type="vanished">Importer</translation>
-    </message>
-    <message>
-        <source>BrickLink Set Inventory...</source>
-        <translation type="vanished">Inventaire set BrickLink...</translation>
-    </message>
-    <message>
-        <source>Ctrl+I,Ctrl+I</source>
-        <comment>File|Import BrickLink Set Inventory</comment>
-        <translation type="vanished">Ctrl+I,Ctrl+I</translation>
-    </message>
-    <message>
-        <source>BrickLink XML...</source>
-        <translation type="vanished">Fichier XML BrickLink...</translation>
-    </message>
-    <message>
-        <source>Ctrl+I,Ctrl+X</source>
-        <comment>File|Import BrickLink XML</comment>
-        <translation type="vanished">Ctrl+I,Ctrl+X</translation>
-    </message>
-    <message>
-        <source>BrickLink Order...</source>
-        <translation type="vanished">Commande BrickLink...</translation>
-    </message>
-    <message>
-        <source>Ctrl+I,Ctrl+O</source>
-        <comment>File|Import BrickLink Order</comment>
-        <translation type="vanished">Ctrl+I,Ctrl+O</translation>
-    </message>
-    <message>
-        <source>BrickLink Store Inventory...</source>
-        <translation type="vanished">Inventaire boutique BrickLink...</translation>
-    </message>
-    <message>
-        <source>Ctrl+I,Ctrl+S</source>
-        <comment>File|Import BrickLink Store Inventory</comment>
-        <translation type="vanished">Ctrl+I,Ctrl+S</translation>
-    </message>
-    <message>
-        <source>BrickLink Shopping Cart...</source>
-        <translation type="vanished">Panier d&apos;achat BrickLink...</translation>
-    </message>
-    <message>
-        <source>Ctrl+I,Ctrl+C</source>
-        <comment>File|Import BrickLink Shopping Cart</comment>
-        <translation type="vanished">Ctrl+I,Ctrl+C</translation>
-    </message>
-    <message>
-        <source>Ctrl+I,Ctrl+L</source>
-        <comment>File|Import LDraw Model</comment>
-        <translation type="vanished">Ctrl+I,Ctrl+L</translation>
-    </message>
-    <message>
-        <source>LDraw or Studio Model...</source>
-        <translation type="vanished">Modèle LDraw ou Studio...</translation>
-    </message>
-    <message>
-        <source>Export</source>
-        <translation type="vanished">Exporter</translation>
-    </message>
-    <message>
-        <source>Ctrl+E,Ctrl+X</source>
-        <comment>File|Import BrickLink XML</comment>
-        <translation type="vanished">Ctrl+E,Ctrl+X</translation>
-    </message>
-    <message>
-        <source>BrickLink Mass-Upload XML to Clipboard</source>
-        <translation type="vanished">XML d&apos;ajout en masse sur BrickLink vers le presse-papiers</translation>
-    </message>
-    <message>
-        <source>Ctrl+E,Ctrl+U</source>
-        <comment>File|Import BrickLink Mass-Upload</comment>
-        <translation type="vanished">Ctrl+E,Ctrl+U</translation>
-    </message>
-    <message>
-        <source>BrickLink Mass-Update XML to Clipboard</source>
-        <translation type="vanished">XML de m.à.j. en masse sur BrickLink vers le presse-papiers</translation>
-    </message>
-    <message>
-        <source>Ctrl+E,Ctrl+P</source>
-        <comment>File|Import BrickLink Mass-Update</comment>
-        <translation type="vanished">Ctrl+E,Ctrl+P</translation>
-    </message>
-    <message>
-        <source>BrickLink Set Inventory XML to Clipboard</source>
-        <translation type="vanished">XML d&apos;inventaire de set sur BrickLink vers le presse-papiers</translation>
-    </message>
-    <message>
-        <source>Ctrl+E,Ctrl+I</source>
-        <comment>File|Import BrickLink Set Inventory</comment>
-        <translation type="vanished">Ctrl+E,Ctrl+I</translation>
-    </message>
-    <message>
-        <source>BrickLink Wanted List XML to Clipboard</source>
-        <translation type="vanished">XML de liste articles désirés sur BrickLink vers presse-papiers</translation>
-    </message>
-    <message>
-        <source>Ctrl+E,Ctrl+W</source>
-        <comment>File|Import BrickLink Wanted List</comment>
-        <translation type="vanished">Ctrl+E,Ctrl+W</translation>
-    </message>
-    <message>
-        <source>Close</source>
-        <translation type="vanished">Fermer</translation>
-    </message>
-    <message>
-        <source>Exit</source>
-        <translation type="vanished">Quitter</translation>
-    </message>
-    <message>
-        <source>&amp;Edit</source>
-        <translation type="vanished">&amp;Edition</translation>
-    </message>
-    <message>
-        <source>Cut</source>
-        <translation type="vanished">Couper</translation>
-    </message>
-    <message>
-        <source>Copy</source>
-        <translation type="vanished">Copier</translation>
-    </message>
-    <message>
-        <source>Paste</source>
-        <translation type="vanished">Coller</translation>
-    </message>
-    <message>
-        <source>Delete</source>
-        <translation type="vanished">Supprimer</translation>
-    </message>
-    <message>
-        <source>Add Items...</source>
-        <translation type="vanished">Ajouter des articles...</translation>
-    </message>
-    <message>
-        <source>Insert</source>
-        <comment>Edit|AddItems</comment>
-        <translation type="vanished">Insert</translation>
-    </message>
-    <message>
-        <source>Subtract Items...</source>
-        <translation type="vanished">Soustraire des articles...</translation>
-    </message>
-    <message>
-        <source>Consolidate Items...</source>
-        <translation type="vanished">Consolider des articles...</translation>
-    </message>
-    <message>
-        <source>Ctrl+L</source>
-        <comment>Edit|Consolidate Items</comment>
-        <translation type="vanished">Ctrl+L</translation>
-    </message>
-    <message>
-        <source>Part out Item...</source>
-        <translation type="vanished">Inventorier l&apos;article...</translation>
-    </message>
-    <message>
-        <source>Ctrl+Shift+A</source>
-        <comment>Edit|Select None</comment>
-        <translation type="vanished">Ctrl+Shift+A</translation>
-    </message>
-    <message>
-        <source>Go to the Next Error</source>
-        <translation type="vanished">Aller à l&apos;erreur suivante</translation>
-    </message>
-    <message>
-        <source>Go to the Next Difference</source>
-        <translation type="vanished">Aller à la différence suivante</translation>
-    </message>
-    <message>
-        <source>Set status to Include</source>
-        <translation type="vanished">Fixer le statut à inclus</translation>
-    </message>
-    <message>
-        <source>Set status to Exclude</source>
-        <translation type="vanished">Fixer le statut à exclus</translation>
-    </message>
-    <message>
-        <source>Toggle status between Include and Exclude</source>
-        <translation type="vanished">Basculer le statut entre inclus et exclus</translation>
-    </message>
-    <message>
-        <source>Set condition to New</source>
-        <comment>Cond|New</comment>
-        <translation type="vanished">Fixer l&apos;état à neuf</translation>
-    </message>
-    <message>
-        <source>Set condition to Used</source>
-        <translation type="vanished">Fixer l&apos;état à usagé</translation>
-    </message>
-    <message>
-        <source>Set sub-condition to None</source>
-        <translation type="vanished">Fixer le sous-état à néant</translation>
-    </message>
-    <message>
-        <source>Set sub-condition to Sealed</source>
-        <translation type="vanished">Fixer le sous-état à scellé</translation>
-    </message>
-    <message>
-        <source>Set sub-condition to Complete</source>
-        <translation type="vanished">Fixer le sous-état à complet</translation>
-    </message>
-    <message>
-        <source>Set sub-condition to Incomplete</source>
-        <translation type="vanished">Fixer le sous-état à incomplet</translation>
-    </message>
-    <message>
-        <source>Round price to 2 decimals</source>
-        <translation type="vanished">Arrondir le prix à 2 décimales</translation>
-    </message>
-    <message>
-        <source>Set stockroom to None</source>
-        <translation type="vanished">Fixer stockroom à néant</translation>
-    </message>
-    <message>
-        <source>Set stockroom to A</source>
-        <translation type="vanished">Fixer stockroom à A</translation>
-    </message>
-    <message>
-        <source>Set stockroom to B</source>
-        <translation type="vanished">Fixer stockroom à B</translation>
-    </message>
-    <message>
-        <source>Set stockroom to C</source>
-        <translation type="vanished">Fixer stockroom à C</translation>
-    </message>
-    <message>
-        <source>Select All</source>
-        <translation type="vanished">Sélectionner tout</translation>
-    </message>
-    <message>
-        <source>Filter the Item List</source>
-        <translation type="vanished">Filtrer la liste des articles</translation>
-    </message>
-    <message>
-        <source>Select None</source>
-        <translation type="vanished">Ne rien sélectionner</translation>
-    </message>
-    <message>
-        <source>&amp;View</source>
-        <translation type="vanished">&amp;Affichage</translation>
-    </message>
-    <message>
-        <source>View Toolbar</source>
-        <translation type="vanished">Afficher la barre d&apos;outils</translation>
-    </message>
-    <message>
-        <source>Full Screen</source>
-        <translation type="vanished">Plein écran</translation>
-    </message>
-    <message>
-        <source>Show Input Errors</source>
-        <translation type="vanished">Montrer les erreurs d&apos;entrée</translation>
-    </message>
-    <message>
-        <source>E&amp;xtras</source>
-        <translatorcomment>@rgriebl Called it &quot;tools&quot; here, as it&apos;s usually what has Options in it, see firefox</translatorcomment>
-        <translation type="vanished">&amp;Outils</translation>
-    </message>
-    <message>
-        <source>Update Database</source>
-        <translation type="vanished">Mettre à jour la base de données</translation>
-    </message>
-    <message>
-        <source>&amp;Windows</source>
-        <translation type="vanished">Fe&amp;nêtres</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation type="vanished">A&amp;ide</translation>
-    </message>
-    <message>
-        <source>About...</source>
-        <translation type="vanished">A propos de...</translation>
-    </message>
-    <message>
-        <source>Check for Program Updates...</source>
-        <translation type="vanished">Vérifier la mise à jour du programme...</translation>
-    </message>
-    <message>
-        <source>Status</source>
-        <translation type="vanished">Statut</translation>
-    </message>
-    <message>
-        <source>Condition</source>
-        <translation type="vanished">Etat</translation>
-    </message>
-    <message>
-        <source>Create a Filter from the Selection</source>
-        <translation type="vanished">Créer un filtre d&apos;après la sélection</translation>
-    </message>
-    <message>
-        <source>Save Column Layout...</source>
-        <translation type="vanished">Enregistrer la disposition des colonnes...</translation>
-    </message>
-    <message>
-        <source>Manage Column Layouts...</source>
-        <translation type="vanished">Gérer les dispositions des colonnes...</translation>
-    </message>
-    <message>
-        <source>Load Column Layout</source>
-        <translation type="vanished">Charger une disposition des colonnes</translation>
-    </message>
-    <message>
-        <source>Settings...</source>
-        <translation type="vanished">Options...</translation>
-    </message>
-    <message>
-        <source>Quantity</source>
-        <translation type="vanished">Quantité</translation>
-    </message>
-    <message>
-        <source>Ctrl+*</source>
-        <comment>Edit|Quantity|Multiply</comment>
-        <translation type="vanished">Ctrl+*</translation>
-    </message>
-    <message>
-        <source>Ctrl+/</source>
-        <comment>Edit|Quantity|Divide</comment>
-        <translation type="vanished">Ctrl+/</translation>
-    </message>
-    <message>
-        <source>Price</source>
-        <translation type="vanished">Prix</translation>
-    </message>
-    <message>
-        <source>Ctrl+G</source>
-        <comment>Edit|Price|Set to PriceGuide</comment>
-        <translation type="vanished">Ctrl+G</translation>
-    </message>
-    <message>
-        <source>Ctrl++</source>
-        <comment>Edit|Price|Inc/Dec</comment>
-        <translation type="vanished">Ctrl++</translation>
-    </message>
-    <message>
-        <source>Cost</source>
-        <translation type="vanished">Coût</translation>
-    </message>
-    <message>
-        <source>Ctrl+%</source>
-        <comment>Edit|Sale</comment>
-        <translation type="vanished">Ctrl+%</translation>
-    </message>
-    <message>
-        <source>Comment</source>
-        <translation type="vanished">Commentaire</translation>
-    </message>
-    <message>
-        <source>Remark</source>
-        <translation type="vanished">Remarque</translation>
-    </message>
-    <message>
-        <source>Stockroom Item</source>
-        <translation type="vanished">Article en stockroom</translation>
-    </message>
-    <message>
-        <source>Show BrickLink Catalog Info...</source>
-        <translation type="vanished">Ouvrir le catalogue sur BrickLink...</translation>
-    </message>
-    <message>
-        <source>Ctrl+B,Ctrl+C</source>
-        <comment>Edit|Show BL Catalog Info</comment>
-        <translation type="vanished">Ctrl+B,Ctrl+C</translation>
-    </message>
-    <message>
-        <source>Show BrickLink Price Guide Info...</source>
-        <translation type="vanished">Ouvrir le guide des prix sur BrickLink...</translation>
-    </message>
-    <message>
-        <source>Ctrl+B,Ctrl+P</source>
-        <comment>Edit|Show BL Price Guide</comment>
-        <translation type="vanished">Ctrl+B,Ctrl+P</translation>
-    </message>
-    <message>
-        <source>Show Lots for Sale on BrickLink...</source>
-        <translation type="vanished">Ouvrir lots en vente sur BrickLink...</translation>
-    </message>
-    <message>
-        <source>Ctrl+B,Ctrl+L</source>
-        <comment>Edit|Show BL Lots for Sale</comment>
-        <translation type="vanished">Ctrl+B,Ctrl+L</translation>
-    </message>
-    <message>
-        <source>Show in my Store on BrickLink...</source>
-        <translation type="vanished">Ouvrir dans ma boutique sur BrickLink...</translation>
-    </message>
-    <message>
-        <source>Ctrl+B,Ctrl+I</source>
-        <comment>Edit|Show BL my Inventory</comment>
-        <translation type="vanished">Ctrl+B,Ctrl+I</translation>
-    </message>
-    <message>
-        <source>Open File</source>
-        <translation type="vanished">Ouvrir un fichier</translation>
-    </message>
-    <message>
-        <source>Import File</source>
-        <translation type="vanished">Importer un fichier</translation>
-    </message>
-    <message>
-        <source>Import of %1</source>
-        <translation type="vanished">Import de %1</translation>
-    </message>
-    <message>
-        <source>Could not parse the XML data.</source>
-        <translation type="vanished">N&apos;est pas arrivé à interpréter les données XML.</translation>
-    </message>
-    <message>
-        <source>Could not open file %1 for reading.</source>
-        <translation type="vanished">N&apos;est pas arrivé à ouvrir en lecture le fichier %1.</translation>
-    </message>
-    <message>
-        <source>Import BrickLink Store</source>
-        <translation type="vanished">Import de la boutique BrickLink</translation>
-    </message>
-    <message>
-        <source>Importing BrickLink Store</source>
-        <translation type="vanished">Import de la boutique BrickLink</translation>
-    </message>
-    <message>
-        <source>This XML document is not a valid BrickStoreXML file.</source>
-        <translation type="vanished">Ce document XML n&apos;est pas un fichier BrickStoreXML valide.</translation>
-    </message>
-    <message>
-        <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
-        <translation type="vanished">N&apos;a pas trouvé de paramètres d&apos;authentification BrickLink valides.&lt;br /&gt;&lt;br /&gt;Voulez-vous changer ces paramètres maintenant?</translation>
-    </message>
-    <message>
-        <source>Do you want to cancel all outstanding inventory, image and Price Guide transfers?</source>
-        <translation type="vanished">Voulez-vous annuler les téléchargements en cours: inventaires, images et guides des prix?</translation>
-    </message>
-</context>
-<context>
     <name>HeaderView</name>
     <message>
         <location filename="../src/desktop/headerview.cpp" line="+297"/>
@@ -4131,22 +3106,22 @@
 <context>
     <name>ImportCartDialog</name>
     <message>
-        <location filename="../src/desktop/importcartdialog.ui" line="+14"/>
+        <location filename="../src/desktop/importcartdialog.ui"/>
         <source>Import BrickLink Shopping Cart</source>
         <translation>Import panier d&apos;achat BrickLink</translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location/>
         <source>Filter</source>
         <translation>Filtre</translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location/>
         <source>Update now</source>
         <translation>Mettre à jour maintenant</translation>
     </message>
     <message>
-        <location line="+52"/>
+        <location/>
         <source>%v / %m</source>
         <translation>%v / %m</translation>
     </message>
@@ -4169,30 +3144,6 @@
         <location line="-1"/>
         <source>International</source>
         <translation>International</translation>
-    </message>
-    <message>
-        <source>Last Update</source>
-        <translation type="vanished">Dernière m.à.j</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation type="vanished">Type</translation>
-    </message>
-    <message>
-        <source>Items</source>
-        <translation type="vanished">Items</translation>
-    </message>
-    <message>
-        <source>Lots</source>
-        <translation type="vanished">Lots</translation>
-    </message>
-    <message>
-        <source>Total</source>
-        <translation type="vanished">Total</translation>
-    </message>
-    <message>
-        <source>Cart in store %1</source>
-        <translation type="vanished">Panier d&apos;achat dans la boutique %1</translation>
     </message>
     <message>
         <location filename="../src/desktop/importcartdialog.cpp" line="+176"/>
@@ -4221,22 +3172,6 @@
         <translation>La dernière mise à jour a échoué</translation>
     </message>
     <message>
-        <source>Import BrickLink Cart</source>
-        <translation type="vanished">Import panier d&apos;achat BrickLink</translation>
-    </message>
-    <message>
-        <source>Could not login to BrickLink.</source>
-        <translation type="vanished">N&apos;est pas arrivé à s&apos;authentifier sur BrickLink.</translation>
-    </message>
-    <message>
-        <source>Could not parse the cart data</source>
-        <translation type="vanished">N&apos;est pas arrivé à interpréter les données du panier d&apos;achat</translation>
-    </message>
-    <message>
-        <source>%1 lots of your Shopping Cart could not be imported.</source>
-        <translation type="vanished">%1 lot(s) du panier d&apos;achat n&apos;a (n&apos;ont) pas pu être importé(s).</translation>
-    </message>
-    <message>
         <location line="-10"/>
         <source>Last updated %1</source>
         <translation>Dernière mise à jour %1</translation>
@@ -4260,39 +3195,6 @@
         <translation>Séparation&#x202f;:</translation>
     </message>
     <message>
-        <source>&amp;Quantity:</source>
-        <translation type="vanished">&amp;Quantité:</translation>
-    </message>
-    <message>
-        <source>Condition:</source>
-        <translation type="vanished">Etat:</translation>
-    </message>
-    <message>
-        <source>&amp;Quantity</source>
-        <translation type="obsolete">&amp;Quantité</translation>
-    </message>
-    <message>
-        <source>Condition</source>
-        <translation type="vanished">Etat</translation>
-    </message>
-    <message>
-        <source>&amp;New</source>
-        <translation type="vanished">&amp;Neuf</translation>
-    </message>
-    <message>
-        <source>&amp;Used</source>
-        <translation type="vanished">&amp;Usagé</translation>
-    </message>
-    <message>
-        <source>Include</source>
-        <translation type="vanished">Inclus</translation>
-    </message>
-    <message>
-        <source>Include</source>
-        <comment>Extra parts state</comment>
-        <translation type="obsolete">Inclus</translation>
-    </message>
-    <message>
         <location filename="../src/mobile/ImportInventoryDialog.qml" line="+13"/>
         <source>Part out</source>
         <translation>Sors de là</translation>
@@ -4308,22 +3210,6 @@
         <translation>Filtre</translation>
     </message>
     <message>
-        <source>Quantity</source>
-        <translation type="vanished">Quantité</translation>
-    </message>
-    <message>
-        <source>Used</source>
-        <translation type="vanished">Usagé</translation>
-    </message>
-    <message>
-        <source>Exclude</source>
-        <translation type="vanished">Exclus</translation>
-    </message>
-    <message>
-        <source>Extra</source>
-        <translation type="vanished">Extra</translation>
-    </message>
-    <message>
         <location line="-106"/>
         <location filename="../src/desktop/importinventorydialog.cpp" line="+110"/>
         <source>Import</source>
@@ -4333,103 +3219,95 @@
 <context>
     <name>ImportInventoryWidget</name>
     <message>
-        <location filename="../src/desktop/importinventorywidget.ui" line="+37"/>
+        <location filename="../src/desktop/importinventorywidget.ui"/>
         <source>&amp;Quantity:</source>
         <translation>&amp;Quantité:</translation>
     </message>
     <message>
-        <location line="+45"/>
+        <location/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="+75"/>
         <source>Condition:</source>
         <translation>Etat:</translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location/>
         <source>&amp;New</source>
         <translation>&amp;Neuf</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location/>
         <source>&amp;Used</source>
         <translation>&amp;Usagé</translation>
     </message>
     <message>
-        <location line="+25"/>
+        <location/>
         <source>E&amp;xtra parts:</source>
         <translation>E&amp;pièces supplémentaires&#x202f;:</translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="+15"/>
         <source>Include</source>
         <extracomment>Extra parts state</extracomment>
         <translation>Inclus</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="+1"/>
         <source>Exclude</source>
         <translation>Exclus</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="+1"/>
         <source>Extra</source>
         <translation>Extra</translation>
     </message>
     <message>
-        <location line="+32"/>
+        <location/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="+3"/>
         <source>Include:</source>
         <extracomment>Label on the left</extracomment>
         <translation>Inclure&#x202f;:</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>&amp;Instructions</source>
         <translation>&amp;Instructions</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="+9"/>
         <source>Original Box</source>
         <translation>Boîte originale</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>&amp;Alternates</source>
         <translation>&amp;Alternatives</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location/>
         <source>&amp;Counterparts</source>
         <translation>&amp;Contreparties</translation>
     </message>
     <message>
-        <location line="+30"/>
+        <location/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="+16"/>
         <source>Also part out:</source>
         <translation>Fais aussi la part des choses&#x202f;:</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="+3"/>
         <source>Sets in set</source>
         <translation>Les ensembles dans l&apos;ensemble</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="+6"/>
         <source>Minifigs</source>
         <translation>Minifigs</translation>
-    </message>
-    <message>
-        <source>Quantity</source>
-        <translation type="obsolete">Quantité</translation>
-    </message>
-    <message>
-        <source>Condition</source>
-        <translation type="obsolete">Etat</translation>
     </message>
     <message>
         <location filename="../src/mobile/ImportInventoryWidget.qml" line="-50"/>
@@ -4470,35 +3348,35 @@
 <context>
     <name>ImportOrderDialog</name>
     <message>
-        <location filename="../src/desktop/importorderdialog.ui" line="+14"/>
+        <location filename="../src/desktop/importorderdialog.ui"/>
         <source>Import BrickLink Order</source>
         <translation>Import commande BrickLink</translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location/>
         <source>Filter</source>
         <translation>Filtre</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location/>
         <location filename="../src/mobile/ImportOrderDialog.qml" line="+30"/>
         <source>Synchronize the orders of the last</source>
         <translatorcomment>@rgriebl warning, caption width too small  -&gt; interesting, the dialog should self adjust to the width needed. Let me know if looks weird. Otherwise, ignore it</translatorcomment>
         <translation>Synchroniser les commandes des derniers</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location/>
         <location filename="../src/mobile/ImportOrderDialog.qml" line="+0"/>
         <source>days</source>
         <translation>jours</translation>
     </message>
     <message>
-        <location line="+27"/>
+        <location/>
         <source>Update now</source>
         <translation>Mettre à jour maintenant</translation>
     </message>
     <message>
-        <location line="+52"/>
+        <location/>
         <source>%v / %m</source>
         <translation></translation>
     </message>
@@ -4519,34 +3397,6 @@
         <translation>Passée</translation>
     </message>
     <message>
-        <source>Type</source>
-        <translation type="vanished">Type</translation>
-    </message>
-    <message>
-        <source>Date</source>
-        <translation type="vanished">Date</translation>
-    </message>
-    <message>
-        <source>Status</source>
-        <translation type="vanished">Statut</translation>
-    </message>
-    <message>
-        <source>Order ID</source>
-        <translation type="vanished">Numéro</translation>
-    </message>
-    <message>
-        <source>Items</source>
-        <translation type="vanished">Items</translation>
-    </message>
-    <message>
-        <source>Lots</source>
-        <translation type="vanished">Lots</translation>
-    </message>
-    <message>
-        <source>Total</source>
-        <translation type="vanished">Total</translation>
-    </message>
-    <message>
         <location filename="../src/desktop/importorderdialog.cpp" line="+215"/>
         <source>Import</source>
         <translation>Importer</translation>
@@ -4560,10 +3410,6 @@
         <location line="+1"/>
         <source>Filter the list for lines containing these words</source>
         <translation>Filtrer dans la liste les lignes qui contiennent ces mots</translation>
-    </message>
-    <message>
-        <source>Show</source>
-        <translation type="vanished">Montrer</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4580,10 +3426,6 @@
         <location filename="../src/desktop/importorderdialog.cpp" line="+111"/>
         <source>Last update failed</source>
         <translation>La dernière mise à jour a échoué</translation>
-    </message>
-    <message>
-        <source>Failed to import order %1</source>
-        <translation type="vanished">Echec lors de l&apos;import de la commande %1</translation>
     </message>
     <message>
         <location line="-140"/>
@@ -4624,22 +3466,22 @@
 <context>
     <name>ImportWantedListDialog</name>
     <message>
-        <location filename="../src/desktop/importwantedlistdialog.ui" line="+14"/>
+        <location filename="../src/desktop/importwantedlistdialog.ui"/>
         <source>Import BrickLink Wanted List</source>
         <translation>Importer la liste des personnes recherchées de BrickLink</translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location/>
         <source>Filter</source>
         <translation>Filtre</translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location/>
         <source>Update now</source>
         <translation>Mettre à jour maintenant</translation>
     </message>
     <message>
-        <location line="+52"/>
+        <location/>
         <source>%v / %m</source>
         <translation>%v / %m</translation>
     </message>
@@ -4789,17 +3631,17 @@
         <translation>La demande d&apos;accès à la caméra de BrickStore a été refusée. Tu ne pourras pas utiliser ta webcam pour identifier les pièces tant que tu n&apos;auras pas accordé les autorisations nécessaires via l&apos;application Paramètres de ton système.</translation>
     </message>
     <message>
-        <location line="+398"/>
+        <location line="+427"/>
         <source>Item Scanner</source>
         <translation>Scanner d&apos;articles</translation>
     </message>
     <message>
-        <location line="-334"/>
+        <location line="-363"/>
         <source>Any</source>
         <translation>Tous</translation>
     </message>
     <message>
-        <location line="+337"/>
+        <location line="+366"/>
         <source>Camera</source>
         <translation>Appareil photo</translation>
     </message>
@@ -4824,22 +3666,22 @@
         <translation>Clique dans l&apos;aperçu de l&apos;appareil photo ou appuie sur Espace pour capturer une image.</translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="+23"/>
         <source>An error occurred:</source>
         <translation>Une erreur s&apos;est produite&#x202f;:</translation>
     </message>
     <message>
-        <location line="-19"/>
+        <location line="-21"/>
         <source>There is no camera connected to this computer.</source>
         <translation>Aucun appareil photo n&apos;est connecté à cet ordinateur.</translation>
     </message>
     <message>
-        <location line="+15"/>
+        <location line="+17"/>
         <source>No matching item found - try again.</source>
         <translation>Aucun article correspondant n&apos;a été trouvé - essaie à nouveau.</translation>
     </message>
     <message>
-        <location line="-167"/>
+        <location line="-175"/>
         <source>Scanning failed</source>
         <translation>Le balayage a échoué</translation>
     </message>
@@ -4909,10 +3751,6 @@ Clic droit Menu</translation>
         <translation>Guide des prix</translation>
     </message>
     <message>
-        <source>Appears In Sets</source>
-        <translation type="vanished">Présent dans les sets</translation>
-    </message>
-    <message>
         <location line="+2"/>
         <source>Item Inventory</source>
         <translation>Inventaire des articles</translation>
@@ -4926,10 +3764,6 @@ Clic droit Menu</translation>
         <location line="+2"/>
         <source>Recent Documents</source>
         <translation>Documents récents</translation>
-    </message>
-    <message>
-        <source>Error Log</source>
-        <translation type="vanished">Journal d&apos;erreurs</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -4947,7 +3781,7 @@ Clic droit Menu</translation>
         <translation>Téléchargement...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; terminé&lt;br&gt;(%v of %m)</translation>
     </message>
     <message>
-        <location line="+797"/>
+        <location line="+771"/>
         <source>Customize Toolbar...</source>
         <translation>Personnaliser la barre d&apos;outils...</translation>
     </message>
@@ -4972,14 +3806,6 @@ Clic droit Menu</translation>
 </context>
 <context>
     <name>MiniZip</name>
-    <message>
-        <source>Could not extract model.ldr from the Studio ZIP file.</source>
-        <translation type="vanished">N&apos;est pas arrivé à extraire model.ldr du fichier ZIP Studio.</translation>
-    </message>
-    <message>
-        <source>Could not locate the model.ldr file within the Studio ZIP file.</source>
-        <translation type="vanished">N&apos;est pas arrivé à localiser le fichier model.ldr dans le fichier ZIP Studio.</translation>
-    </message>
     <message>
         <location filename="../3rdparty/minizip/minizip.cpp" line="+179"/>
         <source>ZIP file %1 has not been opened for reading</source>
@@ -5027,22 +3853,6 @@ Clic droit Menu</translation>
         <source>Could not open the ZIP file %1</source>
         <translation>Impossible d&apos;ouvrir le fichier ZIP %1</translation>
     </message>
-    <message>
-        <source>Could not open the Studio ZIP file</source>
-        <translation type="vanished">N&apos;est pas arrivé à ouvrir le fichier ZIP Studio</translation>
-    </message>
-    <message>
-        <source>Could not read downloaded file: %1</source>
-        <translation type="obsolete">N&apos;est pas arrivé à lire le fichier téléchargé: %1</translation>
-    </message>
-    <message>
-        <source>Could not write to database file: %1</source>
-        <translation type="obsolete">N&apos;est pas arrivé à écrire le fichier de la base de données: %1</translation>
-    </message>
-    <message>
-        <source>Could not initialize the LZMA decompressor</source>
-        <translation type="obsolete">N&apos;est pas arrivé à initialiser le décompresseur LZMA</translation>
-    </message>
 </context>
 <context>
     <name>MobileApplication</name>
@@ -5063,118 +3873,118 @@ Clic droit Menu</translation>
 <context>
     <name>OrderInformationDialog</name>
     <message>
-        <location filename="../src/desktop/orderinformationdialog.ui" line="+20"/>
+        <location filename="../src/desktop/orderinformationdialog.ui"/>
         <source>Order information</source>
         <translation>Informations sur la commande</translation>
     </message>
     <message>
-        <location line="+64"/>
+        <location/>
         <source>Status</source>
         <translation>Statut</translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location/>
         <source>Last updated</source>
         <translation>Dernière mise à jour</translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location/>
         <source>Tracking Number</source>
         <translation>Numéro de suivi</translation>
     </message>
     <message>
-        <location line="+57"/>
+        <location/>
         <source>Address</source>
         <translation>Adresse</translation>
     </message>
     <message>
-        <location line="+250"/>
+        <location/>
         <source>Phone</source>
         <translation>Téléphone</translation>
     </message>
     <message>
-        <location line="+82"/>
+        <location/>
         <source>Currency Code</source>
         <translation>Code de la monnaie</translation>
     </message>
     <message>
-        <location line="+58"/>
+        <location/>
         <source>Shipping</source>
         <translation>Expédition</translation>
     </message>
     <message>
-        <location line="+41"/>
+        <location/>
         <source>Insurance</source>
         <translation>Assurance</translation>
     </message>
     <message>
-        <location line="+41"/>
+        <location/>
         <source>Additional Charges 1</source>
         <translation>Frais supplémentaires 1</translation>
     </message>
     <message>
-        <location line="+41"/>
+        <location/>
         <source>Additional Charges 2</source>
         <translation>Frais supplémentaires 2</translation>
     </message>
     <message>
-        <location line="+41"/>
+        <location/>
         <source>Credit</source>
         <translation>Crédit</translation>
     </message>
     <message>
-        <location line="+41"/>
+        <location/>
         <source>Credit Coupon</source>
         <translation>Coupon de crédit</translation>
     </message>
     <message>
-        <location line="+41"/>
+        <location/>
         <source>US Sales Tax</source>
         <translation>Taxe de vente américaine</translation>
     </message>
     <message>
-        <location line="+106"/>
+        <location/>
         <source>VAT Information:</source>
         <translation>Informations sur la TVA&#x202f;:</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Net Grand Total</source>
         <translation>Net Grand Total</translation>
     </message>
     <message>
-        <location line="+41"/>
+        <location/>
         <source>%1 VAT (Seller)</source>
         <comment>x% VAT (Seller or BrickLink)</comment>
         <translation>%1 TVA (Vendeur)</translation>
     </message>
     <message>
-        <location line="+126"/>
+        <location/>
         <source>%1 VAT (BrickLink)</source>
         <translation>%1 TVA (BrickLink)</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location/>
         <source>Payment By</source>
         <translation>Paiement par</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Payment Status</source>
         <translation>État des paiements</translation>
     </message>
     <message>
-        <location line="-115"/>
+        <location/>
         <source>Gross Grand Total</source>
         <translation>Brut Grand Total</translation>
     </message>
     <message>
-        <location line="-482"/>
+        <location/>
         <source>Order Total</source>
         <translation>Commande Total</translation>
     </message>
     <message>
-        <location line="+344"/>
+        <location/>
         <source>Grand Total</source>
         <translation>Total général</translation>
     </message>
@@ -5197,13 +4007,6 @@ Clic droit Menu</translation>
         <location line="+42"/>
         <source>Payment in</source>
         <translation>Paiement en</translation>
-    </message>
-</context>
-<context>
-    <name>OrderModel</name>
-    <message>
-        <source>Received</source>
-        <translation type="obsolete">Reçue</translation>
     </message>
 </context>
 <context>
@@ -5484,7 +4287,7 @@ Clic droit Menu</translation>
         <source>A total quantity of %Ln item(s) is available for purchase</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>Une quantité totale de %Ln articles est disponible à l&apos;achat.</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
@@ -5493,7 +4296,7 @@ Clic droit Menu</translation>
         <source>in %Ln individual lot(s)</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>en %Ln lots individuels</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
@@ -5501,7 +4304,7 @@ Clic droit Menu</translation>
         <source>A total quantity of %Ln item(s) has been sold</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>Une quantité totale de %Ln articles a été vendue</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -5518,168 +4321,165 @@ Clic droit Menu</translation>
 <context>
     <name>PrintDialog</name>
     <message>
-        <location filename="../src/desktop/printdialog.ui" line="+14"/>
+        <location filename="../src/desktop/printdialog.ui"/>
         <source>Print preview</source>
         <translation>Aperçu avant impression</translation>
     </message>
     <message>
-        <location line="+27"/>
+        <location/>
         <source>Show first page</source>
         <translation>Afficher la première page</translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location/>
         <source>Show previous page</source>
         <translation>Afficher la page précédente</translation>
     </message>
     <message>
-        <location line="+24"/>
+        <location/>
         <source>Show next page</source>
         <translation>Afficher la page suivante</translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location/>
         <source>Show last page</source>
         <translation>Afficher la dernière page</translation>
     </message>
     <message>
-        <location line="+30"/>
+        <location/>
         <source>Show only one page at a time</source>
         <translation>Ne montre qu&apos;une page à la fois</translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location/>
         <source>Show all pages side-by-side</source>
         <translation>Afficher toutes les pages côte à côte</translation>
     </message>
     <message>
-        <location line="+30"/>
+        <location/>
         <source>Fit to window width</source>
         <translation>S&apos;adapter à la largeur de la fenêtre</translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location/>
         <source>Fit one full page to window</source>
         <translation>Ajoute une page entière à la fenêtre</translation>
     </message>
     <message>
-        <location line="+30"/>
+        <location/>
         <source>Zoom out</source>
         <translation>Zoom arrière</translation>
     </message>
     <message>
-        <location line="+24"/>
+        <location/>
         <source>Zoom in</source>
         <translation>Zoom avant</translation>
     </message>
     <message>
-        <location line="+44"/>
+        <location/>
         <location filename="../src/desktop/printdialog.cpp" line="+271"/>
         <source>Print</source>
         <translation>Imprimer</translation>
     </message>
     <message>
-        <location line="+24"/>
+        <location/>
         <source>Destination</source>
         <translation>Destination</translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location/>
         <source>Pages</source>
         <translation>Pages</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location/>
         <source>All</source>
         <translation>Tous</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location/>
         <source>Selection Only</source>
         <translation>Sélection seulement</translation>
     </message>
     <message>
-        <location line="+5"/>
-        <location line="+170"/>
+        <location/>
         <source>Custom</source>
         <translation>Sur mesure</translation>
     </message>
     <message>
-        <location line="-162"/>
+        <location/>
         <source>e.g. 1-5,8,11-13</source>
         <translation>par exemple 1-5,8,11-13</translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location/>
         <source>Invalid page range, use e.g. 1-5,8,11-13</source>
         <translation>Plage de pages non valide, utilise par exemple 1-5,8,11-13</translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location/>
         <source>Copies</source>
         <translation>Copies</translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location/>
         <source>Layout</source>
         <translation>Mise en page</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location/>
         <source>Portrait</source>
         <translation>Portrait</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location/>
         <source>Landscape</source>
         <translation>Paysage</translation>
     </message>
     <message>
-        <location line="+10"/>
-        <location line="+10"/>
+        <location/>
         <location filename="../src/desktop/printdialog.cpp" line="-16"/>
         <source>Color</source>
         <translation>Couleur</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location/>
         <location filename="../src/desktop/printdialog.cpp" line="+2"/>
         <source>Black and white</source>
         <translation>Noir et blanc</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location/>
         <source>Paper size</source>
         <translation>Taille du papier</translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location/>
         <source>Margins</source>
         <translation>Marges</translation>
     </message>
     <message>
-        <location line="+10"/>
-        <location line="+33"/>
+        <location/>
         <source>Default</source>
         <translation>Défaut</translation>
     </message>
     <message>
-        <location line="-28"/>
+        <location/>
         <source>None</source>
         <translation>Néant</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location/>
         <source>Minimum</source>
         <translation>Minimum</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location/>
         <source>Scale</source>
         <translation>Échelle</translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location/>
         <source>Fit to width</source>
         <translation>S&apos;adapter à la largeur</translation>
     </message>
@@ -5743,17 +4543,6 @@ Clic droit Menu</translation>
     </message>
 </context>
 <context>
-    <name>ProgressDialog</name>
-    <message>
-        <source>Error</source>
-        <translation type="vanished">Erreur</translation>
-    </message>
-    <message>
-        <source>Download failed: %1</source>
-        <translation type="vanished">Echec lors du téléchargement: %1</translation>
-    </message>
-</context>
-<context>
     <name>QDialogButtonBox</name>
     <message>
         <location filename="../src/desktop/desktopuihelpers_p.h" line="+164"/>
@@ -5782,182 +4571,182 @@ Clic droit Menu</translation>
 <context>
     <name>RenderSettingsDialog</name>
     <message>
-        <location filename="../src/desktop/rendersettingsdialog.ui" line="+14"/>
+        <location filename="../src/desktop/rendersettingsdialog.ui"/>
         <source>3D Render Settings</source>
         <translation>Paramètres de rendu 3D</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location/>
         <source>General</source>
         <translation>Généralités</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location/>
         <source>Camera</source>
         <translation>Appareil photo</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Orthographic</source>
         <translation>Orthographique</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Perspective</source>
         <translation>Perspective</translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location/>
         <source>Field of view</source>
         <translation>Champ de vision</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location/>
         <source> °</source>
         <translation> °</translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location/>
         <source>Lines</source>
         <translation>Lignes</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Show</source>
         <translation>Montrer</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Line width</source>
         <translation>Largeur de la ligne</translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location/>
         <source> px</source>
         <translation> px</translation>
     </message>
     <message>
-        <location line="+15"/>
+        <location/>
         <source>Animation</source>
         <translation>Animation</translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location/>
         <source> ° / tick</source>
         <translation> ° / tique</translation>
     </message>
     <message>
-        <location line="+15"/>
+        <location/>
         <source>Debug</source>
         <translation>Débogage</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Show bounding spheres</source>
         <translation>Montre les sphères de délimitation</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location/>
         <source>Anti-Aliasing</source>
         <translation>Anti-crénelage</translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location/>
         <source>Off</source>
         <translation>Off</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location/>
         <source>Medium</source>
         <translation>Moyen</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location/>
         <source>High</source>
         <translation>Haut</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location/>
         <source>Very high</source>
         <translation>Très élevé</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location/>
         <source>Lighting</source>
         <translation>Éclairage</translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location/>
         <source>Enable</source>
         <translation>Activer</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Realistic Lighting</source>
         <translation>Éclairage réaliste</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Brightness</source>
         <translation>Luminosité</translation>
     </message>
     <message>
-        <location line="+45"/>
+        <location/>
         <source>Ambient Occlusion</source>
         <translation>Occlusion ambiante</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location/>
         <source>Strength</source>
         <translation>La force</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location/>
         <source>Softness</source>
         <translation>Douceur</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location/>
         <source>Distance</source>
         <translation>Distance</translation>
     </message>
     <message>
-        <location line="+70"/>
+        <location/>
         <source>Materials</source>
         <translation>Matériaux</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location/>
         <source>Reflections</source>
         <translation>Réflexions</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location/>
         <source>Metalness</source>
         <translation>Le métal</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Roughness</source>
         <translation>Rugosité</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Plain</source>
         <translation>Plaine</translation>
     </message>
     <message>
-        <location line="+39"/>
+        <location/>
         <source>Chrome</source>
         <translation>Chrome</translation>
     </message>
     <message>
-        <location line="+39"/>
+        <location/>
         <source>Metallic</source>
         <translation>Métallique</translation>
     </message>
     <message>
-        <location line="+39"/>
+        <location/>
         <source>Pearl</source>
         <translation>Perle</translation>
     </message>
@@ -6079,10 +4868,6 @@ Clic droit Menu</translation>
         <translation>Ctrl+2</translation>
     </message>
     <message>
-        <source>Ctrl+3</source>
-        <translation type="vanished">Ctrl+3</translation>
-    </message>
-    <message>
         <location line="+213"/>
         <source>Item type:</source>
         <translation>Type d&apos;article:</translation>
@@ -6093,17 +4878,9 @@ Clic droit Menu</translation>
         <translation>Filtre</translation>
     </message>
     <message>
-        <source>List</source>
-        <translation type="vanished">Liste</translation>
-    </message>
-    <message>
         <location line="+21"/>
         <source>List with Images</source>
         <translation>Liste avec images</translation>
-    </message>
-    <message>
-        <source>Switch to the item&apos;s category</source>
-        <translation type="vanished">Basculer dans la catégorie de l&apos;article</translation>
     </message>
     <message>
         <location line="+438"/>
@@ -6325,51 +5102,51 @@ Clic droit Menu</translation>
 <context>
     <name>SetToPriceGuideDialog</name>
     <message>
-        <location filename="../src/desktop/settopriceguidedialog.ui" line="+14"/>
+        <location filename="../src/desktop/settopriceguidedialog.ui"/>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="+11"/>
         <source>Set To Price Guide</source>
         <translation>Fixer au guide des prix</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location/>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="+41"/>
         <source>The prices of all selected items will be set to Price Guide values.&lt;br /&gt;&lt;br /&gt;Select which part of the price guide should be used:</source>
         <translation>Les prix des articles sélectionnés vont être fixés aux valeurs du guide des prix.&lt;br /&gt;&lt;br /&gt;Choisissez quelle partie du guide des prix doit être utilisée:</translation>
     </message>
     <message>
-        <location line="+43"/>
+        <location/>
         <source>If no price-guide data is available:</source>
         <translation>Si aucune donnée du guide des prix n&apos;est disponible&#x202f;:</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Don&apos;t change the lot price</source>
         <translation>Ne change pas le prix du lot</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location/>
         <source>Set the lot price to 0</source>
         <translation>Fixe le prix du lot à 0</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Just set a red marker on the lot</source>
         <translation>Il suffit de placer un marqueur rouge sur le terrain</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location/>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="+62"/>
         <source>Advanced options</source>
         <translation>Options avancées</translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location/>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="+11"/>
         <source>Only use these options if you know what you are doing!</source>
         <translation>N&apos;utilise ces options que si tu sais ce que tu fais&#x202f;!</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <location filename="../src/mobile/SetToPriceGuideDialog.qml" line="+7"/>
         <source>Download even if already in cache.</source>
         <translation>Télécharge-le même s&apos;il est déjà dans le cache.</translation>
@@ -6419,84 +5196,84 @@ Clic droit Menu</translation>
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="+14"/>
+        <location filename="../src/desktop/settingsdialog.ui"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+13"/>
         <source>Settings</source>
         <translation>Options</translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+50"/>
         <source>Language</source>
         <translation>Langue</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+16"/>
         <source>Weights</source>
         <translation>Poids</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+9"/>
         <source>Metric (g)</source>
         <translation>Métrique (g)</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+1"/>
         <source>Imperial (oz)</source>
         <translation>Impérial (oz)</translation>
     </message>
     <message>
-        <location line="+48"/>
+        <location/>
         <source>Reload cross rates from the ECB</source>
         <translation>Recharge les taux croisés de la BCE</translation>
     </message>
     <message>
-        <location line="+196"/>
+        <location/>
         <source>Interface</source>
         <translation>Interface</translation>
     </message>
     <message>
-        <location line="-178"/>
+        <location/>
         <source>Document Directory</source>
         <translation>Répertoire des documents</translation>
     </message>
     <message>
-        <location line="+57"/>
+        <location/>
         <source>Restore the saved documents from the previous session</source>
         <translation>Restaure les documents sauvegardés lors de la session précédente</translation>
     </message>
     <message>
-        <location line="-21"/>
+        <location/>
         <source>On export</source>
         <translation>À l&apos;exportation</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Open a Web-Browser window when exporting to the clipboard</source>
         <translation>Ouvrir une fenêtre de navigateur Web lors de l&apos;exportation vers le presse-papiers</translation>
     </message>
     <message>
-        <location line="+649"/>
+        <location/>
         <source>BrickLink database, if older than</source>
         <translation>La base de données BrickLink, si elle est plus ancienne que</translation>
     </message>
     <message>
-        <location line="-108"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="-61"/>
         <source>BrickLink</source>
         <translation>BrickLink</translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+177"/>
         <source>Username</source>
         <translation>Nom d&apos;utilisateur</translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+22"/>
         <source>Password</source>
         <translation>Mot de passe</translation>
@@ -6508,147 +5285,144 @@ Clic droit Menu</translation>
         <translation>Ton nom d&apos;utilisateur est requis ici - pas ton adresse e-mail.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="+219"/>
+        <location filename="../src/desktop/settingsdialog.ui"/>
         <source>LDraw</source>
         <translation>LDraw</translation>
     </message>
     <message>
-        <location line="-879"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="-121"/>
         <source>Default currency</source>
         <translation>Devise par défaut</translation>
     </message>
     <message>
-        <location line="-63"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="-71"/>
         <source>General</source>
         <translation>Généralités</translation>
     </message>
     <message>
-        <location line="+117"/>
+        <location/>
         <source>Parting out items</source>
         <translation>Se séparer d&apos;objets</translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location/>
         <source>Ask the user</source>
         <translation>Demande à l&apos;utilisateur</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location/>
         <source>Always replace the item being parted out</source>
         <translation>Remplace toujours l&apos;objet mis au rebut</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location/>
         <source>Always part out to a new document</source>
         <translation>Toujours se séparer d&apos;un nouveau document</translation>
     </message>
     <message>
-        <location line="+36"/>
+        <location/>
         <source>Modifications</source>
         <translation>Modifications</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Visual changes modify the document</source>
         <translation>Les changements visuels modifient le document</translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location/>
         <source>When selected, the document is marked as modified just by sorting, filtering or changing the column layout.</source>
         <translation>Lorsqu&apos;il est sélectionné, le document est marqué comme modifié simplement en le triant, en le filtrant ou en changeant la disposition des colonnes.</translation>
     </message>
     <message>
-        <location line="-49"/>
+        <location/>
         <source>On startup</source>
         <translation>Au démarrage</translation>
     </message>
     <message>
-        <location line="+64"/>
+        <location/>
         <source>On crashes</source>
         <translation>Sur les accidents</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Send anonymous crash reports</source>
         <translation>Envoie des rapports anonymes sur les accidents</translation>
     </message>
     <message>
-        <location line="+127"/>
+        <location/>
         <source>Icon size</source>
         <translation>Taille de l&apos;icône</translation>
     </message>
     <message>
-        <location line="-44"/>
-        <location line="+26"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+120"/>
         <source>System default</source>
         <translation>Défaut du système</translation>
     </message>
     <message>
-        <location line="-34"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="-7"/>
         <source>Theme</source>
         <translation>Thème</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+8"/>
         <source>Light</source>
         <translation>Lumière</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+1"/>
         <source>Dark</source>
         <translation>Sombre</translation>
     </message>
     <message>
-        <location line="+21"/>
-        <location line="+311"/>
+        <location/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+17"/>
         <source>Small</source>
         <translation>Petit</translation>
     </message>
     <message>
-        <location line="-306"/>
+        <location/>
         <source>Big</source>
         <translation>Grand</translation>
     </message>
     <message>
-        <location line="+108"/>
+        <location/>
         <source>Font size</source>
         <translation>Taille de la police</translation>
     </message>
     <message>
-        <location line="-164"/>
+        <location/>
         <source>Global</source>
         <translation>Global</translation>
     </message>
     <message>
-        <location line="+145"/>
-        <location line="+100"/>
+        <location/>
         <source>Reset to 100%</source>
         <translation>Réinitialisation à 100%</translation>
     </message>
     <message>
-        <location line="+64"/>
+        <location/>
         <source>The quick brown fox jumps over the lazy dog.</source>
         <translation>Le renard brun rapide saute par-dessus le chien paresseux.</translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location/>
         <source>Document Views</source>
         <translation>Vues du document</translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location/>
         <source>Column spacing</source>
         <translation>Espacement des colonnes</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location/>
         <source>Medium</source>
         <translation>Moyen</translation>
     </message>
@@ -6659,120 +5433,117 @@ Clic droit Menu</translation>
         <translation>La longueur maximale du mot de passe de BrickLink est de 15.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="+293"/>
+        <location filename="../src/desktop/settingsdialog.ui"/>
         <source>Library</source>
         <translation>Bibliothèque</translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location/>
         <source>Let BrickStore manage its own LDraw parts library</source>
         <translation>Laisse BrickStore gérer sa propre bibliothèque de pièces LDraw</translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location/>
         <source>This is the preferred option, as BrickStore will keep this installation up-to-date.</source>
         <translation>C&apos;est l&apos;option préférée, car BrickStore maintiendra cette installation à jour.</translation>
     </message>
     <message>
-        <location line="+56"/>
+        <location/>
         <source>Use this option, if you need custom or unofficial parts</source>
         <translation>Utilise cette option, si tu as besoin de pièces personnalisées ou non officielles.</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location/>
         <source>Status</source>
         <translation>Statut</translation>
     </message>
     <message>
-        <location line="+31"/>
+        <location/>
         <source>Update</source>
         <translation>Mise à jour</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location/>
         <source>Now</source>
         <translation>Maintenant</translation>
     </message>
     <message>
-        <location line="-786"/>
-        <location line="+825"/>
+        <location/>
         <source>Toolbar</source>
         <translation>Barre d&apos;outils</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location/>
         <source>Customize the main toolbar using drag-and-drop</source>
         <translation>Personnalise la barre d&apos;outils principale à l&apos;aide de la fonction glisser-déposer.</translation>
     </message>
     <message>
-        <location line="+108"/>
+        <location/>
         <source>Keyboard</source>
         <translation>Clavier</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location/>
         <source>Customize the global keyboard shortcuts</source>
         <translation>Personnalise les raccourcis clavier globaux</translation>
     </message>
     <message>
-        <location line="-107"/>
-        <location line="+114"/>
+        <location/>
         <source>Filter</source>
         <translation>Filtre</translation>
     </message>
     <message>
-        <location line="-1028"/>
+        <location/>
         <source>&lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;See here&lt;/a&gt; for more information.</source>
         <translation>&lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;Voir ici&lt;/a&gt; pour plus d&apos;informations.</translation>
     </message>
     <message>
-        <location line="+378"/>
+        <location/>
         <source>Row height</source>
         <translation>Hauteur de la rangée</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location/>
         <source>Editable via scroll wheel and zoom gesture</source>
         <translation>Modifiable via la molette de défilement et le geste de zoom</translation>
     </message>
     <message>
-        <location line="+92"/>
+        <location/>
         <source>If you set a password, it is saved in your system: it is just scrambled, but &lt;b&gt;not&lt;/b&gt; encrypted, because BrickStore needs to send this password to the BrickLink server when downloading data on your behalf.&lt;br&gt;&lt;br&gt;If you do not want to save your password, then just leave this field empty and you will be asked to enter your password the first time BrickStore is downloading data on your behalf from BrickLink after starting.</source>
         <translation>Si tu définis un mot de passe, il est enregistré dans ton système&#x202f;: il est juste brouillé, mais &lt;b&gt;non&lt;/b&gt; crypté, car BrickStore doit envoyer ce mot de passe au serveur BrickLink lorsqu&apos;il télécharge des données en ton nom.&lt;br&gt;&lt;br&gt;Si tu ne veux pas enregistrer ton mot de passe, il te suffit de laisser ce champ vide et il te sera demandé de saisir ton mot de passe la première fois que BrickStore téléchargera des données en ton nom à partir de BrickLink après le démarrage.</translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location/>
         <source>Price guide</source>
         <translation>Guide des prix</translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location/>
         <source>Values</source>
         <translation>Valeurs</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location/>
         <source>Source</source>
         <translation>Source</translation>
     </message>
     <message>
-        <location line="+243"/>
+        <location/>
         <source>Use an existing LDraw installation</source>
         <translation>Utilise une installation LDraw existante</translation>
     </message>
     <message>
-        <location line="+124"/>
+        <location/>
         <source>Updates are downloaded and applied automatically in the background. Please only start a manual update, if the automatic one fails.</source>
         <translation>Les mises à jour sont téléchargées et appliquées automatiquement en arrière-plan. Ne lance une mise à jour manuelle que si la mise à jour automatique échoue.</translation>
     </message>
     <message>
-        <location line="+125"/>
-        <location line="+76"/>
+        <location/>
         <source>Reset all</source>
         <translation>Réinitialiser tout</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location/>
         <source>Reset</source>
         <translation>Remise à zéro</translation>
     </message>
@@ -6782,34 +5553,32 @@ Clic droit Menu</translation>
         <translation>Taille de l&apos;image de l&apos;article</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="-561"/>
+        <location filename="../src/desktop/settingsdialog.ui"/>
         <source>Automatically update cached data</source>
         <translation>Mettre à jour automatiquement les données mises en cache</translation>
     </message>
     <message>
-        <location line="+21"/>
-        <location line="+23"/>
-        <location line="+23"/>
+        <location/>
         <source> days</source>
         <translation> jours</translation>
     </message>
     <message>
-        <location line="-30"/>
+        <location/>
         <source>BrickLink Pictures, if older than</source>
         <translation>BrickLink Pictures, si elle est plus ancienne que</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location/>
         <source>BrickLink Price Guides, if older than</source>
         <translation>Guides de prix BrickLink, s&apos;ils sont plus anciens que</translation>
     </message>
     <message>
-        <location line="+65"/>
+        <location/>
         <source>Reset to defaults</source>
         <translation>Rétablir les valeurs par défaut</translation>
     </message>
     <message>
-        <location line="-213"/>
+        <location/>
         <source>BrickLink Login</source>
         <translation>Authentification BrickLink</translation>
     </message>
@@ -6865,10 +5634,6 @@ Clic droit Menu</translation>
         <translation>Emplacement du répertoire LDraw</translation>
     </message>
     <message>
-        <source>The specified document directory does not exist or is not read- and writeable.&lt;br /&gt;The document directory setting will not be changed.</source>
-        <translation type="vanished">Le dossier des documents spécifié n&apos;existe pas ou bien n&apos;est pas autorisé en lecture/écriture&lt;br /&gt;Le paramètre du dossier des documents ne sera pas changé.</translation>
-    </message>
-    <message>
         <location filename="../src/mobile/SettingsDialog.qml" line="-148"/>
         <source>UI</source>
         <translation>UI</translation>
@@ -6899,7 +5664,7 @@ Clic droit Menu</translation>
         <translation>Guide des prix</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="-34"/>
+        <location filename="../src/desktop/settingsdialog.ui"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="-84"/>
         <source>Large</source>
         <translation>Grandes</translation>
@@ -6932,46 +5697,9 @@ Clic droit Menu</translation>
     </message>
 </context>
 <context>
-    <name>StatusBar</name>
-    <message numerus="yes">
-        <source>%n Differences(s)</source>
-        <translation type="vanished">
-            <numerusform>%n différence</numerusform>
-            <numerusform>%n différences</numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <source>%n Error(s)</source>
-        <translation type="vanished">
-            <numerusform>%n erreur</numerusform>
-            <numerusform>%n erreurs</numerusform>
-        </translation>
-    </message>
-    <message>
-        <source>Items</source>
-        <translation type="vanished">Items</translation>
-    </message>
-    <message>
-        <source>Filter</source>
-        <translation type="vanished">Filtre</translation>
-    </message>
-    <message>
-        <source>Go to the next difference</source>
-        <translation type="vanished">Aller à la différence suivante</translation>
-    </message>
-    <message>
-        <source>Go to the next error</source>
-        <translation type="vanished">Aller à l&apos;erreur suivante</translation>
-    </message>
-    <message>
-        <source>Currency:</source>
-        <translation type="vanished">Monnaie:</translation>
-    </message>
-</context>
-<context>
     <name>SystemInfoDialog</name>
     <message>
-        <location filename="../src/desktop/systeminfodialog.ui" line="+23"/>
+        <location filename="../src/desktop/systeminfodialog.ui"/>
         <source>Use the following to provide more detailed information about your system to bug reports:</source>
         <translation>Utilise les éléments suivants pour fournir des informations plus détaillées sur ton système aux rapports de bogues&#x202f;:</translation>
     </message>
@@ -6981,7 +5709,7 @@ Clic droit Menu</translation>
         <translation>Copier dans le presse-papiers</translation>
     </message>
     <message>
-        <location filename="../src/desktop/systeminfodialog.ui" line="-9"/>
+        <location filename="../src/desktop/systeminfodialog.ui"/>
         <location filename="../src/mobile/SystemInfoDialog.qml" line="+10"/>
         <source>System Information</source>
         <translation>Informations sur le système</translation>
@@ -7000,11 +5728,7 @@ Clic droit Menu</translation>
 <context>
     <name>TaskInfoWidget</name>
     <message>
-        <source>min.</source>
-        <translation type="vanished">min.</translation>
-    </message>
-    <message>
-        <location filename="../src/desktop/taskwidgets.cpp" line="+247"/>
+        <location filename="../src/desktop/taskwidgets.cpp" line="+251"/>
         <source>Multiple lots selected</source>
         <translation>Lots multiples sélectionnés</translation>
     </message>
@@ -7013,31 +5737,11 @@ Clic droit Menu</translation>
         <source>Document statistics</source>
         <translation>Statistiques sur le document</translation>
     </message>
-    <message>
-        <source>Lots:</source>
-        <translation type="vanished">Lots:</translation>
-    </message>
-    <message>
-        <source>Items:</source>
-        <translation type="vanished">Items:</translation>
-    </message>
-    <message>
-        <source>Value:</source>
-        <translation type="vanished">Prix:</translation>
-    </message>
-    <message>
-        <source>Cost:</source>
-        <translation type="vanished">Coût:</translation>
-    </message>
-    <message>
-        <source>Weight:</source>
-        <translation type="vanished">Poids:</translation>
-    </message>
 </context>
 <context>
     <name>TaskInventoryWidget</name>
     <message>
-        <location line="+95"/>
+        <location line="+96"/>
         <source>Add Item...</source>
         <translation>Ajouter un article...</translation>
     </message>
@@ -7078,6 +5782,14 @@ Clic droit Menu</translation>
     </message>
 </context>
 <context>
+    <name>UIHelpers</name>
+    <message>
+        <location filename="../src/common/uihelpers.cpp" line="+72"/>
+        <source>All Files</source>
+        <translation>Tous les fichiers</translation>
+    </message>
+</context>
+<context>
     <name>UndoAction</name>
     <message>
         <location filename="../src/desktop/mainwindow_p.h" line="+262"/>
@@ -7107,49 +5819,6 @@ Clic droit Menu</translation>
     </message>
 </context>
 <context>
-    <name>UpdateDatabase</name>
-    <message>
-        <source>Updating BrickLink Database</source>
-        <translation type="vanished">Mise à jour de la base de données BrickLink</translation>
-    </message>
-    <message>
-        <source>Download: %p</source>
-        <translation type="vanished">Téléchargement: %p</translation>
-    </message>
-    <message>
-        <source>Update Database</source>
-        <translation type="obsolete">Mettre à jour la base de données</translation>
-    </message>
-    <message>
-        <source>Finished.</source>
-        <translation type="vanished">Terminée.</translation>
-    </message>
-    <message>
-        <source>Could not load the new database.</source>
-        <translation type="vanished">N&apos;est pas arrivé à charger la nouvelle base de données.</translation>
-    </message>
-    <message>
-        <source>Downloaded file is empty.</source>
-        <translation type="vanished">Le fichier téléchargé est vide.</translation>
-    </message>
-    <message>
-        <source>Could not read downloaded file: %1</source>
-        <translation type="vanished">N&apos;est pas arrivé à lire le fichier téléchargé: %1</translation>
-    </message>
-    <message>
-        <source>Could not write to database file: %1</source>
-        <translation type="vanished">N&apos;est pas arrivé à écrire le fichier de la base de données: %1</translation>
-    </message>
-    <message>
-        <source>Could not initialize the LZMA decompressor</source>
-        <translation type="vanished">N&apos;est pas arrivé à initialiser le décompresseur LZMA</translation>
-    </message>
-    <message>
-        <source>Decompressing database</source>
-        <translation type="vanished">Décompression de la base de données</translation>
-    </message>
-</context>
-<context>
     <name>View</name>
     <message>
         <location filename="../src/mobile/View.qml" line="+16"/>
@@ -7171,14 +5840,6 @@ Clic droit Menu</translation>
         <location line="+12"/>
         <source>CP</source>
         <translation>CP</translation>
-    </message>
-    <message>
-        <source>Overwrite the currently selected items?</source>
-        <translation type="vanished">Ecraser les articles actuellement sélectionnés?</translation>
-    </message>
-    <message>
-        <source>Enter the new price for all selected items:</source>
-        <translation type="vanished">Entrer la nouvelle prix pour les articles sélectionnés:</translation>
     </message>
     <message>
         <location filename="../src/desktop/view.cpp" line="-243"/>
@@ -7207,69 +5868,13 @@ Clic droit Menu</translation>
         <source>Parted out %n item(s)</source>
         <translation>
             <numerusform></numerusform>
-            <numerusform>A paré %n articles</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
         <location line="+216"/>
         <source>Printing failed.</source>
         <translation>L&apos;impression a échoué.</translation>
-    </message>
-    <message>
-        <source>Multiply the quantities of all selected items with this factor.</source>
-        <translation type="vanished">Multiplier les quantités des articles sélectionnés par ce facteur.</translation>
-    </message>
-    <message>
-        <source>Loading price guide data from disk</source>
-        <translation type="vanished">Chargement des guides des prix depuis le disque</translation>
-    </message>
-    <message>
-        <source>Downloading price guide data from BrickLink</source>
-        <translation type="vanished">Téléchargement des guides des prix depuis BrickLink</translation>
-    </message>
-    <message>
-        <source>x</source>
-        <translation type="vanished">x</translation>
-    </message>
-    <message>
-        <source>Set sale in percent for the selected items (this will &lt;u&gt;not&lt;/u&gt; change any prices).&lt;br /&gt;Negative values are also allowed.</source>
-        <translation type="vanished">Fixez la remise en pourcents pour les articles sélectionnés (ceci ne va &lt;u&gt;pas&lt;/u&gt; changer les prix).&lt;br /&gt;Les valeurs négatives sont aussi autorisées.</translation>
-    </message>
-    <message>
-        <source>%</source>
-        <translation type="vanished">%</translation>
-    </message>
-    <message>
-        <source>Enter the new quantities for all selected items:</source>
-        <translation type="vanished">Entrer la nouvelle quantité pour les articles sélectionnés:</translation>
-    </message>
-    <message>
-        <source>Enter the new remark for all selected items:</source>
-        <translation type="vanished">Entrer la nouvelle remarque pour les articles sélectionnés:</translation>
-    </message>
-    <message>
-        <source>Enter the text, that should be added to the remarks of all selected items:</source>
-        <translation type="vanished">Entrer le texte qui doit être ajouté aux remarques des articles sélectionnés:</translation>
-    </message>
-    <message>
-        <source>Enter the text, that should be removed from the remarks of all selected items:</source>
-        <translation type="vanished">Entrer le texte qui doit être enlevé des remarques des articles sélectionnés:</translation>
-    </message>
-    <message>
-        <source>Enter the new comment for all selected items:</source>
-        <translation type="vanished">Entrer le nouveau commentaire pour les articles sélectionnés:</translation>
-    </message>
-    <message>
-        <source>Enter the text, that should be added to the comments of all selected items:</source>
-        <translation type="vanished">Entrer le texte qui doit être ajouté aux commentaires des articles sélectionnés:</translation>
-    </message>
-    <message>
-        <source>Enter the text, that should be removed from the comments of all selected items:</source>
-        <translation type="vanished">Entrer le texte qui doit être enlevé des commentaires des articles sélectionnés:</translation>
-    </message>
-    <message>
-        <source>Reserve all selected items for this specific buyer (BrickLink username):</source>
-        <translation type="vanished">Réserver les articles sélectionnés à cet acheteur (nom d&apos;utilisateur BrickLink):</translation>
     </message>
     <message>
         <location line="-532"/>
@@ -7287,45 +5892,9 @@ Clic droit Menu</translation>
         <translation>Inventorier les articles sélectionnés dans le document courant afin de les remplacer?</translation>
     </message>
     <message>
-        <source>The document %1 has been modified.</source>
-        <translation type="vanished">Le document %1 a été modifié.</translation>
-    </message>
-    <message>
-        <source>Do you want to save your changes?</source>
-        <translation type="vanished">Voulez-vous enregistrer les changements?</translation>
-    </message>
-    <message>
         <location line="+389"/>
         <source>Page %1/%2</source>
         <translation>Page %1/%2</translation>
-    </message>
-    <message>
-        <source>Save File as</source>
-        <translation type="vanished">Enregistrer le fichier sous</translation>
-    </message>
-    <message>
-        <source>Failed to open file %1 for writing.</source>
-        <translation type="vanished">Echec lors de l&apos;ouverture pour écriture du fichier %1.</translation>
-    </message>
-    <message>
-        <source>Failed to save data to file %1.</source>
-        <translation type="vanished">Echec lors de l&apos;enregistrement des données du fichier %1.</translation>
-    </message>
-    <message>
-        <source>Export File</source>
-        <translation type="vanished">Exporter un fichier</translation>
-    </message>
-    <message>
-        <source>There are problems: %1Do you really want to export this list?</source>
-        <translation type="vanished">Il y a des erreurs non résolues: %1Voulez-vous vraiment exporter cette liste?</translation>
-    </message>
-    <message>
-        <source>Enter the ID number of Wanted List (leave blank for the default Wanted List)</source>
-        <translation type="vanished">Entrez le numéro d&apos;ID de la liste des articles désirés (laisser vide pour liste par défaut)</translation>
-    </message>
-    <message>
-        <source>This list contains items with errors.&lt;br /&gt;&lt;br /&gt;Do you really want to export this list?</source>
-        <translation type="vanished">Cette liste contient des articles avec des erreurs.&lt;br /&gt;&lt;br /&gt;Voulez-vous vraiment exporter cette liste?</translation>
     </message>
 </context>
 <context>
@@ -7420,13 +5989,6 @@ Clic droit Menu</translation>
     </message>
 </context>
 <context>
-    <name>WelcomeButton</name>
-    <message>
-        <source>Shortcut:</source>
-        <translation type="vanished">Raccourci:</translation>
-    </message>
-</context>
-<context>
     <name>WelcomeWidget</name>
     <message>
         <location filename="../src/desktop/welcomewidget.cpp" line="+110"/>
@@ -7499,33 +6061,6 @@ Clic droit Menu</translation>
         <location filename="../src/desktop/mainwindow_p.h" line="-257"/>
         <source>No windows</source>
         <translation>Pas de fenêtres</translation>
-    </message>
-</context>
-<context>
-    <name>Workspace</name>
-    <message>
-        <source>Alt+%1</source>
-        <extracomment>Shortcut to activate window 0-9</extracomment>
-        <translation type="vanished">Alt+%1</translation>
-    </message>
-    <message>
-        <source>Show a list of all open documents</source>
-        <translation type="vanished">Afficher une liste des documents ouverts</translation>
-    </message>
-    <message>
-        <source>Go to the Quickstart page</source>
-        <translation type="vanished">Aller à la page de démarrage rapide</translation>
-    </message>
-    <message>
-        <source>Go back to the current document</source>
-        <translation type="vanished">Revenir au document courant</translation>
-    </message>
-</context>
-<context>
-    <name>main</name>
-    <message>
-        <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
-        <translation type="vanished">N&apos;a pas trouvé de paramètres d&apos;authentification BrickLink valides.&lt;br /&gt;&lt;br /&gt;Voulez-vous changer ces paramètres maintenant?</translation>
     </message>
 </context>
 </TS>
