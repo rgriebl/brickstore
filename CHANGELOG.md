@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+## [2024.2.1] - 2024-02-14
+
+This is an important bug-fix release, if you are using **Brickognize.com**: older versions of BrickStore can flood their servers with pointless, duplicate requests.
+
+Other noteworthy fixes:
+- Camera access in Linux AppImages and Snaps is restored.
+- A few long-standing, but infrequent crashes on database updates and shutdown have finally been fixed.
+- Importing LDraw or Studio models with unknown item ids would merge lots, regardless of color.
+
+
 ## [2024.1.4] - 2024-01-21
 
 Fix for Webcams only showing black on some machines.
@@ -633,7 +644,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.1.4...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.2.1...HEAD
+[2024.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.2.1
 [2024.1.4]: https://github.com/rgriebl/brickstore/releases/tag/v2024.1.4
 [2024.1.3]: https://github.com/rgriebl/brickstore/releases/tag/v2024.1.3
 [2024.1.2]: https://github.com/rgriebl/brickstore/releases/tag/v2024.1.2
