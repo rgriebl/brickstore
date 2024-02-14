@@ -101,10 +101,15 @@ QSize FlowLayout::sizeHint() const
         if (m_mode == VerticalOnly) {
             s.rwidth() = std::max(s.width(), sh.width());
             s.rheight() += sh.height();
+            int vspace = verticalSpacing();
+            if (vspace == -1) {
+                vspace = item->widget()->style()->layoutSpacing(QSizePolicy::PushButton,
+                                                                QSizePolicy::PushButton,
+                                                                Qt::Vertical);
+            }
+            s.rheight() += vspace;
         }
     }
-    if (m_mode == VerticalOnly)
-        s.rheight() += (m_items.count() - 1) * verticalSpacing();
 
     const auto margins = contentsMargins();
     return s + QSize(margins.left() + margins.right(), margins.top() + margins.bottom());
