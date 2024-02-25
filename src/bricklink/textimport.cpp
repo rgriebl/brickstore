@@ -459,14 +459,23 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
             co.m_altid = matchId;
             co.m_cpart = counterPart;
 
-            // if this itemid was involved in a changelog entry after the last time we downloaded
-            // the inventory, we need to reload
+            // if this itemid or color was involved in a changelog entry after the last time we
+            // downloaded the inventory, we need to reload
             QByteArray itemTypeAndId = itemTypeId + itemId;
-            auto [lit, uit] = std::equal_range(m_db->m_itemChangelog.cbegin(), m_db->m_itemChangelog.cend(), itemTypeAndId);
-            for (auto it = lit; it != uit; ++it) {
+            const auto irange = std::equal_range(m_db->m_itemChangelog.cbegin(), m_db->m_itemChangelog.cend(), itemTypeAndId);
+            for (auto it = irange.first; it != irange.second; ++it) {
                 if (it->date() > fileDate) {
                     throw Exception("Item id %1 changed on %2 (last download: %3)")
                         .arg(QString::fromLatin1(itemTypeAndId))
+                        .arg(it->date().toString(u"yyyy/MM/dd"))
+                        .arg(fileDate.toString(u"yyyy/MM/dd"));
+                }
+            }
+            const auto crange = std::equal_range(m_db->m_colorChangelog.cbegin(), m_db->m_colorChangelog.cend(), colorId);
+            for (auto it = crange.first; it != crange.second; ++it) {
+                if (it->date() > fileDate) {
+                    throw Exception("Color id %1 changed on %2 (last download: %3)")
+                        .arg(colorId)
                         .arg(it->date().toString(u"yyyy/MM/dd"))
                         .arg(fileDate.toString(u"yyyy/MM/dd"));
                 }
