@@ -21,7 +21,6 @@
 
 #include "bricklink/core.h"
 #include "bricklink/database.h"
-#include "bricklink/dimensions.h"
 
 #include "lzma/bs_lzma.h"
 
@@ -244,7 +243,6 @@ void Database::read(const QString &fileName)
         std::vector<Item>                items;
         std::vector<ItemChangeLogEntry>  itemChangelog;
         std::vector<ColorChangeLogEntry> colorChangelog;
-        std::vector<PartColorCode>       pccs;
         std::vector<Relationship>        relationships;
         std::vector<RelationshipMatch>   relationshipMatches;
         uint                             latestChangelogId = 0;
@@ -430,7 +428,6 @@ void Database::read(const QString &fileName)
                 { u"Categories"_qs,   loc.toString(categories.size()).rightJustified(10) },
                 { u"Colors"_qs,       loc.toString(colors.size()).rightJustified(10) },
                 { u"LDraw Colors"_qs, loc.toString(ldrawExtraColors.size()).rightJustified(10) },
-                { u"PCCs"_qs,         loc.toString(pccs.size()).rightJustified(10) },
                 { u"Items"_qs,        loc.toString(items.size()).rightJustified(10) },
             };
 #if defined(QT_DEBUG)

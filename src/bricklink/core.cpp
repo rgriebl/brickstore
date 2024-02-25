@@ -1,8 +1,6 @@
 // Copyright (C) 2004-2024 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <cstdio>
-#include <cstdlib>
 #include <array>
 
 #include <QCoreApplication>
@@ -28,7 +26,6 @@
 #include "utility/persistentcookiejar.h"
 
 #include "bricklink/category.h"
-#include "bricklink/changelogentry.h"
 #include "bricklink/color.h"
 #include "bricklink/core.h"
 #include "bricklink/item.h"
