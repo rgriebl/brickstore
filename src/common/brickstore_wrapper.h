@@ -47,7 +47,6 @@ class QmlDocument : public QAbstractProxyModel
     Q_PRIVATE_PROPERTY(model(), bool sorted READ isSorted NOTIFY isSortedChanged FINAL)
     Q_PRIVATE_PROPERTY(model(), bool filtered READ isFiltered NOTIFY isFilteredChanged FINAL)
     Q_PRIVATE_PROPERTY(model(), QString currencyCode READ currencyCode NOTIFY currencyCodeChanged FINAL)
-    Q_PRIVATE_PROPERTY(model(), int lotCount READ lotCount NOTIFY lotCountChanged FINAL)
     Q_PRIVATE_PROPERTY(model(), bool modified READ isModified NOTIFY modificationChanged FINAL)
     Q_PRIVATE_PROPERTY(doc(), QString title READ title WRITE setTitle NOTIFY titleChanged FINAL)
     Q_PRIVATE_PROPERTY(doc(), QString filePath READ filePath WRITE setFilePath NOTIFY filePathChanged FINAL)
@@ -60,6 +59,8 @@ class QmlDocument : public QAbstractProxyModel
     Q_PRIVATE_PROPERTY(doc(), bool restoredFromAutosave READ isRestoredFromAutosave CONSTANT FINAL)
     Q_PRIVATE_PROPERTY(doc(), QItemSelectionModel *selectionModel READ selectionModel CONSTANT FINAL)
 
+    Q_PROPERTY(int lotCount READ lotCount NOTIFY lotCountChanged FINAL)
+    Q_PROPERTY(int visibleLotCount READ visibleLotCount NOTIFY visibleLotCountChanged FINAL)
     Q_PROPERTY(QVariantList sortColumns READ qmlSortColumns NOTIFY qmlSortColumnsChanged FINAL)
     Q_PROPERTY(QmlDocumentLots *lots READ qmlLots CONSTANT FINAL)
     Q_PROPERTY(QList<BrickLink::QmlLot> selectedLots READ qmlSelectedLots NOTIFY qmlSelectedLotsChanged FINAL)
@@ -88,6 +89,11 @@ public:
     QmlDocumentLots *qmlLots();
     QList<BrickLink::QmlLot> qmlSelectedLots();
 
+    int lotCount() const;
+    Q_SIGNAL void lotCountChanged(int newLotCount);
+    int visibleLotCount() const;
+    Q_SIGNAL void visibleLotCountChanged(int newVisibleLotCount);
+
     Q_INVOKABLE void sort(int column, Qt::SortOrder order) override;
     Q_INVOKABLE void sortAdditionally(int column, Qt::SortOrder order);
 
@@ -113,7 +119,6 @@ signals:
     void isSortedChanged(bool b);
     void isFilteredChanged(bool b);
     void currencyCodeChanged(const QString &ccode);
-    void lotCountChanged(int lotCount);
     void modificationChanged(bool modified);
     void filePathChanged(const QString &filePath);
     void fileNameChanged(const QString &fileName);
@@ -130,6 +135,7 @@ signals:
 
 private:
     DocumentModel *model() { return m_doc->model(); }
+    const DocumentModel *model() const { return m_doc->model(); }
     Document *doc() { return m_doc; }
 
     void setDocument(Document *doc);
@@ -455,7 +461,9 @@ public:
     Q_INVOKABLE int add(BrickLink::QmlItem item, BrickLink::QmlColor color);
     Q_INVOKABLE void remove(BrickLink::QmlLot lot);
     Q_INVOKABLE void removeAt(int index);
+    Q_INVOKABLE void removeVisibleAt(int index);
     Q_INVOKABLE BrickLink::QmlLot at(int index);
+    Q_INVOKABLE BrickLink::QmlLot visibleAt(int index);
 
 private:
     DocumentModel *m_model;

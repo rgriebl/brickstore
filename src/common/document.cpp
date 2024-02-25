@@ -155,6 +155,13 @@ void ColumnLayoutCmd::undo()
 /*! \qmlproperty string Document::lotCount
     \readonly
     The number of lots in this document.
+    This count is ignoring filtering.
+*/
+/*! \qmlproperty string Document::visibleLotCount
+    \readonly
+    The number of visible lots in this document.
+    This count is after filtering: it's the the exact number of visible lots as seen in the
+    document view.
 */
 /*! \qmlproperty string Document::title
     \readonly
@@ -171,17 +178,30 @@ void ColumnLayoutCmd::undo()
     An Order object or \c null, if this document is not a BrickLink order.
 */
 /*! \qmlmethod Lot Document::lots.at(int index)
-    Returns the lot at the specified \a index.
+    Returns the lot at the specified \a index in the document.
+    This index is independent of sort order and filtering.
+*/
+/*! \qmlmethod Lot Document::lots.visibleAt(int index)
+    Returns the lot at the specified visible \a index in the document.
+    This index is taking sort order and filtering into account: it's the the exact visible index
+    as seen in the document view.
 */
 /*! \qmlmethod Document::lots.removeAt(int index)
     Removes the lot at the specified \a index from the document.
+    This index is independent of sort order and filtering.
+*/
+/*! \qmlmethod Document::lots.removeVisibleAt(int index)
+    Removes the lot at the specified visible \a index from the document.
+    This index is taking sort order and filtering into account: it's the the exact visible index
+    as seen in the document view.
 */
 /*! \qmlmethod Document::lots.remove(Lot lot)
     Removes the specified \a lot from the document.
 */
 /*! \qmlmethod int Document::lots.add(Item item, Color color)
     Adds a new lot for the given \a item and \a color combination to the document.
-    Returns the index of the newly created lot.
+    Returns the index of the newly created lot in the document.
+    This index is independent of sort order and filtering.
 */
 
 

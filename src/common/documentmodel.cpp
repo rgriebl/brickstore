@@ -2393,8 +2393,6 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
     const QModelIndexList before = persistentIndexList();
 
-    m_filteredLotIndex.clear();
-
     m_sortColumns = columns;
 
     if (!unsortedLots.isEmpty()) {
@@ -2436,7 +2434,7 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
             && (m_filteredLots.size() != m_sortedLots.size())
             && (m_filteredLots != m_sortedLots)) {
         m_filteredLots = QtConcurrent::blockingFiltered(m_sortedLots, [this](auto *lot) {
-            return m_filteredLots.contains(lot);
+            return m_filteredLotIndex.contains(lot);
         });
     } else {
         m_filteredLots = m_sortedLots;
@@ -2463,11 +2461,10 @@ void DocumentModel::filterDirect(const QVector<Filter> &filter, bool &filtered,
 {
     bool emitFilterChanged = (filter != m_filter);
     bool wasFiltered = isFiltered();
+    qsizetype filteredSizeBefore = m_filteredLots.size();
 
     emit layoutAboutToBeChanged({ }, VerticalSortHint);
     const QModelIndexList before = persistentIndexList();
-
-    m_filteredLotIndex.clear();
 
     m_filter = filter;
 
@@ -2503,6 +2500,10 @@ void DocumentModel::filterDirect(const QVector<Filter> &filter, bool &filtered,
 
     if (isFiltered() != wasFiltered)
         emit isFilteredChanged(isFiltered());
+
+    qsizetype filteredSizeNow = m_filteredLots.size();
+    if (filteredSizeBefore != filteredSizeNow)
+        emit filteredLotCountChanged(int(filteredSizeNow));
 }
 
 QByteArray DocumentModel::saveSortFilterState() const

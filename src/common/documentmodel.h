@@ -304,6 +304,7 @@ signals:
     void modificationChanged(bool);
     void currencyCodeChanged(const QString &ccode);
     void lotCountChanged(int lotCount);
+    void filteredLotCountChanged(int filteredLotCount);
     void filterChanged(const QVector<Filter> &filter);
     void sortColumnsChanged(const QVector<QPair<int, Qt::SortOrder>> &columns);
     void lastCommandWasVisualChanged(bool b);

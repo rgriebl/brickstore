@@ -353,6 +353,11 @@ QmlDocument::QmlDocument(Document *doc)
     });
     connect(doc, &Document::selectedLotsChanged,
             this, &QmlDocument::qmlSelectedLotsChanged);
+
+    connect(model(), &DocumentModel::lotCountChanged,
+            this, &QmlDocument::lotCountChanged);
+    connect(model(), &DocumentModel::filteredLotCountChanged,
+            this, &QmlDocument::visibleLotCountChanged);
 }
 
 QVariantList QmlDocument::qmlSortColumns() const
@@ -384,6 +389,16 @@ QList<BrickLink::QmlLot> QmlDocument::qmlSelectedLots()
         qmlLots << BrickLink::QmlLot(lot);
 
     return qmlLots;
+}
+
+int QmlDocument::lotCount() const
+{
+    return int(model()->lots().size());
+}
+
+int QmlDocument::visibleLotCount() const
+{
+    return int(model()->filteredLots().size());
 }
 
 void QmlDocument::sort(int column, Qt::SortOrder order)
@@ -1055,19 +1070,33 @@ void QmlDocumentLots::remove(BrickLink::QmlLot lot)
 
 void QmlDocumentLots::removeAt(int index)
 {
-    if ((index >= 0) && (index < m_model->lotCount())) {
-        Lot *lot = m_model->lots().at(index);
-        m_model->removeLot(lot);
-    }
+    const auto &lots = m_model->lots();
+    if ((index >= 0) && (index < int(lots.size())))
+        m_model->removeLot(lots.at(index));
+}
+
+void QmlDocumentLots::removeVisibleAt(int index)
+{
+    const auto &filteredLots = m_model->filteredLots();
+    if ((index >= 0) && (index < int(filteredLots.size())))
+        m_model->removeLot(filteredLots.at(index));
 }
 
 BrickLink::QmlLot QmlDocumentLots::at(int index)
 {
-    if (index < 0 || index >= m_model->lotCount())
+    const auto &lots = m_model->lots();
+    if (index < 0 || index >= int(lots.size()))
         return { };
-    return { m_model->lots().at(index), this };
+    return { lots.at(index), this };
 }
 
+BrickLink::QmlLot QmlDocumentLots::visibleAt(int index)
+{
+    const auto &filteredLots = m_model->filteredLots();
+    if (index < 0 || index >= int(filteredLots.size()))
+        return { };
+    return { filteredLots.at(index), this };
+}
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
