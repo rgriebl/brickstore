@@ -682,7 +682,8 @@ jobs:
     - name: Promote Snapcraft build to stable
       env:
         SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.UBUNTU_SNAP_LOGIN }}
+        SNAPCRAFT_HAS_TTY: "true"
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y install lxd snapcraft
-        snapcraft promote --from-channel edge --to-channel stable --yes brickstore
+        yes | snapcraft promote --from-channel edge --to-channel stable brickstore
       shell: bash
