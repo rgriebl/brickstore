@@ -139,11 +139,18 @@
             <function name="lots.removeAt" fullname="BrickStore.Document.lots.removeAt" href="qml-brickstore-document.html#lots.removeAt-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
                 <parameter type="int" name="index" default=""/>
             </function>
+            <function name="lots.removeVisibleAt" fullname="BrickStore.Document.lots.removeVisibleAt" href="qml-brickstore-document.html#lots.removeVisibleAt-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+                <parameter type="int" name="index" default=""/>
+            </function>
+            <function name="lots.visibleAt" fullname="BrickStore.Document.lots.visibleAt" href="qml-brickstore-document.html#lots.visibleAt-method" status="active" access="public" documented="true" meta="qmlmethod" type="Lot">
+                <parameter type="int" name="index" default=""/>
+            </function>
             <qmlproperty name="currencyCode" fullname="BrickStore.Document.currencyCode" href="qml-brickstore-document.html#currencyCode-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
             <qmlproperty name="fileName" fullname="BrickStore.Document.fileName" href="qml-brickstore-document.html#fileName-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
             <qmlproperty name="lotCount" fullname="BrickStore.Document.lotCount" href="qml-brickstore-document.html#lotCount-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
             <qmlproperty name="order" fullname="BrickStore.Document.order" href="qml-brickstore-document.html#order-prop" status="active" access="public" documented="true" type="Order" attached="false" writable="false"/>
             <qmlproperty name="title" fullname="BrickStore.Document.title" href="qml-brickstore-document.html#title-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
+            <qmlproperty name="visibleLotCount" fullname="BrickStore.Document.visibleLotCount" href="qml-brickstore-document.html#visibleLotCount-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="ExtensionScriptAction" qml-module-name="BrickStore" fullname="BrickStore.ExtensionScriptAction" href="qml-brickstore-extensionscriptaction.html" status="active" access="public" documented="true" groups="qml-extension" title="ExtensionScriptAction" fulltitle="ExtensionScriptAction" subtitle="" brief="Use this type to add an UI action to your extension"/>
         <qmlclass name="Item" qml-module-name="BrickLink" fullname="BrickLink.Item" href="qml-bricklink-item.html" status="active" access="public" documented="true" groups="qml-api" title="Item" fulltitle="Item" subtitle="" brief="This value type represents a BrickLink item">
