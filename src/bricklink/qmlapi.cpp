@@ -344,6 +344,7 @@ QVariantList QmlItem::consistsOf() const
     result.reserve(consists.size());
     for (const auto &co : consists) {
         auto *lot = new Lot { co.item(), co.color() };
+        lot->setQuantity(co.quantity());
         lot->setAlternate(co.isAlternate());
         lot->setAlternateId(co.alternateId());
         lot->setCounterPart(co.isCounterPart());
