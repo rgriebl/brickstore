@@ -42,6 +42,8 @@ public:
     std::span<const Dimensions, std::dynamic_extent> dimensions() const;
     bool hasKnownColor(const Color *col) const;
     QVector<const Color *> knownColors() const;
+    bool hasAlternateIds() const           { return !m_alternateIds.isEmpty(); }
+    QByteArray alternateIds() const        { return m_alternateIds.asQByteArray(); }
 
     AppearsIn appearsIn(const Color *color = nullptr) const;
 
@@ -173,6 +175,7 @@ private:
     PooledArray<quint16> m_relationshipMatchIds;
     PooledArray<Dimensions> m_dimensions;
     PooledArray<PCC> m_pccs;
+    PooledArray<char8_t> m_alternateIds;
 
 private:
     friend class Core;

@@ -212,7 +212,7 @@ void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, co
         QStringList strs = line.split(u'\t');
 
         if (strs.count() < 3)
-            throw ParseException(&f, "expected at least 2 fields in line %1").arg(lineNumber);
+            throw ParseException(&f, "expected at least 3 fields in line %1").arg(lineNumber);
 
         const QByteArray itemId = strs.at(2).toLatin1();
         auto item = const_cast<Item *>(core()->item(itt->m_id, itemId));
@@ -252,6 +252,9 @@ void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, co
                     item->m_categoryIndexes.push_back(addCatIndex, nullptr);
             }
         }
+        if (strs.size() >= 5) { // alternate ids
+            item->m_alternateIds.copyQByteArray(strs.at(4).toLatin1().replace(',', ' '), nullptr);
+        }
     }
 }
 
@@ -283,6 +286,7 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
     xmlParse(path, u"CATALOG"_qs, u"ITEM"_qs, [this, itt](QDomElement e) {
         Item item;
         item.m_id.copyQByteArray(xmlTagText(e, "ITEMID").toLatin1(), nullptr);
+        //item.m_alternateIds.copyQByteArray(xmlTagText(e, "###ALTITEMID").toLatin1().replace(',', ' '), nullptr);
         const QString itemName = xmlTagText(e, "ITEMNAME").simplified();
         item.m_name.copyQString(itemName, nullptr);
         item.m_itemTypeIndex = (itt - m_db->m_itemTypes.data());

@@ -722,6 +722,7 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, MemoryR
     dataStream >> item.m_relationshipMatchIds.deserialize(pool);
     dataStream >> item.m_dimensions.deserialize(pool);
     dataStream >> item.m_pccs.deserialize(pool);
+    //dataStream >> item.m_alternateIds.deserialize(pool);
 }
 
 void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Version v) const
@@ -765,6 +766,9 @@ void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Ve
 
     if (v >= Version::V11)
         dataStream << item.m_pccs;
+
+    if (v >= Version::V12)
+        dataStream << item.m_alternateIds;
 }
 
 void Database::writePCCToDatabase(const PartColorCode &pcc, QDataStream &dataStream, Version) const

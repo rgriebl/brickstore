@@ -332,16 +332,21 @@ QVariantList QmlItem::knownColors() const
     const auto known = wrapped->knownColors();
     QVariantList result;
     result.reserve(known.size());
-    for (auto c : known)
+    for (const auto c : known)
         result.append(QVariant::fromValue(QmlColor { c }));
     return result;
+}
+
+QStringList QmlItem::alternateIds() const
+{
+    return QString::fromLatin1(wrapped->alternateIds()).split(u' ');
 }
 
 QVariantList QmlItem::consistsOf() const
 {
     const auto consists = wrapped->consistsOf();
     QVariantList result;
-    result.reserve(consists.size());
+    result.reserve(qsizetype(consists.size()));
     for (const auto &co : consists) {
         auto *lot = new Lot { co.item(), co.color() };
         lot->setQuantity(co.quantity());

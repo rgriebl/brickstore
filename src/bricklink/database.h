@@ -48,10 +48,11 @@ public:
         V9,  // 2023.3.1
         V10, // 2023.11.1
         V11, // 2024.1.2
+        V12, // 2024.3.1
 
         OldestStillSupported = V6,
 
-        Latest = V11
+        Latest = V12
     };
 
     void setUpdateInterval(int interval);
