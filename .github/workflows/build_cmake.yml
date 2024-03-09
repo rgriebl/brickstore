@@ -126,7 +126,7 @@ jobs:
           runs-on: ubuntu-20.04
           os: android
           android_abi: 'arm64-v8a'
-          android_ndk: '26.1.10909125'
+          android_ndk: '26.2.11394342'
           qt_host: 'linux'
           qt_host_arch: 'gcc_64'
           qt_target: 'android'
@@ -154,7 +154,7 @@ jobs:
     # Checkout
     #################################################
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -164,7 +164,7 @@ jobs:
     - name: Cache Qt from aqtinstall
       id: cache-qt
       if: (matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: "${{ runner.workspace }}/Qt/"
         key: "Qt-${{ matrix.config.qt_version }}-${{ matrix.config.qt_host }}-${{ matrix.config.qt_arch }}"
@@ -253,7 +253,7 @@ jobs:
 
     - name: Upload Windows Installer
       if: (matrix.config.os == 'windows')
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.config.artifact }}
         path: "build/*.exe"
@@ -280,7 +280,7 @@ jobs:
 
     - name: Upload Linux DEB
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.config.artifact }}
         path: "build/*.deb"
@@ -356,7 +356,7 @@ jobs:
 
     - name: Upload Linux AppImage
       if: matrix.config.appimage
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.AppImage"
@@ -401,7 +401,7 @@ jobs:
 
     - name: Upload Linux Snap
       if: matrix.config.snap
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.config.artifact }}
         path: ${{ steps.create-snap.outputs.snap }}
@@ -463,21 +463,21 @@ jobs:
 
     - name: Upload Android AAB
       if: (matrix.config.os == 'android')
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.config.artifact }}-PlayStore
         path: "build/*.aab"
 
     - name: Upload Android ARM64 APK
       if: (matrix.config.os == 'android')
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.config.artifact }}-ARM64
         path: "build/android_abi_builds/arm64-v8a/*.apk"
 
     - name: Upload Android ARM APK
       if: (matrix.config.os == 'android')
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.config.artifact }}-ARM
         path: "build/android_abi_builds/armeabi-v7a/*.apk"
@@ -532,7 +532,7 @@ jobs:
 
     - name: Upload macOS DMG
       if: (matrix.config.os == 'macos')
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.config.artifact }}
         path: "build/*.dmg"
@@ -590,7 +590,7 @@ jobs:
 
     - name: Upload iOS IPA
       if: (matrix.config.os == 'ios')
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.config.artifact }}-AppStore
         path: "build/*.ipa"
@@ -643,10 +643,10 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Download Artifacts to Release
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: 'artifacts'
 
