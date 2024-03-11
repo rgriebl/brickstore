@@ -722,7 +722,7 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, MemoryR
     dataStream >> item.m_relationshipMatchIds.deserialize(pool);
     dataStream >> item.m_dimensions.deserialize(pool);
     dataStream >> item.m_pccs.deserialize(pool);
-    //dataStream >> item.m_alternateIds.deserialize(pool);
+    dataStream >> item.m_alternateIds.deserialize(pool);
 }
 
 void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Version v) const
