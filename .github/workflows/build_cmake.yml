@@ -110,6 +110,7 @@ jobs:
           qt_arch: 'clang_64'
           qt_dir: 'macos'
           cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DSENTRY=ON'
+          xcode: '15.1'   # https://developer.apple.com/forums/thread/740889
 
         - name: "macOS 10 Legacy"
           artifact: "macOS-10-Legacy"
@@ -512,6 +513,12 @@ jobs:
       run: |
         exec .github/scripts/apple-import-apikey.sh
 
+    - name: Set XCode version for macOS
+      if: (matrix.config.os == 'macos' && matrix.config.xcode)
+      run: |
+        sudo xcode-select -s /Applications/Xcode_${{ matrix.config.xcode }}.app
+      shell: bash
+
     - name: Build for macOS
       if: (matrix.config.os == 'macos')
       run: |
@@ -520,6 +527,7 @@ jobs:
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         cmake --build build --config RelWithDebInfo --parallel --target dmg --verbose
       shell: bash
+
     - name: Notarize and staple macOS DMG
       if: (matrix.config.os == 'macos')
       run: |
