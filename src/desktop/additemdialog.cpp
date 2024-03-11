@@ -232,7 +232,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
     });
     connect(w_select_item, &SelectItem::showInColor,
             this, [this](const BrickLink::Color *color) {
-        w_select_color->setCurrentColor(color);
+        w_select_color->setCurrentColorAndItem(color, w_select_item->currentItem());
     });
 
     connect(w_select_color, &SelectColor::colorSelected,
