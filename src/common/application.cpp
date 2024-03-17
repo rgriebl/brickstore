@@ -601,7 +601,7 @@ void Application::setupTerminateHandler()
 
         if (e) {
             const char *typeName = nullptr;
-#if defined(HAS_CXXABI)
+#if defined(HAS_CXXABI) && !defined(Q_OS_WASM)
             static size_t demangleBufferSize = 768;
             static char *demangleBuffer = static_cast<char *>(malloc(demangleBufferSize));
 

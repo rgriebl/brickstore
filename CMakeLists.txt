@@ -71,7 +71,7 @@ if (NOT (ANDROID OR APPLE))
 endif()
 
 # Android is the last supported 32bit platform
-if (NOT ANDROID AND QT_32BIT)
+if (NOT ANDROID AND NOT WASM AND QT_32BIT)
     message(FATAL_ERROR "32bit builds for this platform are not supported.")
 endif()
 

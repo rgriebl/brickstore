@@ -190,8 +190,10 @@ DesktopApplication::~DesktopApplication()
 
 void DesktopApplication::checkRestart()
 {
+#if QT_CONFIG(process)
     if (m_restart)
         QProcess::startDetached(qApp->applicationFilePath(), { });
+#endif
 }
 
 DeveloperConsole *DesktopApplication::developerConsole()

@@ -26,7 +26,7 @@ if (NOT BS_BACKEND)
             minizip/iowin32.c
             minizip/iowin32.h
         )
-    else()
+    elseif(NOT WASM)
         find_package(ZLIB REQUIRED)
 
         target_link_libraries(${PROJECT_NAME} PRIVATE

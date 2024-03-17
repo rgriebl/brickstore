@@ -351,13 +351,14 @@ void TransferRetriever::schedule()
                              QNetworkRequest::ManualRedirectPolicy);
         }
 
+#if QT_CONFIG(ssl)
         auto ssl = req.sslConfiguration();
         ssl.setSslOption(QSsl::SslOptionDisableSessionPersistence, false);
         QByteArray sslSession = m_sslSessionForHost.value(url.host());
         if (!sslSession.isEmpty())
             ssl.setSessionTicket(sslSession);
         req.setSslConfiguration(ssl);
-
+#endif
         j->setStatus(TransferJob::Active);
         if (isget) {
             if (j->m_only_if_newer.isValid())
@@ -442,8 +443,9 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
         j->m_error_string = j->m_reply->errorString();
         j->setStatus(TransferJob::Failed);
     } else {
+#if QT_CONFIG(ssl)
         m_sslSessionForHost.insert(j->m_url.host(), reply->sslConfiguration().sessionTicket());
-
+#endif
         switch (j->m_respcode) {
         case 304:
             if (j->m_only_if_newer.isValid() || !j->m_only_if_different.isEmpty()) {

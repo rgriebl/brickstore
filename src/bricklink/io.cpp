@@ -22,7 +22,11 @@ static QDateTime parseESTDateTimeString(const QString &v)
 
     QStringList sl = QString(v).replace(u'/', u' ').replace(u':', u' ').split(u' ');
     if (sl.size() == 7) {
+#if QT_CONFIG(timezone)
         static const QTimeZone est("EST");
+#else
+        static const QTimeZone est = QTimeZone::fromSecondsAheadOfUtc(-5 * 3600);
+#endif
 
         int h = sl.at(3).toInt() % 12;
         if (sl.at(6) == u"PM")

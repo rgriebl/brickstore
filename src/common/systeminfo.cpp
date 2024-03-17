@@ -175,6 +175,12 @@ SystemInfo::SystemInfo()
                 gpuVendorId = line.trimmed().right(5).left(4).toUInt(nullptr, 16);
         }
 #  endif
+#elif defined(Q_OS_WASM)
+    physmem = 8ULL * 1024 * 1024 * 1024;
+    cpuName = u"wasm"_qs;
+    gpuName = u"wasm"_qs;
+    gpuVendorName = u"wasm"_qs;
+    gpuVendorId = 0;
 #else
 #  warning "BrickStore doesn't know how to get the physical memory size on this platform!"
 #endif
