@@ -321,7 +321,7 @@ void ItemScannerDialog::setupCapture()
 {
     connect(m_imageCapture, &QImageCapture::errorOccurred,
             this, [this](int id, QImageCapture::Error error, const QString &errorString) {
-        Q_UNUSED(error);
+        Q_UNUSED(error)
 
         if (!m_currentCaptureId.has_value() || m_currentCaptureId.value() != id) {
             qCritical() << "SCANNERDLG" << "Ignoring errorOccurred(id:" << id << "), current:"
@@ -463,7 +463,7 @@ void ItemScannerDialog::onScanFinished(uint id, const QVector<ItemScanner::Resul
         for (const auto &is : itemsAndScores)
             items << is.item;
 
-        int elapsed = m_lastScanTime.elapsed();
+        int elapsed = int(m_lastScanTime.elapsed());
         s_averageScanTime = s_averageScanTime ? (s_averageScanTime + elapsed) / 2 : elapsed;
 
         if (items.isEmpty()) {
