@@ -297,6 +297,13 @@ QVector<BrickLink::WantedList *> WantedLists::parseGlobalWantedList(const QByteA
 
         if (id >= 0 && !name.isEmpty() && lots && items) {
             auto wantedList = new WantedList;
+
+#if defined(__APPLE__) && defined(__clang__) && ((__clang_major__ - 0) == 15)
+            // We would be running into a brk assembly instruction at this point. Most likely
+            // a clang optimization gone wrong. Calling into QObject prevents the crash.
+            QObject *macClang15CrashWorkaround = wantedList;
+            macClang15CrashWorkaround->setObjectName({ });
+#endif
             wantedList->setId(id);
             wantedList->setName(name);
             wantedList->setDescription(desc);
