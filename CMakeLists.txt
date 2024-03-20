@@ -555,14 +555,10 @@ elseif (WIN32)
         set(WINDEPLOYQT_PATH "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
     endif()
 
-    set (REMOVE_PLUGINS_COMMAND COMMAND "${CMAKE_COMMAND}" -E rm -rf "${CMAKE_CURRENT_BINARY_DIR}/bin/tls/qopensslbackend.dll")
-
     if (${Qt6_VERSION} VERSION_LESS "6.5.0")
         list(APPEND WINDEPLOYQT_EXTRA_ARGS --no-qmltooling)
     elseif (${Qt6_VERSION} VERSION_GREATER "6.5.0")
         list(APPEND WINDEPLOYQT_EXTRA_ARGS --skip-plugin-types qmltooling)
-    else()
-        list(APPEND REMOVE_PLUGINS_COMMAND "${CMAKE_CURRENT_BINARY_DIR}/bin/qmltooling")
     endif ()
 
     # deploy Qt dependencies and create an INNO setup installer
@@ -574,7 +570,6 @@ elseif (WIN32)
                 "--no-translations"
                 "--verbose" "2"
         ${COPY_SENTRY_COMMAND}
-        ${REMOVE_PLUGINS_COMMAND}
         COMMAND "iscc.exe" "/DSOURCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/bin" "/DARCH=${INNO_ARCH}"
                 "/O${CMAKE_CURRENT_BINARY_DIR}"
                 "/F${PROJECT_NAME}-${VERSION}" "${CMAKE_SOURCE_DIR}/windows/brickstore.iss"

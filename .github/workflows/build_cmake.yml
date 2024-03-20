@@ -223,11 +223,13 @@ jobs:
         find "$Qt6_DIR/plugins/sqldrivers" -type f -not -ipath "*qsqlite*" -delete
         find "$Qt6_DIR/lib/cmake/Qt6Sql" -name "*DriverPlugin*" -not -name "*QSQLite*" -delete
 
-        # macOS: remove the openssl TLS plugin, as this can cause problems with brew installations
-        if [ "${{ matrix.config.os }}" = "macos" ]; then
-          find "$Qt6_DIR/plugins/tls" -type f -ipath "*libqopensslbackend*" -delete
-          find "$Qt6_DIR/lib/cmake/Qt6Network" -name "*QTlsBackendOpenSSL*" -delete
-        fi
+        # macOS/Windows: remove the openssl TLS plugin, as this can cause problems
+        case "${{ matrix.config.os }}" in
+          macos|windows)
+            find "$Qt6_DIR/plugins/tls" -type f -ipath "*libqopensslbackend*" -delete
+            find "$Qt6_DIR/lib/cmake/Qt6Network" -name "*QTlsBackendOpenSSL*" -delete
+            ;;
+        esac
 
     - name: Install Qt from Linux Distro (container)
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
