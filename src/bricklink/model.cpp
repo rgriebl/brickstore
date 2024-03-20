@@ -654,6 +654,8 @@ QVariant ItemModel::data(const QModelIndex &index, int role) const
         return QVariant::fromValue(i->itemType());
     } else if (role == CategoryPointerRole) {
         return QVariant::fromValue(i->category());
+    } else if ((role == ColorPointerRole) && (m_color_filter)) {
+        return QVariant::fromValue(m_color_filter);
     }
     return { };
 }
@@ -677,13 +679,18 @@ QHash<int, QByteArray> ItemModel::roleNames() const
         { ItemPointerRole, "itemPointer" },
         { ItemTypePointerRole, "itemTypePointer" },
         { CategoryPointerRole, "categoryPointer" },
+        { ColorPointerRole, "colorPointer" },
     };
     return roles;
 }
 
 void ItemModel::pictureUpdated(Picture *pic)
 {
-    if (!pic || !pic->item() || pic->color() != pic->item()->defaultColor())
+    if (!pic || !pic->item())
+        return;
+    if (m_color_filter && (pic->color() != m_color_filter))
+        return;
+    else if (!m_color_filter && (pic->color() != pic->item()->defaultColor()))
         return;
 
     QModelIndex idx = index(pic->item());
@@ -738,6 +745,7 @@ void ItemModel::setFilterColor(const Color *col)
     m_color_filter = col;
     emit isFilteredChanged();
     invalidateFilter();
+    emit dataChanged(index(0, 0), index(rowCount() - 1, 0));
 }
 
 QString ItemModel::filterText() const
