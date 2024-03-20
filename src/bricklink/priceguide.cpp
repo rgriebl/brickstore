@@ -681,10 +681,12 @@ void PriceGuideCache::clearCache()
     for (int i = 1; i <= MaxClearRuns; ++i) {
         auto leakedCount = (i == MaxClearRuns) ? d->m_cache.clearRecursive(leakControl)
                                                : d->m_cache.clearRecursive();
-        qCWarning(LogCache) << "PriceGuide cache:" << leakedCount
-                            << "objects still have a reference after clearing run" << i;
-        if (!leakedCount)
+        if (leakedCount) {
+            qCWarning(LogCache) << "PriceGuide cache:" << leakedCount
+                                << "objects still have a reference after clearing run" << i;
+        } else {
             break;
+        }
         QThread::msleep(100);
     }
 
