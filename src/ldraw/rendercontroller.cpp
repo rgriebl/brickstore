@@ -206,6 +206,8 @@ QCoro::Task<void> RenderController::updateGeometries()
     QList<QmlRenderGeometry *> geos;
     QByteArray lineBuffer;
 
+    QPointer<RenderController> guard(this);
+
     co_await QtConcurrent::run([part, color, &lineBuffer, &geos, &radius, &center]() {
         QHash<const BrickLink::Color *, QByteArray> surfaceBuffers;
         RenderController::fillVertexBuffers(part, color, color, QMatrix4x4(), false, surfaceBuffers, lineBuffer);
@@ -287,6 +289,9 @@ QCoro::Task<void> RenderController::updateGeometries()
             }
         }
     });
+
+    if (!guard) // Sentry report: we've been deleted while the co-routine was running
+        co_return;
 
     qDeleteAll(m_geos);
     m_geos.clear();
