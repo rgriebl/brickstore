@@ -56,8 +56,10 @@ target_link_libraries(common_module PRIVATE
     Qt6::Xml
     Qt6::Quick
     Qt6::QuickPrivate
+    Qt6::Svg # force deployment
     QCoro6::Network
     QCoro6::Core
+    QCoro6::Qml
     bricklink_module
 )
 
@@ -72,13 +74,6 @@ if (BS_MOBILE)
     target_link_libraries(common_module PRIVATE
         Qt6::QuickControls2ImplPrivate
         Qt6::QuickTemplates2Private
-    )
-endif()
-
-if (BS_DESKTOP OR BS_MOBILE)
-    target_link_libraries(common_module PRIVATE
-        QCoro6::Qml
-        Qt6::Svg # force deployment
     )
 endif()
 
