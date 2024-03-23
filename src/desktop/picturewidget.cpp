@@ -51,18 +51,6 @@ PictureWidget::PictureWidget(QWidget *parent)
                                                                : Qt::NoContextMenu);
         return EventFilter::ContinueEventProcessing;
     });
-    new EventFilter(w_text, { QEvent::Resize }, [this](QObject *, QEvent *) {
-        // workaround for layouts breaking, if a rich-text label with word-wrap has
-        // more than one line
-        QMetaObject::invokeMethod(w_text, [this]() {
-            w_text->setMinimumHeight(0);
-            int h = w_text->heightForWidth(w_text->width());
-            if (h > 0)
-                w_text->setMinimumHeight(h);
-        }, Qt::QueuedConnection);
-
-        return EventFilter::ContinueEventProcessing;
-    });
 
     w_image = new QLabel(this);
     w_image->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
