@@ -189,6 +189,7 @@ public:
     void copyLotId() const;
     void clearLotId();
     void setColor(const BrickLink::Color *color);
+    void copyAlternateId() const;
 
     QCoro::Task<> exportBrickLinkXMLToFile();
     QCoro::Task<> exportBrickLinkXMLToClipboard();

@@ -120,6 +120,7 @@ public:
         DateAdded,
         DateLastSold,
         Weight,
+        AlternateIds,
 
         FieldCount
     };

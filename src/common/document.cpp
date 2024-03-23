@@ -486,6 +486,7 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
         { "edit_marker_clear", [this](bool) { clearMarker(); } },
         { "edit_lotid_copy", [this](bool) { copyLotId(); } },
         { "edit_lotid_clear", [this](bool) { clearLotId(); } },
+        { "edit_altid_copy", [this](bool) { copyAlternateId(); } },
 
         { "view_reset_diff_mode", [this](bool) { resetDifferenceMode(); } },
         { "view_goto_next_diff", [this](bool) { gotoNextErrorOrDifference(true); } },
@@ -1550,6 +1551,19 @@ void Document::setColor(const BrickLink::Color *color)
         (to = from).setColor(color);
         return DocumentModel::LotChanged;
     });
+}
+
+void Document::copyAlternateId() const
+{
+    QString text;
+    for (const Lot *lot : m_selectedLots) {
+        if (lot->item() && lot->item()->hasAlternateIds()) {
+            if (!text.isEmpty())
+                text.append(u"\n"_qs);
+            text.append(QString::fromLatin1(lot->item()->alternateIds()));
+        }
+    }
+    QGuiApplication::clipboard()->setText(text);
 }
 
 QCoro::Task<> Document::exportBrickLinkXMLToFile()

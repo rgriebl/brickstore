@@ -737,6 +737,9 @@ void View::contextMenu(const QPoint &pos)
         case DocumentModel::TierP3:
             actionNames = { "edit_tierprice_relative" };
             break;
+        case DocumentModel::AlternateIds:
+            actionNames = { "edit_altid_copy" };
+            break;
         }
         for (const auto &actionName : std::as_const(actionNames)) {
             if (actionName == "-")

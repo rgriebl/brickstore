@@ -2321,6 +2321,17 @@ void DocumentModel::initializeColumns()
               return dateTimeCompare(l1->dateLastSold(), l2->dateLastSold());
           },
       });
+    C(AlternateIds, Column {
+          .defaultWidth = 15,
+          .editable = false,
+          .title = QT_TR_NOOP("Alternate Id"),
+          .displayFn = [&](const Lot *lot) { return lot->item() ? QString::fromLatin1(lot->item()->alternateIds()) : QString { }; },
+          .compareFn = [&](const Lot *l1, const Lot *l2) {
+              const auto ai1 = (l1 && l1->item()) ? l1->item()->alternateIds() : QByteArray { };
+              const auto ai2 = (l2 && l2->item()) ? l2->item()->alternateIds() : QByteArray { };
+              return ai1.compare(ai2);
+          },
+      });
 }
 
 void DocumentModel::pictureUpdated(BrickLink::Picture *pic)

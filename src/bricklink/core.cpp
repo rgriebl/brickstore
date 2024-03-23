@@ -716,6 +716,7 @@ QString Core::itemHtmlDescription(const Item *item, const Color *color, const QC
         QString typeStr;
         QString colorStr;
         QString pccStr;
+        QString altIdStr;
 
         if (!QByteArray("MP").contains(item->itemTypeId())) {
             typeStr = uR"(<i><font color=")" + Utility::textColor(highlight).name()
@@ -730,6 +731,12 @@ QString Core::itemHtmlDescription(const Item *item, const Color *color, const QC
 
         }
         if (item) {
+            if (item->hasAlternateIds()) {
+                altIdStr = uR"(<br><b>[)"_qs
+                           + QString::fromLatin1(item->alternateIds()).replace(u' ', u", "_qs)
+                           + uR"(]</b>)"_qs;
+            }
+
             QVector<std::tuple<uint, const Color *>> pccToColor;
 
             const uint colorIndex = color ? color->index() : 0;
@@ -761,7 +768,7 @@ QString Core::itemHtmlDescription(const Item *item, const Color *color, const QC
         }
 
         return u"<center><b>" + QLatin1String(item->id()) + u"</b>&nbsp; "
-               + typeStr + colorStr + item->name() + pccStr + u"</center>";
+               + typeStr + colorStr + item->name() + altIdStr + pccStr + u"</center>";
     } else {
         return { };
     }

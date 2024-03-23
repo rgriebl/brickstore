@@ -25,6 +25,7 @@ AutoSizingDialog {
         none = (selected === 0)
 
         if (single) {
+            root.title = ''
             infoText.text = ''
 
             let lot = document.selectedLots[0]
@@ -36,10 +37,13 @@ AutoSizingDialog {
             appearsIn.items = [ lot.item ]
             appearsIn.colors = [ lot.color ]
 
-            root.title = BL.BrickLink.itemHtmlDescription(lot.item, lot.color, Style.accentColor)
+            headerText.text = BL.BrickLink.itemHtmlDescription(lot.item, lot.color, Style.accentColor)
+            headerText.visible = true
         } else {
             root.title = (selected === 0) ? qsTr("Document statistics")
                                           : qsTr("Multiple lots selected")
+            headerText.visible = false
+            headerText.text = ''
 
             let stat = document.selectionStatistics()
             infoText.text = stat.asHtmlTable()
@@ -89,52 +93,64 @@ AutoSizingDialog {
         TabButton { text: qsTr("Appears In"); enabled: !root.none }
     }
 
-    SwipeView {
-        id: swipeView
-        interactive: false
+    ColumnLayout {
         anchors.fill: parent
-        currentIndex: tabBar.currentIndex
-        clip: true
-
-        StackLayout {
-            clip: true
-            currentIndex: root.single ? 1 : 0
-
-            Label {
-                id: infoText
-                textFormat: Text.RichText
-                wrapMode: Text.Wrap
-                leftPadding: 8
-            }
-
-            InfoWidget {
-                id: info
-                document: root.document
-            }
+        Label {
+            id: headerText
+            textFormat: Text.RichText
+            wrapMode: Text.Wrap
+            horizontalAlignment: Text.AlignHCenter
+            visible: false
+            Layout.fillWidth: true
         }
+        SwipeView {
+            id: swipeView
+            interactive: false
+            currentIndex: tabBar.currentIndex
+            clip: true
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
-        ScrollableLayout {
-            id: pgScroller
-            visible: root.single
+            StackLayout {
+                clip: true
+                currentIndex: root.single ? 1 : 0
 
-            SwipeView.onIsCurrentItemChanged: { if (SwipeView.isCurrentItem) flashScrollIndicators() }
+                Label {
+                    id: infoText
+                    textFormat: Text.RichText
+                    wrapMode: Text.Wrap
+                    leftPadding: 8
+                }
 
-            ColumnLayout {
-                width: pgScroller.width
-                PriceGuideWidget {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    id: priceGuide
+                InfoWidget {
+                    id: info
                     document: root.document
                 }
             }
-        }
 
-        AppearsInWidget {
-            id: appearsIn
-            document: root.document
+            ScrollableLayout {
+                id: pgScroller
+                visible: root.single
+
+                SwipeView.onIsCurrentItemChanged: { if (SwipeView.isCurrentItem) flashScrollIndicators() }
+
+                ColumnLayout {
+                    width: pgScroller.width
+                    PriceGuideWidget {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        id: priceGuide
+                        document: root.document
+                    }
+                }
+            }
+
+            AppearsInWidget {
+                id: appearsIn
+                document: root.document
+            }
         }
     }
 }

@@ -106,7 +106,8 @@ QSize DocumentDelegate::sizeHint(const QStyleOptionViewItem &option1, const QMod
     static const QVector<int> twoLiners = {
         DocumentModel::Description,
         DocumentModel::Remarks,
-        DocumentModel::Comments
+        DocumentModel::Comments,
+        DocumentModel::AlternateIds,
     };
 
     if (twoLiners.contains(idx.column())
@@ -497,6 +498,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         DocumentModel::Marker,
         DocumentModel::DateAdded,
         DocumentModel::DateLastSold,
+        DocumentModel::AlternateIds,
     };
 
     if (!str.isEmpty()) {

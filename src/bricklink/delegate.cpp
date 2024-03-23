@@ -207,20 +207,26 @@ bool ToolTip::show(const Item *item, const Color *color, const Category *categor
 
 QString ToolTip::createItemToolTip(const Item *item, Picture *pic) const
 {
-    static const QString str = uR"(<table class="tooltip_picture"><tr><td>%2</td><td align="right"><i>&nbsp;%4</i></td></tr><tr><td colspan="2"><b>%3</b></td></tr><tr><td colspan="2">%1</td></tr></table>)"_qs;
+    static const QString str = uR"(<table class="tooltip_picture"><tr><td>%2</td><td align="right"><i>&nbsp;%4</i></td></tr><tr><td colspan="2"><b>%3</b></td></tr><tr><td colspan="2">%1</td>%5</table>)"_qs;
     static const QString img_left = uR"(<center><img src="data:image/png;base64,%1" width="%2" height="%3"/></center>)"_qs;
     QString note_left = u"<i>" + ItemDelegate::tr("[Image is loading]") + u"</i>";
     QString yearStr = yearSpan(item->yearReleased(), item->yearLastProduced());
     QString id = QString::fromLatin1(item->id());
+    QString altIds;
 
     QColor color = qApp->palette().color(QPalette::Highlight);
     id = id + uR"(&nbsp;&nbsp;<i><font color=")" + Utility::textColor(color).name()
          + uR"(" style="background-color: )" + color.name() + uR"(;">&nbsp;)"
          + item->itemType()->name() + uR"(&nbsp;</font></i>)";
 
+    if (item->hasAlternateIds()) {
+        altIds = uR"(</tr><tr><td colspan="2"><i>%1: %2</i></td></tr>)"_qs.arg(
+            tr("Alternate id"), QString::fromLatin1(item->alternateIds()).replace(u' ', u", "_qs));
+    }
+
     if (pic && ((pic->updateStatus() == UpdateStatus::Updating)
                 || (pic->updateStatus() == UpdateStatus::Loading))) {
-        return str.arg(note_left, id, item->name(), yearStr);
+        return str.arg(note_left, id, item->name(), yearStr, altIds);
     } else {
         QByteArray ba;
         QBuffer buffer(&ba);
@@ -229,7 +235,7 @@ QString ToolTip::createItemToolTip(const Item *item, Picture *pic) const
         img.save(&buffer, "PNG");
 
         return str.arg(img_left.arg(QString::fromLatin1(ba.toBase64())).arg(img.width()).arg(img.height()),
-                       id, item->name(), yearStr);
+                       id, item->name(), yearStr, altIds);
     }
 }
 

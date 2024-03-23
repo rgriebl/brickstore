@@ -312,6 +312,9 @@ QmlCategory::QmlCategory(const Category *cat)
     Returns \c true if this item is known to exist in the given \a color, or \c false otherwise.
     \sa knownColors
 */
+/*! \qmlproperty list<string> Item::alternateIds
+    Returns a list of all alternate BrickLink ids registered for this item.
+*/
 
 QmlItem::QmlItem(const Item *item)
     : QmlWrapperBase(item)

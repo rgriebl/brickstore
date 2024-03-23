@@ -60,6 +60,7 @@ AutoSizingDialog {
                 Layout.fillWidth: true
                 textFormat: Text.MarkdownText
                 wrapMode: Text.WordWrap
+                padding: 8
                 onLinkActivated: (link) => Qt.openUrlExternally(link)
             }
         }
