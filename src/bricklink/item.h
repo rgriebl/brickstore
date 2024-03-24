@@ -30,6 +30,7 @@ public:
     inline QByteArray id() const           { return m_id.asQByteArray(); }
     inline QString name() const            { return m_name.asQString(); }
     char itemTypeId() const;
+    QByteArray itemTypeAndId() const       { return itemTypeId() + id(); }
     const ItemType *itemType() const;
     const Category *category() const;
     const QVector<const Category *> categories(bool includeMainCategory = false) const;

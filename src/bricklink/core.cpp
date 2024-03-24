@@ -1000,6 +1000,45 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot, uint startAtChangelogId, c
     if (tryToResolveColor)
         color = core()->color(resolvedColorId);
 
+    // try to find by name instead
+    if (!item && !inc->m_item_name.isEmpty()) {
+        for (const Item &checkItem : core()->items()) {
+            if (checkItem.name() == inc->m_item_name) {
+                item = &checkItem;
+                resolvedItemTypeAndId = item->itemTypeAndId();
+                qCInfo(LogResolver).noquote() << "item:" << itemTypeAndId << "->"
+                                              << resolvedItemTypeAndId << "[via name match]";
+                break;
+            }
+        }
+    }
+    if (!color && !inc->m_color_name.isEmpty()) {
+        for (const Color &checkColor : core()->colors()) {
+            if (checkColor.name() == inc->m_color_name) {
+                color = &checkColor;
+                resolvedColorId = color->id();
+                qCInfo(LogResolver) << "color:" << colorId << "->" << resolvedColorId
+                                    << "[via name match]";
+                break;
+            }
+        }
+    }
+
+    // try to find by case insensitive id instead
+    if (!item && !inc->m_item_id.isLower()) {
+        QByteArray checkLowerId = itemTypeAndId.mid(1).toLower();
+        char checkType = itemTypeAndId.at(0);
+
+        for (const Item &checkItem : core()->items()) {
+            if ((checkItem.itemTypeId() == checkType) && (checkItem.id().toLower() == checkLowerId)) {
+                item = &checkItem;
+                resolvedItemTypeAndId = item->itemTypeAndId();
+                qCInfo(LogResolver).noquote() << "item:" << itemTypeAndId << "->" << resolvedItemTypeAndId << "[via case insensitive id match]";
+                break;
+            }
+        }
+    }
+
     if (item)
         lot->setItem(item);
     if (color)
