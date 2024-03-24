@@ -854,11 +854,18 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
         case 'T':   // ItemType
         case 'M': { // ItemMerge
             const QString &fromType = strs.at(3);
-            const QString &fromId = strs.at(4);
+            QString fromId = strs.at(4);
             const QString &toType = strs.at(5);
             const QString &toId = strs.at(6);
             if ((fromType.length() == 1) && (toType.length() == 1)
                     && !fromId.isEmpty() && !toId.isEmpty()) {
+                // BL bug: if something changes into a Set, the fromId has a '-1' appended that
+                //         shouldn't be there. The other way around, the '-1' is missing.
+                if ((toType.at(0) == u'S') && (fromType.at(0) != u'S') && fromId.endsWith(u"-1"_qs))
+                    fromId.chop(2);
+                if ((toType.at(0) != u'S') && (fromType.at(0) == u'S') && !fromId.endsWith(u"-1"_qs))
+                    fromId.append(u"-1"_qs);
+
                 ItemChangeLogEntry icl;
                 icl.m_id = id;
                 icl.m_julianDay = uint(date.toJulianDay());
