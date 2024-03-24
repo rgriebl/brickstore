@@ -283,7 +283,6 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
     xmlParse(path, u"CATALOG"_qs, u"ITEM"_qs, [this, itt](QDomElement e) {
         Item item;
         item.m_id.copyQByteArray(xmlTagText(e, "ITEMID").toLatin1(), nullptr);
-        item.m_alternateIds.copyQByteArray(xmlTagText(e, "ALTITEMIDS").toLatin1().replace(',', ' ').simplified(), nullptr);
         const QString itemName = xmlTagText(e, "ITEMNAME").simplified();
         item.m_name.copyQString(itemName, nullptr);
         item.m_itemTypeIndex = (itt - m_db->m_itemTypes.data());
@@ -293,6 +292,13 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
         if (!cat)
             throw ParseException("item %1 has no category").arg(QString::fromLatin1(item.id()));
         item.m_categoryIndexes.push_back(quint16(cat->index()), nullptr);
+
+        QByteArray altIds;
+        try {
+            altIds = xmlTagText(e, "ALTITEMIDS").toLatin1().replace(',', ' ').simplified();
+        } catch (...) { }
+        if (!altIds.isEmpty())
+            item.m_alternateIds.copyQByteArray(altIds, nullptr);
 
         uint y = 0;
         try {
