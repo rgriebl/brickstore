@@ -226,7 +226,7 @@ jobs:
         # macOS/Windows: remove the openssl TLS plugin, as this can cause problems
         case "${{ matrix.config.os }}" in
           macos|windows)
-            find "$Qt6_DIR/plugins/tls" -type f -ipath "*libqopensslbackend*" -delete
+            find "$Qt6_DIR/plugins/tls" -type f -ipath "*qopensslbackend*" -delete
             find "$Qt6_DIR/lib/cmake/Qt6Network" -name "*QTlsBackendOpenSSL*" -delete
             ;;
         esac
