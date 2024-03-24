@@ -240,7 +240,6 @@ ScriptManager *ScriptManager::create(QQmlEngine *engine)
 {
     Q_ASSERT(!s_inst);
     s_inst = new ScriptManager(engine);
-    s_inst->reload();
     return s_inst;
 }
 

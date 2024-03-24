@@ -156,6 +156,7 @@ void DesktopApplication::init()
     });
 
     ScriptManager::create(m_engine);
+    QTimer::singleShot(0, ScriptManager::inst(), &ScriptManager::reload);
 
     MainWindow::inst()->show();
 
