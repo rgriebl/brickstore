@@ -199,16 +199,18 @@ void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, co
 
     QTextStream ts(&f);
     ts.readLine(); // skip header
-    ts.readLine(); // skip empty line
-    ts.readLine(); // skip empty line
-    ts.readLine(); // skip merge cat
-    int lineNumber = 4;
+    int lineNumber = 1;
+    QByteArray lastItemId;
 
     while (!ts.atEnd()) {
         ++lineNumber;
         QString line = ts.readLine();
         if (line.isEmpty())
             continue;
+        if (line.startsWith(u'\t')) {
+            qWarning() << "  > Item name for" << lastItemId << "most likely ends with a new-line character:" << f.fileName() << "in line" << (lineNumber - 1);
+            continue;
+        }
         QStringList strs = line.split(u'\t');
 
         if (strs.count() < 3)
@@ -252,6 +254,7 @@ void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, co
                     item->m_categoryIndexes.push_back(addCatIndex, nullptr);
             }
         }
+        lastItemId = itemId;
     }
 }
 
