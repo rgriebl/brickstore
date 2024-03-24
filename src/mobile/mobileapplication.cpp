@@ -3,6 +3,7 @@
 
 #include <QtCore/QLoggingCategory>
 #include <QtGui/QGuiApplication>
+#include <QtGui/QWindow>
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlProperty>
 #include <QtQml/QQmlApplicationEngine>
