@@ -113,6 +113,8 @@ void MainWindow::show()
 
         QMainWindow::show();
 
+        Application::inst()->setMainWindow(windowHandle());
+
 #if defined(Q_OS_MACOS)
         MainWindow::inst()->raise();
 #endif

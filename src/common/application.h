@@ -15,6 +15,7 @@ QT_FORWARD_DECLARE_CLASS(QTranslator)
 QT_FORWARD_DECLARE_CLASS(QQmlApplicationEngine)
 QT_FORWARD_DECLARE_CLASS(QGuiApplication)
 QT_FORWARD_DECLARE_CLASS(QMimeData)
+QT_FORWARD_DECLARE_CLASS(QWindow)
 
 
 class Announcements;
@@ -57,6 +58,10 @@ public:
     UndoGroup *undoGroup();
 
     QQmlApplicationEngine *qmlEngine();
+
+    QWindow *mainWindow();
+    void setMainWindow(QWindow *newWindow);
+    Q_SIGNAL void mainWindowChanged(QWindow *newWindow);
 
     void raise();
 
@@ -121,5 +126,6 @@ protected:
 
     QQmlApplicationEngine *m_engine = nullptr;
     QGuiApplication *m_app = nullptr;
+    QPointer<QWindow> m_mainWindow;
     static Application *s_inst;
 };

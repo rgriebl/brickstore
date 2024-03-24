@@ -8,6 +8,8 @@
 #include <QFile>
 #include <QUrl>
 #include <QGuiApplication>
+#include <QPalette>
+#include <QWindow>
 
 #include "utility/utility.h"
 #include "common/currency.h"
@@ -80,6 +82,8 @@ QmlBrickStore::QmlBrickStore()
 
     connect(Application::inst(), &Application::showSettings,
             this, &QmlBrickStore::showSettings);
+    connect(Application::inst(), &Application::mainWindowChanged,
+            this, &QmlBrickStore::mainWindowChanged);
 
     connect(ActionManager::inst(), &ActionManager::activeDocumentChanged,
             this, [this](Document *doc) {
@@ -149,6 +153,11 @@ QmlDebug *QmlBrickStore::debug() const
 QString QmlBrickStore::defaultCurrencyCode() const
 {
     return Config::inst()->defaultCurrencyCode();
+}
+
+QWindow *QmlBrickStore::mainWindow() const
+{
+    return Application::inst()->mainWindow();
 }
 
 /*! \qmlmethod string BrickStore::exchangeRate(string fromCode, string toCode)

@@ -525,6 +525,7 @@ class QmlBrickStore : public QObject
     Q_PROPERTY(ColumnLayoutsModel *columnLayouts READ columnLayouts CONSTANT FINAL)
     Q_PROPERTY(QVariantMap about READ about CONSTANT FINAL)
     Q_PROPERTY(QmlDebug *debug READ debug CONSTANT FINAL)
+    Q_PROPERTY(QWindow *mainWindow READ mainWindow NOTIFY mainWindowChanged FINAL)
 
 public:
     static QmlBrickStore *inst();
@@ -539,6 +540,7 @@ public:
     QVariantMap about() const;
     QmlDebug *debug() const;
     QString defaultCurrencyCode() const;
+    QWindow *mainWindow() const;
 
     Q_INVOKABLE double exchangeRate(const QString &fromCode, const QString &toCode) const;
 
@@ -572,6 +574,7 @@ signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
     void showSettings(const QString &page);
     void activeDocumentChanged(QmlDocument *doc);
+    void mainWindowChanged(QWindow *newWindow);
 
 private:
     QmlBrickStore();

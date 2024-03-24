@@ -92,6 +92,7 @@ void MobileApplication::init()
         QMetaObject::invokeMethod(this, &QCoreApplication::quit, Qt::QueuedConnection);
         return;
     }
+    setMainWindow(qobject_cast<QWindow *>(m_engine->rootObjects().constFirst()));
 }
 
 void MobileApplication::setupLogging()

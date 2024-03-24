@@ -579,6 +579,19 @@ QQmlApplicationEngine *Application::qmlEngine()
     return m_engine;
 }
 
+QWindow *Application::mainWindow()
+{
+    return m_mainWindow.get();
+}
+
+void Application::setMainWindow(QWindow *newWindow)
+{
+    if (m_mainWindow != newWindow) {
+        m_mainWindow = newWindow;
+        emit mainWindowChanged(newWindow);
+    }
+}
+
 void Application::raise()
 {
     const auto tlWindows = qApp->topLevelWindows();
