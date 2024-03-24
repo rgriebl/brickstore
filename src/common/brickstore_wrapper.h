@@ -62,6 +62,7 @@ class QmlDocument : public QAbstractProxyModel
     Q_PROPERTY(int lotCount READ lotCount NOTIFY lotCountChanged FINAL)
     Q_PROPERTY(int visibleLotCount READ visibleLotCount NOTIFY visibleLotCountChanged FINAL)
     Q_PROPERTY(QVariantList sortColumns READ qmlSortColumns NOTIFY qmlSortColumnsChanged FINAL)
+    Q_PROPERTY(QString filterString READ filterString WRITE setFilterString NOTIFY filterStringChanged FINAL)
     Q_PROPERTY(QmlDocumentLots *lots READ qmlLots CONSTANT FINAL)
     Q_PROPERTY(QList<BrickLink::QmlLot> selectedLots READ qmlSelectedLots NOTIFY qmlSelectedLotsChanged FINAL)
     Q_PROPERTY(QmlDocumentColumnModel *columnModel READ columnModel CONSTANT FINAL)
@@ -88,6 +89,10 @@ public:
     QVariantList qmlSortColumns() const;
     QmlDocumentLots *qmlLots();
     QList<BrickLink::QmlLot> qmlSelectedLots();
+
+    QString filterString() const;
+    void setFilterString(const QString &newFilterString);
+    Q_SIGNAL void filterStringChanged();
 
     int lotCount() const;
     Q_SIGNAL void lotCountChanged(int newLotCount);

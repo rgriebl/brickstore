@@ -367,6 +367,9 @@ QmlDocument::QmlDocument(Document *doc)
             this, &QmlDocument::lotCountChanged);
     connect(model(), &DocumentModel::filteredLotCountChanged,
             this, &QmlDocument::visibleLotCountChanged);
+
+    connect(model(), &DocumentModel::filterChanged,
+            this, &QmlDocument::filterStringChanged);
 }
 
 QVariantList QmlDocument::qmlSortColumns() const
@@ -398,6 +401,16 @@ QList<BrickLink::QmlLot> QmlDocument::qmlSelectedLots()
         qmlLots << BrickLink::QmlLot(lot);
 
     return qmlLots;
+}
+
+QString QmlDocument::filterString() const
+{
+    return const_cast<DocumentModel *>(model())->filterParser()->toString(model()->filter(), true /*symbolic*/);
+}
+
+void QmlDocument::setFilterString(const QString &newFilterString)
+{
+    model()->setFilter(model()->filterParser()->parse(newFilterString));
 }
 
 int QmlDocument::lotCount() const
