@@ -280,7 +280,7 @@ bool DesktopApplication::notifyOtherInstance()
                         need = 0;
                     }
                 }
-                client->write("X", 1);
+                // client->write("X", 1);
                 client->close();
 
                 for (const auto &f : std::as_const(files))
