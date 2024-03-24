@@ -157,6 +157,7 @@
             <function name="hasKnownColor" fullname="BrickLink.Item.hasKnownColor" href="qml-bricklink-item.html#hasKnownColor-method" status="active" access="public" documented="true" meta="qmlmethod" type="bool">
                 <parameter type="Color" name="color" default=""/>
             </function>
+            <qmlproperty name="alternateIds" fullname="BrickLink.Item.alternateIds" href="qml-bricklink-item.html#alternateIds-prop" status="active" access="public" documented="true" type="list&lt;string&gt;" attached="false" writable="true"/>
             <qmlproperty name="category" fullname="BrickLink.Item.category" href="qml-bricklink-item.html#category-prop" status="active" access="public" documented="true" type="Category" attached="false" writable="false"/>
             <qmlproperty name="defaultColor" fullname="BrickLink.Item.defaultColor" href="qml-bricklink-item.html#defaultColor-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
             <qmlproperty name="hasInventory" fullname="BrickLink.Item.hasInventory" href="qml-bricklink-item.html#hasInventory-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
