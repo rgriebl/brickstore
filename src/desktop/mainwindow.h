@@ -74,6 +74,7 @@ public slots:
     void titleUpdate();
 
 signals:
+    void shown();
     void documentActivated(Document *);
 
 protected slots:

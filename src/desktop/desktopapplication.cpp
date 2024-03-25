@@ -156,9 +156,15 @@ void DesktopApplication::init()
     });
 
     ScriptManager::create(m_engine);
-    QTimer::singleShot(0, ScriptManager::inst(), &ScriptManager::reload);
 
     MainWindow::inst()->show();
+
+    connect(MainWindow::inst(), &MainWindow::shown,
+            this, [this]() {
+        // we need to delay this, because Quick doesn't like changes to transientParents
+        setMainWindow(MainWindow::inst()->windowHandle());
+        ScriptManager::inst()->reload();
+    });
 
 #if defined(Q_OS_WINDOWS)
     RegisterApplicationRestart(nullptr, 0); // make us restart-able by installers
