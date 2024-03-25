@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2024.3.1] - 2024-03-26
+
+Important for macOS users: this release works around two bugs in Apple's build tools:
+- The standard macOS version will now work again on macOS 11.
+- The crash on Wanted List download does not occur anymore.
+
+Other changes:
+- Support for alternate BrickLink item ids was added to the info displays, the item tooltips and the Add Item dialog filter. Also a new column showing these ids is available for the main document views: it's not visible by default, but it can be shown via the column headers' right-click menu.
+- BrickStore will now try harder to resolve unknown items when loading old documents:
+  - Items changing type from or to `Set` are not named correctly in BrickLink's change-log. BrickStore is trying to work around that now.
+  - If the change-log doesn't yield a result, BrickStore now tries to find an item with the same description.
+  - If that still fails and the item id has upper-case characters, a case-insensitive search for the item-id is performed.
+
+
 ## [2024.2.1] - 2024-02-14
 
 This is an important bug-fix release, if you are using **Brickognize.com**: older versions of BrickStore can flood their servers with pointless, duplicate requests.
@@ -644,7 +658,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.2.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.3.1...HEAD
+[2024.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.3.1
 [2024.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.2.1
 [2024.1.4]: https://github.com/rgriebl/brickstore/releases/tag/v2024.1.4
 [2024.1.3]: https://github.com/rgriebl/brickstore/releases/tag/v2024.1.3
