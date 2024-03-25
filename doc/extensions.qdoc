@@ -60,7 +60,11 @@ In addition to that, printing extensions also use these types:
 \section1 Debugging
 
 The JavaScript environment is very similiar to a web browser, so any \c{console.log()} calls end
-up in BrickStore's error log, which is available via the \c View > \c {View info docks} menu.
+up in BrickStore's developer console, which is available via the \c Extras > \c {Developer Console}
+menu.
+
+This developer console also doubles as a live JavaScript console, so you can test your code snippets
+directly there in an interactive environment.
 
 If you throw an \c Error object, the script execution will terminate and the \c message property
 of the thrown object will be shown to the user in a message box.

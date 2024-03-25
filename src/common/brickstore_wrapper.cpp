@@ -36,41 +36,6 @@ using namespace std::chrono_literals;
     A kitchen sink type singleton for all global state, settings and utility functions.
 */
 
-/*! \qmlsignal BrickStore::showSettings(string page)
-    \internal
-*/
-
-/*! \qmlproperty string BrickStore::defaultCurrencyCode
-    \readonly
-    The user's default ISO currency code (e.g. \c EUR).
-*/
-/*! \qmlproperty string BrickStore::versionNumber
-    \readonly
-    BrickStore's version as a string (e.g. \c "2021.10.2").
-*/
-/*! \qmlproperty string BrickStore::buildNumber
-    \readonly
-    BrickStore's build number as a string (e.g. \c "42").
-*/
-/*! \qmlproperty bool BrickStore::databaseValid
-    \readonly
-    Returns whether the current database is valid or not.
-*/
-/*! \qmlproperty date BrickStore::lastDatabaseUpdate
-    \readonly
-    This property holds the date and time of the last successful database update.
-*/
-/*! \qmlproperty bool BrickStore::online
-    \readonly
-    The current online state of the application. This is mirroring the operating system's online
-    state.
-*/
-/*! \qmlproperty Document BrickStore::activeDocument
-    \readonly
-    The currently active document, i.e. the document the user is working on. Can be \c null, if
-    no documents are open, but also if the quick-start page is active.
-*/
-
 QmlBrickStore *QmlBrickStore::s_inst = nullptr;
 
 QmlBrickStore::QmlBrickStore()
@@ -118,11 +83,19 @@ Config *QmlBrickStore::config() const
     return Config::inst();
 }
 
+/*! \qmlproperty string BrickStore::versionNumber
+    \readonly
+    BrickStore's version as a string (e.g. \c "2021.10.2").
+*/
 QString QmlBrickStore::versionNumber() const
 {
     return u"" BRICKSTORE_VERSION ""_qs;
 }
 
+/*! \qmlproperty string BrickStore::buildNumber
+    \readonly
+    BrickStore's build number as a string (e.g. \c "42").
+*/
 QString QmlBrickStore::buildNumber() const
 {
     return u"" BRICKSTORE_BUILD_NUMBER ""_qs;
@@ -150,11 +123,20 @@ QmlDebug *QmlBrickStore::debug() const
     return m_debug;
 }
 
+/*! \qmlproperty string BrickStore::defaultCurrencyCode
+    \readonly
+    The user's default ISO currency code (e.g. \c EUR).
+*/
 QString QmlBrickStore::defaultCurrencyCode() const
 {
     return Config::inst()->defaultCurrencyCode();
 }
 
+/*! \qmlproperty Window BrickStore::mainWindow
+    \readonly
+    A reference to the main \l Window of BrickStore. Can be used to open dialogs and other windows
+    on top of the main window by setting \l{Window::}{transientParent}.
+*/
 QWindow *QmlBrickStore::mainWindow() const
 {
     return Application::inst()->mainWindow();
@@ -162,8 +144,8 @@ QWindow *QmlBrickStore::mainWindow() const
 
 /*! \qmlmethod string BrickStore::exchangeRate(string fromCode, string toCode)
 
-    Returns the currency exchange cross-rate between the two given currencies, denoted as ISO
-    currency code (e.g. \c EUR).
+    Returns the currency exchange cross-rate between the two given \a fromCode and \a toCode
+    currencies, denoted as ISO currency code (e.g. \c EUR).
 */
 double QmlBrickStore::exchangeRate(const QString &fromCode, const QString &toCode) const
 {
@@ -262,6 +244,11 @@ void QmlBrickStore::updateDatabase()
     Application::inst()->updateDatabase();
 }
 
+/*! \qmlproperty Document BrickStore::activeDocument
+    \readonly
+    The currently active document, i.e. the document the user is working on. Can be \c null, if
+    no documents are open, but also if the quick-start page is active.
+*/
 QmlDocument *QmlBrickStore::activeDocument() const
 {
     return m_docList->map(ActionManager::inst()->activeDocument());
@@ -303,6 +290,33 @@ QString QmlBrickStore::cacheStats() const
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
+
+/*! \qmltype Document
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief Each instance of this type represents an open document.
+
+    \note The \e index parameter of the lot API is the index into the internal data structure and
+          not related to any sorting or filtering in the visible document window.
+*/
+/*! \qmlproperty string Document::currencyCode
+    \readonly
+    The ISO currency code used in this document, e.g. \c EUR.
+*/
+/*! \qmlproperty string Document::title
+    \readonly
+    The title of this document. Documents loaded from files do not have titles, but documents
+    created from online imports do. A store import would have a title like \c{Store import <date>}.
+*/
+/*! \qmlproperty string Document::fileName
+    \readonly
+    The file name of this document. New and imported documents that have not been saved yet will
+    not have fileName set.
+*/
+/*! \qmlproperty Order Document::order
+    \readonly
+    An Order object or \c null, if this document is not a BrickLink order.
+*/
 
 QmlDocument::QmlDocument(Document *doc)
     : QAbstractProxyModel(doc)
@@ -413,11 +427,22 @@ void QmlDocument::setFilterString(const QString &newFilterString)
     model()->setFilter(model()->filterParser()->parse(newFilterString));
 }
 
+/*! \qmlproperty string Document::lotCount
+    \readonly
+    The number of lots in this document.
+    This count is ignoring filtering.
+*/
 int QmlDocument::lotCount() const
 {
     return int(model()->lots().size());
 }
 
+/*! \qmlproperty string Document::visibleLotCount
+    \readonly
+    The number of visible lots in this document.
+    This count is after filtering: it's the the exact number of visible lots as seen in the
+    document view.
+*/
 int QmlDocument::visibleLotCount() const
 {
     return int(model()->filteredLots().size());
@@ -452,6 +477,18 @@ void QmlDocument::saveCurrentColumnLayout()
 void QmlDocument::setColumnLayoutFromId(const QString &layoutId)
 {
     m_doc->setColumnLayoutFromId(layoutId);
+}
+
+void QmlDocument::startBlockingOperation(const QString &title, const QJSValue &cancelCallback)
+{
+    if (!cancelCallback.isCallable())
+        return;
+    m_doc->startBlockingOperation(title, [=]() { cancelCallback.call(); });
+}
+
+void QmlDocument::endBlockingOperation()
+{
+    m_doc->endBlockingOperation();
 }
 
 void QmlDocument::cancelBlockingOperation()
@@ -1075,6 +1112,11 @@ QmlDocumentLots::QmlDocumentLots(DocumentModel *model)
     }
 }
 
+/*! \qmlmethod int Document::lots.add(Item item, Color color)
+    Adds a new lot for the given \a item and \a color combination to the document.
+    Returns the index of the newly created lot in the document.
+    This index is independent of sort order and filtering.
+*/
 int QmlDocumentLots::add(BrickLink::QmlItem item, BrickLink::QmlColor color)
 {
     auto lot = new Lot();
@@ -1084,12 +1126,19 @@ int QmlDocumentLots::add(BrickLink::QmlItem item, BrickLink::QmlColor color)
     return int(m_model->lots().indexOf(lot));
 }
 
+/*! \qmlmethod Document::lots.remove(Lot lot)
+    Removes the specified \a lot from the document.
+*/
 void QmlDocumentLots::remove(BrickLink::QmlLot lot)
 {
     if (!lot.isNull() && m_model && (lot.m_documentLots == this))
         m_model->removeLot(lot.wrappedObject());
 }
 
+/*! \qmlmethod Document::lots.removeAt(int index)
+    Removes the lot at the specified \a index from the document.
+    This index is independent of sort order and filtering.
+*/
 void QmlDocumentLots::removeAt(int index)
 {
     const auto &lots = m_model->lots();
@@ -1097,6 +1146,11 @@ void QmlDocumentLots::removeAt(int index)
         m_model->removeLot(lots.at(index));
 }
 
+/*! \qmlmethod Document::lots.removeVisibleAt(int index)
+    Removes the lot at the specified visible \a index from the document.
+    This index is taking sort order and filtering into account: it's the the exact visible index
+    as seen in the document view.
+*/
 void QmlDocumentLots::removeVisibleAt(int index)
 {
     const auto &filteredLots = m_model->filteredLots();
@@ -1104,6 +1158,10 @@ void QmlDocumentLots::removeVisibleAt(int index)
         m_model->removeLot(filteredLots.at(index));
 }
 
+/*! \qmlmethod Lot Document::lots.at(int index)
+    Returns the lot at the specified \a index in the document.
+    This index is independent of sort order and filtering.
+*/
 BrickLink::QmlLot QmlDocumentLots::at(int index)
 {
     const auto &lots = m_model->lots();
@@ -1112,6 +1170,11 @@ BrickLink::QmlLot QmlDocumentLots::at(int index)
     return { lots.at(index), this };
 }
 
+/*! \qmlmethod Lot Document::lots.visibleAt(int index)
+    Returns the lot at the specified visible \a index in the document.
+    This index is taking sort order and filtering into account: it's the the exact visible index
+    as seen in the document view.
+*/
 BrickLink::QmlLot QmlDocumentLots::visibleAt(int index)
 {
     const auto &filteredLots = m_model->filteredLots();
@@ -1119,6 +1182,7 @@ BrickLink::QmlLot QmlDocumentLots::visibleAt(int index)
         return { };
     return { filteredLots.at(index), this };
 }
+
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -1193,5 +1257,27 @@ DocumentList *QmlDocumentList::docList()
 {
     return DocumentList::inst();
 }
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+/*! \qmltype OnlineState
+    \inherits QtObject
+    \inqmlmodule BrickStore
+    \ingroup qml-api
+    \brief This singleton represents the network state.
+
+    The current online state of the application. This is mirroring the operating system's online
+    state.
+*/
+
+/*! \qmlproperty bool OnlineState::online
+
+    This property holds whether the system is currently online.
+*/
+
 
 #include "moc_brickstore_wrapper.cpp"

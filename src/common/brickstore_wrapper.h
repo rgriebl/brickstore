@@ -107,6 +107,8 @@ public:
     Q_INVOKABLE void saveCurrentColumnLayout();
     Q_INVOKABLE void setColumnLayoutFromId(const QString &layoutId);
 
+    Q_INVOKABLE void startBlockingOperation(const QString &title, const QJSValue &cancelCallback);
+    Q_INVOKABLE void endBlockingOperation();
     Q_INVOKABLE void cancelBlockingOperation();
 
     Q_INVOKABLE void setPriceToGuide(BrickLink::Time time, BrickLink::Price price, bool forceUpdate);
@@ -458,7 +460,8 @@ class QmlRecentFiles
 class QmlDocumentLots : public QObject
 {
     Q_OBJECT
-    QML_ANONYMOUS
+    QML_NAMED_ELEMENT(DocumentLots)
+    QML_UNCREATABLE("")
 
 public:
     QmlDocumentLots(DocumentModel *model);

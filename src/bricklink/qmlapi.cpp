@@ -702,7 +702,29 @@ Lot *QmlLot::get() const
     \li PriceGuide
     \endlist
 */
+/*! \qmlproperty Database BrickLink::database
+    \readonly
+    The BrickLink catalog \l Database.
+*/
 
+/*! \qmltype Database
+    \inherits QtObject
+    \inqmlmodule BrickLink
+    \ingroup qml-api
+    \brief This type represents the BrickLink catalog database.
+
+    This type is a singleton that provides access to the BrickLink catalog database.
+    It is accessible via the BrickLink::database property.
+*/
+/*! \qmlproperty bool Database::valid
+    \readonly
+    Returns whether the current database is valid or not.
+*/
+
+/*! \qmlproperty date Database::lastUpdated
+    \readonly
+    This property holds the date and time of the last successful database update.
+*/
 
 QmlBrickLink::QmlBrickLink()
 {
