@@ -283,11 +283,6 @@ Control {
     }
 
     DialogLoader {
-        id: systemInfoDialog
-        source: "SystemInfoDialog.qml"
-    }
-
-    DialogLoader {
         id: announcementsDialog
         source: "AnnouncementsDialog.qml"
     }
@@ -359,7 +354,9 @@ Control {
                      },
                      "update_database": () => { BS.BrickStore.updateDatabase() },
                      "help_about": () => { aboutDialog.active = true },
-                     "help_systeminfo": () => { systemInfoDialog.open() },
+                     "help_systeminfo": () => {
+                         homeStack.push("SystemInfoDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
+                     },
                      "help_announcements": () => { },
                  })
         for (let i = 0; i < BS.BrickStore.documents.count; ++i) {

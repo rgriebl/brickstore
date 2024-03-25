@@ -732,7 +732,7 @@ QVariantMap Application::about() const
     const auto translations = Config::inst()->translations();
     for (const Config::Translation &trans : translations) {
         if ((trans.language != u"en") && !trans.author.isEmpty()) {
-            QString langname = trans.localName + u" (" + trans.name + u")";
+            QString langname = trans.localName;
             translators = translators + transRow.arg(langname, trans.author, trans.authorEmail, trans.authorEmail);
         }
     }

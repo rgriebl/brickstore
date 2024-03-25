@@ -93,21 +93,16 @@ FullscreenDialog {
                     }
                     ButtonGroup { id: catListGroup }
 
-                    delegate: RadioDelegate {
+                    delegate: ItemDelegate {
                         width: ListView.view.width
                         required property int index
                         required property string name
                         required property var categoryPointer
                         text: name
-                        highlighted: checked
-                        ButtonGroup.group: catListGroup
-                        checked: index === 0
+                        highlighted: (itemListModel.filterCategory === categoryPointer)
 
-                        onCheckedChanged: {
-                            if (checked)
-                                itemListModel.filterCategory = categoryPointer
-                        }
                         onClicked: {
+                            itemListModel.filterCategory = categoryPointer
                             pages.currentIndex = 1
                         }
                     }

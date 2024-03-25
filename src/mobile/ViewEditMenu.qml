@@ -19,6 +19,8 @@ AutoSizingMenu {
     }
 
     RowLayout {
+        spacing: 0
+
         ToolButton { action: BS.ActionManager.quickAction("edit_cut")
             display: AbstractButton.IconOnly
             Layout.fillWidth: true
