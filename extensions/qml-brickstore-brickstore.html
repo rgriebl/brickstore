@@ -42,10 +42,8 @@
 <ul>
 <li class="fn"><b><a href="qml-brickstore-brickstore.html#activeDocument-prop">activeDocument</a></b> : Document</li>
 <li class="fn"><b><a href="qml-brickstore-brickstore.html#buildNumber-prop">buildNumber</a></b> : string</li>
-<li class="fn"><b><a href="qml-brickstore-brickstore.html#databaseValid-prop">databaseValid</a></b> : bool</li>
 <li class="fn"><b><a href="qml-brickstore-brickstore.html#defaultCurrencyCode-prop">defaultCurrencyCode</a></b> : string</li>
-<li class="fn"><b><a href="qml-brickstore-brickstore.html#lastDatabaseUpdate-prop">lastDatabaseUpdate</a></b> : date</li>
-<li class="fn"><b><a href="qml-brickstore-brickstore.html#online-prop">online</a></b> : bool</li>
+<li class="fn"><b><a href="qml-brickstore-brickstore.html#mainWindow-prop">mainWindow</a></b> : Window</li>
 <li class="fn"><b><a href="qml-brickstore-brickstore.html#versionNumber-prop">versionNumber</a></b> : string</li>
 </ul>
 <h2 id="methods">Methods</h2>
@@ -81,16 +79,6 @@
 <div class="qmldoc"><p>BrickStore's build number as a string (e.g&#x2e; <code>&quot;42&quot;</code>).</p>
 </div></div><!-- @@@buildNumber -->
 <br/>
-<!-- $$$databaseValid -->
-<div class="qmlitem"><div class="qmlproto">
-<div class="table"><table class="qmlname">
-<tr valign="top" class="odd" id="databaseValid-prop">
-<td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">databaseValid</span> : <span class="type">bool</span></p></td></tr>
-</table></div></div>
-<div class="qmldoc"><p>Returns whether the current database is valid or not.</p>
-</div></div><!-- @@@databaseValid -->
-<br/>
 <!-- $$$defaultCurrencyCode -->
 <div class="qmlitem"><div class="qmlproto">
 <div class="table"><table class="qmlname">
@@ -101,25 +89,15 @@
 <div class="qmldoc"><p>The user's default ISO currency code (e.g&#x2e; <code>EUR</code>).</p>
 </div></div><!-- @@@defaultCurrencyCode -->
 <br/>
-<!-- $$$lastDatabaseUpdate -->
+<!-- $$$mainWindow -->
 <div class="qmlitem"><div class="qmlproto">
 <div class="table"><table class="qmlname">
-<tr valign="top" class="odd" id="lastDatabaseUpdate-prop">
+<tr valign="top" class="odd" id="mainWindow-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">lastDatabaseUpdate</span> : <span class="type">date</span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">mainWindow</span> : <span class="type">Window</span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>This property holds the date and time of the last successful database update.</p>
-</div></div><!-- @@@lastDatabaseUpdate -->
-<br/>
-<!-- $$$online -->
-<div class="qmlitem"><div class="qmlproto">
-<div class="table"><table class="qmlname">
-<tr valign="top" class="odd" id="online-prop">
-<td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">online</span> : <span class="type">bool</span></p></td></tr>
-</table></div></div>
-<div class="qmldoc"><p>The current online state of the application. This is mirroring the operating system's online state.</p>
-</div></div><!-- @@@online -->
+<div class="qmldoc"><p>A reference to the main Window of BrickStore. Can be used to open dialogs and other windows on top of the main window by setting transientParent.</p>
+</div></div><!-- @@@mainWindow -->
 <br/>
 <!-- $$$versionNumber -->
 <div class="qmlitem"><div class="qmlproto">
@@ -139,7 +117,7 @@
 <td class="tblQmlFuncNode"><p>
 <span class="type">string</span> <span class="name">exchangeRate</span>(<span class="type">string</span> <i>fromCode</i>, <span class="type">string</span> <i>toCode</i>)</p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>Returns the currency exchange cross-rate between the two given currencies, denoted as ISO currency code (e.g&#x2e; <code>EUR</code>).</p>
+<div class="qmldoc"><p>Returns the currency exchange cross-rate between the two given <i>fromCode</i> and <i>toCode</i> currencies, denoted as ISO currency code (e.g&#x2e; <code>EUR</code>).</p>
 </div></div><!-- @@@exchangeRate -->
 <br/>
 <!-- $$$symbolForCurrencyCode[overload1]$$$symbolForCurrencyCodestring -->

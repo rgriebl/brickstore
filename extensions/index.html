@@ -49,10 +49,12 @@ import QtQuick</pre>
 <tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-brickstore.html">BrickStore</a></p></td><td class="tblDescr"><p>This singleton represents global settings and state</p></td></tr>
 <tr class="odd topAlign"><td class="tblName"><p><a href="qml-bricklink-category.html">Category</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item category</p></td></tr>
 <tr class="even topAlign"><td class="tblName"><p><a href="qml-bricklink-color.html">Color</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink color</p></td></tr>
-<tr class="odd topAlign"><td class="tblName"><p><a href="qml-brickstore-document.html">Document</a></p></td><td class="tblDescr"><p>Each instance of this type represents an open document</p></td></tr>
-<tr class="even topAlign"><td class="tblName"><p><a href="qml-bricklink-item.html">Item</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item</p></td></tr>
-<tr class="odd topAlign"><td class="tblName"><p><a href="qml-bricklink-itemtype.html">ItemType</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item type</p></td></tr>
-<tr class="even topAlign"><td class="tblName"><p><a href="qml-bricklink-lot.html">Lot</a></p></td><td class="tblDescr"><p>This value type represent a lot in a document</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-bricklink-database.html">Database</a></p></td><td class="tblDescr"><p>This type represents the BrickLink catalog database</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-document.html">Document</a></p></td><td class="tblDescr"><p>Each instance of this type represents an open document</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-bricklink-item.html">Item</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-bricklink-itemtype.html">ItemType</a></p></td><td class="tblDescr"><p>This value type represents a BrickLink item type</p></td></tr>
+<tr class="odd topAlign"><td class="tblName"><p><a href="qml-bricklink-lot.html">Lot</a></p></td><td class="tblDescr"><p>This value type represent a lot in a document</p></td></tr>
+<tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-onlinestate.html">OnlineState</a></p></td><td class="tblDescr"><p>This singleton represents the network state</p></td></tr>
 <tr class="odd topAlign"><td class="tblName"><p><a href="qml-bricklink-order.html">Order</a></p></td><td class="tblDescr"><p>This type holds the information about a BrickLink order</p></td></tr>
 <tr class="even topAlign"><td class="tblName"><p><a href="qml-bricklink-picture.html">Picture</a></p></td><td class="tblDescr"><p>This value type represents a picture of a BrickLink item</p></td></tr>
 <tr class="odd topAlign"><td class="tblName"><p><a href="qml-bricklink-priceguide.html">PriceGuide</a></p></td><td class="tblDescr"><p>This value type represents the price guide for a BrickLink item</p></td></tr>
@@ -63,7 +65,8 @@ import QtQuick</pre>
 <tr class="even topAlign"><td class="tblName"><p><a href="qml-brickstore-printpage.html">PrintPage</a></p></td><td class="tblDescr"><p>An instance of this type represents the canvas of a printer page</p></td></tr>
 </table></div>
 <h2 id="debugging">Debugging</h2>
-<p>The JavaScript environment is very similiar to a web browser, so any <code>console.log()</code> calls end up in BrickStore's error log, which is available via the <code>View</code> &gt; <code>View info docks</code> menu.</p>
+<p>The JavaScript environment is very similiar to a web browser, so any <code>console.log()</code> calls end up in BrickStore's developer console, which is available via the <code>Extras</code> &gt; <code>Developer Console</code> menu.</p>
+<p>This developer console also doubles as a live JavaScript console, so you can test your code snippets directly there in an interactive environment.</p>
 <p>If you throw an <code>Error</code> object, the script execution will terminate and the <code>message</code> property of the thrown object will be shown to the user in a message box.</p>
 </div>
 <!-- @@@index.html -->

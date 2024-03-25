@@ -2,6 +2,18 @@
 <!DOCTYPE QDOCINDEX>
 <INDEX url="" title="BrickStore Extensions" version="" project="BrickStore">
     <namespace name="" status="active" access="public" module="brickstore">
+        <page name="installation.html" href="installation.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="90" documented="true" subtype="page" title="BrickStore Extension Installation" fulltitle="BrickStore Extension Installation" subtitle=""/>
+        <page name="index.html" href="index.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="4" documented="true" subtype="page" title="BrickStore Extensions Documentation" fulltitle="BrickStore Extensions Documentation" subtitle="">
+            <contents name="installation" title="Installation" level="1"/>
+            <contents name="porting-old-scripts" title="Porting old Scripts" level="1"/>
+            <contents name="writing-extensions" title="Writing Extensions" level="1"/>
+            <contents name="debugging" title="Debugging" level="1"/>
+        </page>
+        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="144" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="">
+            <contents name="the-simple-changes" title="The simple changes" level="2"/>
+            <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
+            <contents name="complex-changes" title="Complex changes" level="2"/>
+        </page>
         <qmlclass name="BrickLink" qml-module-name="BrickLink" fullname="BrickLink.BrickLink" href="qml-bricklink-bricklink.html" status="active" access="public" documented="true" groups="qml-api" title="BrickLink" fulltitle="BrickLink" subtitle="" brief="Core singleton managing the data transfer from and to BrickLink">
             <function name="category" fullname="BrickLink.BrickLink.category" href="qml-bricklink-bricklink.html#category-method" status="active" access="public" documented="true" meta="qmlmethod" type="Category">
                 <parameter type="var" name="category" default=""/>
@@ -63,6 +75,7 @@
             <function name="priceGuideUpdated" fullname="BrickLink.BrickLink.priceGuideUpdated" href="qml-bricklink-bricklink.html#priceGuideUpdated-signal" status="active" access="public" documented="true" meta="qmlsignal" type="">
                 <parameter type="PriceGuide" name="priceGuide" default=""/>
             </function>
+            <qmlproperty name="database" fullname="BrickLink.BrickLink.database" href="qml-bricklink-bricklink.html#database-prop" status="active" access="public" documented="true" type="Database" attached="false" writable="false"/>
             <qmlproperty name="noColor" fullname="BrickLink.BrickLink.noColor" href="qml-bricklink-bricklink.html#noColor-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
             <qmlproperty name="noItem" fullname="BrickLink.BrickLink.noItem" href="qml-bricklink-bricklink.html#noItem-prop" status="active" access="public" documented="true" type="Item" attached="false" writable="false"/>
             <qmlproperty name="noLot" fullname="BrickLink.BrickLink.noLot" href="qml-bricklink-bricklink.html#noLot-prop" status="active" access="public" documented="true" type="Lot" attached="false" writable="false"/>
@@ -87,19 +100,10 @@
             <function name="updateDatabase" fullname="BrickStore.BrickStore.updateDatabase" href="qml-brickstore-brickstore.html#updateDatabase-method" status="active" access="public" documented="true" meta="qmlmethod" type="void"/>
             <qmlproperty name="activeDocument" fullname="BrickStore.BrickStore.activeDocument" href="qml-brickstore-brickstore.html#activeDocument-prop" status="active" access="public" documented="true" type="Document" attached="false" writable="false"/>
             <qmlproperty name="buildNumber" fullname="BrickStore.BrickStore.buildNumber" href="qml-brickstore-brickstore.html#buildNumber-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="databaseValid" fullname="BrickStore.BrickStore.databaseValid" href="qml-brickstore-brickstore.html#databaseValid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
             <qmlproperty name="defaultCurrencyCode" fullname="BrickStore.BrickStore.defaultCurrencyCode" href="qml-brickstore-brickstore.html#defaultCurrencyCode-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
-            <qmlproperty name="lastDatabaseUpdate" fullname="BrickStore.BrickStore.lastDatabaseUpdate" href="qml-brickstore-brickstore.html#lastDatabaseUpdate-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
-            <qmlproperty name="online" fullname="BrickStore.BrickStore.online" href="qml-brickstore-brickstore.html#online-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+            <qmlproperty name="mainWindow" fullname="BrickStore.BrickStore.mainWindow" href="qml-brickstore-brickstore.html#mainWindow-prop" status="active" access="public" documented="true" type="Window" attached="false" writable="false"/>
             <qmlproperty name="versionNumber" fullname="BrickStore.BrickStore.versionNumber" href="qml-brickstore-brickstore.html#versionNumber-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
         </qmlclass>
-        <page name="installation.html" href="installation.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="86" documented="true" subtype="page" title="BrickStore Extension Installation" fulltitle="BrickStore Extension Installation" subtitle=""/>
-        <page name="index.html" href="index.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="4" documented="true" subtype="page" title="BrickStore Extensions Documentation" fulltitle="BrickStore Extensions Documentation" subtitle="">
-            <contents name="installation" title="Installation" level="1"/>
-            <contents name="porting-old-scripts" title="Porting old Scripts" level="1"/>
-            <contents name="writing-extensions" title="Writing Extensions" level="1"/>
-            <contents name="debugging" title="Debugging" level="1"/>
-        </page>
         <qmlclass name="Category" qml-module-name="BrickLink" fullname="BrickLink.Category" href="qml-bricklink-category.html" status="active" access="public" documented="true" groups="qml-api" title="Category" fulltitle="Category" subtitle="" brief="This value type represents a BrickLink item category">
             <qmlproperty name="id" fullname="BrickLink.Category.id" href="qml-bricklink-category.html#id-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
             <qmlproperty name="isNull" fullname="BrickLink.Category.isNull" href="qml-bricklink-category.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
@@ -124,6 +128,10 @@
             <qmlproperty name="solid" fullname="BrickLink.Color.solid" href="qml-bricklink-color.html#solid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
             <qmlproperty name="speckle" fullname="BrickLink.Color.speckle" href="qml-bricklink-color.html#speckle-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
             <qmlproperty name="transparent" fullname="BrickLink.Color.transparent" href="qml-bricklink-color.html#transparent-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
+        </qmlclass>
+        <qmlclass name="Database" qml-module-name="BrickLink" fullname="BrickLink.Database" href="qml-bricklink-database.html" status="active" access="public" documented="true" groups="qml-api" title="Database" fulltitle="Database" subtitle="" brief="This type represents the BrickLink catalog database">
+            <qmlproperty name="lastUpdated" fullname="BrickLink.Database.lastUpdated" href="qml-bricklink-database.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
+            <qmlproperty name="valid" fullname="BrickLink.Database.valid" href="qml-bricklink-database.html#valid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="Document" qml-module-name="BrickStore" fullname="BrickStore.Document" href="qml-brickstore-document.html" status="active" access="public" documented="true" groups="qml-api" title="Document" fulltitle="Document" subtitle="" brief="Each instance of this type represents an open document">
             <function name="lots.add" fullname="BrickStore.Document.lots.add" href="qml-brickstore-document.html#lots.add-method" status="active" access="public" documented="true" meta="qmlmethod" type="int">
@@ -229,6 +237,9 @@
             <qmlproperty name="totalWeight" fullname="BrickLink.Lot.totalWeight" href="qml-bricklink-lot.html#totalWeight-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
             <qmlproperty name="weight" fullname="BrickLink.Lot.weight" href="qml-bricklink-lot.html#weight-prop" status="active" access="public" documented="true" type="real" attached="false" writable="true"/>
         </qmlclass>
+        <qmlclass name="OnlineState" qml-module-name="BrickStore" fullname="BrickStore.OnlineState" href="qml-brickstore-onlinestate.html" status="active" access="public" documented="true" groups="qml-api" title="OnlineState" fulltitle="OnlineState" subtitle="" brief="This singleton represents the network state">
+            <qmlproperty name="online" fullname="BrickStore.OnlineState.online" href="qml-brickstore-onlinestate.html#online-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="true"/>
+        </qmlclass>
         <qmlclass name="Order" qml-module-name="BrickLink" fullname="BrickLink.Order" href="qml-bricklink-order.html" status="active" access="public" documented="true" groups="qml-api" title="Order" fulltitle="Order" subtitle="" brief="This type holds the information about a BrickLink order">
             <qmlproperty name="additionalCharges1" fullname="BrickLink.Order.additionalCharges1" href="qml-bricklink-order.html#additionalCharges1-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
             <qmlproperty name="additionalCharges2" fullname="BrickLink.Order.additionalCharges2" href="qml-bricklink-order.html#additionalCharges2-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
@@ -269,11 +280,6 @@
             <qmlproperty name="lastUpdated" fullname="BrickLink.Picture.lastUpdated" href="qml-bricklink-picture.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
             <qmlproperty name="updateStatus" fullname="BrickLink.Picture.updateStatus" href="qml-bricklink-picture.html#updateStatus-prop" status="active" access="public" documented="true" type="UpdateStatus" attached="false" writable="false"/>
         </qmlclass>
-        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="140" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="">
-            <contents name="the-simple-changes" title="The simple changes" level="2"/>
-            <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
-            <contents name="complex-changes" title="Complex changes" level="2"/>
-        </page>
         <qmlclass name="PriceGuide" qml-module-name="BrickLink" fullname="BrickLink.PriceGuide" href="qml-bricklink-priceguide.html" status="active" access="public" documented="true" groups="qml-api" title="PriceGuide" fulltitle="PriceGuide" subtitle="" brief="This value type represents the price guide for a BrickLink item">
             <function name="lots" fullname="BrickLink.PriceGuide.lots" href="qml-bricklink-priceguide.html#lots-method" status="active" access="public" documented="true" meta="qmlmethod" type="int">
                 <parameter type="Time" name="time" default=""/>
@@ -364,7 +370,7 @@
         <group name="qml-extension" href="qml-extension.html" status="internal" seen="false" title=""/>
         <group name="qml-printing" href="qml-printing.html" status="internal" seen="false" title=""/>
         <group name="qmlmodules" href="qmlmodules.html" status="internal" seen="false" title=""/>
-        <qmlmodule name="BrickLink" qml-module-name="BrickLink" qml-module-version="1.0" href="bricklink-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="78" documented="true" groups="qmlmodules" seen="true" title="BrickLink QML types" brief="Provides QML types for interfacing with the BrickLink database"/>
-        <qmlmodule name="BrickStore" qml-module-name="BrickStore" qml-module-version="1.0" href="brickstore-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="71" documented="true" groups="qmlmodules" seen="true" title="BrickStore QML types" brief="Provides QML types for BrickStore specific functionality"/>
+        <qmlmodule name="BrickLink" qml-module-name="BrickLink" qml-module-version="1.0" href="bricklink-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="82" documented="true" groups="qmlmodules" seen="true" title="BrickLink QML types" brief="Provides QML types for interfacing with the BrickLink database"/>
+        <qmlmodule name="BrickStore" qml-module-name="BrickStore" qml-module-version="1.0" href="brickstore-qmlmodule.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="75" documented="true" groups="qmlmodules" seen="true" title="BrickStore QML types" brief="Provides QML types for BrickStore specific functionality"/>
     </namespace>
 </INDEX>
