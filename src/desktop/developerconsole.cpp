@@ -70,6 +70,7 @@ DeveloperConsole::DeveloperConsole(const QString &prompt,
             this, [this]() {
         auto cmd = m_cmd->text();
         if (!cmd.isEmpty() && m_executeFunction) {
+            m_log->setCurrentCharFormat({ });
             m_log->appendPlainText(m_prompt->text() + cmd);
             auto [message, succeeded] = m_executeFunction(cmd);
             if (succeeded) {
