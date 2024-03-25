@@ -14,7 +14,7 @@ AutoSizingMenu {
     property int field
     required property BS.Document document
 
-    property string fieldName: document.headerData(document.visualColumn(field), Qt.Horizontal)
+    property string fieldName: document?.headerData(document.visualColumn(field), Qt.Horizontal) ?? ''
 
     modal: true
     cascade: false
@@ -47,7 +47,7 @@ AutoSizingMenu {
 
             ListView {
                 anchors.fill: parent
-                model: root.document.columnModel
+                model: root.document?.columnModel
                 clip: true
 
                 ScrollIndicator.vertical: ScrollIndicator { }

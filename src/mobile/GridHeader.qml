@@ -16,7 +16,7 @@ Control {
     required property string display
     required property BS.Document document
     property int visualIndex: index
-    property int logicalIndex: document.logicalColumn(index)
+    property int logicalIndex: document?.logicalColumn(index) ?? -1
     property int sortStatus: 0
     property int sortCount: 0
 

@@ -13,7 +13,7 @@ import BrickLink as BL
 Page {
     id: root
     padding: 0
-    title: document.fileName.length ? document.fileName : (document.title.length ? document.title : qsTr("Untitled"))
+    title: document?.fileName.length ? document.fileName : (document?.title.length ? document.title : qsTr("Untitled"))
 
     required property BS.Document document
 
@@ -100,7 +100,11 @@ Page {
                         MenuItem { action: BS.ActionManager.quickAction("document_export_bl_update_clip") }
                         MenuItem { action: BS.ActionManager.quickAction("document_export_bl_wantedlist_clip") }
                     }
-                    MenuItem { action: BS.ActionManager.quickAction("document_close") }
+                    MenuItem {
+                        // workaround for Qt bug: the overlay doesn't get removed in Qt 6.6+
+                        onClicked: { viewMenu.modal = false }
+                        action: BS.ActionManager.quickAction("document_close")
+                    }
                 }
             }
         }
@@ -117,8 +121,8 @@ Page {
             reuseItems: false
             //interactive: false
 
-            property bool sorted: root.document.sorted
-            property var sortColumns: root.document.sortColumns
+            property bool sorted: root.document?.sorted ?? false
+            property var sortColumns: root.document?.sortColumns
 
             Loader {
                 id: headerMenu
@@ -180,7 +184,7 @@ Page {
                                  ? 0 : table.model.headerData(c, Qt.Horizontal, Qt.SizeHintRole)
             rowHeightProvider: () => cellHeight
 
-            selectionModel: root.document.selectionModel
+            selectionModel: root.document?.selectionModel ?? null
 
             Loader {
                 id: editMenu
@@ -507,17 +511,17 @@ Page {
 
     Loader {
         id: blockDialog
-        active: root.document.blockingOperationActive
+        active: root.document?.blockingOperationActive ?? false
         source: "ProgressDialog.qml"
         Binding {
             target: blockDialog.item
             property: "text"
-            value: root.document.blockingOperationTitle
+            value: root.document?.blockingOperationTitle
         }
         Binding {
             target: blockDialog.item
             property: "cancelable"
-            value: root.document.blockingOperationCancelable
+            value: root.document?.blockingOperationCancelable
         }
         Connections {
             target: root.document
