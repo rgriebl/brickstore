@@ -950,14 +950,8 @@ InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<SimpleLo
 
         for (int row = 0; row < m_entries.size(); ++row) {
             auto *e = m_entries.at(row);
-            if (e->isSection()) {
-                for (int srow = 0; srow < e->m_sectionEntries.size(); ++srow) {
-                    if (pictureMatch(e->m_sectionEntries.at(srow), pic))
-                        indexes << index(srow, InventoryModel::PictureColumn, index(row, 0));
-                }
-            } else if (pictureMatch(e, pic)) {
+            if (!e->isSection() && pictureMatch(e, pic))
                 indexes << index(row, InventoryModel::PictureColumn); // clazy:exclude=reserve-candidates
-            }
         }
 
         for (const auto &idx : indexes)
@@ -1157,13 +1151,11 @@ void InternalInventoryModel::fillRelationships(const QVector<SimpleLot> &lots)
 
         for (const RelationshipMatch *match : std::as_const(allMatches)) {
             if (auto rel = core()->relationship(match->relationshipId())) {
-                auto section = m_entries.emplace_back(new Entry { rel->name() });
+                m_entries.emplace_back(new Entry { rel->name() });
                 const auto matchItems = match->items();
                 for (auto item : matchItems) {
-                    if (!items.contains(item)) {
-                        auto e = section->m_sectionEntries.emplace_back(new Entry { item, nullptr, -1 });
-                        e->m_section = section;
-                    }
+                    if (!items.contains(item))
+                        m_entries.emplace_back(new Entry { item, nullptr, -1 });
                 }
             }
         }
@@ -1179,28 +1171,14 @@ InternalInventoryModel::~InternalInventoryModel()
 
 QModelIndex InternalInventoryModel::index(int row, int column, const QModelIndex &parent) const
 {
-    if (!hasIndex(row, column, parent))
-        return { };
-
-    const Entry *e = nullptr;
-    if (parent.isValid())
-        e = static_cast<const Entry *>(parent.internalPointer())->m_sectionEntries.at(row);
-    else
-        e = m_entries.at(row);
-
-    return createIndex(row, column, e);
+    if (!parent.isValid() && hasIndex(row, column, parent))
+        return createIndex(row, column, m_entries.at(row));
+    return { };
 }
 
-QModelIndex InternalInventoryModel::parent(const QModelIndex &index) const
+QModelIndex InternalInventoryModel::parent(const QModelIndex &) const
 {
-    if (!index.isValid())
-        return { };
-
-    auto *e = static_cast<const Entry *>(index.internalPointer())->m_section;
-    if (!e)
-        return { };
-
-    return createIndex(int(m_entries.indexOf(e)), 0, e);
+    return { };
 }
 
 const InternalInventoryModel::Entry *InternalInventoryModel::entry(const QModelIndex &idx) const
@@ -1211,14 +1189,7 @@ const InternalInventoryModel::Entry *InternalInventoryModel::entry(const QModelI
 
 int InternalInventoryModel::rowCount(const QModelIndex &parent) const
 {
-    if (parent.column() > 0)
-        return 0;
-    else if (!parent.isValid())
-        return int(m_entries.size());
-    else if (auto *e = entry(parent))
-        return int(e->m_sectionEntries.size());
-    else
-        return 0;
+    return parent.isValid() ? 0 : int(m_entries.size());
 }
 
 int InternalInventoryModel::columnCount(const QModelIndex &) const
@@ -1317,6 +1288,8 @@ QHash<int, QByteArray> InternalInventoryModel::roleNames() const
         { QuantityRole, "quantity" },
         { ItemPointerRole, "itemPointer" },
         { ColorPointerRole, "colorPointer" },
+        { IsSectionHeaderRole, "isSectionHeader" },
+        { Qt::DisplayRole, "sectionTitle" },
     };
     return roles;
 }
@@ -1330,6 +1303,8 @@ InventoryModel::InventoryModel(Mode mode, const QVector<SimpleLot> &simpleLots, 
     : QSortFilterProxyModel(parent)
 {
     setSourceModel(new InternalInventoryModel(mode, simpleLots, this));
+    connect(this, &QAbstractItemModel::modelReset,
+            this, [this]() { emit countChanged(count()); });
 }
 
 int InventoryModel::count() const
@@ -1347,6 +1322,12 @@ InventoryModel::Mode InventoryModel::mode() const
     return static_cast<const InternalInventoryModel *>(sourceModel())->m_mode;
 }
 
+void InventoryModel::sort(int column, Qt::SortOrder order)
+{
+    if (mode() != Mode::Relationships)
+        QSortFilterProxyModel::sort(column, order);
+}
+
 bool InventoryModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
     // the indexes are from the source model, so the internal pointers are valid
@@ -1354,9 +1335,6 @@ bool InventoryModel::lessThan(const QModelIndex &left, const QModelIndex &right)
     const auto *iim = static_cast<const InternalInventoryModel *>(sourceModel());
     const auto e1 = iim->entry(left);
     const auto e2 = iim->entry(right);
-
-    if (e1 && e1->isSection() && e2 && e2->isSection())
-        return e1->m_sectionTitle.localeAwareCompare(e2->m_sectionTitle) < 0;
 
     if (!e1 || !e1->m_item)
         return true;
@@ -1385,9 +1363,7 @@ InternalInventoryModel::Entry::Entry(const Item *item, const Color *color, int q
 { }
 
 InternalInventoryModel::Entry::~Entry()
-{
-    qDeleteAll(m_sectionEntries);
-}
+{ }
 
 InternalInventoryModel::Entry::Entry(const QString &sectionTitle)
     : m_sectionTitle(sectionTitle)

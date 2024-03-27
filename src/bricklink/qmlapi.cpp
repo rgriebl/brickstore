@@ -955,49 +955,37 @@ QmlLot QmlBrickLink::lot(const QVariant &v) const
         return v.value<BrickLink::Lot *>();
 }
 
-InventoryModel *QmlBrickLink::inventoryModel(bool appearsIn, const QVariantList &items,
-                                             const QVariantList &colors)
+InventoryModel *QmlBrickLink::inventoryModel(InventoryModel::Mode mode, const QVariantList &simpleLots)
 {
     QVector<BrickLink::InventoryModel::SimpleLot> list;
 
-    if (items.size() == colors.size()) {
-        list.reserve(items.size());
+    list.reserve(simpleLots.size());
 
-        for (int i = 0; i < int(items.size()); ++i) {
-            const QVariant &vitem = items.at(i);
-            const QVariant &vcolor = colors.at(i);
-            const BrickLink::Item *item = nullptr;
-            const BrickLink::Color *color = nullptr;
+    for (int i = 0; i < int(simpleLots.size()); ++i) {
+        const QVariantMap &sl = simpleLots.at(i).toMap();
+        const QVariant &vitem = sl.value(u"item"_qs);
+        const QVariant &vcolor = sl.value(u"color"_qs);
+        int qty = sl.value(u"quantity"_qs).toInt();
+        const BrickLink::Item *item = nullptr;
+        const BrickLink::Color *color = nullptr;
 
-            if (vitem.userType() == qMetaTypeId<const BrickLink::Item *>())
-                item = vitem.value<const BrickLink::Item *>();
-            else if (vitem.userType() == qMetaTypeId<BrickLink::QmlItem>())
-                item = vitem.value<BrickLink::QmlItem>().wrappedObject();
+        if (vitem.userType() == qMetaTypeId<const BrickLink::Item *>())
+            item = vitem.value<const BrickLink::Item *>();
+        else if (vitem.userType() == qMetaTypeId<BrickLink::QmlItem>())
+            item = vitem.value<BrickLink::QmlItem>().wrappedObject();
 
-            if (vcolor.userType() == qMetaTypeId<const BrickLink::Color *>())
-                color = vcolor.value<const BrickLink::Color *>();
-            else if (vcolor.userType() == qMetaTypeId<BrickLink::QmlColor>())
-                color = vcolor.value<BrickLink::QmlColor>().wrappedObject();
+        if (vcolor.userType() == qMetaTypeId<const BrickLink::Color *>())
+            color = vcolor.value<const BrickLink::Color *>();
+        else if (vcolor.userType() == qMetaTypeId<BrickLink::QmlColor>())
+            color = vcolor.value<BrickLink::QmlColor>().wrappedObject();
 
-            if (item && color)
-                list.emplace_back(item, color);
-        }
+        if (item && color)
+            list.emplace_back(item, color, qty);
     }
 
-    auto *iim = new InventoryModel(appearsIn ? InventoryModel::Mode::AppearsIn
-                                             : InventoryModel::Mode::ConsistsOf, list, nullptr);
+    auto *iim = new InventoryModel(mode, list, nullptr);
     iim->sort(0, Qt::DescendingOrder);
     return iim;
-}
-
-InventoryModel *QmlBrickLink::appearsInModel(const QVariantList &items, const QVariantList &colors)
-{
-    return inventoryModel(true, items, colors);
-}
-
-InventoryModel *QmlBrickLink::consistsOfModel(const QVariantList &items, const QVariantList &colors)
-{
-    return inventoryModel(false, items, colors);
 }
 
 QString QmlBrickLink::itemHtmlDescription(QmlItem item, QmlColor color, const QColor &highlight) const

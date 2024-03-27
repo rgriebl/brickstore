@@ -239,11 +239,12 @@ class InventoryModel : public QSortFilterProxyModel
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("")
-    Q_PROPERTY(int count READ count CONSTANT FINAL)
+    Q_PROPERTY(int count READ count NOTIFY countChanged FINAL)
     Q_PROPERTY(bool hasSections READ hasSections CONSTANT FINAL)
 
 public:
     enum class Mode { AppearsIn, ConsistsOf, CanBuild, Relationships };
+    Q_ENUM(Mode)
 
     struct SimpleLot
     {
@@ -272,11 +273,14 @@ public:
     InventoryModel(Mode mode, const QVector<SimpleLot> &simpleLots, QObject *parent);
 
     int count() const;
+    Q_SIGNAL void countChanged(int newCount);
     bool hasSections() const;
     Mode mode() const;
 
     using QSortFilterProxyModel::index;
     QModelIndex index(const AppearsInItem *const_ai) const;
+
+    void sort(int column, Qt::SortOrder order) override;
 
 protected:
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;

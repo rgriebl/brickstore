@@ -43,10 +43,7 @@ public:
         const BrickLink::Item *m_item = nullptr;
         const BrickLink::Color *m_color = nullptr;
         int m_quantity = 0;
-        Entry *m_section = nullptr;
-
         QString m_sectionTitle;
-        QVector<Entry *> m_sectionEntries;
 
         Q_DISABLE_COPY_MOVE(Entry)
     };

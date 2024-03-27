@@ -366,7 +366,6 @@ void InventoryWidget::updateModel(const QVector<BrickLink::InventoryModel::Simpl
                 if (d->m_model->index(row, 0).data(BrickLink::IsSectionHeaderRole).toBool())
                     d->m_view->setFirstColumnSpanned(row, QModelIndex { }, true);
             }
-            d->m_view->expandToDepth(1);
         }
 
         d->m_view->header()->setSectionResizeMode(BrickLink::InventoryModel::PictureColumn, QHeaderView::Fixed);
