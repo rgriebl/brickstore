@@ -11,20 +11,17 @@ AutoSizingDialog {
     relativeWidth: .8
     relativeHeight: .8
 
-    padding: 0
+    //padding: 0
 
     required property BS.Document document
 
-    property bool single: false
-    property bool none: false
-
+    property int selectionSize: 0
+    property var simpleLots: []
 
     function updateInfos() {
-        let selected = document.selectedLots.length
-        single = (selected === 1)
-        none = (selected === 0)
+        selectionSize = document.selectedLots.length
 
-        if (single) {
+        if (selectionSize === 1) {
             root.title = ''
             infoText.text = ''
 
@@ -34,14 +31,15 @@ AutoSizingDialog {
             priceGuide.item = lot.item
             priceGuide.color = lot.color
 
-            appearsIn.items = [ lot.item ]
-            appearsIn.colors = [ lot.color ]
+            simpleLots = [ { item: lot.item, color: lot.color, quantity: lot.quantity } ]
 
-            headerText.text = BL.BrickLink.itemHtmlDescription(lot.item, lot.color, Style.accentColor)
+            headerText.text = //"<center>"
+                    BL.BrickLink.itemHtmlDescription(lot.item, lot.color, Style.accentColor)
+                    //+ "</center>"
             headerText.visible = true
         } else {
-            root.title = (selected === 0) ? qsTr("Document statistics")
-                                          : qsTr("Multiple lots selected")
+            root.title = (selectionSize === 0) ? qsTr("Document statistics")
+                                               : qsTr("Multiple lots selected")
             headerText.visible = false
             headerText.text = ''
 
@@ -53,20 +51,14 @@ AutoSizingDialog {
             priceGuide.item = BL.BrickLink.noItem
             priceGuide.color = BL.BrickLink.noColor
 
-            let items = []
-            let colors = []
-
+            let sl = []
             document.selectedLots.forEach(function(lot) {
-                if (!lot.item.isNull && !lot.color.isNull) {
-                    items.push(lot.item)
-                    colors.push(lot.color)
-                }
+                if (!lot.item.isNull && !lot.color.isNull)
+                    sl.push({ item: lot.item, color: lot.color, quantity: lot.quantity })
             })
-
-            appearsIn.items = items
-            appearsIn.colors = colors
+            simpleLots = sl
         }
-        if (!tabBar.currentItem.enabled)
+        if (!tabBar.currentItem.visible)
             tabBar.currentIndex = 0
     }
 
@@ -76,22 +68,12 @@ AutoSizingDialog {
         priceGuide.item = BL.BrickLink.noItem
         priceGuide.color = BL.BrickLink.noColor
 
-        appearsIn.items = []
-        appearsIn.colors = []
+        simpleLots = []
     }
 
     onAboutToShow: { updateInfos() }
     onClosed: { clearInfos() }
 
-    footer: TabBar {
-        id: tabBar
-
-        currentIndex: swipeView.currentIndex
-
-        TabButton { text: qsTr("Info"); }
-        TabButton { text: qsTr("Price Guide"); enabled: root.single ? 1 : 0 }
-        TabButton { text: qsTr("Appears In"); enabled: !root.none }
-    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -102,18 +84,55 @@ AutoSizingDialog {
             horizontalAlignment: Text.AlignHCenter
             visible: false
             Layout.fillWidth: true
+            Layout.topMargin: 4
         }
+        TabBar {
+            id: tabBar
+
+            background: Item { }
+
+            Layout.fillWidth: true
+            visible: tabRepeater.model.length > 1
+
+            property var tabs: [
+                { label: qsTr("Info"),        index: 0, icon: "help-about" },
+                { label: qsTr("Price Guide"), index: 1, icon: "bricklink-priceguide" },
+                { label: qsTr("Appears In"),  index: 2, icon: "bootstrap-box-arrow-in-right" },
+                { label: qsTr("Consists Of"), index: 3, icon: "bootstrap-box-arrow-right" },
+                { label: qsTr("Can Build"),   index: 4, icon: "bootstrap-bricks" },
+                { label: qsTr("Related"),     index: 5, icon: "bootstrap-share-fill" }
+            ]
+
+            Repeater {
+                id: tabRepeater
+                model: {
+                    switch (root.selectionSize) {
+                    case  0: return tabBar.tabs.slice(0, 1)
+                    case  1: return tabBar.tabs
+                    default: return tabBar.tabs.filter((_, idx) => idx !== 1)
+                    }
+                }
+                TabButton {
+                    icon.name: modelData.icon
+                    text: Style.smallSize ? undefined : modelData.label
+                    property int swipeIndex: modelData.index
+                    property bool current: swipeView.currentIndex === swipeIndex
+                    onCurrentChanged: if (current) TabBar.tabBar.currentIndex = TabBar.index
+                }
+            }
+        }
+
         SwipeView {
             id: swipeView
             interactive: false
-            currentIndex: tabBar.currentIndex
+            currentIndex: tabBar.currentItem?.swipeIndex ?? 0
             clip: true
             Layout.fillWidth: true
             Layout.fillHeight: true
 
             StackLayout {
                 clip: true
-                currentIndex: root.single ? 1 : 0
+                currentIndex: (root.selectionSize === 1) ? 1 : 0
 
                 Label {
                     id: infoText
@@ -130,7 +149,7 @@ AutoSizingDialog {
 
             ScrollableLayout {
                 id: pgScroller
-                visible: root.single
+                visible: root.selectionSize === 1
 
                 SwipeView.onIsCurrentItemChanged: { if (SwipeView.isCurrentItem) flashScrollIndicators() }
 
@@ -147,9 +166,29 @@ AutoSizingDialog {
                 }
             }
 
-            AppearsInWidget {
+            InventoryWidget {
                 id: appearsIn
-                document: root.document
+                mode: BL.InventoryModel.Mode.AppearsIn
+                simpleLots: root.simpleLots
+                visible: root.selectionSize > 0
+            }
+            InventoryWidget {
+                id: consistsOf
+                mode: BL.InventoryModel.Mode.ConsistsOf
+                simpleLots: root.simpleLots
+                visible: root.selectionSize > 0
+            }
+            InventoryWidget {
+                id: canBuild
+                mode: BL.InventoryModel.Mode.CanBuild
+                simpleLots: root.simpleLots
+                visible: root.selectionSize > 0
+            }
+            InventoryWidget {
+                id: related
+                mode: BL.InventoryModel.Mode.Relationships
+                simpleLots: root.simpleLots
+                visible: root.selectionSize > 0
             }
         }
     }

@@ -57,7 +57,6 @@ qt_add_qml_module(mobile_module
         ActionMenuItem.qml
         ActionMenuSeparator.qml
         AnnouncementsDialog.qml
-        AppearsInWidget.qml
         AutoSizingMenu.qml
         AutoSizingDialog.qml
         CheckButton.qml
@@ -75,6 +74,7 @@ qt_add_qml_module(mobile_module
         ImportWantedListDialog.qml
         IncDecPricesDialog.qml
         InfoWidget.qml
+        InventoryWidget.qml
         Main.qml
         MainWindow.qml
         PriceGuideWidget.qml

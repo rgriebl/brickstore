@@ -90,6 +90,7 @@ Control {
 
         PartRenderer {
             id: info3D
+            renderController.clearColor: "transparent"
             Connections {
                 target: info3D.renderController
                 function onCanRenderChanged(canRender : bool) {
@@ -105,30 +106,29 @@ Control {
         anchors {
             bottom: parent.bottom
             left: parent.left
+            leftMargin: Style.smallSize ? 8 : 0
             right: parent.right
+            rightMargin: Style.smallSize ? 8 : 0
         }
-        Basic.Button {
-            flat: true
+
+        Button {
+            id: switch2d3dButton
             font.bold: true
-            palette.windowText: "black"
-            palette.buttonText: "black"
-            leftPadding: 8
-            bottomPadding: 8
-            topPadding: 16
-            rightPadding: 16
             text: root.is3D ? "2D" : "3D"
             onClicked: { root.is3D = !root.is3D; root.prefer3D = root.is3D }
+
+            property color buttonOverlayColor: root.is3D ? Style.primaryTextColor : "black"
+
+            Binding {
+                target: switch2d3dButton.contentItem
+                property: "color"
+                value: switch2d3dButton.buttonOverlayColor
+            }
         }
         Item { Layout.fillWidth: true }
-        Basic.Button {
-            flat: true
-            palette.windowText: "black"
-            palette.buttonText: "black"
+        Button {
             icon.name: root.is3D ? "zoom-fit-best" : "view-refresh"
-            rightPadding: 8
-            bottomPadding: 8
-            topPadding: 16
-            leftPadding: 16
+            icon.color: switch2d3dButton.buttonOverlayColor
             onClicked: {
                 if (root.is3D)
                     info3D.renderController.resetCamera();
