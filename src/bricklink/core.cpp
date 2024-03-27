@@ -718,11 +718,10 @@ QString Core::itemHtmlDescription(const Item *item, const Color *color, const QC
         QString pccStr;
         QString altIdStr;
 
-        if (!QByteArray("MP").contains(item->itemTypeId())) {
-            typeStr = uR"(<i><font color=")" + Utility::textColor(highlight).name()
-                      + uR"(" style="background-color: )" + highlight.name() + uR"(;">&nbsp;)"
-                      + item->itemType()->name() + uR"(&nbsp;</font></i>&nbsp;&nbsp;)";
-        }
+        typeStr = uR"(<i><font color=")" + Utility::textColor(highlight).name()
+                  + uR"(" style="background-color: )" + highlight.name() + uR"(;">&nbsp;)"
+                  + item->itemType()->name() + uR"(&nbsp;</font></i>&nbsp;&nbsp;)";
+
         if (color && color->id()) {
             QColor c = color->color();
             colorStr = uR"(<b><font color=")" + Utility::textColor(c).name()
@@ -767,8 +766,8 @@ QString Core::itemHtmlDescription(const Item *item, const Color *color, const QC
             }
         }
 
-        return u"<center><b>" + QLatin1String(item->id()) + u"</b>&nbsp; "
-               + typeStr + colorStr + item->name() + altIdStr + pccStr + u"</center>";
+        return u"<b>" + QLatin1String(item->id()) + u"</b>&nbsp; "
+               + typeStr + colorStr + item->name() + altIdStr + pccStr;
     } else {
         return { };
     }

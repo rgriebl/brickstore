@@ -300,7 +300,7 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
 
     QString s = BrickLink::core()->itemHtmlDescription(m_item, m_color,
                                                        palette().color(QPalette::Highlight));
-    w_text->setText(s);
+    w_text->setText(u"<center>" + s + u"</center>");
     w_image->setPixmap({ });
     w_3d->setEnabled(w_ldraw->canRender());
     w_reloadRescale->setEnabled(m_item);
