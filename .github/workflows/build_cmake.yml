@@ -695,5 +695,5 @@ jobs:
         SNAPCRAFT_HAS_TTY: "true"
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y install lxd snapcraft
-        yes | snapcraft promote --from-channel edge --to-channel stable brickstore
+        (yes || true) | snapcraft promote --from-channel edge --to-channel stable brickstore
       shell: bash
