@@ -21,13 +21,13 @@
 #include "utility.h"
 
 
-static int naturalCompareNumbers(const QChar *&n1, const QChar *&n2)
+static int naturalCompareNumbers(const QChar *&n1, const QChar *n1e, const QChar *&n2, const QChar *n2e)
 {
     int result = 0;
 
     while (true) {
-        const auto d1 = (n1++)->digitValue();
-        const auto d2 = (n2++)->digitValue();
+        const auto d1 = (++n1 < n1e) ? n1->digitValue() : -1;
+        const auto d2 = (++n2 < n2e) ? n2->digitValue() : -1;
 
         if (d1 == -1 && d2 == -1) {
             --n1; --n2;
@@ -73,8 +73,7 @@ int Utility::naturalCompare(const QString &name1, const QString &name2)
 
         // 2) check for numbers
         if ((n1 < n1e) && n1->isDigit() && (n2 < n2e) && n2->isDigit()) {
-            int d = naturalCompareNumbers(n1, n2);
-            if (d)
+            if (int d = naturalCompareNumbers(n1, n1e, n2, n2e))
                 return d;
             special = true;
         }
