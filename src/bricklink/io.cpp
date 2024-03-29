@@ -62,8 +62,8 @@ namespace BrickLink {
 
 QString IO::toBrickLinkXML(const LotList &lots)
 {
-    bool doubleEscapedComments = core()->isApiQuirkEnabled(ApiQuirk::InventoryCommentsAreDoubleEscaped);
-    bool doubleEscapedRemarks = core()->isApiQuirkEnabled(ApiQuirk::InventoryRemarksAreDoubleEscaped);
+    bool doubleEscapedComments = core()->isApiQuirkActive(ApiQuirk::InventoryCommentsAreDoubleEscaped);
+    bool doubleEscapedRemarks = core()->isApiQuirkActive(ApiQuirk::InventoryRemarksAreDoubleEscaped);
 
     QString out;
     QXmlStreamWriter xml(&out);
@@ -135,11 +135,11 @@ IO::ParseResult IO::fromBrickLinkXML(const QByteArray &data, Hint hint, const QD
 {
     //stopwatch loadXMLWatch("Load XML");
 
-    const bool doubleEscapedComments = core()->isApiQuirkEnabled(ApiQuirk::InventoryCommentsAreDoubleEscaped);
-    const bool doubleEscapedRemarks = core()->isApiQuirkEnabled(ApiQuirk::InventoryRemarksAreDoubleEscaped);
+    const bool doubleEscapedComments = core()->isApiQuirkActive(ApiQuirk::InventoryCommentsAreDoubleEscaped);
+    const bool doubleEscapedRemarks = core()->isApiQuirkActive(ApiQuirk::InventoryRemarksAreDoubleEscaped);
     // The remove(',') on QTY is a workaround for the broken Order XML generator: the QTY
     // field is generated with thousands-separators enabled (e.g. 1,752 instead of 1752)
-    const bool qtyHasComma = (hint == Hint::Order) && core()->isApiQuirkEnabled(ApiQuirk::OrderQtyHasComma);
+    const bool qtyHasComma = (hint == Hint::Order) && core()->isApiQuirkActive(ApiQuirk::OrderQtyHasComma);
 
     ParseResult pr;
     QXmlStreamReader xml(data);
@@ -358,8 +358,8 @@ QString IO::toInventoryRequest(const LotList &lots)
 QString IO::toBrickLinkUpdateXML(const LotList &lots,
                                  const std::function<const Lot *(const Lot *)> &differenceBaseLot)
 {
-    bool doubleEscapedComments = core()->isApiQuirkEnabled(ApiQuirk::InventoryCommentsAreDoubleEscaped);
-    bool doubleEscapedRemarks = core()->isApiQuirkEnabled(ApiQuirk::InventoryRemarksAreDoubleEscaped);
+    bool doubleEscapedComments = core()->isApiQuirkActive(ApiQuirk::InventoryCommentsAreDoubleEscaped);
+    bool doubleEscapedRemarks = core()->isApiQuirkActive(ApiQuirk::InventoryRemarksAreDoubleEscaped);
 
     QString out;
     QXmlStreamWriter xml(&out);

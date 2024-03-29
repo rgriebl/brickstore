@@ -508,14 +508,22 @@ void Application::checkRestart()
 QCoro::Task<bool> Application::checkBrickLinkLogin()
 {
     if (!Config::inst()->brickLinkUsername().isEmpty()) {
-        if (!Config::inst()->brickLinkPassword().isEmpty()) {
-            co_return true;
-        } else {
+        if (Config::inst()->brickLinkPassword().isEmpty()) {
             if (auto pw = co_await UIHelpers::getPassword(tr("Please enter the password for the BrickLink account %1:")
                                                           .arg(u"<b>" + Config::inst()->brickLinkUsername() + u"</b>"))) {
                 Config::inst()->setBrickLinkPassword(*pw, true /*do not save*/);
-                co_return true;
             }
+        }
+        if (const auto pw = Config::inst()->brickLinkPassword(); !pw.isEmpty()) {
+            static bool shown = false;
+
+            if (BrickLink::core()->isApiQuirkActive(BrickLink::ApiQuirk::PasswordLimitedTo15Characters)
+                    && (pw.length() > 15) && !shown) {
+                co_await UIHelpers::warning(tr("You have entered a BrickLink password that is longer than 15 characters, which is not accepted by BrickLink. "
+                                               "BrickStore will use it anyway, but expect to get authentication errors."));
+                shown = true;
+            }
+            co_return true;
         }
     } else {
         if (co_await UIHelpers::question(tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?")

@@ -1095,7 +1095,7 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
 
     // BrickLink quirk: a few of the fields can contain unescaped '&' characters
     // we try to fix this by finding all '&' that are not followed by a ';' within 6 characters.
-    if (core()->isApiQuirkEnabled(ApiQuirk::OrderXmlHasUnescapedFields)) {
+    if (core()->isApiQuirkActive(ApiQuirk::OrderXmlHasUnescapedFields)) {
         QByteArray fixed(data_);
         qsizetype pos = 0;
         while (pos >= 0) {

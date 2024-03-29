@@ -110,6 +110,7 @@ private:
     std::vector<Relationship>        m_relationships;
     std::vector<RelationshipMatch>   m_relationshipMatches;
     QHash<QByteArray, QString>       m_apiKeys;
+    QSet<ApiQuirk>                   m_apiQuirks;
 
     uint m_latestChangelogId = 0;
 

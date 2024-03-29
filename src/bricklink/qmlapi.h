@@ -107,10 +107,9 @@ public:
     Q_INVOKABLE QString iconForVatType(BrickLink::VatType vatType) const;
 
     QVariantList knownApiQuirks() const;
-    Q_INVOKABLE bool isApiQuirkEnabled(BrickLink::ApiQuirk apiQuirk) const;
+    Q_INVOKABLE bool isApiQuirkActive(BrickLink::ApiQuirk apiQuirk) const;
     Q_INVOKABLE QString apiQuirkDescription(BrickLink::ApiQuirk apiQuirk) const;
-    Q_INVOKABLE void enableApiQuirk(BrickLink::ApiQuirk apiQuirk);
-    Q_INVOKABLE void disableApiQuirk(BrickLink::ApiQuirk apiQuirk);
+    Q_INVOKABLE void setApiQuirkActive(BrickLink::ApiQuirk apiQuirk, bool active);
 
 signals:
     void priceGuideUpdated(BrickLink::PriceGuide *priceGuide);

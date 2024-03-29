@@ -14,6 +14,7 @@ enum class ApiQuirk : uint {
     OrderXmlHasUnescapedFields        = 2,
     InventoryCommentsAreDoubleEscaped = 3,
     InventoryRemarksAreDoubleEscaped  = 4,
+    PasswordLimitedTo15Characters     = 5,
 };
 
 enum class Time         : uint { PastSix, Current, Count };

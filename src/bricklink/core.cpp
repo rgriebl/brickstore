@@ -346,7 +346,6 @@ Core *Core::create(const QString &dataDir, const QString &updateUrl, quint64 phy
 
 Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem)
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
-    , m_activeApiQuirks(~1ULL)
     , m_noImageIcon(QIcon::fromTheme(u"image-missing-large"_qs))
     , m_transfer(new Transfer(this))
     , m_authenticatedTransfer(new Transfer(std::make_unique<PersistentCookieJar>(datadir, u"BrickLink"_qs), this))
@@ -363,14 +362,6 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
 #if defined(BS_BACKEND)
     Q_UNUSED(physicalMem)
 #endif
-
-    QStringList quirks;
-    for (const auto apiQuirk : knownApiQuirks()) {
-        if (isApiQuirkEnabled(apiQuirk))
-            quirks << apiQuirkDescription(apiQuirk);
-    }
-    if (!quirks.isEmpty())
-        qInfo().noquote() << "Currently active BrickLink API quirks:\n " << quirks.join(u"\n  "_qs);
 
     m_transferStatId = AppStatistics::inst()->addSource(u"HTTP requests"_qs);
 
@@ -1071,22 +1062,16 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot, uint startAtChangelogId, c
     }
 }
 
-const QVector<ApiQuirk> Core::knownApiQuirks()
+const QSet<ApiQuirk> Core::knownApiQuirks()
 {
-    static const QVector<ApiQuirk> known {
+    static const QSet<ApiQuirk> known {
         ApiQuirk::OrderQtyHasComma,
         ApiQuirk::OrderXmlHasUnescapedFields,
         ApiQuirk::InventoryCommentsAreDoubleEscaped,
-        ApiQuirk::InventoryRemarksAreDoubleEscaped
+        ApiQuirk::InventoryRemarksAreDoubleEscaped,
+        ApiQuirk::PasswordLimitedTo15Characters,
     };
     return known;
-}
-
-bool Core::isApiQuirkEnabled(ApiQuirk apiQuirk)
-{
-    if (uint(apiQuirk) && (uint(apiQuirk) < (sizeof(m_activeApiQuirks) * 8)))
-        return m_activeApiQuirks & (1ULL << uint(apiQuirk));
-    return false;
 }
 
 QString Core::apiQuirkDescription(ApiQuirk apiQuirk)
@@ -1095,16 +1080,19 @@ QString Core::apiQuirkDescription(ApiQuirk apiQuirk)
     return QString::fromLatin1(me.valueToKey(static_cast<int>(apiQuirk)));
 }
 
-void Core::enableApiQuirk(ApiQuirk apiQuirk)
+bool Core::isApiQuirkActive(ApiQuirk apiQuirk)
 {
-    if (uint(apiQuirk) && (uint(apiQuirk) < (sizeof(m_activeApiQuirks) * 8)))
-        m_activeApiQuirks |= (1ULL << uint(apiQuirk));
+    return m_database->m_apiQuirks.contains(apiQuirk);
 }
 
-void Core::disableApiQuirk(ApiQuirk apiQuirk)
+QSet<ApiQuirk> Core::activeApiQuirks() const
 {
-    if (uint(apiQuirk) && (uint(apiQuirk) < (sizeof(m_activeApiQuirks) * 8)))
-        m_activeApiQuirks &= ~(1ULL << uint(apiQuirk));
+    return m_database->m_apiQuirks;
+}
+
+void Core::setActiveApiQuirks(const QSet<ApiQuirk> &apiQuirks)
+{
+    m_database->m_apiQuirks = apiQuirks;
 }
 
 QSize Core::standardPictureSize() const

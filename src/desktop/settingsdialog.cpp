@@ -798,13 +798,14 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     });
     connect(w_bl_password, &QLineEdit::textChanged,
             this, [this](const QString &s) {
-        bool isWrong = (s.length() > 15);
-        bool wasWrong = w_bl_password->property("showInputError").toBool();
+        bool isTooLong = BrickLink::core()->isApiQuirkActive(BrickLink::ApiQuirk::PasswordLimitedTo15Characters)
+                         && (s.length() > 15);
+        bool wasTooLong = w_bl_password->property("showInputError").toBool();
 
-        if (isWrong != wasWrong) {
-            w_bl_password->setProperty("showInputError", isWrong);
+        if (isTooLong != wasTooLong) {
+            w_bl_password->setProperty("showInputError", isTooLong);
 
-            if (isWrong) {
+            if (isTooLong) {
                 QString msg = tr("BrickLink's maximum password length is 15.");
                 w_bl_password->setToolTip(msg);
                 QToolTip::showText(w_bl_password->mapToGlobal(w_bl_password->rect().bottomLeft()),

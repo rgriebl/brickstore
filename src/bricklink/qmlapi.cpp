@@ -1033,9 +1033,9 @@ QVariantList QmlBrickLink::knownApiQuirks() const
     return result;
 }
 
-bool QmlBrickLink::isApiQuirkEnabled(ApiQuirk apiQuirk) const
+bool QmlBrickLink::isApiQuirkActive(ApiQuirk apiQuirk) const
 {
-    return BrickLink::core()->isApiQuirkEnabled(apiQuirk);
+    return BrickLink::core()->isApiQuirkActive(apiQuirk);
 }
 
 QString QmlBrickLink::apiQuirkDescription(ApiQuirk apiQuirk) const
@@ -1043,14 +1043,14 @@ QString QmlBrickLink::apiQuirkDescription(ApiQuirk apiQuirk) const
     return BrickLink::core()->apiQuirkDescription(apiQuirk);
 }
 
-void QmlBrickLink::enableApiQuirk(ApiQuirk apiQuirk)
+void QmlBrickLink::setApiQuirkActive(ApiQuirk apiQuirk, bool active)
 {
-    BrickLink::core()->enableApiQuirk(apiQuirk);
-}
-
-void QmlBrickLink::disableApiQuirk(ApiQuirk apiQuirk)
-{
-    BrickLink::core()->disableApiQuirk(apiQuirk);
+    auto currentlyActive = BrickLink::core()->activeApiQuirks();
+    if (active && !currentlyActive.contains(apiQuirk))
+        currentlyActive.insert(apiQuirk);
+    else if (!active && currentlyActive.contains(apiQuirk))
+        currentlyActive.remove(apiQuirk);
+    BrickLink::core()->setActiveApiQuirks(currentlyActive);
 }
 
 char QmlBrickLink::firstCharInString(const QString &str)

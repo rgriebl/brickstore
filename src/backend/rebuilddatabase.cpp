@@ -171,6 +171,9 @@ int RebuildDatabase::exec()
     printf("\nSTEP 8: Computing the database...\n");
 
     blti.finalizeDatabase();
+    auto apiQuirks = BrickLink::Core::knownApiQuirks();
+    // remove any fixed quirks here
+    blti.setApiQuirks(apiQuirks);
     blti.setApiKeys({ { "affiliate", m_affiliateApiKey } });
 
     /////////////////////////////////////////////////////////////////////////////////

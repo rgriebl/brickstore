@@ -24,6 +24,7 @@ public:
 
     bool import(const QString &path);
     void finalizeDatabase();
+    void setApiQuirks(const QSet<ApiQuirk> &apiQuirks);
     void setApiKeys(const QHash<QByteArray, QString> &apiKeys);
 
     enum ImportInventoriesStep {
