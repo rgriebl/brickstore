@@ -7,7 +7,6 @@ import Mobile
 import Qt5Compat.GraphicalEffects
 import BrickStore as BS
 import BrickLink as BL
-import "utils.js" as Utils
 
 
 FullscreenDialog {
@@ -51,6 +50,7 @@ FullscreenDialog {
             clip: true
 
             ScrollIndicator.vertical: ScrollIndicator { }
+            FlashScrollIndicators { id: flashScroller; target: table }
 
             model: BS.SortFilterProxyModel {
                 id: sortFilterModel
@@ -172,11 +172,11 @@ FullscreenDialog {
 
         onCurrentIndexChanged: {
             table.forceLayout()
-            Utils.flashScrollIndicators(table)
+            flashScroller.flash()
         }
     }
 
     Component.onCompleted: {
-        Utils.flashScrollIndicators(table)
+        flashScroller.flash()
     }
 }

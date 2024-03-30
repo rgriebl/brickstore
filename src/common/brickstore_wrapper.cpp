@@ -321,14 +321,8 @@ QString QmlBrickStore::cacheStats() const
 QmlDocument::QmlDocument(Document *doc)
     : QAbstractProxyModel(doc)
     , m_doc(doc)
-    , m_forceLayoutDelay(new QTimer(this))
     , m_columnModel(new QmlDocumentColumnModel(this))
 {
-    m_forceLayoutDelay->setInterval(100ms);
-    m_forceLayoutDelay->setSingleShot(true);
-    connect(m_forceLayoutDelay, &QTimer::timeout,
-            this, &QmlDocument::forceLayout);
-
     setDocument(doc);
 
     // relay signals for the QML API
@@ -537,21 +531,20 @@ void QmlDocument::setDocument(Document *doc)
             update();
             endResetModel();
             m_columnModel->endResetModel();
-            emitForceLayout();
         });
         connect(m_doc, &Document::columnSizeChanged,
                 m_connectionContext, [this](int li, int /*size*/) {
             emit headerDataChanged(Qt::Horizontal, l2v[li], l2v[li]);
-            emitForceLayout();
+            emit columnLayoutChanged();
         });
         connect(m_doc, &Document::columnHiddenChanged,
                 m_connectionContext, [this](int li, bool /*hidden*/) {
             emit headerDataChanged(Qt::Horizontal, l2v[li], l2v[li]);
-            emitForceLayout();
+            emit columnLayoutChanged();
         });
         connect(m_doc, &Document::columnLayoutChanged,
                 m_connectionContext, [this]() {
-            emitForceLayout();
+            emit columnLayoutChanged();
         });
 
         connect(m_doc->model(), &QAbstractItemModel::dataChanged,
@@ -708,11 +701,6 @@ void QmlDocument::update()
         l2v[li] = layout[li].m_visualIndex;
         v2l[l2v[li]] = li;
     }
-}
-
-void QmlDocument::emitForceLayout()
-{
-    m_forceLayoutDelay->start();
 }
 
 void QmlDocument::internalMoveColumn(int viFrom, int viTo)

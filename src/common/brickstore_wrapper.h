@@ -118,7 +118,7 @@ public:
     Q_INVOKABLE void costAdjust(bool isFixed, double value);
 
 signals:
-    void forceLayout();
+    void columnLayoutChanged();
 
     void closeAllViewsForDocument();
     void requestActivation();
@@ -149,7 +149,6 @@ private:
     Document *document() const;
 
     void update();
-    void emitForceLayout();
 
     void internalHideColumn(int vi, bool visible);
     void internalMoveColumn(int viFrom, int viTo);
@@ -160,7 +159,6 @@ private:
 
     QPointer<Document> m_doc;
     QObject *m_connectionContext = nullptr;
-    QTimer *m_forceLayoutDelay = nullptr;
     QmlDocumentColumnModel *m_columnModel = nullptr;
 
     QPointer<QmlDocumentLots> m_qmlLots;

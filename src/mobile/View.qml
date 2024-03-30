@@ -5,7 +5,6 @@ pragma ComponentBehavior: Bound
 
 import Mobile
 import Qt.labs.qmlmodels
-import "utils.js" as Utils
 import BrickStore as BS
 import BrickLink as BL
 
@@ -25,10 +24,6 @@ Page {
         Component.onCompleted: {
             setSource("SelectionInfoDialog.qml", { "document": root.document })
         }
-    }
-
-    Component.onCompleted: {
-        Utils.flashScrollIndicators(table)
     }
 
     focus: true
@@ -161,8 +156,6 @@ Page {
 
         TableView {
             id: table
-//            ScrollIndicator.horizontal: ScrollIndicator { id: hbar; active: vbar.active }
-//            ScrollIndicator.vertical: ScrollIndicator { id: vbar; active: hbar.active }
             ScrollBar.horizontal: ScrollBar { id: hbar; minimumSize: 0.07; active: vbar.active }
             ScrollBar.vertical: ScrollBar { id: vbar; minimumSize: 0.07; active: hbar.active }
 
@@ -178,7 +171,7 @@ Page {
 
             FontMetrics { id: fontMetrics; font: root.font }
             property int cellHeight: fontMetrics.height * 2 * BS.Config.rowHeightPercent / 100 + 8
-            onCellHeightChanged: Qt.callLater(function() { forceLayout() })
+            onCellHeightChanged: forceLayout()
 
             columnWidthProvider: (c) => table.model.headerData(c, Qt.Horizontal, Qt.CheckStateRole)
                                  ? 0 : table.model.headerData(c, Qt.Horizontal, Qt.SizeHintRole)
@@ -230,7 +223,7 @@ Page {
 
             Connections {
                 target: root.document
-                function onForceLayout() { table.forceLayout() }
+                function onColumnLayoutChanged() { Qt.callLater(table.forceLayout) }
             }
 
             delegate: DelegateChooser {

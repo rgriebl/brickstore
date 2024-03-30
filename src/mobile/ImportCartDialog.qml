@@ -7,7 +7,6 @@ import Mobile
 import Qt5Compat.GraphicalEffects
 import BrickLink as BL
 import BrickStore as BS
-import "utils.js" as Utils
 
 
 FullscreenDialog {
@@ -34,6 +33,7 @@ FullscreenDialog {
             clip: true
 
             ScrollIndicator.vertical: ScrollIndicator { }
+            FlashScrollIndicators { id: flashScroller; target: table }
 
             model: BS.SortFilterProxyModel {
                 id: sortFilterModel
@@ -41,7 +41,7 @@ FullscreenDialog {
                 sortOrder: Qt.DescendingOrder
                 sortColumn: 0
                 filterSyntax: BS.SortFilterProxyModel.FixedString
-                filterString: domesticOrInternational.currentIndex ? "true" : "false"
+                filterString: domesticOrInternational.currentIndex ? "false" : "true"
 
                 Component.onCompleted: {
                     filterRoleName = "domestic"
@@ -74,7 +74,7 @@ FullscreenDialog {
                         Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
                         asynchronous: true
-                        source: "qrc:/assets/flags/" + delegate.cart.countryCode
+                        source: delegate.cart ? "qrc:/assets/flags/" + delegate.cart.countryCode : ''
                         fillMode: Image.PreserveAspectFit
                         sourceSize.height: fm.height * .75
                         sourceSize.width: fm.height * 1.5
@@ -93,25 +93,25 @@ FullscreenDialog {
                     }
                     Label {
                         id: label
-                        text: delegate.cart.storeName + ' (' + delegate.cart.sellerName + ')'
+                        text: delegate.cart?.storeName + ' (' + delegate.cart?.sellerName + ')'
                         font.bold: true
                         elide: Text.ElideRight
                         maximumLineCount: 1
                         Layout.fillWidth: true
                     }
                     Label {
-                        text: delegate.cart.lastUpdated.toLocaleDateString(Locale.ShortFormat)
+                        text: delegate.cart?.lastUpdated.toLocaleDateString(Locale.ShortFormat) ?? ''
                         Layout.alignment: Qt.AlignRight
                     }
                     Label {
                         text: qsTr("%1 items (%2 lots)")
-                        .arg(Number(delegate.cart.itemCount).toLocaleString())
-                        .arg(Number(delegate.cart.lotCount).toLocaleString())
+                        .arg(Number(delegate.cart?.itemCount).toLocaleString())
+                        .arg(Number(delegate.cart?.lotCount).toLocaleString())
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                     Label {
-                        text: BS.Currency.format(delegate.cart.total, delegate.cart.currencyCode, 2)
+                        text: BS.Currency.format(delegate.cart?.total, delegate.cart?.currencyCode, 2)
                         Layout.alignment: Qt.AlignRight
                     }
                 }
@@ -137,17 +137,17 @@ FullscreenDialog {
     footer: TabBar {
         id: domesticOrInternational
 
-        TabButton { text: qsTr("International") }
         TabButton { text: qsTr("Domestic") }
+        TabButton { text: qsTr("International") }
 
         onCurrentIndexChanged: {
-            table.forceLayout()
-            Utils.flashScrollIndicators(table)
+            // table.forceLayout()
+            flashScroller.flash(table)
         }
     }
 
     Component.onCompleted: {
         Qt.callLater(function() { BL.BrickLink.carts.startUpdate() })
-        Utils.flashScrollIndicators(table)
+        flashScroller.flash(table)
     }
 }

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import Mobile
-import "utils.js" as Utils
 
 
 Flickable {
@@ -16,7 +15,7 @@ Flickable {
 
     interactive: contentHeight > height
 
-    function flashScrollIndicators() { Utils.flashScrollIndicators(root) }
-
     ScrollIndicator.vertical: ScrollIndicator { }
+    FlashScrollIndicators { id: flasher; target: root }
+    function flashScrollIndicators() { flasher.flash() }
 }

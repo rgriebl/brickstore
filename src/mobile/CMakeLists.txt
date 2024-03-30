@@ -63,6 +63,7 @@ qt_add_qml_module(mobile_module
         CornerTag.qml
         DialogLoader.qml
         DeveloperConsole.qml
+        FlashScrollIndicators.qml
         FullscreenDialog.qml
         GridCell.qml
         GridHeader.qml
@@ -91,7 +92,7 @@ qt_add_qml_module(mobile_module
         InputDialog.qml
         ProgressDialog.qml
         ToastMessage.qml
-        utils.js
+
 
     RESOURCES
         qtquickcontrols2.conf

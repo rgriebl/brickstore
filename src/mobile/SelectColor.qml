@@ -7,7 +7,6 @@ import Mobile
 import BrickLink as BL
 import BrickStore as BS
 import QtQuick.Window
-import "utils.js" as Utils
 
 
 AutoSizingDialog {
@@ -53,7 +52,7 @@ AutoSizingDialog {
         if (table.currentIndex >= 0)
             table.positionViewAtIndex(table.currentIndex, ListView.Center)
 
-        Utils.flashScrollIndicators(table)
+        flashScroller.flash()
     }
 
     ColumnLayout {
@@ -117,6 +116,7 @@ AutoSizingDialog {
             clip: true
 
             ScrollIndicator.vertical: ScrollIndicator { active: true }
+            FlashScrollIndicators { id: flashScroller; target: table }
 
             currentIndex: colorModel.indexOfColor(root.color).row
 

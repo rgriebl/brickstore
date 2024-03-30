@@ -6,7 +6,6 @@ pragma ComponentBehavior: Bound
 import Mobile
 import BrickLink as BL
 import BrickStore as BS
-import "utils.js" as Utils
 
 
 FullscreenDialog {
@@ -33,6 +32,7 @@ FullscreenDialog {
             clip: true
 
             ScrollIndicator.vertical: ScrollIndicator { }
+            FlashScrollIndicators { id: flashScroller; target: table }
 
             model: BS.SortFilterProxyModel {
                 id: sortFilterModel
@@ -64,26 +64,26 @@ FullscreenDialog {
 
                     Label {
                         id: label
-                        text: delegate.wantedList.name
+                        text: delegate.wantedList?.name ?? ''
                         font.bold: true
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                     Label {
-                        text: delegate.wantedList.description
+                        text: delegate.wantedList?.description ?? ''
                         Layout.alignment: Qt.AlignRight
                     }
                     Label {
                         text: qsTr("%1 items (%2 lots)")
-                        .arg(Number(delegate.wantedList.itemCount).toLocaleString())
-                        .arg(Number(delegate.wantedList.lotCount).toLocaleString())
+                        .arg(Number(delegate.wantedList?.itemCount).toLocaleString())
+                        .arg(Number(delegate.wantedList?.lotCount).toLocaleString())
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
                     Label {
                         text: qsTr("%1 items left, %2% filled")
-                        .arg(Number(delegate.wantedList.itemLeftCount).toLocaleString())
-                        .arg(delegate.wantedList.filled * 100)
+                        .arg(Number(delegate.wantedList?.itemLeftCount).toLocaleString())
+                        .arg(delegate.wantedList?.filled * 100)
                         Layout.alignment: Qt.AlignRight
                     }
                 }
@@ -109,6 +109,6 @@ FullscreenDialog {
 
     Component.onCompleted: {
         Qt.callLater(function() { BL.BrickLink.wantedLists.startUpdate() })
-        Utils.flashScrollIndicators(table)
+        flashScroller.flash()
     }
 }

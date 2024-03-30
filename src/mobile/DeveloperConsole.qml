@@ -5,7 +5,6 @@ pragma ComponentBehavior: Bound
 
 import Mobile
 import BrickStore as BS
-import "utils.js" as Utils
 
 
 AutoSizingDialog {
@@ -13,28 +12,29 @@ AutoSizingDialog {
     title: qsTr("Error Log")
     keepPaddingInSmallMode: true
 
-    onOpened: {
-        Utils.flashScrollIndicators(log)
-        Qt.callLater(function() { log.positionViewAtEnd() })
-    }
+    onOpened: Qt.callLater(function() { logView.positionViewAtEnd() })
 
     ListView {
-        id: log
+        id: logView
         anchors.fill: parent
         clip: true
 
         ScrollIndicator.vertical: ScrollIndicator { }
+        FlashScrollIndicators {
+            target: logView
+            trigger: root.opened
+        }
 
-        readonly property var typeInfo: ({
-                                             0: { name: "Debug",    fg: "#000000", bg: "#00ff00" },
-                                             1: { name: "Warning",  fg: "#000000", bg: "#ffff00" },
-                                             2: { name: "Critical", fg: "#ff0000", bg: "#000000" },
-                                             3: { name: "Fatal",    fg: "#ffffff", bg: "#ff0000" },
-                                             4: { name: "Info",     fg: "#ffffff", bg: "#0000ff" },
-                                         })
-
-        readonly property var categoryColors: [ "#e81717", "#e8e817", "#17e817", "#17e8e8", "#1717e8", "#e817e8" ]
-
+        readonly property var typeInfo:  [
+            { name: "Debug",    fg: "#000000", bg: "#00ff00" },
+            { name: "Warning",  fg: "#000000", bg: "#ffff00" },
+            { name: "Critical", fg: "#ff0000", bg: "#000000" },
+            { name: "Fatal",    fg: "#ffffff", bg: "#ff0000" },
+            { name: "Info",     fg: "#ffffff", bg: "#0000ff" },
+        ]
+        readonly property var categoryColors: [
+            "#e81717", "#e8e817", "#17e817", "#17e8e8", "#1717e8", "#e817e8"
+        ]
 
         model: BS.BrickStore.debug.log
         delegate: ColumnLayout {
@@ -49,7 +49,7 @@ AutoSizingDialog {
             RowLayout {
                 Label {
                     id: typeLabel
-                    property var info: log.typeInfo[delegate.type]
+                    property var info: logView.typeInfo[delegate.type]
 
                     text: '  ' + info.name + '  '
                     color: info.fg
@@ -66,9 +66,9 @@ AutoSizingDialog {
                         anchors.fill: parent
                         color: "transparent"
                         border.width: 1
-                        border.color: log.categoryColors[(delegate.category.length
+                        border.color: logView.categoryColors[(delegate.category.length
                                                           * delegate.category.codePointAt(0))
-                            % log.categoryColors.length]
+                            % logView.categoryColors.length]
                         radius: height / 2
                     }
                 }
