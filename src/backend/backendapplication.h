@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QCommandLineParser>
+#include <QCoro/QCoroTask>
 
 
 class BackendApplication : public QObject
@@ -15,9 +16,11 @@ public:
     ~BackendApplication() override;
 
     void init();
-    void afterInit();
-    void checkRestart();
+    void afterInit() { };
+    void checkRestart() { };
 
 private:
+    QCoro::Task<int> rebuildDatabase();
+
     QCommandLineParser m_clp;
 };

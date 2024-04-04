@@ -1,52 +1,139 @@
 // Copyright (C) 2004-2024 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <QBitArray>
 #include <QCoreApplication>
+#include <QSqlQuery>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
-#include <QtCore/QTextStream>
-#include <QtCore/QtDebug>
-#include <QtCore/QTimeZone>
+#include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
-#include <QtCore/QJsonArray>
 #include <QtCore/QJsonValue>
 #include <QtCore/QStringBuilder>
+#include <QtCore/QTextStream>
+#include <QtCore/QTimeZone>
+#include <QtCore/QtDebug>
+#include <QtCore/QDirIterator>
 #include <QtXml/QDomElement>
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkReply>
+#include <QtCore/QUrlQuery>
+#include <QCoro/QCoroSignal>
+#include <QCoro/QCoroTimer>
 
 #include "utility/exception.h"
+#include "utility/transfer.h"
+#include "utility/utility.h"
 #include "bricklink/core.h"
 #include "bricklink/dimensions.h"
 #include "bricklink/textimport.h"
+#include "bricklink/textimport_p.h"
 #include "bricklink/changelogentry.h"
+#include "minizip/minizip.h"
 
 
-static void xmlParse(const QString &path, const QString &rootName, const QString &elementName,
+AwaitableTransferJob::AwaitableTransferJob(TransferJob *job)
+    : m_job(job)
+{
+    connect(job->transfer(), &Transfer::finished,
+            this, [this](TransferJob *finishedJob) {
+        if (m_job == finishedJob) {
+            m_job->setAutoDelete(false);
+            emit finished();
+        }
+    });
+}
+
+AwaitableTransferJob::~AwaitableTransferJob()
+{
+    if (!m_job->autoDelete())
+        delete m_job;
+}
+
+AwaitableTransferJob::operator TransferJob *() const
+{
+    return m_job;
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+static QUrl ldrawUrl(const char *page)
+{
+    return QUrl(u"https://library.ldraw.org/"_qs + QString::fromLatin1(page));
+};
+
+static QUrl brickLinkUrl(const char *page)
+{
+    return QUrl(u"https://www.bricklink.com/"_qs + QString::fromLatin1(page));
+};
+
+static QUrl catalogQuery(int which)
+{
+    QUrl url(brickLinkUrl("catalogDownload.asp"));
+    url.setQuery({
+        { u"a"_qs,            u"a"_qs },
+        { u"viewType"_qs,     QString::number(which) },
+        { u"downloadType"_qs, u"X"_qs },
+    });
+    return url;
+};
+
+static QUrl catalogItemQuery(char itemType, bool asXml)
+{
+    QUrl url(brickLinkUrl("catalogDownload.asp"));
+    QUrlQuery query({
+        { u"a"_qs,            u"a"_qs },
+        { u"viewType"_qs,     u"0"_qs },
+        { u"itemType"_qs,     QString(QChar::fromLatin1(itemType)) },
+        { u"downloadType"_qs, asXml ? u"X"_qs : u"T"_qs },
+    });
+    if (asXml) {
+        query.addQueryItem(u"selItemColor"_qs, u"Y"_qs);  // special BrickStore flag to get default color - thanks Dan
+        query.addQueryItem(u"selWeight"_qs,    u"Y"_qs);
+        query.addQueryItem(u"selYear"_qs,      u"Y"_qs);
+    }
+    url.setQuery(query);
+    return url;
+};
+
+static QUrl itemInventoryQuery(const BrickLink::Item *item)
+{
+    QUrl url(brickLinkUrl("catalogDownload.asp"));
+    url.setQuery({
+        { u"a"_qs,            u"a"_qs },
+        { u"viewType"_qs,     u"4"_qs },
+        { u"itemTypeInv"_qs,  QString(QChar::fromLatin1(item->itemTypeId())) },
+        { u"itemNo"_qs,       QString::fromLatin1(item->id()) },
+        { u"downloadType"_qs, u"X"_qs },
+    });
+    return url;
+};
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+static void xmlParse(const QByteArray &xml, const QString &rootName, const QString &elementName,
                      const std::function<void (const QDomElement &)> &callback)
 {
-    QFile f(path);
-    if (!f.open(QFile::ReadOnly))
-        throw ParseException(&f, "could not open file");
-
     QDomDocument doc;
     QString emsg;
     int eline = 0, ecolumn = 0;
-    if (!doc.setContent(&f, false, &emsg, &eline, &ecolumn))
-        throw ParseException(&f, "%1 at line %2, column %3").arg(emsg).arg(eline).arg(ecolumn);
+    if (!doc.setContent(xml, false, &emsg, &eline, &ecolumn))
+        throw Exception("XML parse error at line %2, column %3: %1").arg(emsg).arg(eline).arg(ecolumn);
 
     auto root = doc.documentElement().toElement();
     if (root.nodeName() != rootName)
-        throw ParseException(&f, "expected root node %1, but got %2").arg(rootName, root.nodeName());
+        throw Exception("expected XML root node %1, but got %2").arg(rootName, root.nodeName());
 
-    try {
-        for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
-            if (node.nodeName() == elementName)
-                callback(node.toElement());
-        }
-    } catch (const Exception &e) {
-        throw ParseException(&f, e.what());
+    for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
+        if (node.nodeName() == elementName)
+            callback(node.toElement());
     }
 }
 
@@ -54,7 +141,7 @@ static QString xmlTagText(const QDomElement &parent, const char *tagName)
 {
     const auto dnl = parent.elementsByTagName(QString::fromLatin1(tagName));
     if (dnl.size() != 1) {
-        throw ParseException("Expected a single %1 tag, but found %2")
+        throw Exception("Expected a single %1 tag, but found %2")
             .arg(QString::fromLatin1(tagName)).arg(dnl.size());
     }
     QString text = dnl.at(0).toElement().text().trimmed();
@@ -81,57 +168,312 @@ static QString xmlTagText(const QDomElement &parent, const char *tagName)
 }
 
 
-/////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
 
-BrickLink::TextImport::TextImport()
-    : m_db(core()->database())
-{ }
+namespace BrickLink {
 
-BrickLink::TextImport::~TextImport()
-{ }
-
-bool BrickLink::TextImport::import(const QString &path)
+TextImport::TextImport()
+    : m_trans(new Transfer())
+    , m_db(core()->database())
 {
-    try {
-        // colors
-        readColors(path + u"colors.xml");
-        readLDrawColors(path + u"ldconfig.ldr", path + u"rebrickable_colors.json");
-        calculateColorPopularity();
+    m_archiveName = core()->dataPath() + u"downloads.zip";
+}
 
-        // categories
-        readCategories(path + u"categories.xml");
+TextImport::~TextImport()
+{ }
 
-        // itemtypes
-        readItemTypes(path + u"itemtypes.xml");
+void TextImport::initialize(bool skipDownload)
+{
+    m_skipDownload = skipDownload;
 
-        // speed up loading (exactly 137522 items on 16.06.2020)
-        m_db->m_items.reserve(200000);
+    nextStep(u"Initializing"_qs);
 
-        for (const ItemType &itt : std::as_const(m_db->m_itemTypes)) {
-            readItems(path + u"items_" + QChar::fromLatin1(itt.m_id) + u".xml", &itt);
-            readAdditionalItemCategories(path + u"items_" + QChar::fromLatin1(itt.m_id) + u".csv", &itt);
+    if (skipDownload) {
+        m_lastRunArchive = std::make_unique<MiniZip>(m_archiveName);
+        if (!m_lastRunArchive->open()) {
+            throw Exception("Last-run archive %1 is not available and skip-downloads was requested")
+                .arg(m_archiveName);
         }
-        readRelationships(path + u"relationships.html");
+    } else {
+        QString downloadArchiveName = m_archiveName + u".new";
+        m_downloadArchive = std::make_unique<MiniZip>(downloadArchiveName);
 
-        readPartColorCodes(path + u"part_color_codes.xml");
-        readInventoryList(path + u"btinvlist.csv");
-        readChangeLog(path + u"btchglog.csv");
+        QFile::remove(downloadArchiveName);
+        if (!m_downloadArchive->create())
+            throw Exception("failed to create inventory cache zip %1").arg(downloadArchiveName);
 
-        return true;
-    } catch (const Exception &e) {
-        qWarning() << "Error importing database:" << e.what();
-        return false;
+        m_lastRunArchive = std::make_unique<MiniZip>(m_archiveName);
+        if (!m_lastRunArchive->open()) {
+            message(u"Last-run archive %1 is not available"_qs.arg(m_archiveName));
+            m_lastRunArchive.reset();
+        }
     }
 }
 
-
-void BrickLink::TextImport::readColors(const QString &path)
+QCoro::Task<> TextImport::login(const QString &username, const QString &password,
+                                const QString &rebrickableApiKey)
 {
-    xmlParse(path, u"CATALOG"_qs, u"ITEM"_qs, [this](QDomElement e) {
+    m_rebrickableApiKey = rebrickableApiKey;
+
+    if (m_skipDownload)
+        co_return;
+
+    nextStep(u"Logging into BrickLink"_qs);
+
+    QUrl url(brickLinkUrl("ajax/renovate/loginandout.ajax"));
+    url.setQuery({
+        { u"userid"_qs,          Utility::urlQueryEscape(username) },
+        { u"password"_qs,        Utility::urlQueryEscape(password) },
+        { u"keepme_loggedin"_qs, u"1"_qs }
+    });
+
+    auto *job = TransferJob::post(url);
+    m_trans->retrieve(job, true);
+    AwaitableTransferJob atj(job);
+
+    co_await qCoro(&atj, &AwaitableTransferJob::finished);
+
+    if (job->isFailed() || (job->responseCode() != 200))
+        throw Exception("Failed to log into BrickLink:\n%1").arg(QString::fromLatin1(*job->data()));
+}
+
+QCoro::Task<> TextImport::importCatalog()
+{
+    auto rebrickableApiQuery = [this](const char *page) -> QUrl {
+        QUrl url(u"https://rebrickable.com/api/v3/"_qs + QString::fromLatin1(page));
+        url.setQuery({
+            { u"page_size"_qs,    u"1000"_qs },
+            { u"key"_qs,          m_rebrickableApiKey },
+        });
+        return url;
+    };
+
+    nextStep(u"Importing catalog"_qs);
+
+    co_await download(catalogQuery(3), u"colors.xml"_qs).then(
+        [this](auto data) { readColors(data); });
+
+    co_await download(rebrickableApiQuery("lego/colors/"), u"rebrickable_colors.json"_qs).then(
+        [this](QByteArray rebrickableData) -> QCoro::Task<> {
+            co_await download(ldrawUrl("library/official/LDConfig.ldr"), u"ldconfig.ldr"_qs).then(
+                [this, rebrickableData](QByteArray ldrawData) {
+                    readLDrawColors(ldrawData, rebrickableData);
+                });
+        });
+
+    co_await download(catalogQuery(2), u"categories.xml"_qs).then(
+        [this](QByteArray data) { readCategories(data); });
+
+    co_await download(catalogQuery(1), u"itemtypes.xml"_qs).then(
+        [this](QByteArray data) { readItemTypes(data); });
+
+    m_db->m_items.reserve(200'000);
+
+    for (const ItemType &itt : std::as_const(m_db->m_itemTypes)) {
+        co_await download(catalogItemQuery(itt.id(), true), u"items/%1.xml"_qs.arg(itt.id())).then(
+            [this, &itt](QByteArray data) { readItems(data, &itt); });
+        co_await download(catalogItemQuery(itt.id(), false), u"items/%1.csv"_qs.arg(itt.id())).then(
+            [this, &itt](QByteArray data) { readAdditionalItemCategories(data, &itt); });
+    }
+
+    co_await download(brickLinkUrl("catalogRel.asp"), u"relationships.html"_qs).then(
+        [this](QByteArray data) -> QCoro::Task<> { co_await readRelationships(data); });
+
+    co_await download(catalogQuery(5), u"part_color_codes.xml"_qs).then(
+        [this](QByteArray data) { readPartColorCodes(data); });
+
+    co_await download(brickLinkUrl("btinvlist.asp"), u"btinvlist.csv"_qs).then(
+        [this](QByteArray data) { readInventoryList(data); });
+
+    co_await download(brickLinkUrl("btchglog.asp"), u"btchglog.csv"_qs).then(
+        [this](QByteArray data) { readChangeLog(data); });
+}
+
+QCoro::Task<> TextImport::importInventories()
+{
+    nextStep(u"Importing inventories"_qs);
+
+    QBitArray done(m_db->m_items.size());
+    for (qsizetype itemIndex = 0; itemIndex < done.size(); ++itemIndex) {
+        // mark everything without an inventory as done
+        if (m_inventoryLastUpdated.value(itemIndex, -1) < 0)
+            done.setBit(itemIndex, true);
+    }
+
+    int loaded = loadLastRunInventories([&, this](char itemTypeId, const QByteArray &itemId,
+                                                  const QDateTime &lastModified, const QByteArray &xml) {
+        if (auto item = readInventory(itemTypeId, itemId, lastModified, xml, true)) {
+            if (m_downloadArchive && m_downloadArchive->isOpen()) {
+                const QString filePath = u"%1/%2.xml"_qs.arg(item->itemTypeId()).arg(QLatin1StringView(item->id()));
+                try {
+                    m_downloadArchive->writeFile(filePath, xml, lastModified);
+                } catch (const Exception &e) {
+                    message(2, u"Failed to write inventory for %1/%2 to ZIP: %3"_qs
+                                   .arg(item->itemTypeId()).arg(QLatin1StringView(item->id()))
+                                   .arg(e.errorString()));
+                }
+            }
+            done.setBit(item->index(), true);
+        }
+    });
+
+    message(u"Loaded %1 inventories, %2 are missing or outdated"_qs.arg(loaded).arg(done.count(false)));
+
+    int downloadsInProgress = 0;
+    int downloadsFailed = 0;
+    for (uint i = 0; i < m_db->m_items.size(); ++i) {
+        const BrickLink::Item *item = &m_db->m_items[i];
+        if (!done[i]) {
+            const QString filePath = u"%1/%2.xml"_qs.arg(item->itemTypeId()).arg(QLatin1StringView(item->id()));
+            ++downloadsInProgress;
+            download(itemInventoryQuery(item), filePath).then(
+                [&, item](QByteArray data) {
+                    if (!readInventory(item->itemTypeId(), item->id(), QDateTime::currentDateTime(), data)) {
+                        message(2, u"Failed to import downloaded inventory for %1 %2"_qs
+                                       .arg(item->itemTypeId()).arg(QLatin1StringView(item->id())));
+                        ++downloadsFailed;
+                    }
+                    --downloadsInProgress;
+                },
+                [&](const std::exception &e) {
+                    message(2, QString::fromLatin1(e.what()));
+                    --downloadsInProgress;
+                    ++downloadsFailed;
+                });
+        }
+    }
+
+    while (downloadsInProgress)
+        co_await QCoro::sleepFor(std::chrono::milliseconds(100));
+
+    if (downloadsFailed)
+        throw Exception("Failed to download %1 inventories").arg(downloadsFailed);
+}
+
+void TextImport::finalize()
+{
+    if (!m_skipDownload) {
+        Q_ASSERT(m_downloadArchive && m_downloadArchive->isOpen());
+        m_downloadArchive->close();
+
+        nextStep(u"Writing download cache"_qs);
+
+        // close and rename both archives
+        if (m_lastRunArchive && m_lastRunArchive->isOpen()) {
+            m_lastRunArchive->close();
+            QFile::remove(m_archiveName + u".old");
+            QFile::rename(m_archiveName, m_archiveName + u".old");
+        }
+        QFile::remove(m_archiveName);
+        QFile::rename(m_archiveName + u".new", m_archiveName);
+    }
+
+    nextStep(u"Optimizing data structures"_qs);
+
+    calculateColorPopularity();
+    calculateKnownAssemblyColors();
+    calculateItemTypeCategories();
+    calculatePartsYearUsed();
+    calculateCategoryRecency();
+
+    // unroll the consists-of and appears-in hashes into the actual items
+    for (auto it = m_consists_of_hash.cbegin(); it != m_consists_of_hash.cend(); ++it) {
+        Item &item = m_db->m_items[it.key()];
+        const auto &coItems = it.value();
+        item.m_consists_of.copyContainer(coItems.cbegin(), coItems.cend(), nullptr);
+    }
+    for (auto it = m_appears_in_hash.cbegin(); it != m_appears_in_hash.cend(); ++it) {
+        Item &item = m_db->m_items[it.key()];
+
+        // color-idx -> { vector < qty, item-idx > }
+        const QHash<uint, QVector<QPair<int, uint>>> &appearHash = it.value();
+
+        // we are compacting a "hash of a vector of pairs" down to a list of 32bit integers
+        QVector<Item::AppearsInRecord> tmp;
+
+        for (auto ait = appearHash.cbegin(); ait != appearHash.cend(); ++ait) {
+            const auto &colorVector = ait.value();
+
+            Item::AppearsInRecord cair;
+            cair.m_colorBits.m_colorIndex = ait.key();
+            cair.m_colorBits.m_colorSize = quint32(colorVector.size());
+            tmp.push_back(cair);
+
+            for (const auto &[qty, itemIndex] : colorVector) {
+                Item::AppearsInRecord iair;
+                iair.m_itemBits.m_quantity = qty;
+                iair.m_itemBits.m_itemIndex = itemIndex;
+                tmp.push_back(iair);
+            }
+        }
+        item.m_appears_in.copyContainer(tmp.cbegin(), tmp.cend(), nullptr);
+    }
+}
+
+void TextImport::exportDatabase()
+{
+    nextStep(u"Writing the database to disk"_qs);
+
+    auto dbVersionLowest = Database::Version::OldestStillSupported;
+    auto dbVersionHighest = Database::Version::Latest;
+
+    Q_ASSERT(dbVersionHighest >= dbVersionLowest);
+
+    for (auto v = dbVersionHighest; v >= dbVersionLowest; v = Database::Version((int(v) - 1))) {
+        message(u"Version v%1"_qs.arg(int(v)));
+        core()->database()->write(core()->dataPath() + Database::defaultDatabaseName(v), v);
+    }
+}
+
+void TextImport::setApiKeys(const QHash<QByteArray, QString> &apiKeys)
+{
+    m_db->m_apiKeys = apiKeys;
+}
+
+void TextImport::setApiQuirks(const QSet<ApiQuirk> &apiQuirks)
+{
+    m_db->m_apiQuirks = apiQuirks;
+}
+
+QCoro::Task<QByteArray> TextImport::download(const QUrl &url, const QString &fileName)
+{
+    if (m_skipDownload) {
+        if (!m_lastRunArchive || !m_lastRunArchive->isOpen())
+            throw Exception("No last-run archive to load %1 from").arg(fileName);
+        if (!m_lastRunArchive->contains(fileName))
+            throw Exception("Last-run archive does not contain %1").arg(fileName);
+        message(fileName);
+        co_return m_lastRunArchive->readFile(fileName);
+    }
+
+    TransferJob *job = TransferJob::get(url, nullptr, 2);
+    m_trans->retrieve(job);
+    AwaitableTransferJob atj(job);
+
+    QString fileNameCopy = fileName;
+
+    co_await qCoro(&atj, &AwaitableTransferJob::finished);
+
+    if (!job->isCompleted()) {
+        throw Exception("Download failed for %1: %2")
+            .arg(job->effectiveUrl().toString())
+            .arg(job->errorString());
+    } else if (!job->data()) {
+        throw Exception("Download has no data for %1").arg(job->effectiveUrl().toString());
+    } else {
+        if (!fileNameCopy.isEmpty() && m_downloadArchive && m_downloadArchive->isOpen())
+            m_downloadArchive->writeFile(fileNameCopy, *job->data());
+        message(fileNameCopy);
+        co_return *job->data();
+    }
+}
+
+void TextImport::readColors(const QByteArray &xml)
+{
+    xmlParse(xml, u"CATALOG"_qs, u"ITEM"_qs, [this](QDomElement e) {
         Color col;
         uint colid = xmlTagText(e, "COLOR").toUInt();
 
@@ -175,9 +517,9 @@ void BrickLink::TextImport::readColors(const QString &path)
     std::sort(m_db->m_colors.begin(), m_db->m_colors.end());
 }
 
-void BrickLink::TextImport::readCategories(const QString &path)
+void TextImport::readCategories(const QByteArray &xml)
 {
-    xmlParse(path, u"CATALOG"_qs, u"ITEM"_qs, [this](QDomElement e) {
+    xmlParse(xml, u"CATALOG"_qs, u"ITEM"_qs, [this](QDomElement e) {
         Category cat;
         uint catid = xmlTagText(e, "CATEGORY").toUInt();
 
@@ -188,79 +530,11 @@ void BrickLink::TextImport::readCategories(const QString &path)
     });
 
     std::sort(m_db->m_categories.begin(), m_db->m_categories.end());
-
 }
 
-void BrickLink::TextImport::readAdditionalItemCategories(const QString &path, const BrickLink::ItemType *itt)
+void TextImport::readItemTypes(const QByteArray &xml)
 {
-    QFile f(path);
-    if (!f.open(QFile::ReadOnly))
-        throw ParseException(&f, "could not open file");
-
-    QTextStream ts(&f);
-    ts.readLine(); // skip header
-    int lineNumber = 1;
-    QByteArray lastItemId;
-
-    while (!ts.atEnd()) {
-        ++lineNumber;
-        QString line = ts.readLine();
-        if (line.isEmpty())
-            continue;
-        if (line.startsWith(u'\t')) {
-            qWarning() << "  > Item name for" << lastItemId << "most likely ends with a new-line character:" << f.fileName() << "in line" << (lineNumber - 1);
-            continue;
-        }
-        QStringList strs = line.split(u'\t');
-
-        if (strs.count() < 3)
-            throw ParseException(&f, "expected at least 3 fields in line %1").arg(lineNumber);
-
-        const QByteArray itemId = strs.at(2).toLatin1();
-        auto item = const_cast<Item *>(core()->item(itt->m_id, itemId));
-        if (!item)
-            throw ParseException(&f, "expected a valid item-id field in line %1").arg(lineNumber);
-
-        QString catStr = strs.at(1).simplified();
-        const Category &mainCat = m_db->m_categories.at(item->m_categoryIndexes[0]);
-        if (!catStr.startsWith(mainCat.name()))
-            throw ParseException(&f, "additional categories do not start with the main category in line %1").arg(lineNumber);
-        if (strs.at(0).toUInt() != mainCat.m_id)
-            throw ParseException(&f, "the main category id does not match the XML in line %1").arg(lineNumber);
-
-        catStr = catStr.mid(mainCat.name().length() + 3);
-
-        const QStringList cats = catStr.split(u" / "_qs);
-        for (int i = 0; i < cats.count(); ++i) {
-            for (quint16 catIndex = 0; catIndex < quint16(m_db->m_categories.size()); ++catIndex) {
-                const QString catName = m_db->m_categories.at(catIndex).name();
-                bool disambiguate = catName.contains(u" / ");
-                quint16 addCatIndex = quint16(-1);
-
-                // The " / " sequence is used to separate the fields, but it also appears in
-                // category names like "String Reel / Winch"
-
-                if (disambiguate) {
-                    const auto catNameList = catName.split(u" / "_qs);
-                    if (catNameList == cats.mid(i, catNameList.size())) {
-                        addCatIndex = catIndex;
-                        i += (catNameList.size() - 1);
-                    }
-                } else if (catName == cats.at(i)) {
-                    addCatIndex = catIndex;
-                }
-
-                if (addCatIndex != quint16(-1))
-                    item->m_categoryIndexes.push_back(addCatIndex, nullptr);
-            }
-        }
-        lastItemId = itemId;
-    }
-}
-
-void BrickLink::TextImport::readItemTypes(const QString &path)
-{
-    xmlParse(path, u"CATALOG"_qs, u"ITEM"_qs, [this](QDomElement e) {
+    xmlParse(xml, u"CATALOG"_qs, u"ITEM"_qs, [this](QDomElement e) {
         ItemType itt;
         char c = ItemType::idFromFirstCharInString(xmlTagText(e, "ITEMTYPE"));
 
@@ -281,9 +555,9 @@ void BrickLink::TextImport::readItemTypes(const QString &path)
     std::sort(m_db->m_itemTypes.begin(), m_db->m_itemTypes.end());
 }
 
-void BrickLink::TextImport::readItems(const QString &path, const BrickLink::ItemType *itt)
+void TextImport::readItems(const QByteArray &xml, const ItemType *itt)
 {
-    xmlParse(path, u"CATALOG"_qs, u"ITEM"_qs, [this, itt](QDomElement e) {
+    xmlParse(xml, u"CATALOG"_qs, u"ITEM"_qs, [this, itt](QDomElement e) {
         Item item;
         item.m_id.copyQByteArray(xmlTagText(e, "ITEMID").toLatin1(), nullptr);
         const QString itemName = xmlTagText(e, "ITEMNAME").simplified();
@@ -343,11 +617,80 @@ void BrickLink::TextImport::readItems(const QString &path, const BrickLink::Item
     std::sort(m_db->m_items.begin(), m_db->m_items.end());
 }
 
-void BrickLink::TextImport::readPartColorCodes(const QString &path)
+void TextImport::readAdditionalItemCategories(const QByteArray &csv, const ItemType *itt)
+{
+    const QString fname = u"items/%1.csv"_qs.arg(QChar::fromLatin1(itt->id()));
+    QTextStream ts(csv);
+    ts.readLine(); // skip header
+    int lineNumber = 1;
+    QByteArray lastItemId;
+
+    while (!ts.atEnd()) {
+        ++lineNumber;
+        QString line = ts.readLine();
+        if (line.isEmpty())
+            continue;
+        if (line.startsWith(u'\t')) {
+            message(2, u"Item name for %1 most likely ends with a new-line character: %2 in line %3"_qs
+                           .arg(QLatin1StringView(lastItemId)).arg(fname).arg(lineNumber -1));
+            continue;
+        }
+        QStringList strs = line.split(u'\t');
+
+        if (strs.count() < 3)
+            throw Exception("expected at least 3 fields in %1, line %2").arg(fname).arg(lineNumber);
+
+        const QByteArray itemId = strs.at(2).toLatin1();
+        auto item = const_cast<Item *>(core()->item(itt->m_id, itemId));
+        if (!item)
+            throw Exception("expected a valid item-id field in %1, line %2").arg(fname).arg(lineNumber);
+
+        QString catStr = strs.at(1).simplified();
+        const Category &mainCat = m_db->m_categories.at(item->m_categoryIndexes[0]);
+        if (!catStr.startsWith(mainCat.name())) {
+            throw Exception( "additional categories do not start with the main category in %1, line %2")
+                .arg(fname).arg(lineNumber);
+        }
+        if (strs.at(0).toUInt() != mainCat.m_id) {
+            throw Exception("the main category id does not match the XML in %1, line %2")
+                .arg(fname).arg(lineNumber);
+        }
+
+        catStr = catStr.mid(mainCat.name().length() + 3);
+
+        const QStringList cats = catStr.split(u" / "_qs);
+        for (int i = 0; i < cats.count(); ++i) {
+            for (quint16 catIndex = 0; catIndex < quint16(m_db->m_categories.size()); ++catIndex) {
+                const QString catName = m_db->m_categories.at(catIndex).name();
+                bool disambiguate = catName.contains(u" / ");
+                quint16 addCatIndex = quint16(-1);
+
+                // The " / " sequence is used to separate the fields, but it also appears in
+                // category names like "String Reel / Winch"
+
+                if (disambiguate) {
+                    const auto catNameList = catName.split(u" / "_qs);
+                    if (catNameList == cats.mid(i, catNameList.size())) {
+                        addCatIndex = catIndex;
+                        i += (catNameList.size() - 1);
+                    }
+                } else if (catName == cats.at(i)) {
+                    addCatIndex = catIndex;
+                }
+
+                if (addCatIndex != quint16(-1))
+                    item->m_categoryIndexes.push_back(addCatIndex, nullptr);
+            }
+        }
+        lastItemId = itemId;
+    }
+}
+
+void TextImport::readPartColorCodes(const QByteArray &xml)
 {
     QHash<uint, std::vector<Item::PCC>> pccs;
 
-    xmlParse(path, u"CODES"_qs, u"ITEM"_qs, [this, &pccs](QDomElement e) {
+    xmlParse(xml, u"CODES"_qs, u"ITEM"_qs, [this, &pccs](QDomElement e) {
         char itemTypeId = ItemType::idFromFirstCharInString(xmlTagText(e, "ITEMTYPE"));
         const QByteArray itemId = xmlTagText(e, "ITEMID").toLatin1();
         QString colorName = xmlTagText(e, "COLOR").simplified();
@@ -355,8 +698,8 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
         uint code = xmlTagText(e, "CODENAME").toUInt(&numeric, 10);
 
         if (!numeric) {
-            qWarning() << "  > Parsing part_color_codes: pcc" << xmlTagText(e, "CODENAME")
-                       << "is not numeric";
+            message(2, u"Parsing part_color_codes: pcc %1 is not numeric"_qs
+                           .arg(xmlTagText(e, "CODENAME")));
         }
 
         if (auto item = core()->item(itemTypeId, itemId)) {
@@ -384,10 +727,11 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
                 }
             }
             if (!found)
-                qWarning() << "  > Parsing part_color_codes: skipping invalid color" << colorName
-                           << "on item" << itemTypeId << itemId;
+                message(2, u"Parsing part_color_codes: skipping invalid color %1 on item %2 %3"_qs
+                               .arg(colorName).arg(itemTypeId).arg(QLatin1StringView(itemId)));
         } else {
-            qWarning() << "  > Parsing part_color_codes: skipping invalid item" << itemTypeId << itemId;
+            message(2, u"Parsing part_color_codes: skipping invalid item %1 %2"_qs
+                           .arg(itemTypeId).arg(QLatin1StringView(itemId)));
         }
     });
 
@@ -401,43 +745,27 @@ void BrickLink::TextImport::readPartColorCodes(const QString &path)
     }
 }
 
-
-bool BrickLink::TextImport::importInventories(std::vector<bool> &processedInvs,
-                                              ImportInventoriesStep step)
+const Item *TextImport::readInventory(char itemTypeId, const QByteArray &itemId,
+                                      const QDateTime &lastModified, const QByteArray &xml,
+                                      bool failSilently)
 {
-    for (uint itemIndex = 0; itemIndex < m_db->m_items.size(); ++itemIndex) {
-        if (processedInvs[itemIndex]) // already yanked
-            continue;
+    const auto *invItem = core()->item(itemTypeId, itemId);
+    if (!invItem)
+        return nullptr; // no item found
+    qint64 lastUpdated =  m_inventoryLastUpdated.value(invItem->index(), -1);
+    if (lastUpdated < 0)
+        return nullptr; // item found, but does not have an inventory
+    if (lastModified.toSecsSinceEpoch() < lastUpdated)
+        return nullptr; // item found, has an inventory, but is outdated
 
-        bool hasInventory = (m_inventoryLastUpdated.value(itemIndex, -1) >= 0);
-
-        if (!hasInventory || readInventory(&m_db->m_items[itemIndex], step))
-            processedInvs[itemIndex] = true;
-    }
-    return true;
-}
-
-bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesStep step)
-{
-    std::unique_ptr<QFile> f(BrickLink::core()->dataReadFile(u"inventory.xml", item));
-
-    if (!f || !f->isOpen())
-        return false;
-
-    QDateTime fileTime = f->fileTime(QFileDevice::FileModificationTime);
-    QDate fileDate = fileTime.date();
-    uint itemIndex = uint(item - items().data());
-
-    if (fileTime.toSecsSinceEpoch() < m_inventoryLastUpdated.value(itemIndex, -1))
-        return false;
+    QDate lastModifiedDate = lastModified.date();
 
     QVector<Item::ConsistsOf> inventory;
     QVector<QPair<int, int>> knownColors;
 
     try {
-        f->close();
-        xmlParse(f->fileName(), u"INVENTORY"_qs, u"ITEM"_qs,
-                 [this, &inventory, &knownColors, fileDate](QDomElement e) {
+        xmlParse(xml, u"INVENTORY"_qs, u"ITEM"_qs,
+                 [this, &inventory, &knownColors, lastModifiedDate](QDomElement e) {
             char itemTypeId = ItemType::idFromFirstCharInString(xmlTagText(e, "ITEMTYPE"));
             const QByteArray itemId = xmlTagText(e, "ITEMID").toLatin1();
             uint colorId = xmlTagText(e, "COLOR").toUInt();
@@ -474,20 +802,20 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
             QByteArray itemTypeAndId = itemTypeId + itemId;
             const auto irange = std::equal_range(m_db->m_itemChangelog.cbegin(), m_db->m_itemChangelog.cend(), itemTypeAndId);
             for (auto it = irange.first; it != irange.second; ++it) {
-                if (it->date() > fileDate) {
+                if (it->date() > lastModifiedDate) {
                     throw Exception("Item id %1 changed on %2 (last download: %3)")
                         .arg(QString::fromLatin1(itemTypeAndId))
                         .arg(it->date().toString(u"yyyy/MM/dd"))
-                        .arg(fileDate.toString(u"yyyy/MM/dd"));
+                        .arg(lastModifiedDate.toString(u"yyyy/MM/dd"));
                 }
             }
             const auto crange = std::equal_range(m_db->m_colorChangelog.cbegin(), m_db->m_colorChangelog.cend(), colorId);
             for (auto it = crange.first; it != crange.second; ++it) {
-                if (it->date() > fileDate) {
+                if (it->date() > lastModifiedDate) {
                     throw Exception("Color id %1 changed on %2 (last download: %3)")
                         .arg(colorId)
                         .arg(it->date().toString(u"yyyy/MM/dd"))
-                        .arg(fileDate.toString(u"yyyy/MM/dd"));
+                        .arg(lastModifiedDate.toString(u"yyyy/MM/dd"));
                 }
             }
 
@@ -495,6 +823,8 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
             knownColors.append({ itemIndex, colorIndex});
 
         });
+
+        // no more throwing beyond this point, as we cannot undo changes to global data
 
         for (const auto &kc : std::as_const(knownColors))
             addToKnownColors(kc.first, kc.second);
@@ -528,30 +858,26 @@ bool BrickLink::TextImport::readInventory(const Item *item, ImportInventoriesSte
         for (const Item::ConsistsOf &co : std::as_const(inventory)) {
             if (!co.isExtra()) {
                 auto &vec = m_appears_in_hash[co.itemIndex()][co.colorIndex()];
-                vec.append(qMakePair(co.quantity(), itemIndex));
+                vec.append(qMakePair(co.quantity(), invItem->index()));
             }
         }
         // the hash owns the items now
-        m_consists_of_hash.insert(itemIndex, inventory);
-        return true;
+        m_consists_of_hash.insert(invItem->index(), inventory);
+        return invItem;
 
     } catch (const Exception &e) {
-        if (step != ImportFromDiskCache)
-            qWarning() << "  >" << qPrintable(e.errorString());
-        return false;
+        if (!failSilently)
+            message(2, e.errorString());
+        return nullptr;
     }
 }
 
-void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const QString &rebrickableColorsPath)
+void TextImport::readLDrawColors(const QByteArray &ldconfig, const QByteArray &rebrickableColors)
 {
-    QFile fre(rebrickableColorsPath);
-    if (!fre.open(QFile::ReadOnly))
-        throw ParseException(&fre, "could not open file");
-
     QJsonParseError err;
-    QJsonDocument doc = QJsonDocument::fromJson(fre.readAll(), &err);
+    QJsonDocument doc = QJsonDocument::fromJson(rebrickableColors, &err);
     if (doc.isNull())
-        throw ParseException(&fre, "Invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
+        throw Exception("Rebrickable colors: invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
 
     QHash<int, uint> ldrawToBrickLinkId;
     const QJsonArray results = doc[u"results"].toArray();
@@ -565,11 +891,7 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
         }
     }
 
-    QFile fld(ldconfigPath);
-    if (!fld.open(QFile::ReadOnly))
-        throw ParseException(&fld, "could not open file");
-
-    QTextStream in(&fld);
+    QTextStream in(ldconfig);
     QString line;
     int lineno = 0;
 
@@ -627,12 +949,14 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
                 } else if ((sl[idx] == u"MATERIAL") && (idx < lastIdx)) {
                     const auto mat = sl[idx + 1];
 
-                    if (mat == u"GLITTER")
+                    if (mat == u"GLITTER") {
                         type.setFlag(name.startsWith(u"Opal_") ? ColorTypeFlag::Satin : ColorTypeFlag::Glitter);
-                    else if (mat == u"SPECKLE")
+                    } else if (mat == u"SPECKLE") {
                         type.setFlag(ColorTypeFlag::Speckle);
-                    else
-                        qWarning() << "Found unsupported MATERIAL" << mat << "at line" << lineno << "of LDConfig.ldr";
+                    } else {
+                        message(2, u"Found unsupported MATERIAL %1 at line %2 of LDConfig.ldr"_qs
+                                       .arg(mat).arg(lineno));
+                    }
                 } else if ((sl[idx] == u"SIZE") && (idx < lastIdx)) {
                     particleMinSize = particleMaxSize = sl[++idx].toFloat();
                 } else if ((sl[idx] == u"MINSIZE") && (idx < lastIdx)) {
@@ -727,8 +1051,10 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
 
                 m_db->m_ldrawExtraColors.push_back(c);
 
-                if (!name.startsWith(u"Rubber_"))
-                    qWarning() << "  > Could not match LDraw color" << id << name << "to any BrickLink color";
+                if (!name.startsWith(u"Rubber_")) {
+                    message(2, u"Could not match LDraw color %1 %2 to any BrickLink color"_qs
+                                   .arg(id).arg(name));
+                }
             }
         }
     }
@@ -770,19 +1096,17 @@ void BrickLink::TextImport::readLDrawColors(const QString &ldconfigPath, const Q
             }
             c.m_ldraw_color.setAlpha(alpha);
 
-            if (!c.isModulex())
-                qWarning() << "  > Could not match BrickLink color" << c.id() << c.name() << "to any LDraw color" << c.m_ldraw_color;
+            if (!c.isModulex()) {
+                message(2, u"Could not match BrickLink color %1 %2 to any LDraw color (%3)"_qs
+                               .arg(c.id()).arg(c.name()).arg(c.m_ldraw_color.name()));
+            }
         }
     }
 }
 
-void BrickLink::TextImport::readInventoryList(const QString &path)
+void TextImport::readInventoryList(const QByteArray &csv)
 {
-    QFile f(path);
-    if (!f.open(QFile::ReadOnly))
-        throw ParseException(&f, "could not open file");
-
-    QTextStream ts(&f);
+    QTextStream ts(csv);
     int lineNumber = 0;
     while (!ts.atEnd()) {
         ++lineNumber;
@@ -792,13 +1116,15 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
         QStringList strs = line.split(u'\t');
 
         if (strs.count() < 2)
-            throw ParseException(&f, "expected at least 2 fields in line %1").arg(lineNumber);
+            throw Exception("expected at least 2 fields in btinvlist, line %1").arg(lineNumber);
 
         char itemTypeId = ItemType::idFromFirstCharInString(strs.at(0));
         const QByteArray itemId = strs.at(1).toLatin1();
 
-        if (!itemTypeId || itemId.isEmpty())
-            throw ParseException(&f, "expected a valid item-type and an item-id field in line %1").arg(lineNumber);
+        if (!itemTypeId || itemId.isEmpty()) {
+            throw Exception("expected a valid item-type and an item-id field in btinvlist, line %1")
+                .arg(lineNumber);
+        }
 
         auto item = core()->item(itemTypeId, itemId);
         if (item) {
@@ -829,20 +1155,16 @@ void BrickLink::TextImport::readInventoryList(const QString &path)
             for (quint16 catIndex : item->m_categoryIndexes)
                 m_db->m_categories[catIndex].m_has_inventories |= (quint8(1) << item->m_itemTypeIndex);
         } else {
-            qWarning() << "  > btinvlist: item" << itemTypeId << itemId << "doesn't exist!";
+            message(2, u"item %1 %2 doesn't exist"_qs.arg(itemTypeId).arg(QLatin1StringView(itemId)));
         }
     }
 }
 
-void BrickLink::TextImport::readChangeLog(const QString &path)
+void TextImport::readChangeLog(const QByteArray &csv)
 {
-    QFile f(path);
-    if (!f.open(QFile::ReadOnly))
-        throw ParseException(&f, "could not open file");
-
     m_db->m_latestChangelogId = 0;
 
-    QTextStream ts(&f);
+    QTextStream ts(csv);
     int lineNumber = 0;
     while (!ts.atEnd()) {
         ++lineNumber;
@@ -852,7 +1174,7 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
         QStringList strs = line.split(u'\t');
 
         if (strs.count() < 7)
-            throw ParseException(&f, "expected at least 7 fields in line %1").arg(lineNumber);
+            throw Exception("expected at least 7 fields in btchglog, line %1").arg(lineNumber);
 
         uint id = strs.at(0).toUInt();
         QDate date = QDate::fromString(strs.at(1), u"M/d/yyyy"_qs);
@@ -905,7 +1227,7 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
         case 'C':   // ColorName
             break;
         default:
-            qWarning("  > Parsing btchglog: skipping invalid change code %x", uint(c));
+            message(2, u"skipping invalid change code %1"_qs.arg(c));
             break;
         }
     }
@@ -913,17 +1235,11 @@ void BrickLink::TextImport::readChangeLog(const QString &path)
     std::sort(m_db->m_itemChangelog.begin(), m_db->m_itemChangelog.end());
 }
 
-void BrickLink::TextImport::readRelationships(const QString &path)
+QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
 {
-    QFile f(path);
-    if (!f.open(QFile::ReadOnly))
-        throw ParseException(&f, "could not open file");
-
-    auto data = QString::fromUtf8(f.readAll());
+    auto data = QString::fromUtf8(html);
 
     static const QRegularExpression rxLink(uR"-(<A HREF="catalogRelCat\.asp\?relID=(\d+)">([^<]+)</A>)-"_qs);
-
-    QNetworkAccessManager nam;
 
     for (const auto &m : rxLink.globalMatch(data)) {
         uint id = m.captured(1).toUInt();
@@ -935,14 +1251,22 @@ void BrickLink::TextImport::readRelationships(const QString &path)
 
         QHash<uint, std::vector<uint>> matches;   // match-id -> list of item-indexes
 
+        QString cleanName = name;
+        cleanName.replace(QRegularExpression(uR"(\W)"_qs), u" "_qs);
+        cleanName = cleanName.simplified().toLower();
+        cleanName.replace(u' ', u'_');
+
         uint page = 1;
         do {
-            QString url = u"https://www.bricklink.com/catalogRelList.asp?v=0&relID=%1&pg=%2"_qs.arg(id).arg(page);
-            auto reply = nam.get(QNetworkRequest(url));
-            while (!reply->isFinished())
-                QCoreApplication::processEvents();
-            const auto listData = QString::fromUtf8(reply->readAll());
-            delete reply;
+            QUrl url = brickLinkUrl("catalogRelList.asp");
+            url.setQuery({
+                { u"v"_qs, u"0"_qs },
+                { u"relID"_qs, QString::number(id) },
+                { u"pg"_qs, QString::number(page) },
+            });
+
+            QByteArray listHtml = co_await download(url, u"relationships/%1_%2.html"_qs.arg(cleanName).arg(page));
+            QString listData = QString::fromUtf8(listHtml);
 
             static const QRegularExpression rxHeader(uR"(<B>(\d+)</B> Matches found: Page <B>(\d+)</B> of <B>(\d+)</B>)"_qs);
             auto mh = rxHeader.match(listData);
@@ -1006,14 +1330,13 @@ void BrickLink::TextImport::readRelationships(const QString &path)
                             throw Exception("Relationships: invalid item-type id: %1").arg(ittId);
                         auto item = core()->item(ittId.at(0).toLatin1(), itemId.toLatin1());
                         if (!item) {
-                            qWarning() << "  > Relationships: could not resolve item:"
-                                       << ittId << itemId << "for match id" << currentMatchId
-                                       << "in" << rel.name();
+                            message(2, u"could not resolve item: %1 %2 for match id %3 in %4"_qs
+                                           .arg(ittId).arg(itemId).arg(currentMatchId).arg(rel.name()));
                         } else {
                             matches[currentMatchId].push_back(uint(item->index()));
                         }
                     } else {
-                        qWarning().noquote() << currentRow;
+                        message(2, currentRow.toString());
                         throw Exception("Relationships: Found a TR that is neither an item nor a match id");
                     }
                 }
@@ -1023,7 +1346,8 @@ void BrickLink::TextImport::readRelationships(const QString &path)
         } while (page);
 
         if (rel.m_count != matches.count()) {
-            qWarning() << "  > Relationships:" << rel.name() << "should have" << rel.m_count << "entries, but has" << matches.count();
+            message(2, u"%1 should have %2 entries, but has %3 instead"_qs
+                           .arg(rel.name()).arg(rel.m_count).arg(matches.count()));
             rel.m_count = matches.count();
         }
         m_db->m_relationships.push_back(rel);
@@ -1044,7 +1368,7 @@ void BrickLink::TextImport::readRelationships(const QString &path)
     // store the matches in each affected item as well for faster lookup
     for (const auto &relMatch : m_db->m_relationshipMatches) {
         if (relMatch.m_id > 0xffffu) {
-            qWarning() << "  > relationship match id" << relMatch.m_id << "exceeds 16 bits";
+            message(2, u"relationship match id %1 exceeds 16 bits"_qs.arg(relMatch.m_id));
             continue;
         }
         for (const auto &itemIndex : relMatch.m_itemIndexes) {
@@ -1054,53 +1378,7 @@ void BrickLink::TextImport::readRelationships(const QString &path)
     }
 }
 
-void BrickLink::TextImport::finalizeDatabase()
-{
-    for (auto it = m_consists_of_hash.cbegin(); it != m_consists_of_hash.cend(); ++it) {
-        Item &item = m_db->m_items[it.key()];
-        const auto &coItems = it.value();
-        item.m_consists_of.copyContainer(coItems.cbegin(), coItems.cend(), nullptr);
-    }
-
-    for (auto it = m_appears_in_hash.cbegin(); it != m_appears_in_hash.cend(); ++it) {
-        Item &item = m_db->m_items[it.key()];
-
-        // color-idx -> { vector < qty, item-idx > }
-        const QHash<uint, QVector<QPair<int, uint>>> &appearHash = it.value();
-
-        // we are compacting a "hash of a vector of pairs" down to a list of 32bit integers
-        QVector<Item::AppearsInRecord> tmp;
-
-        for (auto ait = appearHash.cbegin(); ait != appearHash.cend(); ++ait) {
-            const auto &colorVector = ait.value();
-
-            Item::AppearsInRecord cair;
-            cair.m_colorBits.m_colorIndex = ait.key();
-            cair.m_colorBits.m_colorSize = quint32(colorVector.size());
-            tmp.push_back(cair);
-
-            for (const auto &[qty, itemIndex] : colorVector) {
-                Item::AppearsInRecord iair;
-                iair.m_itemBits.m_quantity = qty;
-                iair.m_itemBits.m_itemIndex = itemIndex;
-                tmp.push_back(iair);
-            }
-        }
-        item.m_appears_in.copyContainer(tmp.cbegin(), tmp.cend(), nullptr);
-    }
-}
-
-void BrickLink::TextImport::setApiKeys(const QHash<QByteArray, QString> &apiKeys)
-{
-    m_db->m_apiKeys = apiKeys;
-}
-
-void BrickLink::TextImport::setApiQuirks(const QSet<ApiQuirk> &apiQuirks)
-{
-    m_db->m_apiQuirks = apiQuirks;
-}
-
-void BrickLink::TextImport::calculateColorPopularity()
+void TextImport::calculateColorPopularity()
 {
     float maxpop = 0;
     for (const auto &col : m_db->m_colors)
@@ -1115,7 +1393,7 @@ void BrickLink::TextImport::calculateColorPopularity()
     }
 }
 
-void BrickLink::TextImport::calculateItemTypeCategories()
+void TextImport::calculateItemTypeCategories()
 {
     for (const auto &item : m_db->m_items) {
         // calculate the item-type -> category relation
@@ -1129,7 +1407,7 @@ void BrickLink::TextImport::calculateItemTypeCategories()
     }
 }
 
-void BrickLink::TextImport::calculateKnownAssemblyColors()
+void TextImport::calculateKnownAssemblyColors()
 {
     for (auto it = m_appears_in_hash.begin(); it != m_appears_in_hash.end(); ++it) {
         const Item &item = m_db->m_items[it.key()];
@@ -1172,12 +1450,7 @@ void BrickLink::TextImport::calculateKnownAssemblyColors()
     }
 }
 
-const std::vector<BrickLink::Item> &BrickLink::TextImport::items() const
-{
-    return m_db->m_items;
-}
-
-void BrickLink::TextImport::calculateCategoryRecency()
+void TextImport::calculateCategoryRecency()
 {
     QHash<uint, std::pair<quint64, quint32>> catCounter;
 
@@ -1204,7 +1477,7 @@ void BrickLink::TextImport::calculateCategoryRecency()
     }
 }
 
-void BrickLink::TextImport::calculatePartsYearUsed()
+void TextImport::calculatePartsYearUsed()
 {
     // Parts have no "yearReleased" in the downloaded XMLs. We can however calculate a
     // "last recently used" value, which is much more useful for parts anyway.
@@ -1222,7 +1495,7 @@ void BrickLink::TextImport::calculatePartsYearUsed()
             if ((pass == 1 ? !isPart : isPart) && item.yearReleased()) {
                 const auto itemParts = m_consists_of_hash.value(itemIndex);
 
-                for (const BrickLink::Item::ConsistsOf &part : itemParts) {
+                for (const Item::ConsistsOf &part : itemParts) {
                     Item &partItem = m_db->m_items[part.itemIndex()];
                     if (partItem.itemTypeId() == 'P') {
                         partItem.m_year_from = partItem.m_year_from ? std::min(partItem.m_year_from, item.m_year_from)
@@ -1235,7 +1508,7 @@ void BrickLink::TextImport::calculatePartsYearUsed()
     }
 }
 
-void BrickLink::TextImport::addToKnownColors(int itemIndex, int addColorIndex)
+void TextImport::addToKnownColors(int itemIndex, int addColorIndex)
 {
     if (addColorIndex <= 0)
         return;
@@ -1251,3 +1524,81 @@ void BrickLink::TextImport::addToKnownColors(int itemIndex, int addColorIndex)
     }
     item.m_knownColorIndexes.push_back(quint16(addColorIndex), nullptr);
 }
+
+int TextImport::loadLastRunInventories(const std::function<void(char, const QByteArray &, const QDateTime &, const QByteArray &)> &callback)
+{
+    uint counter = 0;
+    auto updateCounter = [&]() {
+        if (++counter % 500 == 0) {
+            printf("%c", (counter % 5000) ? '.' : 'o');
+            fflush(stdout);
+        }
+    };
+
+    if (m_lastRunArchive && m_lastRunArchive->isOpen()) {
+        message(u"Loading inventories from ZIP..."_qs);
+
+        const auto fileList = m_lastRunArchive->fileList();
+        for (const QString &filePath : fileList) {
+            if (!filePath.endsWith(u".xml") || (filePath.at(1) != u'/'))
+                continue;
+
+            const QString itemId = filePath.section(u'/', -1, -1).chopped(4);
+            const QString itemTypeId = filePath.section(u'/', -2, -2);
+
+            if ((itemTypeId.size() != 1) || !u"BCGIMOPS"_qs.contains(itemTypeId.at(0)))
+                throw Exception("Invalid entry in inventories cache: %1").arg(filePath);
+
+            updateCounter();
+
+            auto [data, lastModified] = m_lastRunArchive->readFileAndLastModified(filePath);
+            callback(itemTypeId.at(0).toLatin1(), itemId.toLatin1(), lastModified, data);
+        }
+    } else {
+        message(u"Loading inventories from filesystem..."_qs);
+
+        QDirIterator dit(core()->dataPath(), { u"inventory.xml"_qs }, QDir::Files, QDirIterator::Subdirectories);
+        while (dit.hasNext()) {
+            const QFileInfo fi = dit.nextFileInfo();
+            const QString itemId = fi.filePath().section(u'/', -2, -2);
+            const QString itemTypeId = fi.filePath().section(u'/', -4, -4);
+
+            if ((itemTypeId.size() != 1) || !u"BCGIMOPS"_qs.contains(itemTypeId.at(0)))
+                continue;
+
+            updateCounter();
+
+            QFile f(fi.filePath());
+            if (!f.open(QIODevice::ReadOnly))
+                throw Exception(&f, "Failed to open for reading");
+
+            const QByteArray data = f.readAll();
+            if (data.isEmpty())
+                throw Exception("Failed to read XML from %1").arg(fi.filePath());
+
+            callback(itemTypeId.at(0).toLatin1(), itemId.toLatin1(), fi.lastModified(), data);
+        }
+    }
+
+    printf("\n");
+    return counter;
+}
+
+void TextImport::nextStep(const QString &text)
+{
+    printf("\nSTEP %d: %s\n", ++m_currentStep, qPrintable(text));
+}
+
+void TextImport::message(const QString &text)
+{
+    message(1, text);
+}
+
+void TextImport::message(int level, const QString &text)
+{
+    printf("%s%c %s\n", QByteArray(level * 2, ' ').constData(), (level <= 1) ? '*' : '>', qPrintable(text));
+}
+
+} // namespace BrickLink
+
+#include "moc_textimport_p.cpp"

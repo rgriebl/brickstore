@@ -5,13 +5,30 @@
 #include <QtCore/QStandardPaths>
 #include "backendapplication.h"
 #include "bricklink/core.h"
+#include "bricklink/textimport.h"
 #include "utility/exception.h"
-#include "rebuilddatabase.h"
+#include "utility/transfer.h"
 #include "version.h"
+
+
+#if defined(Q_OS_WINDOWS)
+#  include <windows.h>
+#endif
 
 
 BackendApplication::BackendApplication(int &argc, char **argv)
 {
+#if defined(Q_OS_WINDOWS)
+    AllocConsole();
+    SetConsoleTitleW(L"BrickStore - Database Maintenance Tool");
+    FILE *dummy;
+    freopen_s(&dummy, "CONIN$", "r", stdin);
+    freopen_s(&dummy, "CONOUT$", "w", stdout);
+#endif
+
+    // disable buffering on stdout
+    setvbuf(stdout, nullptr, _IONBF, 0);
+
     QCoreApplication::setApplicationName(QLatin1String(BRICKSTORE_NAME));
     QCoreApplication::setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
 
@@ -33,7 +50,12 @@ BackendApplication::BackendApplication(int &argc, char **argv)
 }
 
 BackendApplication::~BackendApplication()
-{ }
+{
+#if defined(Q_OS_WINDOWS)
+    printf("\n\nPress RETURN to quit...\n\n");
+    getchar();
+#endif
+}
 
 void BackendApplication::init()
 {
@@ -48,17 +70,63 @@ void BackendApplication::init()
         exit(2);
     }
 
-    auto *rdb = new RebuildDatabase(m_clp.isSet(u"skip-download"_qs), this);
-
-    QMetaObject::invokeMethod(rdb, [rdb]() {
-        QCoreApplication::exit(rdb->exec());
-    }, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, [this]() -> QCoro::Task<> {
+            QCoreApplication::exit(co_await rebuildDatabase());
+        }, Qt::QueuedConnection);
 }
 
-void BackendApplication::afterInit()
-{ }
+QCoro::Task<int> BackendApplication::rebuildDatabase()
+{
+    printf("\n Rebuilding database ");
+    printf("\n=====================\n");
 
-void BackendApplication::checkRestart()
-{ }
+    BrickLink::core();
+    bool skipDownload = m_clp.isSet(u"skip-download"_qs);
+    BrickLink::TextImport blti;
+
+    try {
+        blti.initialize(skipDownload);
+
+        const QString affiliateApiKey = qEnvironmentVariable("BRICKLINK_AFFILIATE_APIKEY");
+        if (affiliateApiKey.isEmpty())
+            throw Exception("Missing BrickLink Affiliate API key: please set $BRICKLINK_AFFILIATE_APIKEY.");
+        blti.setApiKeys({ { "affiliate", affiliateApiKey } });
+
+        auto apiQuirks = BrickLink::Core::knownApiQuirks();
+        // remove any fixed quirks here
+        blti.setApiQuirks(apiQuirks);
+
+        if (!skipDownload) {
+            const QString rebrickableApiKey = qEnvironmentVariable("REBRICKABLE_APIKEY");
+            if (rebrickableApiKey.isEmpty())
+                throw Exception("Missing Rebrickable API key: please set $REBRICKABLE_APIKEY.");
+
+            const QString username = qEnvironmentVariable("BRICKLINK_USERNAME");
+            const QString password = qEnvironmentVariable("BRICKLINK_PASSWORD");
+            if (username.isEmpty() || password.isEmpty())
+                throw Exception("Missing BrickLink login credentials: please set $BRICKLINK_USERNAME and $BRICKLINK_PASSWORD.");
+
+            co_await blti.login(username, password, rebrickableApiKey);
+        }
+
+        co_await blti.importCatalog();
+        co_await blti.importInventories();
+
+        blti.finalize();
+        blti.exportDatabase();
+
+    } catch (const Exception &e) {
+        QString error = e.errorString();
+        if (error.isEmpty())
+            printf("\n /!\\ FAILED.\n");
+        else
+            printf("\n /!\\ FAILED: %s\n", qPrintable(error));
+
+        co_return 2;
+    }
+
+    printf("\n FINISHED.\n\n");
+    co_return 0;
+}
 
 #include "moc_backendapplication.cpp"

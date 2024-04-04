@@ -59,6 +59,9 @@ public:
     void reprioritize(bool highPriority);
     void resetForReuse();
 
+    void setAutoDelete(bool autoDelete) { m_auto_delete = autoDelete; }
+    bool autoDelete() const             { return m_auto_delete; }
+
 private:
     enum Status : uint {
         Inactive = 0,
@@ -99,8 +102,6 @@ private:
 
     QByteArray   m_userTag;
     QVariant     m_userData;
-//    void *       m_user_ptr = nullptr;
-//    int          m_user_tag = 0;
 
     uint         m_respcode         : 16 = 0;
     Status       m_status           : 4 = Inactive;
@@ -110,6 +111,7 @@ private:
     bool         m_was_not_modified : 1 = false;
     bool         m_no_redirects     : 1;
     bool         m_high_priority    : 1 = false;
+    bool         m_auto_delete      : 1 = true;
 
     friend class Transfer;
     friend class TransferRetriever;

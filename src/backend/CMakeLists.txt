@@ -4,13 +4,12 @@
 qt_add_library(backend_module STATIC
     backendapplication.h
     backendapplication.cpp
-    rebuilddatabase.cpp
-    rebuilddatabase.h
 )
 
 target_link_libraries(backend_module PRIVATE
     Qt6::Core
     Qt6::Gui
+    QCoro6::Core
     bricklink_module
 )
 

@@ -61,6 +61,7 @@ target_link_libraries(bricklink_module PRIVATE
 if (BS_BACKEND)
     target_sources(bricklink_module PRIVATE
         textimport.h
+        textimport_p.h
         textimport.cpp
     )
 endif()

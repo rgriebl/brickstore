@@ -171,7 +171,8 @@ Transfer::Transfer(std::unique_ptr<QNetworkCookieJar> &&cookieJar, QObject *pare
                 return;
             }
         }
-        delete job;
+        if (job->autoDelete())
+            delete job;
     }, Qt::QueuedConnection);
     connect(m_retriever, &TransferRetriever::progress,
             this, &Transfer::progress, Qt::QueuedConnection);

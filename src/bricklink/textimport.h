@@ -9,59 +9,72 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QHash>
 #include <QtCore/QVector>
+#include <QCoro/QCoroTask>
 
 #include "global.h"
 #include "item.h"
 
+
+class MiniZip;
+class Transfer;
 
 namespace BrickLink {
 
 class TextImport
 {
 public:
-    TextImport();
+    explicit TextImport();
     ~TextImport();
 
-    bool import(const QString &path);
-    void finalizeDatabase();
+
+    void initialize(bool skipDownload);
+    QCoro::Task<> login(const QString &username, const QString &password,
+                        const QString &rebrickableApiKey);
+    QCoro::Task<> importCatalog();
+    QCoro::Task<> importInventories();
+    void finalize();
+    void exportDatabase();
+
     void setApiQuirks(const QSet<ApiQuirk> &apiQuirks);
     void setApiKeys(const QHash<QByteArray, QString> &apiKeys);
 
-    enum ImportInventoriesStep {
-        ImportFromDiskCache,
-        ImportAfterDownload,
-    };
-
-    bool importInventories(std::vector<bool> &processedInvs, ImportInventoriesStep step);
-
-    void calculateCategoryRecency();
-    void calculatePartsYearUsed();
-    void calculateItemTypeCategories();
-    void calculateKnownAssemblyColors();
-
-    const std::vector<Item> &items() const;
-
 private:
-    void readColors(const QString &path);
-    void readCategories(const QString &path);
-    void readItemTypes(const QString &path);
-    void readItems(const QString &path, const ItemType *itt);
-    void readAdditionalItemCategories(const QString &path, const ItemType *itt);
-    void readPartColorCodes(const QString &path);
-    bool readInventory(const Item *item, ImportInventoriesStep step);
-    void readLDrawColors(const QString &ldconfigPath, const QString &rebrickableColorsPath);
-    void readInventoryList(const QString &path);
-    void readChangeLog(const QString &path);
-    void readRelationships(const QString &path);
+    QCoro::Task<QByteArray> download(const QUrl &url, const QString &fileName);
 
-    int findItemIndex(char type, const QByteArray &id) const;
-    int findColorIndex(uint id) const;
-    int findCategoryIndex(uint id) const;
+    void readColors(const QByteArray &xml);
+    void readCategories(const QByteArray &xml);
+    void readItemTypes(const QByteArray &xml);
+    void readItems(const QByteArray &xml, const ItemType *itt);
+    void readAdditionalItemCategories(const QByteArray &csv, const ItemType *itt);
+    void readPartColorCodes(const QByteArray &xml);
+    const Item *readInventory(char itemTypeId, const QByteArray &itemId,
+                              const QDateTime &lastModified, const QByteArray &xml,
+                              bool failSilently = false);
+    void readLDrawColors(const QByteArray &ldconfig, const QByteArray &rebrickableColors);
+    void readInventoryList(const QByteArray &csv);
+    void readChangeLog(const QByteArray &csv);
+    QCoro::Task<> readRelationships(const QByteArray &html);
 
     void calculateColorPopularity();
+    void calculateItemTypeCategories();
+    void calculateKnownAssemblyColors();
+    void calculateCategoryRecency();
+    void calculatePartsYearUsed();
+
     void addToKnownColors(int itemIndex, int colorIndex);
 
+    int loadLastRunInventories(const std::function<void (char, const QByteArray &, const QDateTime &, const QByteArray &)> &callback);
+
+    void nextStep(const QString &text);
+    void message(const QString &text);
+    void message(int level, const QString &text);
+
 private:
+    std::unique_ptr<Transfer> m_trans;
+    QString m_archiveName;
+    std::unique_ptr<MiniZip> m_downloadArchive;
+    std::unique_ptr<MiniZip> m_lastRunArchive;
+
     Database *m_db;
     // item-idx -> { color-idx -> { vector < qty, item-idx > } }
     QHash<uint, QHash<uint, QVector<QPair<int, uint>>>> m_appears_in_hash;
@@ -69,6 +82,10 @@ private:
     QHash<uint, QVector<Item::ConsistsOf>>   m_consists_of_hash;
     // item-idx -> secs since epoch
     QHash<uint, qint64> m_inventoryLastUpdated;
+
+    QString m_rebrickableApiKey;
+    bool m_skipDownload = false;
+    int m_currentStep = 0;
 };
 
 } // namespace BrickLink
