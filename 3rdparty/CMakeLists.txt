@@ -6,35 +6,33 @@ target_sources(${PROJECT_NAME} PUBLIC
     lzma/bs_lzma.cpp
     lzma/lzmadec.h
     lzma/lzmadec.c
+
+    minizip/crypt.h
+    minizip/ioapi.c
+    minizip/ioapi.h
+    minizip/minizip.cpp
+    minizip/minizip.h
+    minizip/unzip.c
+    minizip/unzip.h
+    minizip/zip.c
+    minizip/zip.h
+    minizip/zlib_p.h
 )
 
+if(WIN32)
+    target_sources(${PROJECT_NAME} PUBLIC
+        minizip/iowin32.c
+        minizip/iowin32.h
+    )
+elseif(NOT WASM)
+    find_package(ZLIB REQUIRED)
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        ${ZLIB_LIBRARIES}
+    )
+endif()
 
 if (NOT BS_BACKEND)
-    target_sources(${PROJECT_NAME} PUBLIC
-        minizip/crypt.h
-        minizip/ioapi.c
-        minizip/ioapi.h
-        minizip/minizip.cpp
-        minizip/minizip.h
-        minizip/unzip.c
-        minizip/unzip.h
-        minizip/zlib_p.h
-    )
-
-    if(WIN32)
-        target_sources(${PROJECT_NAME} PUBLIC
-            minizip/iowin32.c
-            minizip/iowin32.h
-        )
-    elseif(NOT WASM)
-        find_package(ZLIB REQUIRED)
-
-        target_link_libraries(${PROJECT_NAME} PRIVATE
-            ${ZLIB_LIBRARIES}
-        )
-    endif()
-
-
     target_sources(${PROJECT_NAME} PUBLIC
         qtdiag/qtdiag.h
         qtdiag/qtdiag.cpp

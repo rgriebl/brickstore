@@ -36,6 +36,7 @@
 #endif
 
 #include "unzip.h"
+#include "zip.h"
 
 #define CASESENSITIVITY (0)
 #define WRITEBUFFERSIZE (8192)
@@ -66,21 +67,41 @@ bool MiniZip::open()
     return openInternal(true);
 }
 
+bool MiniZip::create()
+{
+    if (m_zip)
+        return false;
+    m_writing = true;
+    return openInternal(false);
+}
+
 bool MiniZip::openInternal(bool parseTOC)
 {
     if (m_zip)
         return false;
 
     static auto openCallback = [](void *, const void *filename, int mode) -> void * {
-        if (filename && (mode == (ZLIB_FILEFUNC_MODE_READ | ZLIB_FILEFUNC_MODE_EXISTING))) {
+        if (filename) {
             auto f = std::make_unique<QFile>(*reinterpret_cast<const QString *>(filename));
-            if (f->open(QIODevice::ReadOnly))
+            QIODevice::OpenMode m;
+            if (mode & ZLIB_FILEFUNC_MODE_READ)
+                m |= QIODevice::ReadOnly;
+            if (mode & ZLIB_FILEFUNC_MODE_WRITE)
+                m |= QIODevice::WriteOnly;
+            if (mode & ZLIB_FILEFUNC_MODE_CREATE)
+                m |= QIODevice::Truncate;
+            if (mode & ZLIB_FILEFUNC_MODE_EXISTING)
+                m |= QIODevice::Append;
+            if (f->open(m))
                 return f.release();
         }
         return nullptr;
     };
     static auto readCallback = [](void *, void *stream, void *buf, uLong size) -> uLong {
         return uLong(stream ? reinterpret_cast<QFile *>(stream)->read(reinterpret_cast<char *>(buf), qint64(size)) : -1);
+    };
+    static auto writeCallback = [](void *, void *stream, const void *buf, uLong size) -> uLong {
+        return uLong(stream ? reinterpret_cast<QFile *>(stream)->write(reinterpret_cast<const char *>(buf), qint64(size)) : -1);
     };
 
     static auto tellCallback = [](void *, void *stream) -> quint64 {
@@ -109,15 +130,18 @@ bool MiniZip::openInternal(bool parseTOC)
     };
 
 
-    zlib_filefunc64_def ffs { openCallback, readCallback, nullptr, tellCallback, seekCallback,
+    zlib_filefunc64_def ffs { openCallback, readCallback, writeCallback, tellCallback, seekCallback,
                 closeCallback, errorCallback, nullptr };
 
-    m_zip = unzOpen2_64(&m_zipFileName, &ffs);
+    if (m_writing)
+        m_zip = zipOpen2_64(&m_zipFileName, APPEND_STATUS_CREATE, nullptr, &ffs);
+    else
+        m_zip = unzOpen2_64(&m_zipFileName, &ffs);
 
     if (!m_zip)
         return false;
 
-    if (parseTOC) {
+    if (parseTOC && !m_writing) {
         stopwatch sw("Reading ZIP directory");
         do {
             unz64_file_pos fpos;
@@ -129,7 +153,8 @@ bool MiniZip::openInternal(bool parseTOC)
             int filenameSize;
             if (unz__GetCurrentFilename(m_zip, &filename, &filenameSize) != UNZ_OK)
                 break;
-            auto buffer = QString::fromUtf8(QByteArray(filename, filenameSize)).toLower().toUtf8();
+            QByteArray fn(filename, filenameSize);
+            auto key = QString::fromUtf8(fn).toLower().toUtf8();
 
             // this is slow, because unzGetCurrentFileInfo64() re-parses the file header
             // which was already done in GoTo{First|Next}File()
@@ -142,7 +167,7 @@ bool MiniZip::openInternal(bool parseTOC)
             //                buffer.truncate(fileInfo.size_filename);
             //                buffer.squeeze();
 
-            m_contents.insert(buffer, qMakePair(fpos.pos_in_zip_directory, fpos.num_of_file));
+            m_contents.insert(key, { fn, fpos.pos_in_zip_directory, fpos.num_of_file });
         } while (unzGoToNextFile(m_zip) == UNZ_OK);
     }
 
@@ -157,25 +182,38 @@ bool MiniZip::contains(const QString &fileName) const
 void MiniZip::close()
 {
     if (m_zip) {
-        unzClose(m_zip);
+        if (m_writing)
+            zipClose(m_zip, nullptr);
+        else
+            unzClose(m_zip);
         m_zip = nullptr;
     }
     m_contents.clear();
+}
+
+bool MiniZip::isOpen() const
+{
+    return (m_zip);
+}
+
+QString MiniZip::fileName() const
+{
+    return m_zipFileName;
 }
 
 QStringList MiniZip::fileList() const
 {
     QStringList l;
     l.reserve(m_contents.size());
-    for (auto it = m_contents.keyBegin(); it != m_contents.keyEnd(); ++it)
-        l << QString::fromUtf8(*it);
+    for (auto it = m_contents.cbegin(); it != m_contents.cend(); ++it)
+        l << QString::fromUtf8(std::get<0>(it.value()));
     return l;
 }
 
 
-QByteArray MiniZip::readFile(const QString &fileName)
+std::tuple<QByteArray, QDateTime> MiniZip::readFileAndLastModified(const QString &fileName)
 {
-    if (!m_zip)
+    if (!m_zip || m_writing)
         throw Exception(tr("ZIP file %1 has not been opened for reading")).arg(m_zipFileName);
 
     QByteArray fn = fileName.toLower().toUtf8();
@@ -183,7 +221,7 @@ QByteArray MiniZip::readFile(const QString &fileName)
     if (it == m_contents.cend())
         throw Exception(tr("Could not locate the file %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
 
-    unz64_file_pos fpos { it.value().first, it.value().second };
+    unz64_file_pos fpos { std::get<1>(it.value()), std::get<2>(it.value()) };
     if (unzGoToFilePos64(m_zip, &fpos) != UNZ_OK)
         throw Exception(tr("Could not seek to the file %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
 
@@ -205,7 +243,40 @@ QByteArray MiniZip::readFile(const QString &fileName)
         throw Exception(tr("Could not read the file %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
     }
     unzCloseCurrentFile(m_zip);
-    return data;
+
+    const auto &tm = fileInfo.tmu_date;
+    QDateTime lastModified(QDate { tm.tm_year, tm.tm_mon + 1, tm.tm_mday},
+                           QTime { tm.tm_hour, tm.tm_min, tm.tm_sec });
+    return { data, lastModified };
+}
+
+void MiniZip::writeFile(const QString &fileName, const QByteArray &data, const QDateTime &dateTime)
+{
+    if (!m_zip || !m_writing)
+        throw Exception(tr("ZIP file %1 has not been opened for writing")).arg(m_zipFileName);
+
+    auto dt = dateTime;
+    if (!dt.isValid())
+        dt = QDateTime::currentDateTime();
+
+    zip_fileinfo info { { dt.time().second(), dt.time().minute(), dt.time().hour(),
+                       dt.date().day(), dt.date().month() - 1, dt.date().year() },
+                      0, 0, 0 };
+
+    if (zipOpenNewFileInZip(m_zip, fileName.toUtf8().constData(), &info, nullptr, 0,
+                            nullptr, 0, nullptr, Z_DEFLATED, Z_DEFAULT_COMPRESSION) != ZIP_OK) {
+        throw Exception(tr("Could not create file %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
+    }
+    if (zipWriteInFileInZip(m_zip, data.constData(), unsigned(data.size())) != ZIP_OK) {
+        zipCloseFileInZip(m_zip);
+        throw Exception(tr("Could not write to file %1 within the ZIP file %2.")).arg(fileName).arg(m_zipFileName);
+    }
+    zipCloseFileInZip(m_zip);
+}
+
+QByteArray MiniZip::readFile(const QString &fileName)
+{
+    return std::get<0>(readFileAndLastModified(fileName));
 }
 
 void MiniZip::unzip(const QString &zipFileName, QIODevice *destination,
