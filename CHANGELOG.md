@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2024.4.1] - 2024-04-05
+
+**Important**: Price guide updates in all prior 2024.1/.2/.3 versions are broken as of April 4th.
+
+> These BrickStore versions do not send the required API key to the BrickLink servers in all cases and BrickLink started blocking these requests on April 4th (without giving me a heads-up, of course).
+
+Other noteworthy fixes:
+- Sorting was sometimes a little off, when it came to comparing strings ending in numbers (e.g. *Plate 1 x 4* vs. *Plate 1 x 3*).
+- The mobile UI got another huge update, especially the item info dialog.
+
+
 ## [2024.3.1] - 2024-03-26
 
 Important for macOS users: this release works around two bugs in Apple's build tools:
@@ -658,7 +669,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.3.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.4.1...HEAD
+[2024.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.4.1
 [2024.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.3.1
 [2024.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.2.1
 [2024.1.4]: https://github.com/rgriebl/brickstore/releases/tag/v2024.1.4
