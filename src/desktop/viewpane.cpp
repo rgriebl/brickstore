@@ -44,7 +44,11 @@ class CollapsibleLabel : public QLabel
     // Q_OBJECT
 
 public:
-    CollapsibleLabel(const QString &str = { })  : QLabel(str)
+    CollapsibleLabel(QWidget *parent = nullptr)
+        : CollapsibleLabel(QString(), parent)
+    { }
+    explicit CollapsibleLabel(const QString &str, QWidget *parent = nullptr)
+        : QLabel(str, parent)
     {
         setSizePolicy({ QSizePolicy::Maximum, QSizePolicy::Fixed });
         setMinimumSize(0, 0);
@@ -192,11 +196,11 @@ ViewPane::ViewPane(const std::function<ViewPane *(Document *, QWidget *)> &viewP
     layout->setSpacing(0);
     layout->addWidget(top);
 
-    m_viewStack = new QStackedWidget();
+    m_viewStack = new QStackedWidget(this);
     setFocusProxy(m_viewStack);
     layout->addWidget(m_viewStack);
 
-    m_filter = new FilterWidget();
+    m_filter = new FilterWidget(this);
     m_filter->setVisible(false);
     createToolBar();
 
@@ -269,7 +273,7 @@ void ViewPane::newWindow()
             nw->addAction(qa);
     }
     nw->setAttribute(Qt::WA_DeleteOnClose);
-    auto *rootSplitter = new QSplitter();
+    auto *rootSplitter = new QSplitter(this);
     rootSplitter->setObjectName(u"WindowSplitter"_qs);
     auto *vp = m_viewPaneCreate(nullptr, nw);
     rootSplitter->addWidget(vp);
@@ -693,15 +697,15 @@ void ViewPane::changeEvent(QEvent *e)
 
 void ViewPane::createToolBar()
 {
-    m_toolBar = new QWidget();
+    m_toolBar = new QWidget(this);
     m_toolBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     auto pageLayout = new QHBoxLayout(m_toolBar);
     pageLayout->setContentsMargins(0, 0, 4, 0);
     pageLayout->setSpacing(4);
 
-    auto addSeparator = [&pageLayout]() -> QWidget * {
-            auto sep = new QFrame();
+    auto addSeparator = [this, &pageLayout]() -> QWidget * {
+            auto sep = new QFrame(this);
             sep->setFrameShape(QFrame::VLine);
             auto pal = sep->palette();
             pal.setColor(QPalette::WindowText, pal.color(QPalette::Disabled, QPalette::WindowText));
@@ -712,7 +716,7 @@ void ViewPane::createToolBar()
             return sep;
     };
 
-    m_viewList = new MenuComboBox();
+    m_viewList = new MenuComboBox(this);
 
     m_viewList->setModel(DocumentList::inst());
     m_viewList->setMinimumContentsLength(12);
@@ -720,7 +724,7 @@ void ViewPane::createToolBar()
     m_viewList->setSizePolicy({ QSizePolicy::Expanding, QSizePolicy::Expanding });
     m_viewList->setFocusPolicy(Qt::NoFocus);
 
-    m_viewListBackground = new QWidget();
+    m_viewListBackground = new QWidget(this);
     m_viewListBackground->setAutoFillBackground(true);
     m_viewListBackground->setBackgroundRole(QPalette::Window);
 
@@ -782,11 +786,11 @@ void ViewPane::createToolBar()
     pageLayout->addWidget(m_errors);
 
     addSeparator();
-    m_count = new CollapsibleLabel();
+    m_count = new CollapsibleLabel(this);
     pageLayout->addWidget(m_count, 1'000'000);
 
     addSeparator();
-    m_weight = new CollapsibleLabel();
+    m_weight = new CollapsibleLabel(this);
     pageLayout->addWidget(m_weight, 1);
 
     addSeparator();
@@ -794,7 +798,7 @@ void ViewPane::createToolBar()
     auto *currencyLayout = new QHBoxLayout();
     currencyLayout->setSpacing(0);
     currencyLayout->setSizeConstraint(QLayout::SetMaximumSize);
-    m_value = new CollapsibleLabel();
+    m_value = new CollapsibleLabel(this);
     currencyLayout->addWidget(m_value);
     m_currency = new QToolButton(this);
     m_currency->setPopupMode(QToolButton::InstantPopup);
@@ -803,7 +807,7 @@ void ViewPane::createToolBar()
     m_currency->setFocusPolicy(Qt::NoFocus);
     currencyLayout->addWidget(m_currency);
     pageLayout->addLayout(currencyLayout, 10'000);
-    m_profit = new CollapsibleLabel();
+    m_profit = new CollapsibleLabel(this);
     m_profit->hide();
     pageLayout->addWidget(m_profit, 100);
 

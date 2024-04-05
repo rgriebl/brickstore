@@ -427,7 +427,9 @@ void FilterWidget::setDocument(Document *doc)
     m_viewConnectionContext = nullptr;
 
     m_doc = doc;
-    if (m_doc) {
+    if (!m_doc) {
+        setFilter({ });
+    } else {
         m_viewConnectionContext = new QObject(this);
 
         connect(m_onOff, &QAction::toggled,
@@ -543,7 +545,7 @@ void FilterWidget::setFilterFromModel()
 
 void FilterWidget::addFilterTerm(const Filter &filter)
 {
-    auto ftw = new FilterTermWidget(m_doc, filter);
+    auto ftw = new FilterTermWidget(m_doc, filter, this);
     ftw->resetCombination();
     m_termsFlow->addWidget(ftw);
     m_termsContainer->setFocusProxy(ftw);
@@ -583,10 +585,12 @@ void FilterWidget::setFilter(const QVector<Filter> &filter)
 void FilterWidget::setFilterTerms(const QVector<Filter> &filter)
 {
     qDeleteAll(m_termsContainer->findChildren<FilterTermWidget *>());
-    for (const auto &f : filter)
-        addFilterTerm(f);
-    if (filter.isEmpty())
-        addFilterTerm({ });
+    if (m_doc) {
+        for (const auto &f : filter)
+            addFilterTerm(f);
+        if (filter.isEmpty())
+            addFilterTerm({ });
+    }
 }
 
 void FilterWidget::setFilterText(const QVector<Filter> &filter)
