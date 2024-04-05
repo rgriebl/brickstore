@@ -26,19 +26,21 @@ static int naturalCompareNumbers(const QChar *&n1, const QChar *n1e, const QChar
     int result = 0;
 
     while (true) {
-        const auto d1 = (++n1 < n1e) ? n1->digitValue() : -1;
-        const auto d2 = (++n2 < n2e) ? n2->digitValue() : -1;
+        const auto d1 = (n1 < n1e) ? n1->digitValue() : -1;
+        const auto d2 = (n2 < n2e) ? n2->digitValue() : -1;
+        const bool invalid1 = (d1 == -1);
+        const bool invalid2 = (d2 == -1);
 
-        if (d1 == -1 && d2 == -1) {
-            --n1; --n2;
+        if (invalid1 && invalid2)
             return result;
-        } else if (d1 == -1) {
+        else if (invalid1)
             return -1;
-        } else if (d2 == -1) {
+        else if (invalid2)
             return 1;
-        } else if (d1 != d2 && !result) {
+        else if ((d1 != d2) && !result)
             result = d1 - d2;
-        }
+
+        ++n1; ++n2;
     }
 }
 
