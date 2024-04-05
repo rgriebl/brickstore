@@ -181,6 +181,8 @@ void Application::init()
 
     try {
         BrickLink::core()->database()->read();
+        // hack to make sure the PriceGuideCache gets the API key
+        emit BrickLink::core()->database()->updateFinished(true, { });
     } catch (const Exception &) {
         // this is not a critical error, but expected on the first run, so just ignore it
     }

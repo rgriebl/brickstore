@@ -1063,7 +1063,7 @@ void PriceGuideCachePrivate::retrieveFinished(PriceGuide *pg, const PriceGuide::
 
 void PriceGuideCachePrivate::retrieveFailed(PriceGuide *pg, const QString &errorString [[maybe_unused]])
 {
-    //qCWarning(LogCache).noquote() << errorString;
+    qCWarning(LogCache).noquote() << errorString;
     pg->setUpdateStatus(UpdateStatus::UpdateFailed);
     emit q->priceGuideUpdated(pg);
 }
