@@ -33,7 +33,7 @@ def download(url, file):
   
     total = int(response.headers.get('content-length', 0))
     blockSize = 1024
-    progressBar = tqdm(total=total, unit='iB', unit_scale=True)
+    progressBar = tqdm(total=total, unit='iB', unit_scale=True, file=sys.stdout)
     with open(file, 'wb') as fp:
         for data in response.iter_content(blockSize):
             progressBar.update(len(data))
@@ -110,7 +110,13 @@ def downloadAndUnpack(tempDir):
                         cwd=tempDir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if cp.returncode != 0:
         sys.exit(cp.stdout)
-  
+
+    print("Trimming LDraw...")
+    shutil.rmtree(tempDir + '/ldraw/parts/textures', ignore_errors=True)
+    shutil.rmtree(tempDir + '/ldraw/models', ignore_errors=True)
+    for f in glob.glob(tempDir + '/ldraw/mklist*'):
+        os.remove(f)
+
     print("Unpacking Studio (stage 1)...")
     cp = subprocess.run(['7z', 'x', studioFile, 'Payload~'],
                         cwd=tempDir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -177,15 +183,15 @@ def main():
         with open(tempDir + '/' +  ldrawDir + '/' + mappingFile, 'wb') as fp:
             cbor2.dump(partsmap, fp)
       
-        ldrawZipFile = ldrawDir + '.zip'
+        ldrawZipFile = ldrawDir + '-mod.zip'
 
-        print("Adding mapping file to ldraw.zip...")
-        cp = subprocess.run(['7z', 'a', ldrawZipFile, ldrawDir + '/' + mappingFile],
+        print("Creating ldraw-mod.zip...")
+        cp = subprocess.run(['7z', '-mmt=on', '-tzip', '-mx=9', 'a', ldrawZipFile, ldrawDir],
                             cwd=tempDir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         if cp.returncode != 0:
             sys.exit(cp.stdout)
 
-        print("Copying the modified ldraw.zip to", args.output, "...")
+        print("Copying the modified ldraw-mod.zip to", args.output, "...")
         shutil.copy2(tempDir + '/' + ldrawZipFile, args.output)
 
         print("Finished")

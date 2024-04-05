@@ -493,7 +493,7 @@ QString Application::databaseUrl() const
 
 QString Application::ldrawUrl() const
 {
-    return u"" BRICKSTORE_DATABASE_URL ""_qs;
+    return u"" BRICKSTORE_LDRAW_URL ""_qs;
 }
 
 void Application::openUrl(const QUrl &url)
