@@ -2,18 +2,6 @@
 <!DOCTYPE QDOCINDEX>
 <INDEX url="" title="BrickStore Extensions" version="" project="BrickStore">
     <namespace name="" status="active" access="public" module="brickstore">
-        <page name="installation.html" href="installation.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="90" documented="true" subtype="page" title="BrickStore Extension Installation" fulltitle="BrickStore Extension Installation" subtitle=""/>
-        <page name="index.html" href="index.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="4" documented="true" subtype="page" title="BrickStore Extensions Documentation" fulltitle="BrickStore Extensions Documentation" subtitle="">
-            <contents name="installation" title="Installation" level="1"/>
-            <contents name="porting-old-scripts" title="Porting old Scripts" level="1"/>
-            <contents name="writing-extensions" title="Writing Extensions" level="1"/>
-            <contents name="debugging" title="Debugging" level="1"/>
-        </page>
-        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="144" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="">
-            <contents name="the-simple-changes" title="The simple changes" level="2"/>
-            <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
-            <contents name="complex-changes" title="Complex changes" level="2"/>
-        </page>
         <qmlclass name="BrickLink" qml-module-name="BrickLink" fullname="BrickLink.BrickLink" href="qml-bricklink-bricklink.html" status="active" access="public" documented="true" groups="qml-api" title="BrickLink" fulltitle="BrickLink" subtitle="" brief="Core singleton managing the data transfer from and to BrickLink">
             <function name="category" fullname="BrickLink.BrickLink.category" href="qml-bricklink-bricklink.html#category-method" status="active" access="public" documented="true" meta="qmlmethod" type="Category">
                 <parameter type="var" name="category" default=""/>
@@ -104,6 +92,13 @@
             <qmlproperty name="mainWindow" fullname="BrickStore.BrickStore.mainWindow" href="qml-brickstore-brickstore.html#mainWindow-prop" status="active" access="public" documented="true" type="Window" attached="false" writable="false"/>
             <qmlproperty name="versionNumber" fullname="BrickStore.BrickStore.versionNumber" href="qml-brickstore-brickstore.html#versionNumber-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
         </qmlclass>
+        <page name="installation.html" href="installation.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="90" documented="true" subtype="page" title="BrickStore Extension Installation" fulltitle="BrickStore Extension Installation" subtitle=""/>
+        <page name="index.html" href="index.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="4" documented="true" subtype="page" title="BrickStore Extensions Documentation" fulltitle="BrickStore Extensions Documentation" subtitle="">
+            <contents name="installation" title="Installation" level="1"/>
+            <contents name="porting-old-scripts" title="Porting old Scripts" level="1"/>
+            <contents name="writing-extensions" title="Writing Extensions" level="1"/>
+            <contents name="debugging" title="Debugging" level="1"/>
+        </page>
         <qmlclass name="Category" qml-module-name="BrickLink" fullname="BrickLink.Category" href="qml-bricklink-category.html" status="active" access="public" documented="true" groups="qml-api" title="Category" fulltitle="Category" subtitle="" brief="This value type represents a BrickLink item category">
             <qmlproperty name="id" fullname="BrickLink.Category.id" href="qml-bricklink-category.html#id-prop" status="active" access="public" documented="true" type="int" attached="false" writable="false"/>
             <qmlproperty name="isNull" fullname="BrickLink.Category.isNull" href="qml-bricklink-category.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
@@ -280,6 +275,11 @@
             <qmlproperty name="lastUpdated" fullname="BrickLink.Picture.lastUpdated" href="qml-bricklink-picture.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
             <qmlproperty name="updateStatus" fullname="BrickLink.Picture.updateStatus" href="qml-bricklink-picture.html#updateStatus-prop" status="active" access="public" documented="true" type="UpdateStatus" attached="false" writable="false"/>
         </qmlclass>
+        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="144" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="">
+            <contents name="the-simple-changes" title="The simple changes" level="2"/>
+            <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
+            <contents name="complex-changes" title="Complex changes" level="2"/>
+        </page>
         <qmlclass name="PriceGuide" qml-module-name="BrickLink" fullname="BrickLink.PriceGuide" href="qml-bricklink-priceguide.html" status="active" access="public" documented="true" groups="qml-api" title="PriceGuide" fulltitle="PriceGuide" subtitle="" brief="This value type represents the price guide for a BrickLink item">
             <function name="lots" fullname="BrickLink.PriceGuide.lots" href="qml-bricklink-priceguide.html#lots-method" status="active" access="public" documented="true" meta="qmlmethod" type="int">
                 <parameter type="Time" name="time" default=""/>
