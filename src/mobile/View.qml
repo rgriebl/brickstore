@@ -167,7 +167,7 @@ Page {
             columnSpacing: 0
             rowSpacing: 0
             clip: true
-            reuseItems: true
+            reuseItems: false // setting this to true will crash on Android if accessibility is enabled
 
             FontMetrics { id: fontMetrics; font: root.font }
             property int cellHeight: fontMetrics.height * 2 * BS.Config.rowHeightPercent / 100 + 8
