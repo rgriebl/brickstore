@@ -138,14 +138,15 @@ jobs:
 
         - name: "iOS"
           artifact: "iOS"
-          runs-on: macos-12
+          runs-on: macos-13
           os: ios
           qt_host: 'mac'
           qt_host_arch: 'clang_64'
           qt_target: 'ios'
-          qt_version: '6.6.3'
+          qt_version: '6.7.0'
           qt_arch: 'ios'
           cmake_extra_config: ''
+          xcode: '15.2'
 
   # BUILD
   #################################################
@@ -265,7 +266,7 @@ jobs:
       if: (matrix.config.os == 'windows')
       run: |
         curl.exe -L --output ..\\sentry-cli.exe "https://github.com/getsentry/sentry-cli/releases/latest/download/sentry-cli-Windows-i686.exe"
-        ..\\sentry-cli.exe --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif --org brickstore --project brickstore build/bin
+        ..\\sentry-cli.exe --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif --org brickstore --project brickstore build/bin ${Qt6_DIR}/bin
       shell: cmd
 
     # Build for Linux
@@ -584,6 +585,12 @@ jobs:
         API_KEY_P8_DATA: ${{ secrets.APPSTORE_API_KEY_P8_DATA }}
       run: |
         exec .github/scripts/apple-import-apikey.sh
+
+    - name: Set XCode version for iOS
+      if: (matrix.config.os == 'ios' && matrix.config.xcode)
+      run: |
+        sudo xcode-select -s /Applications/Xcode_${{ matrix.config.xcode }}.app
+      shell: bash
 
     - name: Build for iOS
       if: (matrix.config.os == 'ios')

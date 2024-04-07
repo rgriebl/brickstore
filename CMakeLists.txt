@@ -353,6 +353,7 @@ if (APPLE)
             INCLUDE_BY_TYPE sqldrivers
                 Qt::QSQLiteDriverPlugin
         )
+        set_target_properties(${PROJECT_NAME} APPEND PROPERTY RESOURCE "macos/PrivacyInfo.xcprivacy")
     else()
         set_target_properties(${PROJECT_NAME} PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/macos/Info.macos.plist"
@@ -483,6 +484,7 @@ add_custom_target("Other-Files" SOURCES
     macos/Info.macos.plist
     macos/LaunchScreen.storyboard
     macos/locversion.plist.in
+    macos/PrivacyInfo.xcprivacy
     scripts/git-release.sh
     translations/translations.json
     unix/brickstore.desktop
