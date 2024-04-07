@@ -20,6 +20,7 @@ QT_FORWARD_DECLARE_CLASS(QWindow)
 
 class Announcements;
 class UndoGroup;
+class SentryInterface;
 
 
 class Application : public QObject
@@ -127,5 +128,8 @@ protected:
     QQmlApplicationEngine *m_engine = nullptr;
     QGuiApplication *m_app = nullptr;
     QPointer<QWindow> m_mainWindow;
+
+    static std::unique_ptr<SentryInterface> s_sentryInterface;
+
     static Application *s_inst;
 };

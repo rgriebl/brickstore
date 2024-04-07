@@ -13,7 +13,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(SENTRY_VERSION 0.6.2)
+set(SENTRY_VERSION 0.7.2)
 set(QCORO_VERSION  0.9.0)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
@@ -78,8 +78,12 @@ endif()
 # important: set up sentry BEFORE enabling strict error reporting
 set(BS_SENTRY OFF)
 if (SENTRY)
-    set(BS_SENTRY ${SENTRY_VERSION})
-    include(BuildSentry)
+    if (ANDROID)
+        set(BS_SENTRY ON)
+    else()
+        set(BS_SENTRY ${SENTRY_VERSION})
+        include(BuildSentry)
+    endif()
 endif()
 
 include(BuildQCoro)
@@ -198,7 +202,6 @@ endif()
 
 if (SENTRY)
     add_compile_definitions(SENTRY_ENABLED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE sentry)
 endif()
 
 if (MODELTEST)

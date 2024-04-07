@@ -3,11 +3,6 @@
 
 include(FetchContent)
 
-set(QCORO_BUILD_EXAMPLES OFF)
-set(QCORO_ENABLE_ASAN ${SANITIZE})
-set(QCORO_DISABLE_DEPRECATED_TASK_H  ON)
-set(BUILD_TESTING OFF)
-
 FetchContent_Declare(
     sentry
     GIT_REPOSITORY https://github.com/getsentry/sentry-native.git

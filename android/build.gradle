@@ -18,6 +18,8 @@ apply plugin: 'com.android.application'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    /*TODO: make this dependent on a project property */
+    implementation 'io.sentry:sentry-android:7.6.0'
 }
 
 android {

@@ -134,11 +134,11 @@ jobs:
           qt_version: '6.6.3'
           qt_arch: 'android_x86_64'
           qt_extra_archs: 'android_arm64_v8a android_armv7 android_x86'
-          cmake_extra_config: ''
+          cmake_extra_config: '-DSENTRY=ON'
 
         - name: "iOS"
           artifact: "iOS"
-          runs-on: macos-13
+          runs-on: macos-12
           os: ios
           qt_host: 'mac'
           qt_host_arch: 'clang_64'

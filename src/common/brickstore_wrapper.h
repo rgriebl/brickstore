@@ -576,6 +576,8 @@ public:
 
     Q_INVOKABLE QString cacheStats() const;
 
+    Q_INVOKABLE void crash(bool useException) const;
+
 signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
     void showSettings(const QString &page);

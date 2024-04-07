@@ -12,6 +12,7 @@
 #include <QWindow>
 
 #include "utility/utility.h"
+#include "utility/exception.h"
 #include "common/currency.h"
 #include "bricklink/order.h"
 #include "bricklink/dimensions.h"
@@ -286,6 +287,13 @@ QString QmlBrickStore::cacheStats() const
                   + u" / " + QString::number(ld.second) + u" lines";
 }
 
+void QmlBrickStore::crash(bool useException) const
+{
+    if (useException)
+        throw Exception("Test exception");
+    else
+        static_cast<int *>(nullptr)[0] = 1; // NOLINT
+}
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////

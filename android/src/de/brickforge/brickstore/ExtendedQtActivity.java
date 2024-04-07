@@ -11,6 +11,8 @@ import android.util.Log;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+import io.sentry.SentryLevel;
+import io.sentry.android.core.SentryAndroid;
 
 public class ExtendedQtActivity extends QtActivity
 {
@@ -66,5 +68,17 @@ public class ExtendedQtActivity extends QtActivity
                 fileName = fileName.substring(idx + 1);
         }
         return fileName;
+    }
+
+    public boolean setupSentry(String dsn, String release, boolean debug, boolean userConsentRequired)
+    {
+        //TODO: userConsentRequired is not supported by sentry-android yet
+
+        SentryAndroid.init(this, options -> {
+            options.setDsn(dsn);
+            options.setRelease(release);
+            options.setDebug(debug);
+        });
+        return true;
     }
 }

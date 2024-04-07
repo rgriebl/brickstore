@@ -23,6 +23,8 @@ qt_add_library(common_module STATIC
     onlinestate.h
     recentfiles.cpp
     recentfiles.h
+    sentryinterface.h
+    sentryinterface.cpp
     systeminfo.cpp
     systeminfo.h
 
@@ -84,7 +86,7 @@ if (MACOS)
     )
 endif()
 
-if (SENTRY)
+if (SENTRY AND NOT ANDROID)
     target_link_libraries(common_module PRIVATE sentry::sentry)
 endif()
 

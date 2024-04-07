@@ -54,13 +54,12 @@
 #include "common/systeminfo.h"
 #include "utility/transfer.h"
 #include "common/undo.h"
+#include "common/sentryinterface.h"
 #include "scanner/itemscanner.h"
 #include "version.h"
 
-#if defined(SENTRY_ENABLED)
-#  include "sentry.h"
-#  include "version.h"
-Q_LOGGING_CATEGORY(LogSentry, "sentry")
+#if defined(Q_OS_ANDROID)
+#  include <dlfcn.h>
 #endif
 
 #if defined(Q_OS_UNIX) || defined(Q_CC_MINGW)
@@ -77,6 +76,7 @@ Q_LOGGING_CATEGORY(LogQml, "qml")
 
 
 Application *Application::s_inst = nullptr;
+std::unique_ptr<SentryInterface> Application::s_sentryInterface;
 
 
 Application::Application(int &argc, char **argv)
@@ -756,100 +756,59 @@ QVariantMap Application::about() const
     };
 }
 
-
 void Application::setupSentry()
 {
-#if defined(SENTRY_ENABLED)
-    auto *sentry = sentry_options_new();
-#  if defined(SENTRY_DEBUG)
-    sentry_options_set_debug(sentry, 1);
-    sentry_options_set_logger(sentry, [](sentry_level_t level, const char *message, va_list args, void *) {
-        QDebug dbg(static_cast<QString *>(nullptr));
-        switch (level) {
-        default:
-        case SENTRY_LEVEL_DEBUG:   dbg = QMessageLogger().debug(LogSentry); break;
-        case SENTRY_LEVEL_INFO:    dbg = QMessageLogger().info(LogSentry); break;
-        case SENTRY_LEVEL_WARNING: dbg = QMessageLogger().warning(LogSentry); break;
-        case SENTRY_LEVEL_ERROR:
-        case SENTRY_LEVEL_FATAL:   dbg = QMessageLogger().critical(LogSentry); break;
+    const char *dsn = "https://335761d80c3042548349ce5e25e12a06@o553736.ingest.sentry.io/5681421";
+    const char *release = "brickstore@" BRICKSTORE_BUILD_NUMBER;
+    constexpr bool debug = true;
+    constexpr bool userConsentRequired = true;
+
+    s_sentryInterface = std::make_unique<SentryInterface>(dsn, release);
+    s_sentryInterface->setDebug(debug);
+    s_sentryInterface->setUserConsentRequired(userConsentRequired);
+
+    if (s_sentryInterface->init()) {
+        auto sysInfo = SystemInfo::inst()->asMap();
+        for (auto it = sysInfo.cbegin(); it != sysInfo.cend(); ++it) {
+            if (!it.key().startsWith(u"os.") || (it.key() == u"os.productname"))
+                s_sentryInterface->setTag(it.key().toUtf8(), it.value().toString().toUtf8());
         }
-        dbg.noquote() << QString::vasprintf(QByteArray(message).replace("%S", "%ls").constData(), args);
-    }, nullptr);
-#  endif
-    sentry_options_set_dsn(sentry, "https://335761d80c3042548349ce5e25e12a06@o553736.ingest.sentry.io/5681421");
-    sentry_options_set_release(sentry, "brickstore@" BRICKSTORE_BUILD_NUMBER);
-    sentry_options_set_require_user_consent(sentry, 1);
-
-    QString dbPath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + u"/.sentry";
-    QString crashHandler = QCoreApplication::applicationDirPath() + u"/crashpad_handler";
-
-#  if defined(Q_OS_WINDOWS)
-    crashHandler.append(u".exe"_qs);
-    sentry_options_set_handler_pathw(sentry, reinterpret_cast<const wchar_t *>(crashHandler.utf16()));
-    sentry_options_set_database_pathw(sentry, reinterpret_cast<const wchar_t *>(dbPath.utf16()));
-#  else
-    sentry_options_set_handler_path(sentry, crashHandler.toLocal8Bit().constData());
-    sentry_options_set_database_path(sentry, dbPath.toLocal8Bit().constData());
-#  endif
-    if (sentry_init(sentry))
-        qCWarning(LogSentry) << "Could not initialize sentry.io!";
-    else
-        qCInfo(LogSentry) << "Successfully initialized sentry.io";
-
-    auto sysInfo = SystemInfo::inst()->asMap();
-    for (auto it = sysInfo.cbegin(); it != sysInfo.cend(); ++it) {
-        if (!it.key().startsWith(u"os.") || (it.key() == u"os.productname"))
-            sentry_set_tag(it.key().toUtf8().constData(), it.value().toString().toUtf8().constData());
+        s_sentryInterface->setTag("language", Config::inst()->language().toUtf8());
     }
-    sentry_set_tag("language", Config::inst()->language().toUtf8().constData());
-#endif
 }
 
 void Application::shutdownSentry()
 {
-#if defined(SENTRY_ENABLED)
-    sentry_shutdown();
-#endif
+    if (s_sentryInterface)
+        s_sentryInterface->close();
 }
 
 void Application::checkSentryConsent()
 {
-#if defined(SENTRY_ENABLED)
     auto check = []() {
+        if (!s_sentryInterface)
+            return;
+
         switch (Config::inst()->sentryConsent()) {
         case Config::SentryConsent::Unknown:
-            sentry_user_consent_reset();
+            s_sentryInterface->userConsentReset();
             break;
         case Config::SentryConsent::Given:
-            sentry_user_consent_give();
+            s_sentryInterface->userConsentGive();
             break;
         case Config::SentryConsent::Revoked:
-            sentry_user_consent_revoke();
+            s_sentryInterface->userConsentRevoke();
             break;
         }
     };
     connect(Config::inst(), &Config::sentryConsentChanged, check);
     check();
-#endif
 }
 
 void Application::addSentryBreadcrumb(QtMsgType msgType, const QMessageLogContext &msgCtx, const QString &msg)
 {
-#if defined(SENTRY_ENABLED)
-    sentry_value_t crumb = sentry_value_new_breadcrumb("default", msg.toUtf8());
-    if (msgCtx.category)
-        sentry_value_set_by_key(crumb, "category", sentry_value_new_string(msgCtx.category));
-    msgType = std::clamp(msgType, QtDebugMsg, QtInfoMsg);
-    static const char *msgTypeLevels[5] = { "debug", "warning", "error", "fatal", "info" };
-    sentry_value_set_by_key(crumb, "level", sentry_value_new_string(msgTypeLevels[msgType]));
-    const auto now = QDateTime::currentSecsSinceEpoch();
-    sentry_value_set_by_key(crumb, "timestamp", sentry_value_new_int32(int32_t(now)));
-    sentry_add_breadcrumb(crumb);
-#else
-    Q_UNUSED(msgType)
-    Q_UNUSED(msgCtx)
-    Q_UNUSED(msg)
-#endif
+    if (s_sentryInterface)
+        s_sentryInterface->addBreadcrumb(msgType, msgCtx, msg);
 }
 
 void Application::setupLogging()

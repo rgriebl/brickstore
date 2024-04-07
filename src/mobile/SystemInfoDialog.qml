@@ -19,6 +19,8 @@ FullscreenDialog {
         icon.name: "edit-copy"
         visible: (tabBar.currentIndex === 0)
         onClicked: { BS.Clipboard.setText(root.sysinfoMarkdown) }
+        onPressAndHold: { BS.BrickStore.crash(false) }
+        onDoubleClicked: { BS.BrickStore.crash(true) }
     }
 
     property var goBackFunction
