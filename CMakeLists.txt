@@ -353,7 +353,7 @@ if (APPLE)
             INCLUDE_BY_TYPE sqldrivers
                 Qt::QSQLiteDriverPlugin
         )
-        set_target_properties(${PROJECT_NAME} APPEND PROPERTY RESOURCE "macos/PrivacyInfo.xcprivacy")
+        set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY RESOURCE "macos/PrivacyInfo.xcprivacy")
     else()
         set_target_properties(${PROJECT_NAME} PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/macos/Info.macos.plist"
