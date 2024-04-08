@@ -324,6 +324,7 @@ if (APPLE)
     if (LTO_STATUS)
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-object_path_lto -Wl,lto.o")
     endif()
+    set(QT_NO_SET_PLIST_LOCALIZATIONS, ON) # we handle this ourselves
     if (IOS)
         set_target_properties(${PROJECT_NAME} PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/macos/Info.ios.plist"
@@ -342,6 +343,12 @@ if (APPLE)
             MACOSX_PACKAGE_LOCATION "Resources"
         )
 
+        set(PRIVACY_INFO "${CMAKE_SOURCE_DIR}/macos/PrivacyInfo.xcprivacy")
+        target_sources(${PROJECT_NAME} PRIVATE ${PRIVACY_INFO})
+        set_source_files_properties(${PRIVACY_INFO} PROPERTIES
+            MACOSX_PACKAGE_LOCATION "Resources"
+        )
+
         # restrict the number of deployed plugins in static builds
         qt_import_plugins(${PROJECT_NAME}
             EXCLUDE_BY_TYPE qmltooling
@@ -353,7 +360,6 @@ if (APPLE)
             INCLUDE_BY_TYPE sqldrivers
                 Qt::QSQLiteDriverPlugin
         )
-        set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY RESOURCE "macos/PrivacyInfo.xcprivacy")
     else()
         set_target_properties(${PROJECT_NAME} PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/macos/Info.macos.plist"

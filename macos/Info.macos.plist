@@ -15,25 +15,25 @@
     <string>APPL</string>
 
     <key>NSHumanrReadableCopyright</key>
-    <string>Copyright © @COPYRIGHT@</string>
+    <string>Copyright © ${COPYRIGHT}</string>
 
     <key>CFBundleIdentifier</key>
-    <string>@MACOSX_BUNDLE_GUI_IDENTIFIER@</string>
+    <string>${MACOSX_BUNDLE_GUI_IDENTIFIER}</string>
 
     <key>CFBundleSignature</key>
     <string>ttxt</string>
 
     <key>CFBundleExecutable</key>
-    <string>@EXECUTABLE@</string>
+    <string>${EXECUTABLE}</string>
 
     <key>CFBundleName</key>
     <string>BrickStore</string>
 
     <key>CFBundleShortVersionString</key>
-    <string>@VERSION@</string>
+    <string>${VERSION}</string>
 
     <key>CFBundleVersion</key>
-    <string>@BUILD_NUMBER@</string>
+    <string>${BUILD_NUMBER}</string>
 
     <key>NSCameraUsageDescription</key>
     <string>BrickStore needs access to your camera, if you want to identify parts with it.</string>
