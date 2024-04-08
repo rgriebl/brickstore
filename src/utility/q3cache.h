@@ -134,7 +134,7 @@ public:
     T *take(const Key &key);
 
     void setObjectCost(const Key &key, int cost);
-    int clearRecursive(std::function<void (T *)> leakCallback = { });
+    int clearRecursive();
 
 private:
     void trim(int m);
@@ -221,7 +221,7 @@ void Q3Cache<Key,T>::trim(int m)
 }
 
 template<class Key, class T>
-int Q3Cache<Key, T>::clearRecursive(std::function<void(T *)> leakCallback)
+int Q3Cache<Key, T>::clearRecursive()
 {
     int s = size();
     while (s) {
@@ -230,16 +230,6 @@ int Q3Cache<Key, T>::clearRecursive(std::function<void(T *)> leakCallback)
         if (new_s == s)
             break;
         s = new_s;
-    }
-    if (s) {
-        // we cannot clear(), as this deletes objects that may still be in use, we HAVE TO leak them
-        const auto leakKeys = keys();
-        for (const auto &key : leakKeys) {
-            auto *object = take(key);
-            if (leakCallback)
-                leakCallback(object);
-            // otherwise just leak object
-        }
     }
     return s;
 }

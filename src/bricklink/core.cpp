@@ -871,7 +871,7 @@ void Core::cancelTransfers()
 {
 #if !defined(BS_BACKEND)
     m_priceGuideCache->cancelAllPriceGuideUpdates();
-    m_pictureCache->cancelAllPictureUpdates();;
+    m_pictureCache->cancelAllPictureUpdates();
 #endif
 
     if (m_transfer)

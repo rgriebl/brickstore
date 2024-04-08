@@ -12,6 +12,7 @@
 #include <QtCore/QJsonDocument>
 #include <QtCore/QTimer>
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QCoreApplication>
 #include <QtNetwork/QNetworkInformation>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
@@ -670,24 +671,30 @@ void PriceGuideCache::setUpdateInterval(int interval)
 
 void PriceGuideCache::clearCache()
 {
-    // Ideally we would just clear() the caches here, but there could be ref'ed objects
-    // left, so we just trim the cache as much as possible and leak the remaining objects
-    // as a sort of damage control.
+    int run = 0;
+    int lastLeftOver = 0;
+    QElapsedTimer timer;
 
-    auto leakControl = [](PriceGuide *pg) { Ref::addZombieRef(pg); };
+    // the loader/saver threads might hold references, so we need to wait for their queues to drain
+    while (true) {
+        ++run;
+        int leftOver = d->m_cache.clearRecursive();
 
-    constexpr int MaxClearRuns = 10;
-
-    for (int i = 1; i <= MaxClearRuns; ++i) {
-        auto leakedCount = (i == MaxClearRuns) ? d->m_cache.clearRecursive(leakControl)
-                                               : d->m_cache.clearRecursive();
-        if (leakedCount) {
-            qCWarning(LogCache) << "PriceGuide cache:" << leakedCount
-                                << "objects still have a reference after clearing run" << i;
-        } else {
+        if (!leftOver) {
+            break;
+        } else if ((leftOver == lastLeftOver) && (timer.elapsed() > 500)) {
+            qCCritical(LogCache) << "PriceGuide cache: still" << leftOver
+                                 << "active references - giving up, expect a crash soon";
             break;
         }
-        QThread::msleep(100);
+
+        qCWarning(LogCache) << "PriceGuide cache:" << leftOver
+                            << "objects still have a reference after clearing run" << run;
+        if (lastLeftOver != leftOver) {
+            lastLeftOver = leftOver;
+            timer.start();
+        }
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents, 500);
     }
 
     AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
