@@ -17,6 +17,7 @@ public:
 
     void init();
     void afterInit() { };
+    int exec();
     void checkRestart() { };
 
 private:

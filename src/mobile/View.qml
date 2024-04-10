@@ -113,7 +113,7 @@ Page {
             id: header
             syncView: table
             clip: true
-            reuseItems: false
+            reuseItems: true
             //interactive: false
 
             property bool sorted: root.document?.sorted ?? false
@@ -167,7 +167,7 @@ Page {
             columnSpacing: 0
             rowSpacing: 0
             clip: true
-            reuseItems: false // setting this to true will crash on Android if accessibility is enabled
+            reuseItems: true
 
             FontMetrics { id: fontMetrics; font: root.font }
             property int cellHeight: fontMetrics.height * 2 * BS.Config.rowHeightPercent / 100 + 8

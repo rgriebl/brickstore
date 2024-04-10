@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     a.init();
     a.afterInit();
 
-    int exitCode = qApp->exec();
+    int exitCode = a.exec();
 
     // we are using QThreadStorage in thread-pool threads, so we have to make sure they are
     // all joined before destroying the static QThreadStorage objects.

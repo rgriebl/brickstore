@@ -10,10 +10,8 @@
 #include <QtQml/QQmlExtensionPlugin>
 
 #include "common/actionmanager.h"
-#include "common/config.h"
 #include "common/document.h"
 #include "common/undo.h"
-#include "ldraw/library.h"
 #include "mobileapplication.h"
 #include "mobileuihelpers.h"
 #include "common/brickstore_wrapper.h"
@@ -22,6 +20,7 @@
 #  include <jni.h>
 #  include <QJniObject>
 #  include <QFileOpenEvent>
+#  include <android/api-level.h>
 
 extern "C" JNIEXPORT void JNICALL
 Java_de_brickforge_brickstore_ExtendedQtActivity_openUrl(JNIEnv *env, jobject, jstring jurl)
@@ -32,6 +31,16 @@ Java_de_brickforge_brickstore_ExtendedQtActivity_openUrl(JNIEnv *env, jobject, j
     QCoreApplication::postEvent(qApp, new QFileOpenEvent(QString::fromUtf8(utf8)));
     env->ReleaseStringUTFChars(jurl, utf8);
 }
+
+static struct DisableA11YOnAndroid14  // clazy:exclude=non-pod-global-static
+{
+    // QTBUG-xxxxxx: Accessibility crashes in TableView on Android 14
+    DisableA11YOnAndroid14()
+    {
+        if (android_get_device_api_level() >= 34)
+            qputenv("QT_ANDROID_DISABLE_ACCESSIBILITY", "1");
+    }
+} disableA11YOnAndroid14;
 
 #endif
 

@@ -129,4 +129,9 @@ QCoro::Task<int> BackendApplication::rebuildDatabase()
     co_return 0;
 }
 
+int BackendApplication::exec()
+{
+    return QCoreApplication::exec();
+}
+
 #include "moc_backendapplication.cpp"

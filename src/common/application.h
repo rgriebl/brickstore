@@ -34,6 +34,7 @@ public:
 
     virtual void init();
     void afterInit();
+    virtual int exec();
 
     QString buildNumber() const;
     QString applicationUrl() const;

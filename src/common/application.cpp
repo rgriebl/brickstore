@@ -330,6 +330,11 @@ void Application::afterInit()
     ItemScanner::inst();
 }
 
+int Application::exec()
+{
+    return QGuiApplication::exec();
+}
+
 QCoro::Task<> Application::restoreLastSession()
 {
     bool autosavesRestored = false;

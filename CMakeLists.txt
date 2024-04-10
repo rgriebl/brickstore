@@ -16,10 +16,6 @@ set(CMAKE_AUTOUIC ON)
 set(SENTRY_VERSION 0.7.2)
 set(QCORO_VERSION  0.9.0)
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
-    set(ANDROID_PLATFORM 21) # supress warning by setting it early
-endif()
-
 # for QtCreator
 set(QML_IMPORT_PATH ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/imports CACHE STRING "" FORCE)
 
