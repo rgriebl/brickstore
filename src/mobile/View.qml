@@ -177,7 +177,8 @@ Page {
                                  ? 0 : table.model.headerData(c, Qt.Horizontal, Qt.SizeHintRole)
             rowHeightProvider: () => cellHeight
 
-            selectionModel: root.document?.selectionModel ?? null
+            model: root.document
+            selectionModel: root.document.selectionModel
 
             Loader {
                 id: editMenu
@@ -217,9 +218,6 @@ Page {
                     editMenu.open(m.column)
                 }
             }
-
-
-            model: root.document
 
             Connections {
                 target: root.document

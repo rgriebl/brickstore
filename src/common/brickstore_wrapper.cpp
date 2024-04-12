@@ -24,6 +24,7 @@
 #include "common/documentio.h"
 #include "common/recentfiles.h"
 #include "brickstore_wrapper.h"
+#include "brickstore_wrapper_p.h"
 #include "version.h"
 
 using namespace std::chrono_literals;
@@ -330,6 +331,7 @@ QmlDocument::QmlDocument(Document *doc)
     : QAbstractProxyModel(doc)
     , m_doc(doc)
     , m_columnModel(new QmlDocumentColumnModel(this))
+    , m_proxySelectionModel(new ProxySelectionModel(this, doc))
 {
     setDocument(doc);
 
@@ -693,6 +695,11 @@ int QmlDocument::visualColumn(int logical) const
 QmlDocumentColumnModel *QmlDocument::columnModel()
 {
     return m_columnModel;
+}
+
+QItemSelectionModel *QmlDocument::selectionModel()
+{
+    return m_proxySelectionModel;
 }
 
 void QmlDocument::update()
@@ -1276,4 +1283,50 @@ DocumentList *QmlDocumentList::docList()
 */
 
 
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+ProxySelectionModel::ProxySelectionModel(QmlDocument *qmlDoc, Document *doc)
+    : QItemSelectionModel(qmlDoc, qmlDoc)
+    , m_qmlDoc(qmlDoc)
+    , m_doc(doc)
+{
+    Q_ASSERT(qmlDoc);
+    Q_ASSERT(doc);
+
+    connect(m_doc->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, [this](const QItemSelection &, const QItemSelection &) {
+        transfer(m_doc->selectionModel(), this);
+    });
+    connect(this, &QItemSelectionModel::selectionChanged,
+            this, [this](const QItemSelection &, const QItemSelection &) {
+        transfer(this, m_doc->selectionModel());
+    });
+}
+
+void ProxySelectionModel::transfer(const QItemSelectionModel *from, QItemSelectionModel *to)
+{
+    if (m_interlock)
+        return;
+    m_interlock = true;
+
+    const QItemSelection fromSel = from->selection();
+    QItemSelection toSel;
+    toSel.reserve(fromSel.size());
+    for (const auto &selRange : fromSel) {
+        QModelIndex tl = (to == this) ? m_qmlDoc->mapFromSource(selRange.topLeft())
+                                      : m_qmlDoc->mapToSource(selRange.topLeft());
+        QModelIndex br = (to == this) ? m_qmlDoc->mapFromSource(selRange.bottomRight())
+                                      : m_qmlDoc->mapToSource(selRange.bottomRight());
+        toSel << QItemSelectionRange(tl, br);
+    }
+
+    to->select(toSel, QItemSelectionModel::ClearAndSelect);
+    m_interlock = false;
+}
+
+
 #include "moc_brickstore_wrapper.cpp"
+#include "moc_brickstore_wrapper_p.cpp"

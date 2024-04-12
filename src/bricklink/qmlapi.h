@@ -152,6 +152,12 @@ protected:
     T *wrapped;
 };
 
+template <typename T>
+QDebug &operator<<(QDebug &dbg, const QmlWrapperBase<T> &wrapper)
+{
+    return dbg << "W(" << wrapper.wrappedObject() << ")";
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////

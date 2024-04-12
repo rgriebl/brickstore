@@ -57,7 +57,6 @@ class QmlDocument : public QAbstractProxyModel
     Q_PRIVATE_PROPERTY(doc(), bool blockingOperationCancelable READ isBlockingOperationCancelable NOTIFY blockingOperationCancelableChanged FINAL)
     Q_PRIVATE_PROPERTY(doc(), QString blockingOperationTitle READ blockingOperationTitle WRITE setBlockingOperationTitle NOTIFY blockingOperationTitleChanged FINAL)
     Q_PRIVATE_PROPERTY(doc(), bool restoredFromAutosave READ isRestoredFromAutosave CONSTANT FINAL)
-    Q_PRIVATE_PROPERTY(doc(), QItemSelectionModel *selectionModel READ selectionModel CONSTANT FINAL)
 
     Q_PROPERTY(int lotCount READ lotCount NOTIFY lotCountChanged FINAL)
     Q_PROPERTY(int visibleLotCount READ visibleLotCount NOTIFY visibleLotCountChanged FINAL)
@@ -66,6 +65,7 @@ class QmlDocument : public QAbstractProxyModel
     Q_PROPERTY(QmlDocumentLots *lots READ qmlLots CONSTANT FINAL)
     Q_PROPERTY(QList<BrickLink::QmlLot> selectedLots READ qmlSelectedLots NOTIFY qmlSelectedLotsChanged FINAL)
     Q_PROPERTY(QmlDocumentColumnModel *columnModel READ columnModel CONSTANT FINAL)
+    Q_PROPERTY(QItemSelectionModel *selectionModel READ selectionModel CONSTANT FINAL)
     Q_PROPERTY(Document *document READ document CONSTANT FINAL)
 
 public:
@@ -85,6 +85,7 @@ public:
     Q_INVOKABLE int visualColumn(int logical) const;
 
     QmlDocumentColumnModel *columnModel();
+    QItemSelectionModel *selectionModel();
 
     QVariantList qmlSortColumns() const;
     QmlDocumentLots *qmlLots();
@@ -160,6 +161,7 @@ private:
     QPointer<Document> m_doc;
     QObject *m_connectionContext = nullptr;
     QmlDocumentColumnModel *m_columnModel = nullptr;
+    QItemSelectionModel *m_proxySelectionModel = nullptr;
 
     QPointer<QmlDocumentLots> m_qmlLots;
 
