@@ -765,7 +765,7 @@ void Application::setupSentry()
 {
     const char *dsn = "https://335761d80c3042548349ce5e25e12a06@o553736.ingest.sentry.io/5681421";
     const char *release = "brickstore@" BRICKSTORE_BUILD_NUMBER;
-    constexpr bool debug = true;
+    constexpr bool debug = false;
     constexpr bool userConsentRequired = true;
 
     s_sentryInterface = std::make_unique<SentryInterface>(dsn, release);
