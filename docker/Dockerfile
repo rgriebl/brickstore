@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   wget \
   ca-certificates \
   xxd \
-  lzma-alone
+  xz-utils \
+  moreutils
 
 ADD $BRICKSTORE_BACKEND_DEB brickstore-backend.deb
 

@@ -22,9 +22,9 @@ echo " Compressing database "
 echo "======================"
 echo
 
-cd "$DB_PATH"
-parallel -i sh -c 'sha512sum < "{}" | xxd -r -p > "$BRICKSTORE_CACHE_PATH/{}.lzma" ; \
-                   xz -F alone -T 1 -c -v "{}" >> "$BRICKSTORE_CACHE_PATH/{}.lzma"' \
+cd "$BRICKSTORE_CACHE_PATH"
+parallel -i sh -c 'sha512sum < "{}" | xxd -r -p > "$DB_PATH/{}.lzma" ; \
+                   xz -F alone -T 1 -c -v "{}" >> "$DB_PATH/{}.lzma"' \
   -- database-v* |& sort -V
 
 echo
