@@ -13,23 +13,20 @@ mkdir -p "$DB_PATH"
 mkdir -p "$LOG_PATH"
 mkdir -p "$CACHE_PATH"
 
-stdbuf -oL -eL /usr/bin/brickstore "$@" 2>&1 \
-  | tee >(gzip -c > $LOG_PATH/log-`date -Iseconds`.log.gz)
+exec &> >(tee >(gzip -c > $LOG_PATH/log-`date -Iseconds`.log.gz) )
+
+stdbuf -oL -eL /usr/bin/brickstore "$@"
 
 echo
-echo "Compressing databases..."
+echo " Compressing database "
+echo "======================"
+echo
 
-for i in $(seq 4 20); do
-  dbname=database-v$i
+cd "$DB_PATH"
+parallel -i sh -c 'sha512sum < "{}" | xxd -r -p > "$BRICKSTORE_CACHE_PATH/{}.lzma" ; \
+                   xz -F alone -T 1 -c -v "{}" >> "$BRICKSTORE_CACHE_PATH/{}.lzma"' \
+  -- database-v* |& sort -V
 
-  rm -f "$DB_PATH/$dbname"
-
-  [ -e "$BRICKSTORE_CACHE_PATH/$dbname" ] || continue
-
-  echo -n "  > $dbname... "
-
-  sha512sum < "$BRICKSTORE_CACHE_PATH/$dbname" | xxd -r -p > "$DB_PATH/$dbname.lzma"
-  lzma_alone e "$BRICKSTORE_CACHE_PATH/$dbname" -so >>"$DB_PATH/$dbname.lzma" 2>/dev/null
-
-  echo "done"
-done
+echo
+echo " FINISHED."
+echo
