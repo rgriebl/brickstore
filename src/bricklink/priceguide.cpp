@@ -671,26 +671,26 @@ void PriceGuideCache::setUpdateInterval(int interval)
 
 void PriceGuideCache::clearCache()
 {
-    int run = 0;
     int lastLeftOver = 0;
     QElapsedTimer timer;
+    QElapsedTimer absoluteTimer;
+    absoluteTimer.start();
 
     // the loader/saver threads might hold references, so we need to wait for their queues to drain
     while (true) {
-        ++run;
         int leftOver = d->m_cache.clearRecursive();
 
         if (!leftOver) {
             break;
         } else if ((leftOver == lastLeftOver) && (timer.elapsed() > 500)) {
-            qCCritical(LogCache) << "PriceGuide cache: still" << leftOver
-                                 << "active references - giving up, expect a crash soon";
+            qCCritical(LogCache) << "PriceGuides:" << leftOver << "active references after"
+                                 << absoluteTimer.elapsed() << "ms - giving up, expect a crash soon.";
             break;
         }
 
-        qCWarning(LogCache) << "PriceGuide cache:" << leftOver
-                            << "objects still have a reference after clearing run" << run;
         if (lastLeftOver != leftOver) {
+            qCWarning(LogCache) << "PriceGuides:" << leftOver << "active references after"
+                                << absoluteTimer.elapsed() << "ms - waiting.";
             lastLeftOver = leftOver;
             timer.start();
         }

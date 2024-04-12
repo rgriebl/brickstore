@@ -279,7 +279,7 @@ UIHelpers_ProgressDialogInterface *MobileUIHelpers::createProgressDialog(const Q
 
 void MobileUIHelpers::processToastMessages()
 {
-    if (m_toastMessageVisible || m_toastMessages.isEmpty())
+    if (m_toastMessageVisible || m_toastMessages.isEmpty() || !s_engine)
         return;
 
     auto [message, timeout] = m_toastMessages.takeFirst();

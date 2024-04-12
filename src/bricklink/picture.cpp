@@ -263,26 +263,26 @@ void PictureCache::setUpdateInterval(int interval)
 
 void PictureCache::clearCache()
 {
-    int run = 0;
     int lastLeftOver = 0;
     QElapsedTimer timer;
+    QElapsedTimer absoluteTimer;
+    absoluteTimer.start();
 
     // the loader/saver threads might hold references, so we need to wait for their queues to drain
     while (true) {
-        ++run;
         int leftOver = d->m_cache.clearRecursive();
 
         if (!leftOver) {
             break;
         } else if ((leftOver == lastLeftOver) && (timer.elapsed() > 500)) {
-            qCCritical(LogCache) << "Picture cache: still" << leftOver
-                                 << "active references - giving up, expect a crash soon";
+            qCCritical(LogCache) << "Pictures:" << leftOver << "active references after"
+                                 << absoluteTimer.elapsed() << "ms - giving up, expect a crash soon.";
             break;
         }
 
-        qCWarning(LogCache) << "Picture cache:" << leftOver
-                            << "objects still have a reference after clearing run" << run;
         if (lastLeftOver != leftOver) {
+            qCWarning(LogCache) << "Pictures:" << leftOver << "active references after"
+                                << absoluteTimer.elapsed() << "ms - waiting.";
             lastLeftOver = leftOver;
             timer.start();
         }
