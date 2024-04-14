@@ -107,30 +107,29 @@ inline void qParallelSortImpl(RandomAccessIterator begin, RandomAccessIterator e
 #  include <execution>
 #  if (__cpp_lib_execution >= 201603) && (__cpp_lib_parallel_algorithm >= 201603)
 #    define BS_HAS_PARALLEL_STL_EXECUTION
+#    include <algorithm>
 #  endif
 #  if !defined(QT_NO_EMIT)
 #    define emit
 #  endif
 #endif
 
+
+template <class IT, class LT>
+inline constexpr void qParallelSort(const IT begin, const IT end, LT lt)
+{
 #ifdef BS_HAS_PARALLEL_STL_EXECUTION
-#include <algorithm>
-
-template <class IT, class LT>
-inline constexpr void qParallelSort(const IT begin, const IT end, LT lt)
-{
     std::sort(std::execution::par_unseq, begin, end, lt);
-}
-
 #else
-
-template <class IT, class LT>
-inline constexpr void qParallelSort(const IT begin, const IT end, LT lt)
-{
     qParallelSortImpl(begin, end, lt);
+#endif
 }
 
-#endif // BS_HAS_PARALLEL_STL_EXECUTION
+template <class IT>
+inline constexpr void qParallelSort(const IT begin, const IT end)
+{
+    qParallelSort(begin, end, std::less<> { });
+}
 
 
 #ifdef QPARALLELSORT_TESTING // benchmarking
