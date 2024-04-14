@@ -24,14 +24,18 @@ REBRICKABLE_APIKEY='zzz'
 
 ######################################################################
 
+interactive=""
+if [ -t 0 ]; then
+  interactive="-it"
+else
+  mkdir -p "$LOCAL_DIR/logs"
+  exec &> >(tee $LOCAL_DIR/logs/log-`date -Iseconds`.log)
+fi
 
 if [ "$(id -un)" != "$LOCAL_USER" ]; then
   echo "Please run this script as user '$LOCAL_USER'."
   exit 2
 fi
-
-interactive=""
-[ -t 0 ] && interactive="-it"
 
 docker run $interactive --rm \
     -e BRICKLINK_USERNAME="$BRICKLINK_USERNAME" \
@@ -46,9 +50,12 @@ docker run $interactive --rm \
 cd "$LOCAL_DIR"
 
 echo
-echo -n "Uploading to server... "
+echo " Uploading to server "
+echo "====================="
+echo
 
 scp -q -P ${UPLOAD_SSH_PORT} db/*.lzma "${UPLOAD_SSH_DESTINATION}"
 
-echo "done"
+echo
+echo " FINISHED."
 echo

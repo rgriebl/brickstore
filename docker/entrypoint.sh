@@ -10,10 +10,7 @@ export XDG_CACHE_HOME="$CACHE_PATH"
 BRICKSTORE_CACHE_PATH="$CACHE_PATH/BrickStore"
 
 mkdir -p "$DB_PATH"
-mkdir -p "$LOG_PATH"
 mkdir -p "$CACHE_PATH"
-
-exec &> >(tee >(gzip -c > $LOG_PATH/log-`date -Iseconds`.log.gz) )
 
 stdbuf -oL -eL /usr/bin/brickstore "$@"
 

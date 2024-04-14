@@ -105,7 +105,11 @@ endif()
 add_compile_options("$<$<COMPILE_LANGUAGE:C>:${copts}>")
 add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${copts}$<SEMICOLON>${cxxopts}>")
 
-qt_add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
+if (BACKEND_ONLY)
+    qt_add_executable(${PROJECT_NAME})
+else()
+    qt_add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
+endif()
 
 if (NOT IOS) # somehow this tries to access the wrong build dir on iOS
     include(SeparateDebugInfo)

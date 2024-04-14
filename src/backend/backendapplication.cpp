@@ -1,36 +1,23 @@
 // Copyright (C) 2004-2024 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <cstdio>
-#include <QtCore/QStandardPaths>
 #include "backendapplication.h"
+#include <QtCore/QStandardPaths>
 #include "bricklink/core.h"
 #include "bricklink/textimport.h"
 #include "utility/exception.h"
+#include "utility/stopwatch.h"
 #include "utility/transfer.h"
 #include "version.h"
-
-
-#if defined(Q_OS_WINDOWS)
-#  include <windows.h>
-#endif
-
+#include <cstdio>
 
 BackendApplication::BackendApplication(int &argc, char **argv)
 {
-#if defined(Q_OS_WINDOWS)
-    AllocConsole();
-    SetConsoleTitleW(L"BrickStore - Database Maintenance Tool");
-    FILE *dummy;
-    freopen_s(&dummy, "CONIN$", "r", stdin);
-    freopen_s(&dummy, "CONOUT$", "w", stdout);
-#endif
-
     // disable buffering on stdout
     setvbuf(stdout, nullptr, _IONBF, 0);
 
-    QCoreApplication::setApplicationName(QLatin1String(BRICKSTORE_NAME));
-    QCoreApplication::setApplicationVersion(QLatin1String(BRICKSTORE_VERSION));
+    QCoreApplication::setApplicationName(QString::fromLatin1(BRICKSTORE_NAME));
+    QCoreApplication::setApplicationVersion(QString::fromLatin1(BRICKSTORE_VERSION));
 
     (void) new QCoreApplication(argc, argv);
 
@@ -51,10 +38,7 @@ BackendApplication::BackendApplication(int &argc, char **argv)
 
 BackendApplication::~BackendApplication()
 {
-#if defined(Q_OS_WINDOWS)
-    printf("\n\nPress RETURN to quit...\n\n");
-    getchar();
-#endif
+    delete BrickLink::core();
 }
 
 void BackendApplication::init()
