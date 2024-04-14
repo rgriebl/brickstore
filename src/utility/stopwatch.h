@@ -10,7 +10,7 @@
 class stopwatch
 {
 public:
-    stopwatch(const char *desc)
+    stopwatch(const QByteArray &desc)
     {
         m_label = desc;
         m_timer.start();
@@ -19,7 +19,7 @@ public:
     {
         restart();
     }
-    void restart(const char *desc = nullptr)
+    void restart(const QByteArray &desc = { })
     {
         qint64 micros = m_timer.nsecsElapsed() / 1000;
 
@@ -31,7 +31,7 @@ public:
         int msec = int(micros / 1000);
         int usec = micros % 1000;
 
-        qInfo("%s: %ds %03dms %03dus", m_label ? m_label : "", sec, msec, usec);
+        qInfo("%s: %ds %03dms %03dus", m_label.constData(), sec, msec, usec);
         m_label = desc;
         m_timer.restart();
     }
@@ -39,6 +39,6 @@ public:
 private:
     Q_DISABLE_COPY(stopwatch)
 
-    const char *m_label;
+    QByteArray m_label;
     QElapsedTimer m_timer;
 };
