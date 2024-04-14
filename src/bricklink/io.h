@@ -5,7 +5,6 @@
 
 #include <QtCore/QString>
 #include <QtCore/QHash>
-#include <QtXml/QDomElement>
 
 #include "bricklink/global.h"
 #include "bricklink/lot.h"

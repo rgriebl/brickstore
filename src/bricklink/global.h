@@ -10,11 +10,12 @@ namespace BrickLink {
 Q_NAMESPACE
 
 enum class ApiQuirk : uint {
-    OrderQtyHasComma                  = 1,
-    OrderXmlHasUnescapedFields        = 2,
-    InventoryCommentsAreDoubleEscaped = 3,
-    InventoryRemarksAreDoubleEscaped  = 4,
-    PasswordLimitedTo15Characters     = 5,
+    OrderQtyHasComma = 1,
+    OrderXmlHasUnescapedFields,
+    InventoryCommentsAreDoubleEscaped,
+    InventoryRemarksAreDoubleEscaped,
+    PasswordLimitedTo15Characters,
+    CatalogDownloadEntitiesAreDoubleEscaped,
 };
 
 enum class Time         : uint { PastSix, Current, Count };

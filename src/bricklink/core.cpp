@@ -368,8 +368,7 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
 #if defined(BS_BACKEND)
     Q_UNUSED(physicalMem)
 #endif
-    auto pcj = new PersistentCookieJar(datadir, u"BrickLink"_qs,
-                                       { { "BLNEWSESSIONID", 60 * 60 * 24 /* 24h as sec */ } });
+    auto pcj = new PersistentCookieJar(datadir, u"BrickLink"_qs, { "BLNEWSESSIONID" });
     m_authenticatedTransfer = new Transfer(std::move(pcj), this);
 
     m_transferStatId = AppStatistics::inst()->addSource(u"HTTP requests"_qs);
@@ -1084,6 +1083,7 @@ const QSet<ApiQuirk> Core::knownApiQuirks()
         ApiQuirk::InventoryCommentsAreDoubleEscaped,
         ApiQuirk::InventoryRemarksAreDoubleEscaped,
         ApiQuirk::PasswordLimitedTo15Characters,
+        ApiQuirk::CatalogDownloadEntitiesAreDoubleEscaped,
     };
     return known;
 }

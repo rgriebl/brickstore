@@ -1,9 +1,8 @@
 // Copyright (C) 2004-2024 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <QBitArray>
-#include <QCoreApplication>
-#include <QSqlQuery>
+#include <QtCore/QBitArray>
+#include <QtCore/QCoreApplication>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QJsonArray>
@@ -15,26 +14,26 @@
 #include <QtCore/QTimeZone>
 #include <QtCore/QtDebug>
 #include <QtCore/QDirIterator>
-#include <QtXml/QDomElement>
 #include <QtCore/QUrlQuery>
+#include <QtCore/QXmlStreamReader>
+
 #include <QCoro/QCoroSignal>
 #include <QCoro/QCoroTimer>
 
-#include "utility/exception.h"
-#include "utility/transfer.h"
-#include "utility/utility.h"
+#include "bricklink/changelogentry.h"
 #include "bricklink/core.h"
 #include "bricklink/dimensions.h"
 #include "bricklink/textimport.h"
 #include "bricklink/textimport_p.h"
-#include "bricklink/changelogentry.h"
 #include "minizip/minizip.h"
+#include "utility/exception.h"
+#include "utility/transfer.h"
 
 
 AwaitableTransferJob::AwaitableTransferJob(TransferJob *job)
     : m_job(job)
 {
-    connect(job->transfer(), &Transfer::finished,
+    connect(BrickLink::core(), &BrickLink::Core::authenticatedTransferFinished,
             this, [this](TransferJob *finishedJob) {
         if (m_job == finishedJob) {
             m_job->setAutoDelete(false);
@@ -118,66 +117,10 @@ static QUrl itemInventoryQuery(const BrickLink::Item *item)
 ///////////////////////////////////////////////////////////////////////
 
 
-static void xmlParse(const QByteArray &xml, const QString &rootName, const QString &elementName,
-                     const std::function<void (const QDomElement &)> &callback)
-{
-    QDomDocument doc;
-    QString emsg;
-    int eline = 0, ecolumn = 0;
-    if (!doc.setContent(xml, false, &emsg, &eline, &ecolumn))
-        throw Exception("XML parse error at line %2, column %3: %1").arg(emsg).arg(eline).arg(ecolumn);
-
-    auto root = doc.documentElement().toElement();
-    if (root.nodeName() != rootName)
-        throw Exception("expected XML root node %1, but got %2").arg(rootName, root.nodeName());
-
-    for (QDomNode node = root.firstChild(); !node.isNull(); node = node.nextSibling()) {
-        if (node.nodeName() == elementName)
-            callback(node.toElement());
-    }
-}
-
-static QString xmlTagText(const QDomElement &parent, const char *tagName)
-{
-    const auto dnl = parent.elementsByTagName(QString::fromLatin1(tagName));
-    if (dnl.size() != 1) {
-        throw Exception("Expected a single %1 tag, but found %2")
-            .arg(QString::fromLatin1(tagName)).arg(dnl.size());
-    }
-    QString text = dnl.at(0).toElement().text().trimmed();
-
-    // QXml did not decode entities, so we have to do it here
-    qsizetype pos = 0;
-    while ((pos = text.indexOf(u"&#", pos)) >= 0) {
-        auto endpos = text.indexOf(u';', pos + 2);
-        if (endpos < 0) {
-            pos += 2;
-        } else {
-            bool isHex = (text.at(pos + 2) == u'x');
-            int unicode = QStringView { text }.mid(pos + 2, endpos - pos - 2)
-                              .toInt(nullptr, isHex ? 16 : 10);
-            if (unicode > 0) {
-                text.replace(pos, endpos - pos + 1, QChar(unicode));
-                pos++;
-            } else {
-                pos = endpos + 1;
-            }
-        }
-    }
-    return text;
-}
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-
 namespace BrickLink {
 
 TextImport::TextImport()
-    : m_trans(new Transfer())
-    , m_db(core()->database())
+    : m_db(core()->database())
 {
     m_archiveName = core()->dataPath() + u"downloads.zip";
 }
@@ -197,6 +140,7 @@ void TextImport::initialize(bool skipDownload)
             throw Exception("Last-run archive %1 is not available and skip-downloads was requested")
                 .arg(m_archiveName);
         }
+        message(u"Skipping downloads. Using last-run archive %1"_qs.arg(m_archiveName));
     } else {
         QString downloadArchiveName = m_archiveName + u".new";
         m_downloadArchive = std::make_unique<MiniZip>(downloadArchiveName);
@@ -223,21 +167,15 @@ QCoro::Task<> TextImport::login(const QString &username, const QString &password
 
     nextStep(u"Logging into BrickLink"_qs);
 
-    QUrl url(brickLinkUrl("ajax/renovate/loginandout.ajax"));
-    url.setQuery({
-        { u"userid"_qs,          Utility::urlQueryEscape(username) },
-        { u"password"_qs,        Utility::urlQueryEscape(password) },
-        { u"keepme_loggedin"_qs, u"1"_qs }
-    });
+    core()->setCredentials({ username, password });
+    if (!core()->isAuthenticated()) {
+        core()->authenticate();
 
-    auto *job = TransferJob::post(url);
-    m_trans->retrieve(job, true);
-    AwaitableTransferJob atj(job);
-
-    co_await qCoro(&atj, &AwaitableTransferJob::finished);
-
-    if (job->isFailed() || (job->responseCode() != 200))
-        throw Exception("Failed to log into BrickLink:\n%1").arg(QString::fromLatin1(*job->data()));
+        auto [usernameAuth, error] = co_await qCoro(core(), &Core::authenticationFinished);
+        Q_ASSERT(usernameAuth == username);
+        if (!error.isEmpty())
+            throw Exception("Failed to log into BrickLink:\n%1").arg(error);
+    }
 }
 
 QCoro::Task<> TextImport::importCatalog()
@@ -450,7 +388,7 @@ QCoro::Task<QByteArray> TextImport::download(const QUrl &url, const QString &fil
     }
 
     TransferJob *job = TransferJob::get(url, nullptr, 2);
-    m_trans->retrieve(job);
+    core()->retrieveAuthenticated(job);
     AwaitableTransferJob atj(job);
 
     QString fileNameCopy = fileName;
@@ -473,18 +411,18 @@ QCoro::Task<QByteArray> TextImport::download(const QUrl &url, const QString &fil
 
 void TextImport::readColors(const QByteArray &xml)
 {
-    xmlParse(xml, u"CATALOG"_qs, u"ITEM"_qs, [this](QDomElement e) {
+    xmlParse(xml, u"CATALOG", u"ITEM", [this](const auto &e) {
         Color col;
-        uint colid = xmlTagText(e, "COLOR").toUInt();
+        uint colid = xmlTagText(e, u"COLOR").toUInt();
 
         col.m_id       = colid;
-        col.m_name.copyQString(xmlTagText(e, "COLORNAME").simplified(), nullptr);
-        col.m_color    = QColor(u'#' + xmlTagText(e, "COLORRGB"));
+        col.m_name.copyQString(xmlTagText(e, u"COLORNAME").simplified(), nullptr);
+        col.m_color    = QColor(u'#' + xmlTagText(e, u"COLORRGB"));
 
         col.m_ldraw_id = -1;
         col.m_type     = ColorType();
 
-        auto type = xmlTagText(e, "COLORTYPE");
+        auto type = xmlTagText(e, u"COLORTYPE");
         if (type.contains(u"Transparent")) col.m_type |= ColorTypeFlag::Transparent;
         if (type.contains(u"Glitter"))     col.m_type |= ColorTypeFlag::Glitter;
         if (type.contains(u"Speckle"))     col.m_type |= ColorTypeFlag::Speckle;
@@ -497,10 +435,10 @@ void TextImport::readColors(const QByteArray &xml)
         if (!col.m_type)
             col.m_type = ColorTypeFlag::Solid;
 
-        int partCnt    = xmlTagText(e, "COLORCNTPARTS").toInt();
-        int setCnt     = xmlTagText(e, "COLORCNTSETS").toInt();
-        int wantedCnt  = xmlTagText(e, "COLORCNTWANTED").toInt();
-        int forSaleCnt = xmlTagText(e, "COLORCNTINV").toInt();
+        int partCnt    = xmlTagText(e, u"COLORCNTPARTS").toInt();
+        int setCnt     = xmlTagText(e, u"COLORCNTSETS").toInt();
+        int wantedCnt  = xmlTagText(e, u"COLORCNTWANTED").toInt();
+        int forSaleCnt = xmlTagText(e, u"COLORCNTINV").toInt();
 
         col.m_popularity = float(partCnt + setCnt + wantedCnt + forSaleCnt);
 
@@ -508,8 +446,8 @@ void TextImport::readColors(const QByteArray &xml)
         // mark it as raw data meanwhile:
         col.m_popularity = -col.m_popularity;
 
-        col.m_year_from = xmlTagText(e, "COLORYEARFROM").toUShort();
-        col.m_year_to   = xmlTagText(e, "COLORYEARTO").toUShort();
+        col.m_year_from = xmlTagText(e, u"COLORYEARFROM").toUShort();
+        col.m_year_to   = xmlTagText(e, u"COLORYEARTO").toUShort();
 
         m_db->m_colors.push_back(col);
     });
@@ -519,12 +457,12 @@ void TextImport::readColors(const QByteArray &xml)
 
 void TextImport::readCategories(const QByteArray &xml)
 {
-    xmlParse(xml, u"CATALOG"_qs, u"ITEM"_qs, [this](QDomElement e) {
+    xmlParse(xml, u"CATALOG", u"ITEM", [this](const auto &e) {
         Category cat;
-        uint catid = xmlTagText(e, "CATEGORY").toUInt();
+        uint catid = xmlTagText(e, u"CATEGORY").toUInt();
 
         cat.m_id   = catid;
-        cat.m_name.copyQString(xmlTagText(e, "CATEGORYNAME").simplified(), nullptr);
+        cat.m_name.copyQString(xmlTagText(e, u"CATEGORYNAME").simplified(), nullptr);
 
         m_db->m_categories.push_back(cat);
     });
@@ -534,15 +472,15 @@ void TextImport::readCategories(const QByteArray &xml)
 
 void TextImport::readItemTypes(const QByteArray &xml)
 {
-    xmlParse(xml, u"CATALOG"_qs, u"ITEM"_qs, [this](QDomElement e) {
+    xmlParse(xml, u"CATALOG", u"ITEM", [this](const auto &e) {
         ItemType itt;
-        char c = ItemType::idFromFirstCharInString(xmlTagText(e, "ITEMTYPE"));
+        char c = ItemType::idFromFirstCharInString(xmlTagText(e, u"ITEMTYPE"));
 
         if (c == 'U')
             return;
 
         itt.m_id   = c;
-        itt.m_name.copyQString(xmlTagText(e, "ITEMTYPENAME").simplified(), nullptr);
+        itt.m_name.copyQString(xmlTagText(e, u"ITEMTYPENAME").simplified(), nullptr);
 
         itt.m_has_inventories   = false;
         itt.m_has_colors        = (c == 'P' || c == 'G');
@@ -557,40 +495,34 @@ void TextImport::readItemTypes(const QByteArray &xml)
 
 void TextImport::readItems(const QByteArray &xml, const ItemType *itt)
 {
-    xmlParse(xml, u"CATALOG"_qs, u"ITEM"_qs, [this, itt](QDomElement e) {
+    xmlParse(xml, u"CATALOG", u"ITEM", [this, itt](const auto &e) {
         Item item;
-        item.m_id.copyQByteArray(xmlTagText(e, "ITEMID").toLatin1(), nullptr);
-        const QString itemName = xmlTagText(e, "ITEMNAME").simplified();
+        item.m_id.copyQByteArray(xmlTagText(e, u"ITEMID").toLatin1(), nullptr);
+        const QString itemName = xmlTagText(e, u"ITEMNAME").simplified();
         item.m_name.copyQString(itemName, nullptr);
         item.m_itemTypeIndex = (itt - m_db->m_itemTypes.data());
 
-        uint catId = xmlTagText(e, "CATEGORY").toUInt();
+        uint catId = xmlTagText(e, u"CATEGORY").toUInt();
         auto cat = core()->category(catId);
         if (!cat)
             throw ParseException("item %1 has no category").arg(QString::fromLatin1(item.id()));
         item.m_categoryIndexes.push_back(quint16(cat->index()), nullptr);
 
-        QByteArray altIds;
-        try {
-            altIds = xmlTagText(e, "ALTITEMIDS").toLatin1().replace(',', ' ').simplified();
-        } catch (...) { }
+        QByteArray altIds = xmlTagText(e, u"ALTITEMIDS", true).toLatin1().replace(',', ' ').simplified();
         if (!altIds.isEmpty())
             item.m_alternateIds.copyQByteArray(altIds, nullptr);
 
-        uint y = 0;
-        try {
-            y = xmlTagText(e, "ITEMYEAR").toUInt();
-        } catch (...) { }
+        uint y = xmlTagText(e, u"ITEMYEAR", true).toUInt();
         item.m_year_from = ((y > 1900) && (y < 2155)) ? (y - 1900) : 0; // we only have 8 bits for the year
         item.m_year_to = item.m_year_from;
 
         if (itt->hasWeight())
-            item.m_weight = xmlTagText(e, "ITEMWEIGHT").toFloat();
+            item.m_weight = xmlTagText(e, u"ITEMWEIGHT").toFloat();
         else
             item.m_weight = 0;
 
         try {
-            auto color = core()->color(xmlTagText(e, "IMAGECOLOR").toUInt());
+            auto color = core()->color(xmlTagText(e, u"IMAGECOLOR").toUInt());
             item.m_defaultColorIndex = !color ? quint16(0xfff) : quint16(color->index());
         } catch (...) {
             item.m_defaultColorIndex = quint16(0xfff);
@@ -619,6 +551,13 @@ void TextImport::readItems(const QByteArray &xml, const ItemType *itt)
 
 void TextImport::readAdditionalItemCategories(const QByteArray &csv, const ItemType *itt)
 {
+    // static is not ideal, but we want to re-use this cache for all item types
+    static QHash<QString, uint> catHash;
+    if (catHash.isEmpty()) {
+        for (const auto &cat : std::as_const(core()->categories()))
+            catHash.insert(cat.name(), cat.index());
+    }
+
     const QString fname = u"items/%1.csv"_qs.arg(QChar::fromLatin1(itt->id()));
     QTextStream ts(csv);
     ts.readLine(); // skip header
@@ -632,7 +571,7 @@ void TextImport::readAdditionalItemCategories(const QByteArray &csv, const ItemT
             continue;
         if (line.startsWith(u'\t')) {
             message(2, u"Item name for %1 most likely ends with a new-line character: %2 in line %3"_qs
-                           .arg(QLatin1StringView(lastItemId)).arg(fname).arg(lineNumber -1));
+                           .arg(QLatin1StringView { lastItemId }).arg(fname).arg(lineNumber -1));
             continue;
         }
         QStringList strs = line.split(u'\t');
@@ -657,78 +596,69 @@ void TextImport::readAdditionalItemCategories(const QByteArray &csv, const ItemT
         }
 
         catStr = catStr.mid(mainCat.name().length() + 3);
+        QVector<quint16> addCatIndexes(1, item->m_categoryIndexes[0]);
 
-        const QStringList cats = catStr.split(u" / "_qs);
-        for (int i = 0; i < cats.count(); ++i) {
-            for (quint16 catIndex = 0; catIndex < quint16(m_db->m_categories.size()); ++catIndex) {
-                const QString catName = m_db->m_categories.at(catIndex).name();
-                bool disambiguate = catName.contains(u" / ");
-                quint16 addCatIndex = quint16(-1);
+        if (!catStr.isEmpty()) {
+            const auto cats = QStringView { catStr }.split(u" / ");
 
-                // The " / " sequence is used to separate the fields, but it also appears in
-                // category names like "String Reel / Winch"
+            for (int i = 0; i < cats.count(); ++i) {
+                QStringView catName = cats.at(i);
+                uint catIndex = catHash.value(catName.toString(), Category::InvalidId);
 
-                if (disambiguate) {
-                    const auto catNameList = catName.split(u" / "_qs);
-                    if (catNameList == cats.mid(i, catNameList.size())) {
-                        addCatIndex = catIndex;
-                        i += (catNameList.size() - 1);
-                    }
-                } else if (catName == cats.at(i)) {
-                    addCatIndex = catIndex;
+                if (catIndex == Category::InvalidId)
+                    catIndex = catHash.value(catName + u" / " + cats.value(++i), Category::InvalidId);
+
+                if (catIndex == Category::InvalidId) {
+                    throw Exception("unknown category %1 for item %2 %3").arg(catName)
+                        .arg(item->itemTypeId()).arg(QLatin1StringView { item->id() });
                 }
 
-                if (addCatIndex != quint16(-1))
-                    item->m_categoryIndexes.push_back(addCatIndex, nullptr);
+                addCatIndexes.append(quint16(catIndex));
             }
         }
+        item->m_categoryIndexes.copyContainer(addCatIndexes.cbegin(), addCatIndexes.cend(), nullptr);
         lastItemId = itemId;
     }
 }
 
 void TextImport::readPartColorCodes(const QByteArray &xml)
 {
-    QHash<uint, std::vector<Item::PCC>> pccs;
+    QHash<uint, QVector<Item::PCC>> pccs;
 
-    xmlParse(xml, u"CODES"_qs, u"ITEM"_qs, [this, &pccs](QDomElement e) {
-        char itemTypeId = ItemType::idFromFirstCharInString(xmlTagText(e, "ITEMTYPE"));
-        const QByteArray itemId = xmlTagText(e, "ITEMID").toLatin1();
-        QString colorName = xmlTagText(e, "COLOR").simplified();
+    xmlParse(xml, u"CODES", u"ITEM", [this, &pccs](const auto &e) {
+        char itemTypeId = ItemType::idFromFirstCharInString(xmlTagText(e, u"ITEMTYPE"));
+        const QByteArray itemId = xmlTagText(e, u"ITEMID").toLatin1();
+        QString colorName = xmlTagText(e, u"COLOR").simplified();
         bool numeric = false;
-        uint code = xmlTagText(e, "CODENAME").toUInt(&numeric, 10);
-
-        if (!numeric) {
-            message(2, u"Parsing part_color_codes: pcc %1 is not numeric"_qs
-                           .arg(xmlTagText(e, "CODENAME")));
-        }
+        uint code = xmlTagText(e, u"CODENAME").toUInt(&numeric, 10);
 
         if (auto item = core()->item(itemTypeId, itemId)) {
-            bool colorLess = !core()->itemType(itemTypeId)->hasColors();
+            bool noColor = !core()->itemType(itemTypeId)->hasColors();
 
             // workaround for a few Minifigs having a PCC with a real color
             static const QString notApplicable = core()->color(0)->name();
-            if (colorLess && (colorName != notApplicable))
+            if (noColor && (colorName != notApplicable))
                 colorName = notApplicable;
 
-            int itemIndex = item->index();
-            bool found = false;
-            for (uint colorIndex = 0; colorIndex < m_db->m_colors.size(); ++colorIndex) {
-                if (m_db->m_colors[colorIndex].name() == colorName) {
-                    addToKnownColors(itemIndex, colorIndex);
+            uint itemIndex = item->index();
 
-                    if (numeric) {
-                        Item::PCC pcc;
-                        pcc.m_pcc = code;
-                        pcc.m_colorIndex = colorIndex;
-                        pccs[itemIndex].push_back(pcc);
-                    }
-                    found = true;
-                    break;
+            if (auto color = core()->colorFromName(colorName)) {
+                uint colorIndex = color->index();
+                addToKnownColors(itemIndex, colorIndex);
+
+                if (numeric) {
+                    Item::PCC pcc;
+                    pcc.m_pcc = code;
+                    pcc.m_colorIndex = colorIndex;
+                    pccs[itemIndex].push_back(pcc);
+                } else {
+                    message(2, u"Parsing part_color_codes: pcc %1 is not numeric"_qs
+                                   .arg(xmlTagText(e, u"CODENAME")));
                 }
-            }
-            if (!found)
+            } else {
                 message(2, u"Parsing part_color_codes: skipping invalid color %1 on item %2 %3"_qs
                                .arg(colorName).arg(itemTypeId).arg(QLatin1StringView(itemId)));
+            }
         } else {
             message(2, u"Parsing part_color_codes: skipping invalid item %1 %2"_qs
                            .arg(itemTypeId).arg(QLatin1StringView(itemId)));
@@ -764,16 +694,16 @@ const Item *TextImport::readInventory(char itemTypeId, const QByteArray &itemId,
     QVector<QPair<int, int>> knownColors;
 
     try {
-        xmlParse(xml, u"INVENTORY"_qs, u"ITEM"_qs,
-                 [this, &inventory, &knownColors, lastModifiedDate](QDomElement e) {
-            char itemTypeId = ItemType::idFromFirstCharInString(xmlTagText(e, "ITEMTYPE"));
-            const QByteArray itemId = xmlTagText(e, "ITEMID").toLatin1();
-            uint colorId = xmlTagText(e, "COLOR").toUInt();
-            int qty = xmlTagText(e, "QTY").toInt();
-            bool extra = (xmlTagText(e, "EXTRA") == u"Y");
-            bool counterPart = (xmlTagText(e, "COUNTERPART") == u"Y");
-            bool alternate = (xmlTagText(e, "ALTERNATE") == u"Y");
-            uint matchId = xmlTagText(e, "MATCHID").toUInt();
+        xmlParse(xml, u"INVENTORY", u"ITEM",
+                 [this, &inventory, &knownColors, lastModifiedDate](const auto &e) {
+            char itemTypeId = ItemType::idFromFirstCharInString(xmlTagText(e, u"ITEMTYPE"));
+            const QByteArray itemId = xmlTagText(e, u"ITEMID").toLatin1();
+            uint colorId = xmlTagText(e, u"COLOR").toUInt();
+            int qty = xmlTagText(e, u"QTY").toInt();
+            bool extra = (xmlTagText(e, u"EXTRA") == u"Y");
+            bool counterPart = (xmlTagText(e, u"COUNTERPART") == u"Y");
+            bool alternate = (xmlTagText(e, u"ALTERNATE") == u"Y");
+            uint matchId = xmlTagText(e, u"MATCHID").toUInt();
 
             auto item = core()->item(itemTypeId, itemId);
             auto color = core()->color(colorId);
@@ -1155,7 +1085,7 @@ void TextImport::readInventoryList(const QByteArray &csv)
             for (quint16 catIndex : item->m_categoryIndexes)
                 m_db->m_categories[catIndex].m_has_inventories |= (quint8(1) << item->m_itemTypeIndex);
         } else {
-            message(2, u"item %1 %2 doesn't exist"_qs.arg(itemTypeId).arg(QLatin1StringView(itemId)));
+            message(2, u"item %1 %2 doesn't exist"_qs.arg(itemTypeId).arg(QLatin1StringView { itemId }));
         }
     }
 }
@@ -1242,17 +1172,18 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
     static const QRegularExpression rxLink(uR"-(<A HREF="catalogRelCat\.asp\?relID=(\d+)">([^<]+)</A>)-"_qs);
 
     for (const auto &m : rxLink.globalMatch(data)) {
-        uint id = m.captured(1).toUInt();
+        uint id = m.capturedView(1).toUInt();
         QString name = m.captured(2);
 
         Relationship rel;
         rel.m_id = id;
         rel.m_name.copyQString(name, nullptr);
 
-        QHash<uint, std::vector<uint>> matches;   // match-id -> list of item-indexes
+        QHash<uint, QVector<uint>> matches;   // match-id -> list of item-indexes
 
+        static const QRegularExpression rxNotWord(uR"(\W)"_qs);
         QString cleanName = name;
-        cleanName.replace(QRegularExpression(uR"(\W)"_qs), u" "_qs);
+        cleanName.replace(rxNotWord, u" "_qs);
         cleanName = cleanName.simplified().toLower();
         cleanName.replace(u' ', u'_');
 
@@ -1274,9 +1205,9 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
             if (!mh.hasMatch())
                 throw Exception("Relationships: couldn't find list header");
 
-            uint count = mh.captured(1).toUInt();
-            uint currentPage = mh.captured(2).toUInt();
-            uint maxPage = mh.captured(3).toUInt();
+            uint count = mh.capturedView(1).toUInt();
+            uint currentPage = mh.capturedView(2).toUInt();
+            uint maxPage = mh.capturedView(3).toUInt();
 
             if (page == 1)
                 rel.m_count = count;
@@ -1285,8 +1216,8 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
             if (currentPage != page)
                 throw Exception("Relationships: wrong page: expected %1, but got %2").arg(page).arg(currentPage);
 
-            auto startPos = mh.capturedEnd();
-            auto endPos = listData.indexOf(u"</TABLE>"_qs, startPos);
+            qsizetype startPos = mh.capturedEnd();
+            qsizetype endPos = listData.indexOf(u"</TABLE>"_qs, startPos);
 
             static const QRegularExpression rxTR(uR"-(<TR .*?</TR>)-"_qs);
             static const QRegularExpression rxMatch(uR"-(<TR BGCOLOR="#......"><TD COLSPAN="4">.*?<B>Match #(\d+)</B></FONT></TD></TR>)-"_qs);
@@ -1300,8 +1231,8 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
                 if (!mt.hasMatch())
                     break;
 
-                int matchStartPos = mt.capturedStart(0);
-                int matchEndPos = mt.capturedEnd(0);
+                qsizetype matchStartPos = mt.capturedStart(0);
+                qsizetype matchEndPos = mt.capturedEnd(0);
                 if (matchStartPos > endPos || matchEndPos > endPos)
                     break;
                 startPos = matchEndPos;
@@ -1313,7 +1244,7 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
 
                 auto mm = rxMatch.match(currentRow);
                 if (mm.hasMatch()) {
-                    uint matchId = mm.captured(1).toUInt();
+                    uint matchId = mm.capturedView(1).toUInt();
                     currentMatchId = matchId;
                 } else {
                     if (!currentMatchId)
@@ -1321,9 +1252,9 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
 
                     auto mi = rxItem.match(currentRow);
                     if (mi.hasMatch()) {
-                        QString ittId = mi.captured(1);
-                        QString itemId = mi.captured(2);
-                        QString itemId2 = mi.captured(3);
+                        QStringView ittId = mi.capturedView(1);
+                        QStringView itemId = mi.capturedView(2);
+                        QStringView itemId2 = mi.capturedView(3);
                         if (itemId != itemId2)
                             throw Exception("Relationships: item ids do not match up: %1 vs. %2").arg(itemId).arg(itemId2);
                         if (ittId.size() != 1)
@@ -1333,7 +1264,7 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
                             message(2, u"could not resolve item: %1 %2 for match id %3 in %4"_qs
                                            .arg(ittId).arg(itemId).arg(currentMatchId).arg(rel.name()));
                         } else {
-                            matches[currentMatchId].push_back(uint(item->index()));
+                            matches[currentMatchId].push_back(item->index());
                         }
                     } else {
                         message(2, currentRow.toString());
@@ -1366,15 +1297,19 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
     std::sort(m_db->m_relationshipMatches.begin(), m_db->m_relationshipMatches.end());
 
     // store the matches in each affected item as well for faster lookup
+    QHash<uint, QVector<quint16>> itemRelMatchIds;
+
     for (const auto &relMatch : m_db->m_relationshipMatches) {
         if (relMatch.m_id > 0xffffu) {
             message(2, u"relationship match id %1 exceeds 16 bits"_qs.arg(relMatch.m_id));
             continue;
         }
-        for (const auto &itemIndex : relMatch.m_itemIndexes) {
-            Item &item = m_db->m_items[itemIndex];
-            item.m_relationshipMatchIds.push_back(quint16(relMatch.m_id), nullptr);
-        }
+        for (const auto &itemIndex : relMatch.m_itemIndexes)
+            itemRelMatchIds[itemIndex].push_back(quint16(relMatch.m_id));
+    }
+    for (const auto &[itemIndex, relMatchIds] : std::as_const(itemRelMatchIds).asKeyValueRange()) {
+        m_db->m_items[itemIndex].m_relationshipMatchIds
+            .copyContainer(relMatchIds.cbegin(), relMatchIds.cend(), nullptr);
     }
 }
 
@@ -1395,15 +1330,16 @@ void TextImport::calculateColorPopularity()
 
 void TextImport::calculateItemTypeCategories()
 {
-    for (const auto &item : m_db->m_items) {
-        // calculate the item-type -> category relation
-        ItemType &itemType = m_db->m_itemTypes[item.m_itemTypeIndex];
-        auto &catv = itemType.m_categoryIndexes;
+    QHash<uint, QSet<uint>> ittCats;
 
-        for (quint16 catIndex : item.m_categoryIndexes) {
-            if (std::find(catv.cbegin(), catv.cend(), catIndex) == catv.cend())
-                catv.push_back(catIndex, nullptr);
-        }
+    // calculate the item-type -> category relation
+    for (const auto &item : m_db->m_items) {
+        for (quint16 catIndex : item.m_categoryIndexes)
+            ittCats[item.m_itemTypeIndex].insert(catIndex);
+    }
+    for (const auto &[ittIndex, catIndexSet] : std::as_const(ittCats).asKeyValueRange()) {
+        m_db->m_itemTypes[ittIndex].m_categoryIndexes
+            .copyContainer(catIndexSet.cbegin(), catIndexSet.cend(), nullptr);
     }
 }
 
@@ -1597,6 +1533,45 @@ void TextImport::message(const QString &text)
 void TextImport::message(int level, const QString &text)
 {
     printf("%s%c %s\n", QByteArray(level * 2, ' ').constData(), (level <= 1) ? '*' : '>', qPrintable(text));
+}
+
+void TextImport::xmlParse(const QByteArray &xml, QStringView rootName, QStringView elementName,
+                          const std::function<void (const QHash<QString, QString> &)> &callback)
+{
+    // Bricklink double encodes entities, so instead of "&#40;", we get "&amp;#40;"
+    const QByteArray fixedXml = core()->isApiQuirkActive(ApiQuirk::CatalogDownloadEntitiesAreDoubleEscaped)
+                                    ? QByteArray(xml).replace("&amp;#", "&#")
+                                    : xml;
+
+    QXmlStreamReader xsr(fixedXml);
+    if (xsr.readNextStartElement()) {
+        if (xsr.name() != rootName)
+            throw Exception("expected XML root node %1, but got %2").arg(rootName, xsr.name());
+        while (xsr.readNextStartElement()) {
+            if (xsr.name() != elementName)
+                throw Exception("expected XML element node %1, but got %2").arg(elementName, xsr.name());
+
+            QHash<QString, QString> hash;
+            while (xsr.readNextStartElement())
+                hash.insert(xsr.name().toString(), xsr.readElementText().trimmed());
+            callback(hash);
+        }
+    }
+
+    if (xsr.hasError())
+        throw Exception("Error parsing XML: %1").arg(xsr.errorString());
+}
+
+QString TextImport::xmlTagText(const QHash<QString, QString> &element, QStringView tagName,
+                               bool optional)
+{
+    auto it = element.constFind(tagName.toString());
+    if (it != element.constEnd())
+        return it.value();
+    else if (optional)
+        return { };
+    else
+        throw Exception("Expected a <%1> tag, but couldn't find one").arg(tagName);
 }
 
 } // namespace BrickLink

@@ -56,7 +56,6 @@ qt_add_library(common_module STATIC
 target_link_libraries(common_module PRIVATE
     Qt6::Qml
     Qt6::Concurrent
-    Qt6::Xml
     Qt6::Quick
     Qt6::QuickPrivate
     Qt6::Svg # force deployment

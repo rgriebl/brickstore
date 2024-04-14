@@ -69,8 +69,11 @@ private:
     void message(const QString &text);
     void message(int level, const QString &text);
 
+    static void xmlParse(const QByteArray &xml, QStringView rootName, QStringView elementName,
+                         const std::function<void(const QHash<QString, QString> &)> &callback);
+    static QString xmlTagText(const QHash<QString, QString> &element, QStringView tagName,
+                              bool optional = false);
 private:
-    std::unique_ptr<Transfer> m_trans;
     QString m_archiveName;
     std::unique_ptr<MiniZip> m_downloadArchive;
     std::unique_ptr<MiniZip> m_lastRunArchive;

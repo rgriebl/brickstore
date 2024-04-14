@@ -51,7 +51,6 @@ endif()
 target_link_libraries(bricklink_module PRIVATE
     Qt6::Core
     Qt6::Gui
-    Qt6::Xml
     Qt6::Concurrent
     Qt6::Sql
     QCoro6::Network
