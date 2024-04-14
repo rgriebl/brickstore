@@ -14,14 +14,15 @@ class PersistentCookieJar : public QNetworkCookieJar
 {
     Q_OBJECT
 public:
-    PersistentCookieJar(const QString &datadir, const QString &name, QObject *parent = nullptr);
+    PersistentCookieJar(const QString &datadir, const QString &name,
+                        const QByteArrayList &persistSessionCookies, QObject *parent = nullptr);
     ~PersistentCookieJar() override;
 
     QList<QNetworkCookie> cookiesForUrl(const QUrl &url) const override;
     bool setCookiesFromUrl(const QList<QNetworkCookie> &cookieList, const QUrl &url) override;
 
 private:
-    void dumpCookies(const QList<QNetworkCookie> &cookies) const;
+    static void dumpCookies(const QList<QNetworkCookie> &cookies);
 
     QMutex m_mutex;
     QThread *m_saveThread = nullptr;
@@ -29,6 +30,7 @@ private:
     QWaitCondition m_saveCondition;
     QByteArray m_lastSaveData;
     QByteArray m_nextSaveData;
+    QByteArrayList m_persistSessionCookies;
 
     QString m_dataDir;
     QString m_name;

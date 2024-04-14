@@ -17,18 +17,21 @@
 using namespace std::chrono_literals;
 
 
-PersistentCookieJar::PersistentCookieJar(const QString &datadir, const QString &name, QObject *parent)
+PersistentCookieJar::PersistentCookieJar(const QString &datadir, const QString &name,
+                                         const QByteArrayList &persistSessionCookies,
+                                         QObject *parent)
     : QNetworkCookieJar(parent)
+    , m_persistSessionCookies(persistSessionCookies)
     , m_dataDir(datadir)
     , m_name(name)
 {
     // load
     try {
-        m_lastSaveData = m_nextSaveData =
-            qUncompress(CredentialsManager::load(u"BrickStore"_qs, m_name + u"-Cookies"_qs));
-        const auto cookies = QNetworkCookie::parseCookies(m_lastSaveData);
-        for (const auto &cookie : cookies)
-            insertCookie(cookie);
+        const QByteArray raw = CredentialsManager::load(u"BrickStore"_qs, m_name + u"-Cookies"_qs);
+        if (!raw.isEmpty()) {
+            m_lastSaveData = m_nextSaveData = qUncompress(raw);
+            setAllCookies(QNetworkCookie::parseCookies(m_lastSaveData));
+        }
     } catch (const Exception &e) {
         qWarning() << "Could not load cookies for" << m_name << ":" << e.errorString();
     }
@@ -80,8 +83,10 @@ bool PersistentCookieJar::setCookiesFromUrl(const QList<QNetworkCookie> &cookieL
 
     QByteArray data;
     QList<QNetworkCookie> all = allCookies();
-    for (const auto &cookie : all)
-        data = data + cookie.toRawForm() + '\n';
+    for (const auto &cookie : all) {
+        if (!cookie.isSessionCookie() || m_persistSessionCookies.contains(cookie.name()))
+            data = data + cookie.toRawForm() + '\n';
+    }
 
     m_mutex.lock();
     m_nextSaveData = data;
@@ -90,7 +95,7 @@ bool PersistentCookieJar::setCookiesFromUrl(const QList<QNetworkCookie> &cookieL
     return result;
 }
 
-void PersistentCookieJar::dumpCookies(const QList<QNetworkCookie> &cookies) const
+void PersistentCookieJar::dumpCookies(const QList<QNetworkCookie> &cookies)
 {
     for (const auto &cookie : cookies) {
         qWarning() << " *" << cookie.name() << cookie.expirationDate() << cookie.value().left(16)
