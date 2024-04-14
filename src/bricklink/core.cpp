@@ -284,7 +284,8 @@ bool Core::isAuthenticated() const
 
 void Core::retrieveAuthenticated(TransferJob *job)
 {
-    job->setNoRedirects(true);
+    if (job)
+        job->setNoRedirects(true);
 
     if (!m_authenticated) {
         if (!m_loginJob) {
@@ -304,10 +305,16 @@ void Core::retrieveAuthenticated(TransferJob *job)
             m_loginJob = TransferJob::post(url, nullptr, true /* no redirects */);
             m_authenticatedTransfer->retrieve(m_loginJob, true);
         }
-        m_jobsWaitingForAuthentication << job;
+        if (job)
+            m_jobsWaitingForAuthentication << job;
     } else {
         m_authenticatedTransfer->retrieve(job);
     }
+}
+
+void Core::authenticate()
+{
+    retrieveAuthenticated(nullptr);
 }
 
 void Core::retrieve(TransferJob *job, bool highPriority)
@@ -348,7 +355,6 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
     , m_noImageIcon(QIcon::fromTheme(u"image-missing-large"_qs))
     , m_transfer(new Transfer(this))
-    , m_authenticatedTransfer(new Transfer(std::make_unique<PersistentCookieJar>(datadir, u"BrickLink"_qs), this))
     , m_database(new Database(updateUrl, this))
 #if !defined(BS_BACKEND)
     , m_store(new Store(this))
@@ -362,6 +368,9 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
 #if defined(BS_BACKEND)
     Q_UNUSED(physicalMem)
 #endif
+    auto pcj = new PersistentCookieJar(datadir, u"BrickLink"_qs,
+                                       { { "BLNEWSESSIONID", 60 * 60 * 24 /* 24h as sec */ } });
+    m_authenticatedTransfer = new Transfer(std::move(pcj), this);
 
     m_transferStatId = AppStatistics::inst()->addSource(u"HTTP requests"_qs);
 
@@ -405,8 +414,11 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
                     m_authenticated = (json[u"returnCode"].toInt() == 0)
                                       || ((json[u"returnCode"].toInt() == -4)
                                           && (json[u"returnMessage"] == u"Already Logged-in!"_qs));
-                    if (!m_authenticated)
+                    if (!m_authenticated) {
                         error = json[u"returnMessage"].toString();
+                        if (error.isEmpty())
+                            error = u"<unknown error>"_qs;
+                    }
 
                     if (wasAuthenticated != m_authenticated)
                         emit authenticationChanged(m_authenticated);
@@ -414,8 +426,7 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
             } else {
                 error = job->errorString();
             }
-            if (!error.isEmpty())
-                emit authenticationFailed(m_credentials.first, error);
+            emit authenticationFinished(m_credentials.first, error);
 
             for (TransferJob *authJob : std::as_const(m_jobsWaitingForAuthentication))
                 m_authenticatedTransfer->retrieve(authJob);
@@ -424,16 +435,19 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
             if (!m_authenticated)
                 m_authenticatedTransfer->abortAllJobs();
         } else {
-            if (job->responseCode() == 302 &&
-                    (job->redirectUrl().toString().contains(u"v2/login.page")
-                     || job->redirectUrl().toString().contains(u"login.asp?"))) {
-                m_authenticated = false;
-                emit authenticationChanged(m_authenticated);
+            if (job->responseCode() == 302) {
+                if (job->redirectUrl().toString().contains(u"v2/login.page")
+                    || job->redirectUrl().toString().contains(u"login.asp?")) {
+                    m_authenticated = false;
+                    emit authenticationChanged(m_authenticated);
+                    job->resetForReuse();
+                } else {
+                    job->resetForReuse(true /* applyRedirect*/);
+                }
 
-                job->resetForReuse();
                 QMetaObject::invokeMethod(this, [=, this]() {
-                    retrieveAuthenticated(job);
-                }, Qt::QueuedConnection);
+                        retrieveAuthenticated(job);
+                    }, Qt::QueuedConnection);
             } else {
                 emit authenticatedTransferFinished(job);
             }

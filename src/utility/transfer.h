@@ -57,7 +57,7 @@ public:
     void abort();
 
     void reprioritize(bool highPriority);
-    void resetForReuse();
+    void resetForReuse(bool applyRedirect = false);
 
     void setAutoDelete(bool autoDelete) { m_auto_delete = autoDelete; }
     bool autoDelete() const             { return m_auto_delete; }
@@ -161,7 +161,7 @@ class Transfer : public QObject
 public:
     Transfer(QObject *parent = nullptr);
     // be careful: cookieJar is moved to the retriever thread!
-    Transfer(std::unique_ptr<QNetworkCookieJar> &&cookieJar, QObject *parent = nullptr);
+    Transfer(QNetworkCookieJar *&&cookieJar, QObject *parent = nullptr);
     ~Transfer() override;
 
     void retrieve(TransferJob *job, bool highPriority = false);

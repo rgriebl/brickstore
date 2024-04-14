@@ -75,7 +75,7 @@ void TransferJob::reprioritize(bool highPriority)
         m_transfer->reprioritize(this, highPriority);
 }
 
-void TransferJob::resetForReuse()
+void TransferJob::resetForReuse(bool applyRedirect)
 {
     m_reset_for_reuse = true;
     if (m_file) {
@@ -84,6 +84,11 @@ void TransferJob::resetForReuse()
             f->resize(0);
     } else {
         m_data->clear();
+    }
+    if (applyRedirect) {
+        if (m_redirect_url.isEmpty())
+            qCWarning(LogTransfer) << "Redirect target for" << m_url << "is empty";
+        m_url = m_redirect_url;
     }
     m_respcode = 0;
     m_status = Inactive;
@@ -137,14 +142,14 @@ Transfer::Transfer(QObject *parent)
     : Transfer(nullptr, parent)
 { }
 
-Transfer::Transfer(std::unique_ptr<QNetworkCookieJar> &&cookieJar, QObject *parent)
+Transfer::Transfer(QNetworkCookieJar *&&cookieJar, QObject *parent)
     : QObject(parent)
 {
     if (s_default_user_agent.isEmpty())
         s_default_user_agent = qApp->applicationName() + u'/' + qApp->applicationVersion();
     m_user_agent = s_default_user_agent;
 
-    m_retriever = new TransferRetriever(this, cookieJar.release());
+    m_retriever = new TransferRetriever(this, std::move(cookieJar));
     m_retrieverThread = QThread::create([this]() {
         if (s_threadInitFunction)
             s_threadInitFunction();
@@ -459,11 +464,13 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
 
         case 302:
         case 303:
-        case 307:
-            j->m_redirect_url = j->m_reply->header(QNetworkRequest::LocationHeader).toUrl();
+        case 307: {
+            j->m_redirect_url = j->m_reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+            if (j->m_redirect_url.isRelative())
+                j->m_redirect_url = j->m_reply->url().resolved(j->m_redirect_url);
             j->setStatus(TransferJob::Completed);
             break;
-
+        }
         case 200: {
             auto lastetag = j->m_reply->header(QNetworkRequest::ETagHeader);
             if (lastetag.isValid())

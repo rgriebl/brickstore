@@ -65,6 +65,7 @@ public:
 
     bool isAuthenticated() const;
     void retrieveAuthenticated(TransferJob *job);
+    void authenticate();
 
     void retrieve(TransferJob *job, bool highPriority = false);
 
@@ -138,7 +139,7 @@ signals:
     void authenticatedTransferFinished(TransferJob *job);
 
     void authenticationChanged(bool auth);
-    void authenticationFailed(const QString &userName, const QString &error);
+    void authenticationFinished(const QString &userName, const QString &error);
 
     void userIdChanged(const QString &userId);
 

@@ -189,10 +189,12 @@ void Application::init()
 
     LDraw::create(ldrawUrl());
 
-    connect(BrickLink::core(), &BrickLink::Core::authenticationFailed,
+    connect(BrickLink::core(), &BrickLink::Core::authenticationFinished,
             this, [](const QString &userName, const QString &error) {
-        UIHelpers::warning(tr("Failed to authenticate with BrickLink as user %1")
-                            .arg(userName) + u"<br><b>" + error + u"</b>");
+        if (!error.isEmpty()) {
+            UIHelpers::warning(tr("Failed to authenticate with BrickLink as user %1")
+                                   .arg(userName) + u"<br><b>" + error + u"</b>");
+        }
     });
 
     m_undoGroup = new UndoGroup(this);
