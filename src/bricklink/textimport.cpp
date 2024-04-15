@@ -1218,7 +1218,6 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
             qsizetype startPos = mh.capturedEnd();
             qsizetype endPos = listData.indexOf(u"</TABLE>"_qs, startPos);
 
-            static const QRegularExpression rxTR(uR"-(<TR .*?</TR>)-"_qs);
             static const QRegularExpression rxMatch(uR"-(<TR BGCOLOR="#......"><TD COLSPAN="4">.*?<B>Match #(\d+)</B></FONT></TD></TR>)-"_qs);
             static const QRegularExpression rxItem (uR"-(<TR BGCOLOR="#......"><TD ALIGN="CENTER" WIDTH="10%">.*?<A HREF="/v2/catalog/catalogitem\.page\?([A-Z])=([A-Za-z0-9._-]+)">([A-Za-z0-9._-]+)</A>.*</FONT></TD></TR>)-"_qs);
 
@@ -1226,20 +1225,21 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
             int trCount = 0;
 
             while (true) {
-                auto mt = rxTR.match(listData, startPos);
-                if (!mt.hasMatch())
+                qsizetype matchStartPos = listData.indexOf(u"<TR "_qs, startPos);
+                if (matchStartPos < 0)
                     break;
-
-                qsizetype matchStartPos = mt.capturedStart(0);
-                qsizetype matchEndPos = mt.capturedEnd(0);
-                if (matchStartPos > endPos || matchEndPos > endPos)
+                qsizetype matchEndPos = listData.indexOf(u"</TR>"_qs, matchStartPos);
+                if (matchEndPos < 0)
+                    break;
+                matchEndPos += 5;
+                if (matchEndPos > endPos)
                     break;
                 startPos = matchEndPos;
 
                 if (++trCount == 1) // skip header
                     continue;
 
-                auto currentRow = mt.capturedView(0);
+                auto currentRow = QStringView { listData }.sliced(matchStartPos, matchEndPos - matchStartPos);
 
                 auto mm = rxMatch.match(currentRow);
                 if (mm.hasMatch()) {
