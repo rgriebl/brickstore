@@ -194,13 +194,9 @@ QCoro::Task<> TextImport::importCatalog()
     co_await download(catalogQuery(3), u"colors.xml"_qs).then(
         [this](auto data) { readColors(data); });
 
-    co_await download(rebrickableApiQuery("lego/colors/"), u"rebrickable_colors.json"_qs).then(
-        [this](QByteArray rebrickableData) -> QCoro::Task<> {
-            co_await download(ldrawUrl("library/official/LDConfig.ldr"), u"ldconfig.ldr"_qs).then(
-                [this, rebrickableData](QByteArray ldrawData) {
-                    readLDrawColors(ldrawData, rebrickableData);
-                });
-        });
+    auto rebrickableData = co_await download(rebrickableApiQuery("lego/colors/"), u"rebrickable_colors.json"_qs);
+    auto ldrawData = co_await download(ldrawUrl("library/official/LDConfig.ldr"), u"ldconfig.ldr"_qs);
+    readLDrawColors(ldrawData, rebrickableData);
 
     co_await download(catalogQuery(2), u"categories.xml"_qs).then(
         [this](QByteArray data) { readCategories(data); });
