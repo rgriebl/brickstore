@@ -430,39 +430,6 @@ void Database::read(const QString &fileName)
                 .arg(f.fileName());
         }
 
-        {
-            QString out = u"Loaded database from " + f.fileName();
-            QLocale loc = QLocale(QLocale::Swedish); // space as number group separator
-            QVector<std::pair<QString, QString>> log = {
-                { u"Generated at"_qs, generationDate.toString(Qt::RFC2822Date) },
-                { u"Changelog Id"_qs, QString::number(latestChangelogId) },
-                { u"  Items"_qs,      loc.toString(itemChangelog.size()).rightJustified(10) },
-                { u"  Colors"_qs,     loc.toString(colorChangelog.size()).rightJustified(10) },
-                { u"Relationships"_qs,loc.toString(relationships.size()).rightJustified(10) },
-                { u"  Matches"_qs,    loc.toString(relationshipMatches.size()).rightJustified(10) },
-                { u"Item Types"_qs,   loc.toString(itemTypes.size()).rightJustified(10) },
-                { u"Categories"_qs,   loc.toString(categories.size()).rightJustified(10) },
-                { u"Colors"_qs,       loc.toString(colors.size()).rightJustified(10) },
-                { u"LDraw Colors"_qs, loc.toString(ldrawExtraColors.size()).rightJustified(10) },
-                { u"Items"_qs,        loc.toString(items.size()).rightJustified(10) },
-            };
-#if defined(QT_DEBUG)
-            std::vector<int> itemCount(itemTypes.size());
-            for (const auto &item : std::as_const(items))
-                ++itemCount[item.m_itemTypeIndex];
-            for (size_t i = 0; i < itemTypes.size(); ++i) {
-                log.append({ u"  "_qs + itemTypes.at(i).name(),
-                            loc.toString(itemCount.at(i)).rightJustified(10) });
-            }
-#endif
-            qsizetype leftSize = 0;
-            for (const auto &logPair : std::as_const(log))
-                leftSize = std::max(leftSize, logPair.first.length());
-            for (const auto &logPair : std::as_const(log))
-                out = out + u"\n  " + logPair.first.leftJustified(leftSize) + u": " + logPair.second;
-            qInfo().noquote() << out;
-        }
-
         m_colors = std::move(colors);
         m_ldrawExtraColors = std::move(ldrawExtraColors);
         m_categories = std::move(categories);
@@ -474,25 +441,11 @@ void Database::read(const QString &fileName)
         m_relationshipMatches = std::move(relationshipMatches);
         m_latestChangelogId = latestChangelogId;
         m_apiKeys = apiKeys;
+        const auto oldQuirks = m_apiQuirks;
+        m_apiQuirks = gotApiQuirks ? apiQuirks.intersect(Core::knownApiQuirks())
+                                   : Core::knownApiQuirks();
 
         m_pool.swap(pool);
-
-        {
-            const auto oldQuirks = m_apiQuirks;
-            m_apiQuirks = gotApiQuirks ? apiQuirks.intersect(Core::knownApiQuirks())
-                                       : Core::knownApiQuirks();
-
-            if (m_apiQuirks != oldQuirks) {
-                QStringList output;
-                output.reserve(m_apiQuirks.size());
-                for (auto apiQuirk : std::as_const(m_apiQuirks))
-                    output << Core::apiQuirkDescription(apiQuirk);
-                output.sort();
-                if (output.isEmpty())
-                    output << u"(None)"_qs;
-                qInfo().noquote() << "Currently active BrickLink API quirks:\n " << output.join(u"\n  "_qs);
-            }
-        }
 
         Color::s_colorImageCache.clear();
 
@@ -504,6 +457,15 @@ void Database::read(const QString &fileName)
             m_valid = true;
             emit validChanged(m_valid);
         }
+
+        bool itemTypeInfo = false;
+#if defined(QT_DEBUG)
+        itemTypeInfo = true;
+#endif
+        bool apiQuirksInfo = (m_apiQuirks != oldQuirks);
+
+        dumpDatabaseInformation(u"Loaded database from " + f.fileName(), itemTypeInfo, apiQuirksInfo);
+
     } catch (const Exception &e) {
         if (m_valid) {
             m_valid = false;
@@ -512,6 +474,52 @@ void Database::read(const QString &fileName)
         }
         qWarning() << "Loading database failed:" << e.errorString();
         throw;
+    }
+}
+
+void Database::dumpDatabaseInformation(const QString &title, bool itemTypeInfo, bool apiQuirksInfo) const
+{
+    QVector<std::pair<QString, QString>> log = {
+        { u"Generated at"_qs, m_lastUpdated.toString(u"dd MMM yyyy HH:mm:ss t") },
+        { u"Changelog Id"_qs, QString::number(m_latestChangelogId).rightJustified(10) },
+        { u"  Items"_qs,      QString::number(m_itemChangelog.size()).rightJustified(10) },
+        { u"  Colors"_qs,     QString::number(m_colorChangelog.size()).rightJustified(10) },
+        { u"Relationships"_qs,QString::number(m_relationships.size()).rightJustified(10) },
+        { u"  Matches"_qs,    QString::number(m_relationshipMatches.size()).rightJustified(10) },
+        { u"Item Types"_qs,   QString::number(m_itemTypes.size()).rightJustified(10) },
+        { u"Categories"_qs,   QString::number(m_categories.size()).rightJustified(10) },
+        { u"Colors"_qs,       QString::number(m_colors.size()).rightJustified(10) },
+        { u"LDraw Colors"_qs, QString::number(m_ldrawExtraColors.size()).rightJustified(10) },
+        { u"Items"_qs,        QString::number(m_items.size()).rightJustified(10) },
+    };
+
+    if (itemTypeInfo) {
+        std::vector<int> itemCount(m_itemTypes.size());
+        for (const auto &item : std::as_const(m_items))
+            ++itemCount[item.m_itemTypeIndex];
+        for (size_t i = 0; i < m_itemTypes.size(); ++i) {
+            log.append({ u"  "_qs + m_itemTypes.at(i).name(),
+                        QString::number(itemCount.at(i)).rightJustified(10) });
+        }
+    }
+
+    QString out = title;
+    qsizetype leftSize = 0;
+    for (const auto &logPair : std::as_const(log))
+        leftSize = std::max(leftSize, logPair.first.length());
+    for (const auto &logPair : std::as_const(log))
+        out = out + u"\n  " + logPair.first.leftJustified(leftSize) + u": " + logPair.second;
+    qInfo().noquote() << out;
+
+    if (apiQuirksInfo) {
+        QStringList output;
+        output.reserve(m_apiQuirks.size());
+        for (auto apiQuirk : std::as_const(m_apiQuirks))
+            output << Core::apiQuirkDescription(apiQuirk);
+        output.sort();
+        if (output.isEmpty())
+            output << u"(None)"_qs;
+        qInfo().noquote() << "Currently active BrickLink API quirks:\n " << output.join(u"\n  "_qs);
     }
 }
 

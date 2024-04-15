@@ -87,6 +87,7 @@ signals:
 private:
     Database(const QString &updateUrl, QObject *parent = nullptr);
     void setUpdateStatus(UpdateStatus updateStatus);
+    void dumpDatabaseInformation(const QString &title, bool itemTypeInfo, bool apiQuirksInfo) const;
 
     void clear();
 

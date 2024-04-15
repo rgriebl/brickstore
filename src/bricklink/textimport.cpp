@@ -349,6 +349,9 @@ void TextImport::finalize()
         }
         item.m_appears_in.copyContainer(tmp.cbegin(), tmp.cend(), nullptr);
     }
+
+    m_db->m_lastUpdated = QDateTime::currentDateTime();
+    m_db->dumpDatabaseInformation({ }, true, true);
 }
 
 void TextImport::exportDatabase()
