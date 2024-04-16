@@ -1,9 +1,9 @@
 <img src="https://raw.githubusercontent.com/rgriebl/brickstore/main/assets/brickstore.png" align="right"
      alt="BrickStore Logo" width="192" height="192">
 
-![](https://github.com/rgriebl/brickstore/workflows/CMake%20Build%20Matrix/badge.svg)
-![DL badge](https://img.shields.io/github/downloads/rgriebl/brickstore/latest/total?label=Downloads)
-![Database](https://img.shields.io/github/v/release/rgriebl/brickstore-database?display_name=release&label=Last%20Database%20Update)
+[![Build badge](https://img.shields.io/github/actions/workflow/status/rgriebl/brickstore/build_cmake.yml?branch=main&logo=github&label=Build%20matrix)](https://github.com/rgriebl/brickstore/action)
+[![DL badge](https://img.shields.io/github/downloads/rgriebl/brickstore/latest/total?label=Downloads%20for%20latest%20version)](https://github.com/rgriebl/brickstore/releases)
+[![DB badge](https://img.shields.io/github/v/release/rgriebl/brickstore-database?display_name=release&label=Last%20database%20update%20UTC)](https://github.com/rgriebl/brickstore-database)
 
 ## BrickStore
 
