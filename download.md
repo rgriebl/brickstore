@@ -6,11 +6,11 @@ All releases are built automatically on GitHub.com and can be downloaded from he
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/rgriebl/brickstore?label=Download%20BrickStore&color=469BC3&style=for-the-badge)](https://github.com/rgriebl/brickstore/releases/latest)
 
 BrickStore works on:
-* **Windows** (10 and 11, 64-bit only, Intel and ARM)
-* **macOS** (10.14 or newer)
-* **Linux** (Ubuntu 22.04 package and Snap, Arch AUR, distro independent AppImage)
-* **Android** (currently in beta test)
-* **iOS** (currently in beta test)
+* **Windows:** 10 (at least 1809) and 11, 64-bit only, Intel and ARM
+* **macOS:** 10.14 or newer
+* **Linux:** Ubuntu 22.04 package and Snap, Arch AUR, distro independent AppImage
+* **Android:** currently in beta test
+* **iOS:** currently in beta test
 
 If you need more infomation on what to download and how to install it, then
 head over to the [installation instructions](installation).
