@@ -3,7 +3,7 @@
 
 ![](https://github.com/rgriebl/brickstore/workflows/CMake%20Build%20Matrix/badge.svg)
 ![DL badge](https://img.shields.io/github/downloads/rgriebl/brickstore/latest/total?label=Downloads)
-![Custom badge](https://img.shields.io/endpoint?url=https%3A%2F%2Fdata.brickstore.dev%2Fdatabase-last-update.py)
+![Database](https://img.shields.io/github/v/release/rgriebl/brickstore-database?display_name=release&label=Last%20Database%20Update)
 
 ## BrickStore
 
