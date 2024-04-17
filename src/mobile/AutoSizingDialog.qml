@@ -61,9 +61,6 @@ Dialog {
         }
     }
 
-    //TODO: fix after Key_Back handling is fixed in 6.4 for Popup
-    onOpened: contentItem.forceActiveFocus()
-
     Connections {
         target: Style
         function onSmallSizeChanged() {
@@ -82,13 +79,6 @@ Dialog {
             header.textFormat = Text.RichText
         defaultBackgroundRadius = (background && ('radius' in background)) ? background.radius : -1
         switchSmallStyle()
-        contentItem.focus = true
-        contentItem.Keys.released.connect(function(e) {
-            if (e.key === Qt.Key_Back) {
-                e.accept = true
-                close()
-            }
-        })
     }
     function switchSmallStyle() {
         if (Style.smallSize || root.forceFullscreen) {
@@ -153,4 +143,3 @@ Dialog {
         }
     }
 }
-
