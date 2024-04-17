@@ -463,7 +463,10 @@ add_custom_target("Other-Files" SOURCES
     android/gradle/wrapper/gradle-wrapper.properties
     android/gradlew
     android/gradlew.bat
+    android/res/values/colors.xml
     android/res/values/libs.xml
+    android/res/values/splashscreentheme.xml
+    android/res/xml/qtprovider_paths.xml
     android/src/de/brickforge/brickstore/ExtendedQtActivity.java
     assets/COPYING-ICONS
     assets/COPYING-FLAGS
