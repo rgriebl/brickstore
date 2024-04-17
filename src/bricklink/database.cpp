@@ -467,8 +467,8 @@ void Database::read(const QString &fileName)
 #endif
         bool apiQuirksInfo = (m_apiQuirks != oldQuirks);
 
-        dumpDatabaseInformation(u"Loaded database from " + f.fileName(), itemTypeInfo, apiQuirksInfo);
-
+        qInfo().noquote() << dumpDatabaseInformation(u"Loaded database from " + f.fileName(),
+                                                     itemTypeInfo, apiQuirksInfo);
     } catch (const Exception &e) {
         if (m_valid) {
             m_valid = false;
@@ -480,7 +480,7 @@ void Database::read(const QString &fileName)
     }
 }
 
-void Database::dumpDatabaseInformation(const QString &title, bool itemTypeInfo, bool apiQuirksInfo) const
+QString Database::dumpDatabaseInformation(const QString &title, bool itemTypeInfo, bool apiQuirksInfo) const
 {
     QVector<std::pair<QString, QString>> log = {
         { u"Generated at"_qs, m_lastUpdated.toString(u"dd MMM yyyy HH:mm:ss t") },
@@ -512,7 +512,6 @@ void Database::dumpDatabaseInformation(const QString &title, bool itemTypeInfo, 
         leftSize = std::max(leftSize, logPair.first.length());
     for (const auto &logPair : std::as_const(log))
         out = out + u"\n  " + logPair.first.leftJustified(leftSize) + u": " + logPair.second;
-    qInfo().noquote() << out;
 
     if (apiQuirksInfo) {
         QStringList output;
@@ -522,9 +521,11 @@ void Database::dumpDatabaseInformation(const QString &title, bool itemTypeInfo, 
         output.sort();
         if (output.isEmpty())
             output << u"(None)"_qs;
-        qInfo().noquote() << "Currently active BrickLink API quirks:\n " << output.join(u"\n  "_qs);
+        out = out + u"\n\nCurrently active BrickLink API quirks:\n  " + output.join(u"\n  ");
     }
+    return out;
 }
+
 
 void Database::write(const QString &filename, Version version) const
 {

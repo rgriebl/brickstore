@@ -347,7 +347,7 @@ void TextImport::finalize()
     }
 
     m_db->m_lastUpdated = QDateTime::currentDateTime();
-    m_db->dumpDatabaseInformation({ }, true, true);
+    message(0, m_db->dumpDatabaseInformation({ }, true, true));
 }
 
 void TextImport::exportDatabase()
@@ -1531,7 +1531,10 @@ void TextImport::message(const QString &text)
 
 void TextImport::message(int level, const QString &text)
 {
-    printf("%s%c %s\n", QByteArray(level * 2, ' ').constData(), (level <= 1) ? '*' : '>', qPrintable(text));
+    if (level <= 0)
+        printf("%s\n", qPrintable(text));
+    else
+        printf("%s%c %s\n", QByteArray(level * 2, ' ').constData(), (level <= 1) ? '*' : '>', qPrintable(text));
 }
 
 void TextImport::xmlParse(const QByteArray &xml, QStringView rootName, QStringView elementName,
