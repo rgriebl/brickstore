@@ -113,7 +113,7 @@ Page {
             id: header
             syncView: table
             clip: true
-            reuseItems: true
+            reuseItems: false
             //interactive: false
 
             property bool sorted: root.document?.sorted ?? false
@@ -167,7 +167,7 @@ Page {
             columnSpacing: 0
             rowSpacing: 0
             clip: true
-            reuseItems: true
+            reuseItems: false
 
             FontMetrics { id: fontMetrics; font: root.font }
             property int cellHeight: fontMetrics.height * 2 * BS.Config.rowHeightPercent / 100 + 8

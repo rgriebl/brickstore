@@ -21,6 +21,9 @@
 #  include <QJniObject>
 #  include <QFileOpenEvent>
 #  include <android/api-level.h>
+#  if QT_VERSION < QT_VERSION_CHECK(6, 7, 0)
+#    include <qpa/qwindowsysteminterface.h>
+#  endif
 
 extern "C" JNIEXPORT void JNICALL
 Java_de_brickforge_brickstore_ExtendedQtActivity_openUrl(JNIEnv *env, jobject, jstring jurl)
@@ -51,6 +54,25 @@ MobileApplication::MobileApplication(int &argc, char **argv)
     m_app = new QGuiApplication(argc, argv);
 
     qputenv("QT_QUICK_CONTROLS_CONF", ":/Mobile/qtquickcontrols2.conf");
+
+#if defined(Q_OS_ANDROID) && (QT_VERSION < QT_VERSION_CHECK(6, 7, 0)) // QTBUG-118421
+    const auto inputDevices = QInputDevice::devices();
+    bool vkbdFound = false;
+    for (const auto *ip : inputDevices) {
+        if ((ip->type() == QInputDevice::DeviceType::Keyboard)
+            && (ip->name() == u"Virtual keyboard"_qs)
+            && (ip->seatName().isEmpty())) {
+            vkbdFound = true;
+            break;
+        }
+    }
+    if (!vkbdFound) {
+        qInfo() << "Qt is missing the virtual keyboard input device, registering it manually.";
+        QWindowSystemInterface::registerInputDevice(
+            new QInputDevice(u"Virtual keyboard"_qs, 0, QInputDevice::DeviceType::Keyboard,
+                             {}, qApp));
+    }
+#endif
 }
 
 void MobileApplication::init()
