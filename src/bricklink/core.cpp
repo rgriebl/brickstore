@@ -259,12 +259,8 @@ void Core::setCredentials(const QPair<QString, QString> &credentials)
         if (wasAuthenticated) {
             emit authenticationChanged(false);
 
-            QUrl url(u"https://www.bricklink.com/ajax/renovate/loginandout.ajax"_qs);
-            QUrlQuery q;
-            q.addQueryItem(u"do_logout"_qs, u"true"_qs);
-            url.setQuery(q);
-
-            auto logoutJob = TransferJob::get(url);
+            auto logoutJob = TransferJob::get(u"https://www.bricklink.com/ajax/renovate/loginandout.ajax"_qs,
+                                              { { u"do_logout"_qs, u"true"_qs } });
             m_authenticatedTransfer->retrieve(logoutJob, true);
         }
         if (newUserId)
@@ -295,14 +291,13 @@ void Core::retrieveAuthenticated(TransferJob *job)
                 return;
             }
 
-            QUrl url(u"https://www.bricklink.com/ajax/renovate/loginandout.ajax"_qs);
-            QUrlQuery q;
-            q.addQueryItem(u"userid"_qs,          Utility::urlQueryEscape(m_credentials.first));
-            q.addQueryItem(u"password"_qs,        Utility::urlQueryEscape(m_credentials.second));
-            q.addQueryItem(u"keepme_loggedin"_qs, u"1"_qs);
-            url.setQuery(q);
-
-            m_loginJob = TransferJob::post(url, nullptr, true /* no redirects */);
+            m_loginJob = TransferJob::post(u"https://www.bricklink.com/ajax/renovate/loginandout.ajax"_qs,
+                                           {
+                                               { u"userid"_qs,          Utility::urlQueryEscape(m_credentials.first) },
+                                               { u"password"_qs,        Utility::urlQueryEscape(m_credentials.second) },
+                                               { u"keepme_loggedin"_qs, u"1"_qs },
+                                            });
+            m_loginJob->setNoRedirects(true);
             m_authenticatedTransfer->retrieve(m_loginJob, true);
         }
         if (job)
@@ -406,8 +401,8 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
 
             QString error;
 
-            if (job->responseCode() == 200 && job->data()) {
-                auto json = QJsonDocument::fromJson(*job->data());
+            if (job->responseCode() == 200) {
+                auto json = QJsonDocument::fromJson(job->data());
                 if (!json.isNull()) {
                     bool wasAuthenticated = m_authenticated;
                     m_authenticated = (json[u"returnCode"].toInt() == 0)

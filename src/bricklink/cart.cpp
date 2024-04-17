@@ -217,7 +217,7 @@ Carts::Carts(Core *core)
     });
     connect(core, &Core::authenticatedTransferFinished,
             this, [this](TransferJob *job) {
-        bool jobCompleted = job->isCompleted() && (job->responseCode() == 200) && job->data();
+        bool jobCompleted = job->isCompleted() && (job->responseCode() == 200);
         QByteArray type = job->userTag();
 
         if (m_cartJobs.contains(job) && (type == "cart")) {
@@ -239,7 +239,7 @@ Carts::Carts(Core *core)
                 if (!jobCompleted) {
                     throw Exception(message + u": " + job->errorString());
                 } else {
-                    int invalidCount = parseSellerCart(*it, *job->data());
+                    int invalidCount = parseSellerCart(*it, job->data());
                     if (invalidCount) {
                         message = tr("%n lot(s) of your Shopping Cart could not be imported.",
                                      nullptr, invalidCount);
@@ -257,7 +257,7 @@ Carts::Carts(Core *core)
             QString message = tr("Failed to import the carts");
             if (success) {
                 try {
-                    const auto carts = parseGlobalCart(*job->data());
+                    const auto carts = parseGlobalCart(job->data());
                     beginResetModel();
                     qDeleteAll(m_carts);
                     m_carts.clear();
@@ -448,9 +448,7 @@ void Carts::startUpdate()
     Q_ASSERT(!m_job);
     setUpdateStatus(UpdateStatus::Updating);
 
-    QUrl url(u"https://www.bricklink.com/v2/globalcart.page"_qs);
-
-    auto job = TransferJob::post(url);
+    auto job = TransferJob::post(u"https://www.bricklink.com/v2/globalcart.page"_qs);
     job->setUserData("globalCart", true);
     m_job = job;
 
@@ -468,13 +466,8 @@ void Carts::startFetchLots(Cart *cart)
     if (!cart)
         return;
 
-    QUrl url(u"https://www.bricklink.com/ajax/renovate/cart/getStoreCart.ajax"_qs);
-    QUrlQuery query;
-    query.addQueryItem(u"sid"_qs, QString::number(cart->sellerId()));
-    url.setQuery(query);
-
-    auto job = TransferJob::post(url);
-
+    auto job = TransferJob::post(u"https://www.bricklink.com/ajax/renovate/cart/getStoreCart.ajax"_qs,
+                                 { { u"sid"_qs, QString::number(cart->sellerId()) } });
     job->setUserData("cart", QVariant::fromValue(cart->sellerId()));
     m_cartJobs << job;
 

@@ -5,6 +5,7 @@
 
 #include <QDateTime>
 #include <QUrl>
+#include <QUrlQuery>
 #include <QThread>
 #include <QLoggingCategory>
 
@@ -22,12 +23,9 @@ class TransferJob
 public:
     ~TransferJob();
 
-    static TransferJob *get(const QUrl &url, QIODevice *file = nullptr, uint retries = 0);
-    static TransferJob *getIfNewer(const QUrl &url, const QDateTime &dt, QIODevice *file = nullptr);
-    static TransferJob *getIfDifferent(const QUrl &url, const QString &etag, QIODevice *file = nullptr);
-    static TransferJob *post(const QUrl &url, QIODevice *file = nullptr, bool noRedirects = false);
-    static TransferJob *postContent(const QUrl &url, const QString &contentType, const QByteArray &content,
-                                    QIODevice *file = nullptr, bool noRedirects = false);
+    static TransferJob *get(const QUrl &url, const QUrlQuery &query = { });
+    static TransferJob *post(const QUrl &url, const QUrlQuery &query = { });
+    static TransferJob *post(const QUrl &url, const QUrlQuery &query, const QString &contentType, const QByteArray &content);
 
     QUrl url() const                 { return m_url; }
     QUrl effectiveUrl() const        { return m_effective_url; }
@@ -35,8 +33,7 @@ public:
     int responseCode() const         { return m_respcode; }
     QUrl redirectUrl() const         { return m_redirect_url; }
     QIODevice *file() const          { return m_file; }
-    QByteArray *data() const         { return m_data; }
-    QDateTime lastModified() const   { return m_last_modified; }
+    QByteArray data() const          { return m_data; }
     QString lastETag() const         { return m_last_etag; }
     bool wasNotModified() const      { return m_was_not_modified; }
     bool isHighPriority() const      { return m_high_priority; }
@@ -49,6 +46,9 @@ public:
     bool isAborted() const           { return m_status == Aborted; }
 
     void setNoRedirects(bool noRedirects) { m_no_redirects = noRedirects; }
+    void setMaximumRetries(uint count)    { m_retries_left = std::max(31u, count); }
+    void setOnlyIfDifferent(const QString &etag) { m_only_if_different = etag; }
+    void setOutputDevice(QIODevice *output);
     void setUserData(const QByteArray &tag, const QVariant &v) { m_userTag = tag; m_userData = v; }
     QVariant userData(const QByteArray &tag) const             { return m_userTag == tag ? m_userData : QVariant(); }
     QByteArray userTag() const                                 { return m_userTag; }
@@ -76,8 +76,7 @@ private:
         HttpPost = 1
     };
 
-    static TransferJob *create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer, const QString &etag,
-                               QIODevice *file, bool noRedirects, uint retries = 0);
+    static TransferJob *create(HttpMethod method, const QUrl &url, const QUrlQuery &query, const QString &contentType, const QByteArray &content);
 
     void setStatus(Status st)  { m_status = st; }
     bool abortInternal();
@@ -89,13 +88,11 @@ private:
     QUrl         m_url;
     QUrl         m_effective_url;
     QUrl         m_redirect_url;
-    QByteArray * m_data = nullptr;
+    QByteArray   m_data;
     QIODevice *  m_file = nullptr;
     QString      m_error_string;
     QString      m_only_if_different;
     QString      m_last_etag;
-    QDateTime    m_only_if_newer;
-    QDateTime    m_last_modified;
     QNetworkReply *m_reply = nullptr;
     QString      m_postContentType;
     QByteArray   m_postContent;
@@ -107,9 +104,9 @@ private:
     Status       m_status           : 4 = Inactive;
     HttpMethod   m_http_method      : 1;
     bool         m_reset_for_reuse  : 1 = false;
-    uint         m_retries_left     : 4;
+    uint         m_retries_left     : 4 = 0;
     bool         m_was_not_modified : 1 = false;
-    bool         m_no_redirects     : 1;
+    bool         m_no_redirects     : 1 = false;
     bool         m_high_priority    : 1 = false;
     bool         m_auto_delete      : 1 = true;
 

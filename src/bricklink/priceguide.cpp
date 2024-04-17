@@ -124,19 +124,18 @@ void SingleHTMLScrapePGRetriever::fetch(PriceGuide *pg, bool highPriority)
 
     pg->addRef();
 
-    QUrl url = QUrl(u"https://www.bricklink.com/priceGuideSummary.asp"_qs);
-    url.setQuery({
-        { u"a"_qs,           QString(QChar::fromLatin1(pg->item()->itemTypeId())) },
-        { u"vcID"_qs,        u"1"_qs }, // USD
-        { u"vatInc"_qs,      (pg->vatType() == VatType::Included) ? u"Y"_qs : u"N"_qs },
-        { u"viewExclude"_qs, u"Y"_qs },
-        { u"ajView"_qs,      u"Y"_qs }, // only the AJAX snippet
-        { u"colorID"_qs,     QString::number(pg->color()->id()) },
-        { u"itemID"_qs,      Utility::urlQueryEscape(pg->item()->id()) },
-        { u"uncache"_qs,     QString::number(QDateTime::currentMSecsSinceEpoch()) },
-    });
-
-    auto job = TransferJob::get(url, nullptr, 2);
+    auto job = TransferJob::get(u"https://www.bricklink.com/priceGuideSummary.asp"_qs,
+                                {
+                                    { u"a"_qs,           QString(QChar::fromLatin1(pg->item()->itemTypeId())) },
+                                    { u"vcID"_qs,        u"1"_qs }, // USD
+                                    { u"vatInc"_qs,      (pg->vatType() == VatType::Included) ? u"Y"_qs : u"N"_qs },
+                                    { u"viewExclude"_qs, u"Y"_qs },
+                                    { u"ajView"_qs,      u"Y"_qs }, // only the AJAX snippet
+                                    { u"colorID"_qs,     QString::number(pg->color()->id()) },
+                                    { u"itemID"_qs,      Utility::urlQueryEscape(pg->item()->id()) },
+                                    { u"uncache"_qs,     QString::number(QDateTime::currentMSecsSinceEpoch()) },
+                                 });
+    job->setMaximumRetries(2);
     job->setUserData("htmlPriceGuide", QVariant::fromValue(pg));
     m_jobs.insert(pg, job);
 
@@ -163,7 +162,7 @@ void SingleHTMLScrapePGRetriever::transferJobFinished(TransferJob *j, PriceGuide
     try {
         if (job->isCompleted()) {
             PriceGuide::Data data;
-            if (parseHtml(*job->data(), data))
+            if (parseHtml(job->data(), data))
                 emit finished(pg, data);
             else
                 throw Exception("invalid price-guide data");
@@ -419,18 +418,16 @@ void BatchedAffiliateAPIPGRetriever::check()
 
             const auto json = QJsonDocument(array).toJson(QJsonDocument::Compact);
 
-            // https://api.bricklink.com/api/affiliate/v1/price_guide_batch?currency_code=USD&precision=4&vat_type=1&api_key=...
-            QUrl url = u"https://api.bricklink.com/api/affiliate/v1/price_guide_batch"_qs;
-            url.setQuery({
-                { u"currency_code"_qs, u"USD"_qs },
-                { u"precision"_qs,     u"4"_qs },
-                { u"vat_type"_qs,      QString::number(int(m_nextBatchVatType)) },
-                { u"api_key"_qs,       m_apiKey }
-            });
+            m_currentJob = TransferJob::post(u"https://api.bricklink.com/api/affiliate/v1/price_guide_batch"_qs,
+                                             {
+                                              { u"currency_code"_qs, u"USD"_qs },
+                                              { u"precision"_qs,     u"4"_qs },
+                                              { u"vat_type"_qs,      QString::number(int(m_nextBatchVatType)) },
+                                              { u"api_key"_qs,       m_apiKey }
+                                             },
+                                             u"application/json"_qs, json);
 
-            m_currentJob = TransferJob::postContent(url, u"application/json"_qs, json);
             m_currentJob->setUserData("batchedPriceGuide", true);
-
             m_core->retrieve(m_currentJob, m_nextBatchPrioritySize > 0);
         } else if (nextSize) {
             auto nextCheck = std::max(0LL, (MaxBatchAgeMSec - std::max(nextAge, nextPriorityAge)));
@@ -446,9 +443,9 @@ void BatchedAffiliateAPIPGRetriever::transferJobFinished(TransferJob *j)
     m_currentJob = nullptr;
 
     try {
-        if (j->isCompleted() && j->data()) {
+        if (j->isCompleted()) {
             QJsonParseError err;
-            const auto doc = QJsonDocument::fromJson(*j->data(), &err);
+            const auto doc = QJsonDocument::fromJson(j->data(), &err);
             if (doc.isNull())
                 throw ParseException("invalid JSON: %1 at %2").arg(err.errorString()).arg(err.offset);
 

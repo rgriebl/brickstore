@@ -21,37 +21,43 @@ TransferJob::~TransferJob()
     Q_ASSERT(!m_reply);
 
     delete m_file;
-    delete m_data;
 }
 
-TransferJob *TransferJob::get(const QUrl &url, QIODevice *file, uint retries)
+TransferJob *TransferJob::get(const QUrl &url, const QUrlQuery &query)
 {
-    Q_ASSERT(retries < 31);
-
-    return create(HttpGet, url, { }, { }, file, false, retries);
+    return create(HttpGet, url, query, { }, { });
 }
 
-TransferJob *TransferJob::getIfNewer(const QUrl &url, const QDateTime &ifnewer, QIODevice *file)
+TransferJob *TransferJob::post(const QUrl &url, const QUrlQuery &query)
 {
-    return create(HttpGet, url, ifnewer, { }, file, false);
+    return create(HttpPost, url, { }, u"application/x-www-form-urlencoded"_qs,
+                  query.toString(QUrl::FullyEncoded).toLatin1());
 }
 
-TransferJob *TransferJob::getIfDifferent(const QUrl &url, const QString &etag, QIODevice *file)
+TransferJob *TransferJob::post(const QUrl &url, const QUrlQuery &query, const QString &contentType, const QByteArray &content)
 {
-    return create(HttpGet, url, { }, etag, file, false);
+    return create(HttpPost, url, query, contentType, content);
 }
 
-TransferJob *TransferJob::post(const QUrl &url, QIODevice *file, bool noRedirects)
+TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QUrlQuery &query,
+                                 const QString &contentType, const QByteArray &content)
 {
-    return create(HttpPost, url, { }, { }, file, noRedirects);
-}
+    if (url.isEmpty())
+        return nullptr;
 
-TransferJob *TransferJob::postContent(const QUrl &url, const QString &contentType, const QByteArray &content, QIODevice *file, bool noRedirects)
-{
-    auto job = post(url, file, noRedirects);
-    job->m_postContentType = contentType;
-    job->m_postContent = content;
-    return job;
+    auto *j = new TransferJob();
+
+    j->m_url = url;
+    if (j->m_url.scheme().isEmpty())
+        j->m_url.setScheme(u"http"_qs);
+    if (!query.isEmpty())
+        j->m_url.setQuery(query);
+
+    j->m_http_method = method;
+    j->m_postContentType = contentType;
+    j->m_postContent = content;
+
+    return j;
 }
 
 QString TransferJob::errorString() const
@@ -59,6 +65,13 @@ QString TransferJob::errorString() const
     return isFailed() ? m_error_string
                       : (isAborted() ? QCoreApplication::translate("Transfer", "Aborted")
                                      : QString { });
+}
+
+void TransferJob::setOutputDevice(QIODevice *output)
+{
+    if (m_file)
+        delete m_file;
+    m_file = output;
 }
 
 void TransferJob::abort()
@@ -83,7 +96,7 @@ void TransferJob::resetForReuse(bool applyRedirect)
         if (auto f = qobject_cast<QFileDevice *>(m_file))
             f->resize(0);
     } else {
-        m_data->clear();
+        m_data.clear();
     }
     if (applyRedirect) {
         if (m_redirect_url.isEmpty())
@@ -106,29 +119,6 @@ bool TransferJob::abortInternal()
         setStatus(TransferJob::Aborted);
     return true;
 }
-
-TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QDateTime &ifnewer,
-                                 const QString &etag, QIODevice *file, bool noRedirects, uint retries)
-{
-    if (url.isEmpty())
-        return nullptr;
-
-    auto *j = new TransferJob();
-
-    j->m_url = url;
-    if (j->m_url.scheme().isEmpty())
-        j->m_url.setScheme(u"http"_qs);
-    j->m_only_if_newer = ifnewer.toUTC();
-    j->m_only_if_different = etag;
-    j->m_data = file ? nullptr : new QByteArray();
-    j->m_file = file ? file : nullptr;
-    j->m_http_method = method;
-    j->m_retries_left = retries;
-    j->m_no_redirects = noRedirects;
-
-    return j;
-}
-
 
 // ===========================================================================
 // ===========================================================================
@@ -367,24 +357,12 @@ void TransferRetriever::schedule()
 #endif
         j->setStatus(TransferJob::Active);
         if (isget) {
-            if (j->m_only_if_newer.isValid())
-                req.setHeader(QNetworkRequest::IfModifiedSinceHeader, j->m_only_if_newer);
             if (!j->m_only_if_different.isEmpty())
                 req.setHeader(QNetworkRequest::IfNoneMatchHeader, j->m_only_if_different);
             j->m_reply = m_nam->get(req);
         } else {
-            QByteArray postdata;
-
-            if (!j->m_postContentType.isEmpty()) {
-                req.setHeader(QNetworkRequest::ContentTypeHeader, j->m_postContentType);
-                postdata = j->m_postContent;
-            } else {
-                req.setHeader(QNetworkRequest::ContentTypeHeader, u"application/x-www-form-urlencoded"_qs);
-                postdata = url.query(QUrl::FullyEncoded).toLatin1();
-                url.setQuery(QUrlQuery());
-                req.setUrl(url);
-            }
-            j->m_reply = m_nam->post(req, postdata);
+            req.setHeader(QNetworkRequest::ContentTypeHeader, j->m_postContentType);
+            j->m_reply = m_nam->post(req, j->m_postContent);
         }
 
         qCInfo(LogTransfer) << (isget ? ">> GET" : ">> POST") << req.url();
@@ -454,7 +432,7 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
 #endif
         switch (j->m_respcode) {
         case 304:
-            if (j->m_only_if_newer.isValid() || !j->m_only_if_different.isEmpty()) {
+            if (!j->m_only_if_different.isEmpty()) {
                 j->m_was_not_modified = true;
                 j->setStatus(TransferJob::Completed);
             } else {
@@ -475,13 +453,10 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
             auto lastetag = j->m_reply->header(QNetworkRequest::ETagHeader);
             if (lastetag.isValid())
                 j->m_last_etag = lastetag.toString();
-            auto lastmod = j->m_reply->header(QNetworkRequest::LastModifiedHeader);
-            if (lastmod.isValid())
-                j->m_last_modified = lastmod.toDateTime();
-            if (j->m_data)
-                *j->m_data = j->m_reply->readAll();
-            else if (j->m_file)
+            if (j->m_file)
                 j->m_file->write(j->m_reply->readAll());
+            else
+                j->m_data = j->m_reply->readAll();
             j->setStatus(TransferJob::Completed);
             break;
         }

@@ -408,8 +408,10 @@ bool Library::startUpdate(bool force)
     auto file = new QSaveFile(localfile);
 
     if (file->open(QIODevice::WriteOnly)) {
-        m_job = TransferJob::getIfDifferent(QUrl(remotefile), force ? QString { } : m_etag, file);
-        // m_job = TransferJob::get(QUrl(remotefile), file); // for testing only
+        m_job = TransferJob::get(remotefile);
+        if (!force)
+            m_job->setOnlyIfDifferent(m_etag);
+        m_job->setOutputDevice(file);
         m_transfer->retrieve(m_job);
     }
     if (!m_job) {

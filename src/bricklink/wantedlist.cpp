@@ -176,7 +176,7 @@ WantedLists::WantedLists(Core *core)
     });
     connect(core, &Core::authenticatedTransferFinished,
             this, [this](TransferJob *job) {
-        bool jobCompleted = job->isCompleted() && (job->responseCode() == 200) && job->data();
+        bool jobCompleted = job->isCompleted() && (job->responseCode() == 200);
         QByteArray type = job->userTag();
 
         if (m_wantedListJobs.contains(job) && (type == "wantedList")) {
@@ -198,7 +198,7 @@ WantedLists::WantedLists(Core *core)
                 if (!jobCompleted) {
                     throw Exception(message + u": " + job->errorString());
                 } else {
-                    int invalidCount = parseWantedList(*it, *job->data());
+                    int invalidCount = parseWantedList(*it, job->data());
                     if (invalidCount) {
                         message = tr("%n lot(s) of your Wanted List could not be imported.",
                                      nullptr, invalidCount);
@@ -216,7 +216,7 @@ WantedLists::WantedLists(Core *core)
             QString message = tr("Failed to import the wanted lists");
             if (success) {
                 try {
-                    const auto wantedLists = parseGlobalWantedList(*job->data());
+                    const auto wantedLists = parseGlobalWantedList(job->data());
                     beginResetModel();
                     qDeleteAll(m_wantedLists);
                     m_wantedLists.clear();
@@ -352,9 +352,7 @@ void WantedLists::startUpdate()
     Q_ASSERT(!m_job);
     setUpdateStatus(UpdateStatus::Updating);
 
-    QUrl url(u"https://www.bricklink.com/v2/wanted/list.page"_qs);
-
-    auto job = TransferJob::post(url);
+    auto job = TransferJob::post(u"https://www.bricklink.com/v2/wanted/list.page"_qs);
     job->setUserData("globalWantedList", true);
     m_job = job;
 
@@ -377,13 +375,8 @@ void WantedLists::startFetchLots(WantedList *wantedList)
     if (!wantedList)
         return;
 
-    QUrl url(u"https://www.bricklink.com/files/clone/wanted/downloadXML.file"_qs);
-    QUrlQuery query;
-    query.addQueryItem(u"wantedMoreID"_qs, QString::number(wantedList->id()));
-    url.setQuery(query);
-
-    auto job = TransferJob::post(url);
-
+    auto job = TransferJob::post(u"https://www.bricklink.com/files/clone/wanted/downloadXML.file"_qs,
+                                 { { u"wantedMoreID"_qs, QString::number(wantedList->id()) } });
     job->setUserData("wantedList", QVariant::fromValue(wantedList->id()));
     m_wantedListJobs << job;
 

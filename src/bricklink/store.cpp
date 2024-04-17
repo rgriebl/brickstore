@@ -29,11 +29,11 @@ BrickLink::Store::Store(Core *core)
     connect(core, &Core::authenticatedTransferFinished,
             this, [this](TransferJob *job) {
         if ((m_updateStatus == UpdateStatus::Updating) && (m_job == job)) {
-            bool success = job->isCompleted() && (job->responseCode() == 200) && job->data();
+            bool success = job->isCompleted() && (job->responseCode() == 200);
             QString message;
             if (success) {
                 try {
-                    auto result = IO::fromBrickLinkXML(*job->data(), IO::Hint::Store);
+                    auto result = IO::fromBrickLinkXML(job->data(), IO::Hint::Store);
                     m_lots = result.takeLots();
                     if (result.currencyCode() != m_currencyCode) {
                         m_currencyCode = result.currencyCode();

@@ -672,8 +672,7 @@ void PictureCachePrivate::transferJobFinished(TransferJob *j, Picture *pic)
 
     if (j->isCompleted()) {
         QImage img;
-        QByteArray data = *j->data();
-        if (imageFromData(img, data)) {
+        if (imageFromData(img, j->data())) {
             pic->setLastUpdated(QDateTime::currentDateTime());
             pic->setImage(img);
             pic->setIsValid(true);

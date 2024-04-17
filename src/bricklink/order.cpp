@@ -645,7 +645,7 @@ Orders::Orders(Core *core)
     });
     connect(core, &Core::authenticatedTransferFinished,
             this, [this](TransferJob *job) {
-        bool jobCompleted = job->isCompleted() && (job->responseCode() == 200) && job->data();
+        bool jobCompleted = job->isCompleted() && (job->responseCode() == 200);
         QByteArray type = job->userTag();
 
         if (d->m_addressJobs.contains(job) && (type == "address")) {
@@ -658,7 +658,7 @@ Orders::Orders(Core *core)
                 int row = indexOfOrder(job->userData(type).toString());
                 if (row >= 0) {
                     Order *order = d->m_orders.at(row);
-                    auto [address, phone] = parseAddressAndPhone(order->type(), *job->data());
+                    auto [address, phone] = parseAddressAndPhone(order->type(), job->data());
                     if (address.isEmpty())
                         address = tr("Address not available");
 
@@ -688,7 +688,7 @@ Orders::Orders(Core *core)
                 d->m_db.transaction();
 
                 try {
-                    orders = parseOrdersXML(*job->data());
+                    orders = parseOrdersXML(job->data());
 
                     for (auto it = orders.cbegin(); it != orders.cend(); ++it) {
                         Order *order = it.key();
@@ -1318,12 +1318,8 @@ void Orders::startUpdateAddress(Order *order)
             return;
     }
 
-    QUrl url(u"https://www.bricklink.com/orderDetail.asp"_qs);
-    QUrlQuery query;
-    query.addQueryItem(u"ID"_qs, Utility::urlQueryEscape(order->id()));
-    url.setQuery(query);
-
-    auto job = TransferJob::get(url);
+    auto job = TransferJob::get(u"https://www.bricklink.com/orderDetail.asp"_qs,
+                                { { u"ID"_qs, Utility::urlQueryEscape(order->id()) } });
     job->setUserData("address", order->id());
     d->m_addressJobs << job;
 

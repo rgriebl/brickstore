@@ -165,7 +165,10 @@ bool Database::startUpdate(bool force)
     hhc->setProperty("bsFile", QVariant::fromValue(file));
 
     if (hhc->open(QIODevice::WriteOnly)) {
-        m_job = TransferJob::getIfDifferent(QUrl(remotefile), force ? QString { } : m_etag, hhc);
+        m_job = TransferJob::get(remotefile);
+        if (!force)
+            m_job->setOnlyIfDifferent(m_etag);
+        m_job->setOutputDevice(hhc);
         m_transfer->retrieve(m_job);
     }
     if (!m_job) {
