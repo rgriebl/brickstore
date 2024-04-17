@@ -99,8 +99,8 @@ protected:
 
 private:
     QString m_message;
-    int m_timeout = -1;
     QAbstractAnimation *m_animation = nullptr;
+    int m_timeout = -1;
     static constexpr int m_fadeTime = 1500;
 };
 

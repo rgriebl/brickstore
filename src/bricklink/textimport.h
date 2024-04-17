@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include <QtCore/QString>
 #include <QtCore/QByteArray>
 #include <QtCore/QHash>
@@ -61,9 +59,9 @@ private:
     void calculateCategoryRecency();
     void calculatePartsYearUsed();
 
-    void addToKnownColors(int itemIndex, int colorIndex);
+    void addToKnownColors(uint itemIndex, uint colorIndex);
 
-    int loadLastRunInventories(const std::function<void (char, const QByteArray &, const QDateTime &, const QByteArray &)> &callback);
+    uint loadLastRunInventories(const std::function<void (char, const QByteArray &, const QDateTime &, const QByteArray &)> &callback);
 
     void nextStep(const QString &text);
     void message(const QString &text);
@@ -80,7 +78,7 @@ private:
 
     Database *m_db;
     // item-idx -> { color-idx -> { vector < qty, item-idx > } }
-    QHash<uint, QHash<uint, QVector<QPair<int, uint>>>> m_appears_in_hash;
+    QHash<uint, QHash<uint, QVector<QPair<uint, uint>>>> m_appears_in_hash;
     // item-idx -> { vector < consists-of > }
     QHash<uint, QVector<Item::ConsistsOf>>   m_consists_of_hash;
     // item-idx -> secs since epoch

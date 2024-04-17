@@ -230,14 +230,14 @@ QCoro::Task<> TextImport::importInventories()
 {
     nextStep(u"Importing inventories"_qs);
 
-    QBitArray done(m_db->m_items.size());
-    for (qsizetype itemIndex = 0; itemIndex < done.size(); ++itemIndex) {
+    QBitArray done(qsizetype(m_db->m_items.size()));
+    for (uint itemIndex = 0; itemIndex < done.size(); ++itemIndex) {
         // mark everything without an inventory as done
         if (m_inventoryLastUpdated.value(itemIndex, -1) < 0)
-            done.setBit(itemIndex, true);
+            done.setBit(qsizetype(itemIndex), true);
     }
 
-    int loaded = loadLastRunInventories([&, this](char itemTypeId, const QByteArray &itemId,
+    uint loaded = loadLastRunInventories([&, this](char itemTypeId, const QByteArray &itemId,
                                                   const QDateTime &lastModified, const QByteArray &xml) {
         if (auto item = readInventory(itemTypeId, itemId, lastModified, xml, true)) {
             if (m_downloadArchive && m_downloadArchive->isOpen()) {
@@ -323,7 +323,7 @@ void TextImport::finalize()
         Item &item = m_db->m_items[it.key()];
 
         // color-idx -> { vector < qty, item-idx > }
-        const QHash<uint, QVector<QPair<int, uint>>> &appearHash = it.value();
+        const QHash<uint, QVector<QPair<uint, uint>>> &appearHash = it.value();
 
         // we are compacting a "hash of a vector of pairs" down to a list of 32bit integers
         QVector<Item::AppearsInRecord> tmp;
@@ -398,13 +398,13 @@ QCoro::Task<QByteArray> TextImport::download(const QUrl &url, const QString &fil
         throw Exception("Download failed for %1: %2")
             .arg(job->effectiveUrl().toString())
             .arg(job->errorString());
-    } else if (!job->data()) {
+    } else if (job->data().isEmpty()) {
         throw Exception("Download has no data for %1").arg(job->effectiveUrl().toString());
     } else {
         if (!fileNameCopy.isEmpty() && m_downloadArchive && m_downloadArchive->isOpen())
-            m_downloadArchive->writeFile(fileNameCopy, *job->data());
+            m_downloadArchive->writeFile(fileNameCopy, job->data());
         message(fileNameCopy);
-        co_return *job->data();
+        co_return job->data();
     }
 }
 
@@ -499,7 +499,7 @@ void TextImport::readItems(const QByteArray &xml, const ItemType *itt)
         item.m_id.copyQByteArray(xmlTagText(e, u"ITEMID").toLatin1(), nullptr);
         const QString itemName = xmlTagText(e, u"ITEMNAME").simplified();
         item.m_name.copyQString(itemName, nullptr);
-        item.m_itemTypeIndex = (itt - m_db->m_itemTypes.data());
+        item.m_itemTypeIndex = quint16(itt - m_db->m_itemTypes.data());
 
         uint catId = xmlTagText(e, u"CATEGORY").toUInt();
         auto cat = core()->category(catId);
@@ -512,7 +512,7 @@ void TextImport::readItems(const QByteArray &xml, const ItemType *itt)
             item.m_alternateIds.copyQByteArray(altIds, nullptr);
 
         uint y = xmlTagText(e, u"ITEMYEAR", true).toUInt();
-        item.m_year_from = ((y > 1900) && (y < 2155)) ? (y - 1900) : 0; // we only have 8 bits for the year
+        item.m_year_from = quint8(((y > 1900) && (y < 2155)) ? (y - 1900) : 0); // we only have 8 bits for the year
         item.m_year_to = item.m_year_from;
 
         if (itt->hasWeight())
@@ -690,7 +690,7 @@ const Item *TextImport::readInventory(char itemTypeId, const QByteArray &itemId,
     QDate lastModifiedDate = lastModified.date();
 
     QVector<Item::ConsistsOf> inventory;
-    QVector<QPair<int, int>> knownColors;
+    QVector<QPair<uint, uint>> knownColors;
 
     try {
         xmlParse(xml, u"INVENTORY", u"ITEM",
@@ -698,7 +698,7 @@ const Item *TextImport::readInventory(char itemTypeId, const QByteArray &itemId,
             char itemTypeId = ItemType::idFromFirstCharInString(xmlTagText(e, u"ITEMTYPE"));
             const QByteArray itemId = xmlTagText(e, u"ITEMID").toLatin1();
             uint colorId = xmlTagText(e, u"COLOR").toUInt();
-            int qty = xmlTagText(e, u"QTY").toInt();
+            uint qty = xmlTagText(e, u"QTY").toUInt();
             bool extra = (xmlTagText(e, u"EXTRA") == u"Y");
             bool counterPart = (xmlTagText(e, u"COUNTERPART") == u"Y");
             bool alternate = (xmlTagText(e, u"ALTERNATE") == u"Y");
@@ -714,8 +714,8 @@ const Item *TextImport::readInventory(char itemTypeId, const QByteArray &itemId,
             if (!qty)
                 throw Exception("Invalid Quantity %1").arg(qty);
 
-            int itemIndex = item->index();
-            int colorIndex = color->index();
+            uint itemIndex = item->index();
+            uint colorIndex = color->index();
 
             Item::ConsistsOf co;
             co.m_quantity = qty;
@@ -870,9 +870,9 @@ void TextImport::readLDrawColors(const QByteArray &ldconfig, const QByteArray &r
                 } else if (sl[idx] == u"PEARLESCENT") {
                     type.setFlag(ColorTypeFlag::Pearl);
                 } else if (sl[idx] == u"RUBBER") {
-                    ; // ignore
+                    qt_noop(); // ignore
                 } else if (sl[idx] == u"MATTE_METALLIC") {
-                    ; // ignore
+                    qt_noop(); // ignore
                 } else if (sl[idx] == u"METAL") {
                     type.setFlag(ColorTypeFlag::Metallic);
                 } else if ((sl[idx] == u"MATERIAL") && (idx < lastIdx)) {
@@ -1057,7 +1057,7 @@ void TextImport::readInventoryList(const QByteArray &csv)
 
         auto item = core()->item(itemTypeId, itemId);
         if (item) {
-            int itemIndex = item->index();
+            uint itemIndex = item->index();
             qint64 t(0);   // 1.1.1970 00:00
 
             if (strs.count() > 2) {
@@ -1278,7 +1278,7 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
         if (rel.m_count != matches.count()) {
             message(2, u"%1 should have %2 entries, but has %3 instead"_qs
                            .arg(rel.name()).arg(rel.m_count).arg(matches.count()));
-            rel.m_count = matches.count();
+            rel.m_count = uint(matches.count());
         }
         m_db->m_relationships.push_back(rel);
 
@@ -1306,7 +1306,7 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
         for (const auto &itemIndex : relMatch.m_itemIndexes)
             itemRelMatchIds[itemIndex].push_back(quint16(relMatch.m_id));
     }
-    for (const auto &[itemIndex, relMatchIds] : std::as_const(itemRelMatchIds).asKeyValueRange()) {
+    for (const auto [itemIndex, relMatchIds] : std::as_const(itemRelMatchIds).asKeyValueRange()) {
         m_db->m_items[itemIndex].m_relationshipMatchIds
             .copyContainer(relMatchIds.cbegin(), relMatchIds.cend(), nullptr);
     }
@@ -1336,7 +1336,7 @@ void TextImport::calculateItemTypeCategories()
         for (quint16 catIndex : item.m_categoryIndexes)
             ittCats[item.m_itemTypeIndex].insert(catIndex);
     }
-    for (const auto &[ittIndex, catIndexSet] : std::as_const(ittCats).asKeyValueRange()) {
+    for (const auto [ittIndex, catIndexSet] : std::as_const(ittCats).asKeyValueRange()) {
         m_db->m_itemTypes[ittIndex].m_categoryIndexes
             .copyContainer(catIndexSet.cbegin(), catIndexSet.cend(), nullptr);
     }
@@ -1355,10 +1355,10 @@ void TextImport::calculateKnownAssemblyColors()
         //   -> check assemblies
 
         // We need to copy here, as we modify (*it) later on and this would invalidate noColor
-        QVector<QPair<int, uint>> noColor = it->value(0);
+        QVector<QPair<uint, uint>> noColor = it->value(0);
 
         for (auto ncit = noColor.begin(); ncit != noColor.end(); ) {
-            int ncQty = ncit->first;
+            uint ncQty = ncit->first;
             uint ncItemIndex = ncit->second;
             const Item &ncItem = m_db->m_items[ncItemIndex];
 
@@ -1443,7 +1443,7 @@ void TextImport::calculatePartsYearUsed()
     }
 }
 
-void TextImport::addToKnownColors(int itemIndex, int addColorIndex)
+void TextImport::addToKnownColors(uint itemIndex, uint addColorIndex)
 {
     if (addColorIndex <= 0)
         return;
@@ -1460,7 +1460,7 @@ void TextImport::addToKnownColors(int itemIndex, int addColorIndex)
     item.m_knownColorIndexes.push_back(quint16(addColorIndex), nullptr);
 }
 
-int TextImport::loadLastRunInventories(const std::function<void(char, const QByteArray &, const QDateTime &, const QByteArray &)> &callback)
+uint TextImport::loadLastRunInventories(const std::function<void(char, const QByteArray &, const QDateTime &, const QByteArray &)> &callback)
 {
     uint counter = 0;
     auto updateCounter = [&]() {

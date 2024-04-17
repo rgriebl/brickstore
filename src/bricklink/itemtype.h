@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include <QtCore/QMetaType>
 #include <QtCore/QString>
 #include <QtCore/QVector>

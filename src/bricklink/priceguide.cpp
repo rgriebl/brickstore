@@ -462,7 +462,7 @@ void BatchedAffiliateAPIPGRetriever::transferJobFinished(TransferJob *j)
                 throw Exception("JSON data size mismatch: requested %1, got %2")
                     .arg(m_currentBatch.size()).arg(data.size());
             }
-            for (const auto &d : data) {
+            for (const auto d : data) {
                 const auto item = d.toObject();
                 const QString itemId = item[u"item"][u"no"].toString();
                 const QString typeId = item[u"item"][u"type"].toString();

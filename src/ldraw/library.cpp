@@ -1,7 +1,6 @@
 // Copyright (C) 2004-2024 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <cfloat>
 #include <array>
 
 #include <QFile>
@@ -320,7 +319,7 @@ QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
             if (map.isEmpty())
                 throw Exception(u"CBOR map is empty"_qs);
 
-            for (const auto &pair : map) {
+            for (const auto pair : map) {
                 if (pair.first.isString() && (pair.second.isString() || pair.second.isNull()))
                     m_partIdMapping.insert(pair.first.toString(), pair.second.toString());
             }

@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include <QString>
 
 #include "utility/pooledarray.h"

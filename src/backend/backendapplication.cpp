@@ -6,7 +6,6 @@
 #include "bricklink/core.h"
 #include "bricklink/textimport.h"
 #include "utility/exception.h"
-#include "utility/stopwatch.h"
 #include "utility/transfer.h"
 #include "version.h"
 #include <cstdio>

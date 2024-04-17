@@ -42,8 +42,8 @@ public:
         return nullptr;
     }
 
-    uint nextId = 0;
     QHash<QByteArray, bool> scanning;
+    uint nextId = 0;
 };
 
 
@@ -105,7 +105,7 @@ uint ItemScanner::scan(const QImage &image, char itemTypeId, const QByteArray &b
     }
     d->scanning[backend->id] = true;
 
-    int scanId = ++d->nextId;
+    uint scanId = ++d->nextId;
 
     if (backend->id == "brickognize") {
         QString path = u"/predict/"_qs;
@@ -153,14 +153,14 @@ uint ItemScanner::scan(const QImage &image, char itemTypeId, const QByteArray &b
                 const auto jsonDetails = json[u"detail"_qs].toArray();
                 QStringList errorStrings;
                 errorStrings.reserve(jsonDetails.size());
-                for (const auto &jsonDetail : jsonDetails) {
+                for (const auto jsonDetail : jsonDetails) {
                     QString str = jsonDetail[u"msg"_qs].toString() + u" (type: "
                                   + jsonDetail[u"type"_qs].toString() + u")";
                     const auto locs = jsonDetail[u"loc"_qs].toArray();
                     if (!locs.isEmpty()) {
                         QStringList locList;
                         locList.reserve(locs.size());
-                        for (const auto &loc : locs)
+                        for (const auto loc : locs)
                             locList << loc.toVariant().toString();
                         str = str + u" at [" + locList.join(u", ") + u']';
                     }
@@ -178,7 +178,7 @@ uint ItemScanner::scan(const QImage &image, char itemTypeId, const QByteArray &b
                 QVector<Result> itemsAndScores;
                 itemsAndScores.reserve(jsonItems.size());
 
-                for (const auto &jsonItem : jsonItems) {
+                for (const auto jsonItem : jsonItems) {
                     const auto itemId = jsonItem[u"id"_qs].toString();
                     const auto type   = jsonItem[u"type"_qs].toString();
                     const auto score  = jsonItem[u"score"_qs].toDouble();

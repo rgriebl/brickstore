@@ -114,14 +114,14 @@ QByteArray CredentialsManager::load(const QString &service, const QString &id)
     const void *queryKeys[] = { kSecClass, kSecAttrService, kSecAttrAccount, kSecReturnData };
     const void *queryValues[] = { kSecClassGenericPassword, cfservice, cfkey, kCFBooleanTrue };
 
-    QCFType<CFDictionaryRef> query = CFDictionaryCreate(0, queryKeys, queryValues, 4, 0, 0);
+    QCFType<CFDictionaryRef> query = CFDictionaryCreate(nullptr, queryKeys, queryValues, 4, nullptr, nullptr);
 
     CFTypeRef data;
     OSStatus status = SecItemCopyMatching(query, &data);
 
     if (status == errSecSuccess) {
         if (data)
-            codedCredential = QByteArray::fromCFData((CFDataRef) data);
+            codedCredential = QByteArray::fromCFData(static_cast<CFDataRef>(data));
     } else if (status != errSecItemNotFound) {
         QCFType<CFStringRef> msg = SecCopyErrorMessageString(status, nullptr);
         throw Exception(QString::fromCFString(msg));
@@ -196,7 +196,7 @@ void CredentialsManager::save(const QString &service, const QString &id, const Q
     const void *queryKeys[] = { kSecClass, kSecAttrService, kSecAttrAccount, kSecValueData };
     const void *queryValues[] = { kSecClassGenericPassword, cfservice, cfkey, cfcredential };
 
-    QCFType<CFDictionaryRef> query = CFDictionaryCreate(0, queryKeys, queryValues, 4, 0, 0);
+    QCFType<CFDictionaryRef> query = CFDictionaryCreate(nullptr, queryKeys, queryValues, 4, nullptr, nullptr);
 
     SecItemDelete(query);
     OSStatus status = SecItemAdd(query, nullptr);

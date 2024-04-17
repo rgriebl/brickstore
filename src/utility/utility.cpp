@@ -150,12 +150,12 @@ QColor Utility::shadeColor(int n, float alpha)
     static std::array<QColor, 12> shades;
     static bool once = false;
     if (!once) [[unlikely]] {
-        for (int i = 0; i < 12; i++)
-            shades[i] = QColor::fromHsv(i * 30, 255, 255).toRgb();
+        for (uint i = 0; i < 12; i++)
+            shades[i] = QColor::fromHsv(30 * int(i), 255, 255).toRgb();
         once = true;
     }
 
-    QColor c = shades[n % 12];
+    QColor c = shades[uint(n % 12)];
     if (!qFuzzyIsNull(alpha))
         c.setAlphaF(alpha);
     return c;
@@ -289,7 +289,7 @@ QString Utility::Android::fileNameFromUrl(const QUrl &url)
     qWarning() << "ANDROID: url=" << url << " -> filename=" << fileName;
     return fileName;
 #else
-    Q_UNUSED(url);
+    Q_UNUSED(url)
     return { };
 #endif
 }

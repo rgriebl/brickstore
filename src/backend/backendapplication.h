@@ -16,9 +16,9 @@ public:
     ~BackendApplication() override;
 
     void init();
-    void afterInit() { };
+    void afterInit() { }
     int exec();
-    void checkRestart() { };
+    void checkRestart() { }
 
 private:
     QCoro::Task<int> rebuildDatabase();

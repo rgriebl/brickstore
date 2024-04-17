@@ -1,10 +1,6 @@
 // Copyright (C) 2004-2024 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <cstdlib>
-#include <clocale>
-#include <climits>
-
 #include <QtCore/QLocale>
 #include <QtCore/QStringBuilder>
 #include <QtCore/QDataStream>
