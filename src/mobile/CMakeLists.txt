@@ -4,6 +4,8 @@
 qt_add_library(mobile_module STATIC
     mobileapplication.h
     mobileapplication.cpp
+    mobilefileopenhandler.h
+    mobilefileopenhandler.cpp
     mobileuihelpers.h
     mobileuihelpers_p.h
     mobileuihelpers.cpp

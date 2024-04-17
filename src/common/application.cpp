@@ -836,6 +836,11 @@ void Application::setupLogging()
 
     auto messageHandler = [](QtMsgType type, const QMessageLogContext &ctx, const QString &msg)
     {
+#if defined(Q_OS_IOS)
+        // suppress this annoying uncategorized warning
+        if ((type == QtWarningMsg) && msg.startsWith(u"stale focus object"))
+            return;
+#endif
         if (s_inst && s_inst->m_defaultMessageHandler)
             (*s_inst->m_defaultMessageHandler)(type, ctx, msg);
 

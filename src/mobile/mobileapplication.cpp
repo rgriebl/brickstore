@@ -14,26 +14,14 @@
 #include "common/undo.h"
 #include "mobileapplication.h"
 #include "mobileuihelpers.h"
+#include "mobilefileopenhandler.h"
 #include "common/brickstore_wrapper.h"
 
 #if defined(Q_OS_ANDROID)
-#  include <jni.h>
-#  include <QJniObject>
-#  include <QFileOpenEvent>
 #  include <android/api-level.h>
 #  if QT_VERSION < QT_VERSION_CHECK(6, 7, 0)
 #    include <qpa/qwindowsysteminterface.h>
 #  endif
-
-extern "C" JNIEXPORT void JNICALL
-Java_de_brickforge_brickstore_ExtendedQtActivity_openUrl(JNIEnv *env, jobject, jstring jurl)
-{
-    jboolean isCopy = false;
-    const char *utf8 = env->GetStringUTFChars(jurl, &isCopy);
-    qWarning() << "opening" << utf8;
-    QCoreApplication::postEvent(qApp, new QFileOpenEvent(QString::fromUtf8(utf8)));
-    env->ReleaseStringUTFChars(jurl, utf8);
-}
 
 static struct DisableA11YOnAndroid14  // clazy:exclude=non-pod-global-static
 {
@@ -44,7 +32,6 @@ static struct DisableA11YOnAndroid14  // clazy:exclude=non-pod-global-static
             qputenv("QT_ANDROID_DISABLE_ACCESSIBILITY", "1");
     }
 } disableA11YOnAndroid14;
-
 #endif
 
 
@@ -78,6 +65,8 @@ MobileApplication::MobileApplication(int &argc, char **argv)
 void MobileApplication::init()
 {
     Application::init();
+
+    MobileFileOpenHandler::create();
 
     // add all relevant QML modules here
     extern void qml_register_types_Mobile(); qml_register_types_Mobile();

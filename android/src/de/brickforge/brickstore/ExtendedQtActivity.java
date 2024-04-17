@@ -25,6 +25,10 @@ public class ExtendedQtActivity extends QtActivity
 
         boolean isDark = ((this.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES);
         changeUiTheme(isDark);
+
+        Intent intent = getIntent();
+        if ((intent != null) && (intent.getAction() == Intent.ACTION_VIEW))
+            openUrl(intent.getData().toString());
     }
 
     @Override
