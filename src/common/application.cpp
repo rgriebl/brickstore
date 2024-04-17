@@ -941,7 +941,7 @@ bool Application::initBrickLink()
         Config::inst()->setValue(u"BrickLink/VAT/"_qs + retrieverId, int(vatType));
     });
 
-    if (retrieverId != lastRetrieverId) {
+    if (!lastRetrieverId.isEmpty() && (retrieverId != lastRetrieverId)) {
         Config::inst()->setValue(u"BrickLink/VAT/LastRetrieverId"_qs, retrieverId);
 
         m_startupMessages << tr("The price-guide download mechanism changed. Please make sure "
