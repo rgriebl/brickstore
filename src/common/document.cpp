@@ -504,7 +504,7 @@ void Document::setActive(bool active)
                 }
 
                 if (!messages.isEmpty()) {
-                    const QString msg = u"<b>" + filePathOrTitle() + u"</b><br><ul><li>"
+                    const QString msg = u"<b>" + fileNameOrTitle() + u"</b><br><ul><li>"
                             + messages.join(u"</li><li>") + u"</li></ul>";
 
                     static auto notifyUser = [](QString s) -> QCoro::Task<> {

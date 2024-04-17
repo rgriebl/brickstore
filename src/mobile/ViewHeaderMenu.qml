@@ -103,9 +103,7 @@ AutoSizingMenu {
         }
     }
     //ActionMenuItem { actionName: "view_column_layout_manage" }
-    ActionMenuItem { actionName: "view_column_layout_save"
-        onClicked: root.document.saveCurrentColumnLayout()
-    }
+    ActionMenuItem { actionName: "view_column_layout_save" }
     ActionMenuItem { actionName: "view_column_layout_load"
         onClicked: loadLayoutMenu.open()
         AutoSizingMenu {

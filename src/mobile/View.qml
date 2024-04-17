@@ -178,7 +178,7 @@ Page {
             rowHeightProvider: () => cellHeight
 
             model: root.document
-            selectionModel: root.document.selectionModel
+            selectionModel: root.document?.selectionModel ?? null
 
             Loader {
                 id: editMenu
@@ -502,7 +502,7 @@ Page {
 
     Loader {
         id: blockDialog
-        active: root.document?.blockingOperationActive ?? false
+        active: false
         source: "ProgressDialog.qml"
         Binding {
             target: blockDialog.item
@@ -519,6 +519,10 @@ Page {
             function onBlockingOperationProgress(done : int, total : int) {
                 blockDialog.item.total = total
                 blockDialog.item.done = done
+            }
+            function onBlockingOperationActiveChanged(blockingActive : bool) {
+                // a direct binding doesn't close the dialog correctly and leaves the Overlay active
+                blockDialog.active = blockingActive
             }
         }
         Connections {
