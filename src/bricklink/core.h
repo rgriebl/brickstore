@@ -165,8 +165,10 @@ private:
     Transfer *                 m_transfer = nullptr;
     Transfer *                 m_authenticatedTransfer = nullptr;
     bool                       m_authenticated = false;
+    QTimer *                   m_authenticatedRefresh = nullptr;
     QPair<QString, QString>    m_credentials;
     TransferJob *              m_loginJob = nullptr;
+    QList<TransferJob *>       m_refreshJobs;
     QVector<TransferJob *>     m_jobsWaitingForAuthentication;
     int                        m_transferStatId = -1;
 

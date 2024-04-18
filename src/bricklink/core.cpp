@@ -41,6 +41,8 @@
 #  include "bricklink/wantedlist.h"
 #endif
 
+using namespace std::chrono_literals;
+
 Q_LOGGING_CATEGORY(LogResolver, "resolver")
 Q_LOGGING_CATEGORY(LogCache, "cache")
 Q_LOGGING_CATEGORY(LogSql, "sql")
@@ -350,6 +352,7 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
     , m_noImageIcon(QIcon::fromTheme(u"image-missing-large"_qs))
     , m_transfer(new Transfer(this))
+    , m_authenticatedRefresh(new QTimer(this))
     , m_database(new Database(updateUrl, this))
 #if !defined(BS_BACKEND)
     , m_store(new Store(this))
@@ -428,12 +431,26 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
 
             if (!m_authenticated)
                 m_authenticatedTransfer->abortAllJobs();
+        } else if (m_refreshJobs.contains(job)) {
+            if (!job->data().isEmpty()
+                    && job->data().startsWith("brickstore({")
+                    && job->data().endsWith("});")) {
+                qsizetype size = job->data().size();
+                QJsonDocument doc = QJsonDocument::fromJson(job->data().sliced(11, size - 11 - 2));
+                if (!doc[u"is_loggedin"].toBool() && m_authenticated) {
+                    m_authenticated = false;
+                    emit authenticationChanged(m_authenticated);
+                }
+            }
+            m_refreshJobs.removeAll(job);
         } else {
             if (job->responseCode() == 302) {
                 if (job->redirectUrl().toString().contains(u"v2/login.page")
-                    || job->redirectUrl().toString().contains(u"login.asp?")) {
-                    m_authenticated = false;
-                    emit authenticationChanged(m_authenticated);
+                        || job->redirectUrl().toString().contains(u"login.asp?")) {
+                    if (m_authenticated) {
+                        m_authenticated = false;
+                        emit authenticationChanged(m_authenticated);
+                    }
                     job->resetForReuse();
                 } else {
                     job->resetForReuse(true /* applyRedirect*/);
@@ -453,6 +470,31 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
             this, &Core::authenticatedTransferProgress);
     connect(m_authenticatedTransfer, &Transfer::started,
             this, &Core::authenticatedTransferStarted);
+
+    connect(this, &Core::authenticationChanged,
+            this, [this](bool authenticated) {
+        if (authenticated)
+            m_authenticatedRefresh->start();
+        else
+            m_authenticatedRefresh->stop();
+    });
+    m_authenticatedRefresh->setInterval(30min);
+    connect(m_authenticatedRefresh, &QTimer::timeout,
+            this, [this]() {
+        if (m_authenticated && m_refreshJobs.isEmpty()) {
+            static auto now = []() { return QString::number(QDateTime::currentMSecsSinceEpoch()); };
+
+            auto *job1 = TransferJob::get(u"https://www.bricklink.com/ajax/renovate/SessionInfoGet.ajax"_qs,
+                                          { { u"callback"_qs, u"brickstore"_qs },
+                                            { u"_"_qs, now() } });
+            retrieveAuthenticated(job1);
+            m_refreshJobs << job1;
+            auto *job2 = TransferJob::get(u"https://www.bricklink.com/refresh.asp"_qs,
+                                          { { u"_"_qs, now() } });
+            retrieveAuthenticated(job2);
+            m_refreshJobs << job2;
+        }
+    });
 }
 
 Core::~Core()
