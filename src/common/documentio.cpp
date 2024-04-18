@@ -185,14 +185,13 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
         if (!f->open(QIODevice::ReadOnly))
             throw Exception(f.get(), tr("Could not open LDraw file for reading"));
 
+        auto restoreCursor = qScopeGuard(QGuiApplication::restoreOverrideCursor);
         QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
         BrickLink::IO::ParseResult pr;
 
         bool b = DocumentIO::parseLDrawModel(f.get(), isStudio, pr);
         Document *document = nullptr;
-
-        QGuiApplication::restoreOverrideCursor();
 
         if (!b || !pr.hasLots())
             throw Exception(tr("Could not parse the LDraw data"));

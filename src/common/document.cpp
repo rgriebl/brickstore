@@ -1720,9 +1720,10 @@ QCoro::Task<bool> Document::save(bool saveAs)
             fn = fn + suffix;
 #endif
         try {
+            auto restoreCursor = qScopeGuard(QGuiApplication::restoreOverrideCursor);
             QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
             saveToFile(fn);
-            QGuiApplication::restoreOverrideCursor();
             co_return true;
 
         } catch (const Exception &e) {
