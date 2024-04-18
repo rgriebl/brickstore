@@ -1926,8 +1926,8 @@ void DocumentModel::initializeColumns()
               return QVariant::fromValue(pic ? pic->image() : QImage { });
           },
           .compareFn = [&](const Lot *l1, const Lot *l2) {
-                       return Utility::naturalCompare(QString::fromLatin1(l1->itemId()),
-                                                      QString::fromLatin1(l2->itemId()));
+              return Utility::naturalCompare(QLatin1StringView { l1->itemId() },
+                                             QLatin1StringView { l2->itemId() });
           },
       });
     C(PartNo, Column {
@@ -1940,8 +1940,8 @@ void DocumentModel::initializeColumns()
                   lot->setItem(newItem);
           },
           .compareFn = [&](const Lot *l1, const Lot *l2) {
-                      return Utility::naturalCompare(QString::fromLatin1(l1->itemId()),
-                                                     QString::fromLatin1(l2->itemId()));
+              return Utility::naturalCompare(QLatin1StringView { l1->itemId() },
+                                             QLatin1StringView { l2->itemId() });
           },
       });
     C(Description, Column {

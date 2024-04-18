@@ -21,80 +21,89 @@
 #include "utility.h"
 
 
-static int naturalCompareNumbers(const QChar *&n1, const QChar *n1e, const QChar *&n2, const QChar *n2e)
+int Utility::naturalCompare(QAnyStringView name1, QAnyStringView name2)
 {
-    int result = 0;
+    return name1.visit([name2](auto name1) {
+        return name2.visit([name1](auto name2) {
+            auto charAt = [](const auto v, const qsizetype pos) constexpr -> QChar {
+                using Tv = decltype(v);
+                if constexpr (std::is_same_v<Tv, const QLatin1StringView>) {
+                    return QChar(v.at(pos));
+                } else if constexpr (std::is_same_v<Tv, const QStringView>) {
+                    return v.at(pos);
+                } else {
+                    Q_ASSERT_X(false, "naturalCompare", "only works on UTF-16 and Latin-1 strings");
+                    return { };
+                }
+            };
 
-    while (true) {
-        const auto d1 = (n1 < n1e) ? n1->digitValue() : -1;
-        const auto d2 = (n2 < n2e) ? n2->digitValue() : -1;
-        const bool invalid1 = (d1 == -1);
-        const bool invalid2 = (d2 == -1);
+            bool special = false;
+            QChar c1, c2;
+            qsizetype pos1 = 0, pos2 = 0;
+            const qsizetype len1 = name1.size();
+            const qsizetype len2 = name2.size();
 
-        if (invalid1 && invalid2)
-            return result;
-        else if (invalid1)
-            return -1;
-        else if (invalid2)
-            return 1;
-        else if ((d1 != d2) && !result)
-            result = d1 - d2;
+            auto next1 = [&]() constexpr { c1 = (pos1 < len1) ? charAt(name1, pos1++) : QChar(); };
+            auto next2 = [&]() constexpr { c2 = (pos2 < len2) ? charAt(name2, pos2++) : QChar(); };
 
-        ++n1; ++n2;
-    }
-}
+            while (true) {
+                next1();
+                next2();
 
-int Utility::naturalCompare(const QString &name1, const QString &name2)
-{
-    bool empty1 = name1.isEmpty();
-    bool empty2 = name2.isEmpty();
+                // 1) skip white space
+                int skipWs1 = 0, skipWs2 = 0;
+                while (c1.isSpace()) {
+                    next1();
+                    ++skipWs1;
+                }
+                while (c2.isSpace()) {
+                    next2();
+                    ++skipWs2;
+                }
+                if (skipWs1 != skipWs2)
+                    special = true;
 
-    if (empty1 && empty2)
-        return 0;
-    else if (empty1)
-        return -1;
-    else if (empty2)
-        return 1;
+                // 2) check for numbers
+                if (c1.isDigit() && c2.isDigit()) {
+                    const int d = [&]() {
+                        int result = 0;
 
-    bool special = false;
-    const QChar *n1 = name1.constData();
-    const QChar *n1e = n1 + name1.size();
-    const QChar *n2 = name2.constData();
-    const QChar *n2e = n2 + name2.size();
+                        while (true) {
+                            const auto d1 = c1.digitValue();
+                            const auto d2 = c2.digitValue();
+                            const bool invalid1 = (d1 == -1);
+                            const bool invalid2 = (d2 == -1);
 
-    while (true) {
-        // 1) skip white space
-        while ((n1 < n1e) && n1->isSpace()) {
-            n1++;
-            special = true;
-        }
-        while ((n2 < n2e) && n2->isSpace()) {
-            n2++;
-            special = true;
-        }
+                            if (invalid1 && invalid2)
+                                return result;
+                            else if (invalid1)
+                                return -1;
+                            else if (invalid2)
+                                return 1;
+                            else if ((d1 != d2) && !result)
+                                result = d1 - d2;
 
-        // 2) check for numbers
-        if ((n1 < n1e) && n1->isDigit() && (n2 < n2e) && n2->isDigit()) {
-            if (int d = naturalCompareNumbers(n1, n1e, n2, n2e))
-                return d;
-            special = true;
-        }
+                            next1(); next2();
+                        }
+                    }();
+                    if (d)
+                        return d;
+                }
 
+                // 4) naturally the same -> let the unicode order decide
+                if (c1.isNull() && c2.isNull())
+                    return special ? QAnyStringView::compare(name1, name2) : 0;
 
-        // 4) naturally the same -> let the unicode order decide
-        if ((n1 >= n1e) && (n2 >= n2e))
-            return special ? name1.localeAwareCompare(name2) : 0;
-
-        // 5) found a difference
-        if (n1 >= n1e)
-            return -1;
-        else if (n2 >= n2e)
-            return 1;
-        else if (*n1 != *n2)
-            return n1->unicode() - n2->unicode();
-
-        n1++; n2++;
-    }
+                // 5) found a difference
+                else if (c1.isNull())
+                    return -1;
+                else if (c2.isNull())
+                    return 1;
+                else if (c1 != c2)
+                    return c1.unicode() - c2.unicode();
+            }
+        });
+    });
 }
 
 QColor Utility::gradientColor(const QColor &c1, const QColor &c2, float f)

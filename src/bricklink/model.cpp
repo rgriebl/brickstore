@@ -871,8 +871,9 @@ bool ItemModel::lessThan(const void *p1, const void *p2, int column, Qt::SortOrd
     const Item *i1 = static_cast<const Item *>(p1);
     const Item *i2 = static_cast<const Item *>(p2);
 
-    return Utility::naturalCompare((column == 2) ? i1->name() : QString::fromLatin1(i1->id()),
-                                   (column == 2) ? i2->name() : QString::fromLatin1(i2->id())) < 0;
+    return ((column == 2) ? Utility::naturalCompare(i1->name(), i2->name())
+                          : Utility::naturalCompare(QLatin1StringView { i1->id() },
+                                                    QLatin1StringView { i2->id() })) < 0;
 }
 
 bool ItemModel::filterAccepts(const void *pointer) const
@@ -1346,8 +1347,8 @@ bool InventoryModel::lessThan(const QModelIndex &left, const QModelIndex &right)
         case InventoryModel::QuantityColumn:
             return e1->m_quantity < e2->m_quantity;
         case InventoryModel::ItemIdColumn:
-            return (Utility::naturalCompare(QString::fromLatin1(e1->m_item->id()),
-                                            QString::fromLatin1(e2->m_item->id())) < 0);
+            return (Utility::naturalCompare(QLatin1StringView { e1->m_item->id() },
+                                            QLatin1StringView { e2->m_item->id() }) < 0);
         case InventoryModel::ItemNameColumn:
             return (Utility::naturalCompare(e1->m_item->name(), e2->m_item->name()) < 0);
         case InventoryModel::ColorColumn:

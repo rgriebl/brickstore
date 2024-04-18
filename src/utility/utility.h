@@ -15,6 +15,9 @@
 #if defined(Q_OS_WINDOWS) && defined(max)
 #  undef max
 #endif
+#if QT_VERSION < QT_VERSION_CHECK(6, 3, 0)
+using QLatin1StringView = QLatin1String;
+#endif
 
 QT_FORWARD_DECLARE_CLASS(QFontMetrics)
 QT_FORWARD_DECLARE_CLASS(QRect)
@@ -34,7 +37,7 @@ constexpr bool fuzzyCompare(double d1, double d2) // just like qFuzzyCompare, bu
     return qAbs(d1 - d2) <= 1e-12 * std::max({ 1.0, qAbs(d1), qAbs(d2) });
 }
 
-int naturalCompare(const QString &s1, const QString &s2);
+int naturalCompare(QAnyStringView s1, QAnyStringView s2);
 
 QColor gradientColor(const QColor &c1, const QColor &c2, float f = 0.5);
 QColor textColor(const QColor &backgroundColor);
