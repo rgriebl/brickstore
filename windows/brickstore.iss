@@ -15,6 +15,8 @@
 #define ApplicationPublisher GetFileCompany(SOURCE_DIR + "\BrickStore.exe")
 
 [Setup]
+; Windows 10 or Windows Server 2019, version 1809
+MinVersion=10.0.17763
 AppName=BrickStore
 AppVersion={#ApplicationVersion}
 AppPublisher={#ApplicationPublisher}
