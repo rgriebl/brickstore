@@ -10,8 +10,8 @@ BrickStore can easily be built from source. Its only dependency is Qt:
 #### Qt SDK
 The easiest way to get a Qt SDK, is to use Qt's online installer that will install everything you need: Get it from <https://www.qt.io/download-open-source> (scroll way down to `Download the Qt Online Installer`).
 
-* When selecting the components, make sure to enable `Qt Quick 3D` and `Qt
-  Multimedia` under `Additional Libraries`, if you want to build a Qt 6
+* When selecting the components, make sure to enable `Qt Quick 3D`, `Qt
+  Multimedia` and `Qt Image Formats` under `Additional Libraries`, if you want to build a Qt 6
   based version.
 * MingW on Windows is untested - please use the compiler from MSVC 2019 or
   2022.  If you still want to use MingW, be my guest and create a pull
