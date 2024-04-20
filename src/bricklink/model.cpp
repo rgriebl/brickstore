@@ -1044,7 +1044,7 @@ void InternalInventoryModel::fillCanBuild(const QVector<SimpleLot> &lots)
             continue;
 
         // squeeze the data as tightly as possible: this map/reduce is quite CPU intensive and
-        // comparing 32 bits instead of 128 for each check helps a lot (plus is also keeps more
+        // comparing 32 bits instead of 128 for each check helps a lot (plus it also keeps more
         // data in the cache, as each entry is only 64 bits instead of 192).
         have.append({ (quint32(lot.m_color->index()) << 20) | quint32(lot.m_item->index()),
                      lot.m_quantity });
@@ -1060,9 +1060,8 @@ void InternalInventoryModel::fillCanBuild(const QVector<SimpleLot> &lots)
 
     auto map = [=](const Item &set) -> const Item * {
         bool matched = false;
-        static const QByteArray canBuildIds = "SM";
 
-        if (set.hasInventory() && canBuildIds.contains(set.itemTypeId())) {
+        if (set.hasInventory()) {
             const auto inv = set.consistsOf();
 
             // copy the have vector, as we need to modify it for counting down quantities
