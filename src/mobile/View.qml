@@ -50,17 +50,17 @@ Page {
                     modal: true
                     cascade: false
 
-                    ActionMenuItem { actionName: "go-home"; onClicked: root.goHomeFunction() }
+                    ActionMenuItem { actionName: "go_home"; onClicked: root.goHomeFunction() }
                     ActionMenuItem { actionName: "document_save" }
                     ActionMenuItem { actionName: "document_save_as" }
                     AutoSizingMenu {
                         title: BS.ActionManager.quickAction("document_export").text
                         modal: true
                         cascade: false
-                        ActionMenuItem { actionName: "document_export_bl_xml" }
-                        ActionMenuItem { actionName: "document_export_bl_xml_clip" }
-                        ActionMenuItem { actionName: "document_export_bl_update_clip" }
-                        ActionMenuItem { actionName: "document_export_bl_wantedlist_clip" }
+                        ActionMenuItem { autoHide: false; actionName: "document_export_bl_xml" }
+                        ActionMenuItem { autoHide: false; actionName: "document_export_bl_xml_clip" }
+                        ActionMenuItem { autoHide: false; actionName: "document_export_bl_update_clip" }
+                        ActionMenuItem { autoHide: false; actionName: "document_export_bl_wantedlist_clip" }
                     }
                     ActionMenuItem {
                         // workaround for Qt bug: the overlay doesn't get removed in Qt 6.6+
@@ -83,13 +83,11 @@ Page {
             }
             ToolButton {
                 icon.name: "help-about"
-                icon.color: "transparent"
                 onClicked: if (root.document) infoDialog.open()
             }
             ToolButton {
                 action: BS.ActionManager.quickAction("edit_additems")
                 display: AbstractButton.IconOnly
-                icon.color: "transparent"
             }
         }
     }

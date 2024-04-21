@@ -5,9 +5,10 @@ import BrickStore as BS
 
 MenuItem {
     property string actionName
+    property bool autoHide: true
     action: BS.ActionManager.quickAction(actionName)
     icon.color: "transparent"
-    visible: enabled
+    visible: !autoHide || enabled
     height: visible ? implicitHeight : 0
 
     Tracer { }

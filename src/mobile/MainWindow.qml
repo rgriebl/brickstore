@@ -309,6 +309,9 @@ Control {
     property var connectionContext
 
     Component.onCompleted: {
+        // Make the go-home action non-checkable for mobile
+        BS.ActionManager.quickAction("go_home").checkable = false
+
         // Handle Android's back button
         ApplicationWindow.contentItem.Keys.released.connect(function(e) {
             if (e.key === Qt.Key_Back) {
