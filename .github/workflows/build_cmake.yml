@@ -131,7 +131,7 @@ jobs:
           qt_host: 'linux'
           qt_host_arch: 'gcc_64'
           qt_target: 'android'
-          qt_version: '6.5.3'  # scrolling speed is broken in 6.6+
+          qt_version: '6.6.3'
           qt_arch: 'android_x86_64'
           qt_extra_archs: 'android_arm64_v8a android_armv7 android_x86'
           cmake_extra_config: '-DSENTRY=ON'
@@ -143,7 +143,7 @@ jobs:
           qt_host: 'mac'
           qt_host_arch: 'clang_64'
           qt_target: 'ios'
-          qt_version: '6.5.3'  # scrolling speed is broken in 6.6+
+          qt_version: '6.6.3'
           qt_arch: 'ios'
           cmake_extra_config: ''
           xcode: '15.2'

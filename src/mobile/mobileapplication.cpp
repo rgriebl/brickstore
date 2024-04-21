@@ -8,10 +8,12 @@
 #include <QtQml/QQmlProperty>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
+#include <QtQuick/private/qquickflickable_p.h>
 
 #include "common/actionmanager.h"
 #include "common/document.h"
 #include "common/undo.h"
+#include "common/eventfilter.h"
 #include "mobileapplication.h"
 #include "mobileuihelpers.h"
 #include "mobilefileopenhandler.h"
@@ -67,6 +69,26 @@ void MobileApplication::init()
     Application::init();
 
     MobileFileOpenHandler::create();
+
+    // the scrolling speed is broken in Qt 6.6+
+    auto dpr = qApp->primaryScreen()->devicePixelRatio();
+    new EventFilter(qApp, { QEvent::ChildAdded }, [dpr](QObject *o, QEvent *) {
+        static QSet<QObject *> flickables;
+
+        if (o && o->inherits("QQuickFlickable")) {
+            if (!flickables.contains(o)) {
+                flickables.insert(o);
+                connect(o, &QObject::destroyed, qApp, [](QObject *dead) {
+                    flickables.remove(dead);
+                });
+                auto flickable = static_cast<QQuickFlickable *>(o);
+                auto maxFlickV = flickable->maximumFlickVelocity();
+                flickable->setMaximumFlickVelocity(maxFlickV * dpr);
+                qWarning() << "Fixed flickable speed:" << flickable << "DPR:" << dpr << "MFV:" << maxFlickV;
+            }
+        }
+        return EventFilter::ContinueEventProcessing;
+    });
 
     // add all relevant QML modules here
     extern void qml_register_types_Mobile(); qml_register_types_Mobile();
