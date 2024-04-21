@@ -191,13 +191,35 @@ Control {
                                 model: BS.BrickStore.recentFiles
 
                                 ActionDelegate {
+                                    id: recentDelegate
                                     required property int index
                                     required property string fileName
                                     required property string filePath
-                                    icon.source: "qrc:/assets/generated-app-icons/brickstore_doc"
+                                    required property bool pinned
+                                    icon.source: pinned ? undefined : "qrc:/assets/generated-app-icons/brickstore_doc"
+                                    icon.name: pinned ? "window-pin" : ''
                                     text: fileName
                                     infoText: filePath
                                     onClicked: BS.BrickStore.recentFiles.open(index)
+                                    onPressAndHold: recentEditMenu.open()
+
+                                    AutoSizingMenu {
+                                        id: recentEditMenu
+                                        MenuItem {
+                                            property bool pinned: recentDelegate.pinned
+                                            text: pinned ? qsTr("Unpin") : qsTr("Pin")
+                                            icon.name: pinned ? "window-unpin" : "window-pin"
+                                            onTriggered: BS.BrickStore.recentFiles.pin(recentDelegate.index, !pinned)
+                                        }
+                                        MenuItem {
+                                            text: qsTr("Clear pinned files")
+                                            onTriggered: BS.BrickStore.recentFiles.clearPinned()
+                                        }
+                                        MenuItem {
+                                            text: qsTr("Clear recent files")
+                                            onTriggered: BS.BrickStore.recentFiles.clearRecent()
+                                        }
+                                    }
                                 }
                             }
                             ActionDelegate {

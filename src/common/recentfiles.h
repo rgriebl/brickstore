@@ -18,8 +18,9 @@ public:
 
     static constexpr int MaxRecentFiles = 18;
     void add(const QString &filePath, const QString &fileName);
-    void clearRecent();
-    void clearPinned();
+    Q_INVOKABLE void clearRecent();
+    Q_INVOKABLE void clearPinned();
+    Q_INVOKABLE void pin(int row, bool down);
     int count() const;
 
     enum Roles {
@@ -44,7 +45,6 @@ signals:
 private:
     RecentFiles(QObject *parent = nullptr);
     void save();
-    void pin(int row, bool down);
 
     struct Entry
     {

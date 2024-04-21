@@ -102,6 +102,8 @@ void RecentFiles::pin(int row, bool down)
     if (m_entries.at(row).pinned == down)
         return;
 
+    int finalRow = row;
+
     m_entries[row].pinned = down;
 
     if (down) { // move to 0
@@ -110,6 +112,7 @@ void RecentFiles::pin(int row, bool down)
             m_entries.move(row, 0);
             endMoveRows();
             save();
+            finalRow = 0;
         }
     } else { // move to --m_pinnedCount (note: overlap possible)
         --m_pinnedCount;
@@ -117,11 +120,15 @@ void RecentFiles::pin(int row, bool down)
             m_entries.move(row, m_pinnedCount);
             endMoveRows();
             save();
+
+            finalRow = m_pinnedCount;
         }
         // We might end up with more than MaxRecentFiles entries, but we allow it to give
         // the user a chance to non-destructively undo this operation.
         // The list will be shortened on restart or when a non-recent file is loaded.
     }
+    emit dataChanged(index(finalRow, 0), index(finalRow, 0), { PinnedRole });
+    emit recentFilesChanged();
 }
 
 void RecentFiles::clearRecent()
@@ -188,8 +195,6 @@ bool RecentFiles::setData(const QModelIndex &index, const QVariant &value, int r
 {
     if (index.isValid() && (role == PinnedRole)) {
         pin(index.row(), value.toBool());
-        emit dataChanged(index, index, { PinnedRole });
-        emit recentFilesChanged();
         return true;
     }
     return false;
