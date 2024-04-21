@@ -1041,7 +1041,7 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot, uint startAtChangelogId, c
         color = core()->color(resolvedColorId);
 
     // try to find by name instead
-    if (!item && !inc->m_item_name.isEmpty()) {
+    if (tryToResolveItem && !item && !inc->m_item_name.isEmpty()) {
         for (const Item &checkItem : core()->items()) {
             if (checkItem.name() == inc->m_item_name) {
                 item = &checkItem;
@@ -1052,7 +1052,7 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot, uint startAtChangelogId, c
             }
         }
     }
-    if (!color && !inc->m_color_name.isEmpty()) {
+    if (tryToResolveColor && !color && !inc->m_color_name.isEmpty()) {
         for (const Color &checkColor : core()->colors()) {
             if (checkColor.name() == inc->m_color_name) {
                 color = &checkColor;
@@ -1065,7 +1065,7 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot, uint startAtChangelogId, c
     }
 
     // try to find by case insensitive id instead
-    if (!item && !inc->m_item_id.isLower()) {
+    if (tryToResolveItem && !item && !inc->m_item_id.isLower()) {
         QByteArray checkLowerId = itemTypeAndId.mid(1).toLower();
         char checkType = itemTypeAndId.at(0);
 
@@ -1084,8 +1084,8 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot, uint startAtChangelogId, c
     if (color)
         lot->setColor(color);
 
-    if (!lot->item() || !lot->color()) {
-        if (!lot->item()) {
+    if ((tryToResolveItem && !lot->item()) || (tryToResolveColor && !lot->color())) {
+        if (tryToResolveItem && !lot->item()) {
             qCWarning(LogResolver).noquote() << "item:" << inc->m_item_id << "/" << inc->m_item_name << "[failed]";
         } else {
             inc->m_item_id.clear();
@@ -1095,7 +1095,7 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot, uint startAtChangelogId, c
             inc->m_category_id = Category::InvalidId;
             inc->m_category_name.clear();
         }
-        if (!lot->color()) {
+        if (tryToResolveColor && !lot->color()) {
             qCWarning(LogResolver) << "color:" << inc->m_color_id << "[failed]";
         } else {
             inc->m_color_id = Color::InvalidId;
