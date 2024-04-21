@@ -499,6 +499,7 @@ Page {
 
             ItemScannerDialog {
                 document: root.document
+                title: qsTr("Add Items")
             }
         }
         sourceComponent: addItems

@@ -35,7 +35,6 @@ VideoOutput {
         width: parent.width * 0.8
         visible: root.active && root.progress
         value: root.progress / 100
-        onValueChanged: { console.log("V",value,root.progress)}
     }
 
     MouseArea {

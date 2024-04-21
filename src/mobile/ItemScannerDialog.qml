@@ -106,16 +106,16 @@ AutoSizingDialog {
 
             function update() {
                 switch (capture.state) {
-                case Scanner.Capture.Idle:
-                    if (cameraMenu.count)
-                        text = qsTr("Click into the camera preview to capture an image.")
+                case Scanner.Capture.State.Idle:
+                    if (mediaDevices.videoInputs.length)
+                        text = qsTr("Tap on the camera preview to capture an image.")
                     else
                         text = "<b>" + qsTr("There is no camera connected.") + "</b>"
                     break
-                case Scanner.Capture.NoMatch:
+                case Scanner.Capture.State.NoMatch:
                     text = "<b>" + qsTr("No matching item found - try again.") + "</b>"
                     break
-                case Scanner.Capture.Error:
+                case Scanner.Capture.State.Error:
                     text = "<b>" + qsTr("An error occurred:") + "</b><br>" + capture.lastError
                     break
                 }
