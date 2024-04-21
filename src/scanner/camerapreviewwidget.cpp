@@ -12,6 +12,8 @@
 #include "camerapreviewwidget.h"
 
 
+namespace Scanner {
+
 CameraPreviewWidget::CameraPreviewWidget(QQmlEngine *engine, QWidget *parent)
     : QWidget(parent)
 {
@@ -60,5 +62,7 @@ QObject *CameraPreviewWidget::videoOutput() const
 {
     return m_widget->rootObject();
 }
+
+} // namespace Scanner
 
 #include "moc_camerapreviewwidget.cpp"

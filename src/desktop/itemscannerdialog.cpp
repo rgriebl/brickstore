@@ -1,115 +1,45 @@
 // Copyright (C) 2004-2024 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <QComboBox>
-#include <QToolButton>
 #include <QButtonGroup>
-#include <QVBoxLayout>
-#include <QFormLayout>
-#include <QStackedLayout>
-#include <QMediaDevices>
-#include <QCamera>
-#include <QImageCapture>
-#include <QMediaCaptureSession>
+#include <QComboBox>
 #include <QLabel>
 #include <QProgressBar>
-#include <QPainter>
-#include <QMouseEvent>
-#include <QQuickView>
-#include <QQuickItem>
+#include <QToolButton>
+#include <QFormLayout>
+#include <QStackedLayout>
+#include <QVBoxLayout>
+#include <QKeyEvent>
+#include <QMediaDevices>
+#include <QCameraDevice>
 #include <QQmlApplicationEngine>
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0) && QT_CONFIG(permissions)
-#  include <QCoreApplication>
-#  include <QMessageBox>
-#  include <QPermissions>
-#  include <QPointer>
-#endif
 
 #include "bricklink/core.h"
 #include "bricklink/item.h"
 #include <common/application.h>
 #include "common/config.h"
-#include "scanner/itemscanner.h"
+#include "scanner/core.h"
+#include "scanner/capture.h"
 #include "scanner/camerapreviewwidget.h"
 #include "itemscannerdialog.h"
 
 using namespace std::chrono_literals;
 
-static struct SetQtMMBackend  // clazy:exclude=non-pod-global-static
-{
-    // QTBUG-120026: The default FFmpeg backend completely freezes the main thread for 1-3 sec
-    // when enumerating camera devices on Windows and macOS.
-    SetQtMMBackend()
-    {
-#if defined(Q_OS_WINDOWS)
-        qputenv("QT_MEDIA_BACKEND", "windows");
-#elif defined(Q_OS_MACOS)
-        qputenv("QT_MEDIA_BACKEND", "darwin");
-#endif
-    }
-} setQtMMBackend;
-
-
-int ItemScannerDialog::s_averageScanTime = 1500;
-bool ItemScannerDialog::s_hasCameraPermission = false;
-
-void ItemScannerDialog::checkSystemPermissions(QObject *context, const std::function<void(bool)> &callback)
-{
-    if (s_hasCameraPermission) {
-        if (callback)
-            callback(true);
-        return;
-    }
-
-    const QString requestDenied = tr("BrickStore's request for camera access was denied. You will not be able to use your webcam to identify parts until you grant the required permissions via your system's Settings application.");
-
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)) && QT_CONFIG(permissions)
-    QCameraPermission cameraPermission;
-    switch (qApp->checkPermission(cameraPermission)) {
-    case Qt::PermissionStatus::Undetermined:
-        qApp->requestPermission(cameraPermission, context, [callback](const QPermission &p) {
-            s_hasCameraPermission = (p.status() == Qt::PermissionStatus::Granted);
-            if (callback)
-                callback(s_hasCameraPermission);
-        });
-        return;
-    case Qt::PermissionStatus::Denied:
-        QMessageBox::warning(nullptr, QCoreApplication::applicationName(), requestDenied);
-        if (callback)
-            callback(false);
-        return;
-    case Qt::PermissionStatus::Granted:
-        break; // Proceed
-    }
-#else
-    Q_UNUSED(context)
-    Q_UNUSED(requestDenied)
-#endif
-    s_hasCameraPermission = true;
-    if (callback)
-        callback(true);
-    return;
-}
 
 ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     : QDialog(parent)
-    , m_mediaDevices(std::make_unique<QMediaDevices>())
+    , m_mediaDevices(new QMediaDevices(this))
+    , m_capture(new Scanner::Capture(this))
 {
     setSizeGripEnabled(true);
 
-    const auto allBackends = ItemScanner::inst()->availableBackends();
-    connect(ItemScanner::inst(), &ItemScanner::scanFinished,
-            this, &ItemScannerDialog::onScanFinished);
-    connect(ItemScanner::inst(), &ItemScanner::scanFailed,
-            this, &ItemScannerDialog::onScanFailed);
-
     m_selectCamera = new QComboBox(this);
     m_selectCamera->setFocusPolicy(Qt::NoFocus);
+    connect(m_mediaDevices, &QMediaDevices::videoInputsChanged,
+            this, &ItemScannerDialog::updateCameraDevices);
 
     m_selectBackend = new QComboBox(this);
     m_selectBackend->setFocusPolicy(Qt::NoFocus);
-    for (const auto &backend : allBackends)
-        m_selectBackend->addItem(backend.icon(), backend.name, backend.id);
 
     m_selectItemType = new QButtonGroup(this);
     auto *itemTypesWidget = new QWidget(this);
@@ -134,28 +64,21 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     for (const auto &itt : BrickLink::core()->itemTypes())
         createTypeButton(&itt);
 
-    m_captureSession = new QMediaCaptureSession(this);
-
-    m_cameraPreviewWidget = new CameraPreviewWidget(Application::inst()->qmlEngine(), this);
-    m_captureSession->setVideoOutput(m_cameraPreviewWidget->videoOutput());
+    m_cameraPreviewWidget = new Scanner::CameraPreviewWidget(Application::inst()->qmlEngine(), this);
     setFocusProxy(m_cameraPreviewWidget);
     m_cameraPreviewWidget->setFocus();
+    m_capture->setVideoOutput(m_cameraPreviewWidget->videoOutput());
 
-    connect(m_cameraPreviewWidget, &CameraPreviewWidget::clicked,
-            this, &ItemScannerDialog::capture);
-
-    m_imageCapture = new QImageCapture(m_captureSession);
-    m_captureSession->setImageCapture(m_imageCapture);
-    setupCapture();
+    connect(m_cameraPreviewWidget, &Scanner::CameraPreviewWidget::clicked,
+            m_capture, &Scanner::Capture::captureAndScan);
+    connect(m_capture, &Scanner::Capture::cameraActiveChanged,
+            m_cameraPreviewWidget, &Scanner::CameraPreviewWidget::setActive);
 
     m_progress = new QProgressBar(this);
     m_progress->setTextVisible(false);
-    m_progressTimer = new QTimer(m_progress);
-    m_progressTimer->setInterval(30ms);
-    connect(m_progressTimer, &QTimer::timeout,
-            this, [this]() {
-        m_progress->setValue(qMin(int(m_lastScanTime.elapsed()), m_progress->maximum()));
-    });
+    m_progress->setRange(0, 100);
+    connect(m_capture, &Scanner::Capture::progressChanged,
+            m_progress, &QProgressBar::setValue);
 
     m_status = new QLabel(this);
     QPalette pal = m_status->palette();
@@ -192,23 +115,32 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     bottomLayout->addLayout(m_bottomStack, 1);
     layout->addLayout(bottomLayout, 0);
 
+    updateCameraDevices();
+
+    const QByteArrayList backendIds = Scanner::core()->availableBackendIds();
+    for (const QByteArray &backendId : backendIds) {
+        const auto *backend = Scanner::core()->backendFromId(backendId);
+        m_selectBackend->addItem(QIcon(backend->icon()), backend->name, backendId);
+    }
+
     m_selectCamera->setCurrentIndex(-1);
     connect(m_selectCamera, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, [this](int index) {
         if (index >= 0)
-            updateCamera(m_selectCamera->itemData(index).toByteArray());
+            m_capture->setCurrentCameraId(m_selectCamera->itemData(index).toByteArray());
     });
     m_selectBackend->setCurrentIndex(-1);
     connect(m_selectBackend, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, [this](int index) {
         if (index >= 0)
-            updateBackend(m_selectBackend->itemData(index).toByteArray());
+            m_capture->setCurrentBackendId(m_selectBackend->itemData(index).toByteArray());
+    });
+    connect(m_selectItemType, &QButtonGroup::idClicked,
+            this, [this](int id) {
+        m_capture->setCurrentItemTypeFilter(BrickLink::core()->itemType(char(id)));
     });
 
-    updateCameraDevices();
-    connect(m_mediaDevices.get(), &QMediaDevices::videoInputsChanged,
-            this, &ItemScannerDialog::updateCameraDevices);
-
+    //TODO: move default ids to Capture?
     const QByteArray cameraId = Config::inst()->value(u"MainWindow/ItemScannerDialog/CameraId"_qs).toByteArray();
     int cameraIndex = m_selectCamera->findData(cameraId);
     m_selectCamera->setCurrentIndex(cameraIndex < 0 ? 0 : cameraIndex);
@@ -222,24 +154,27 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     restoreGeometry(Config::inst()->value(u"MainWindow/ItemScannerDialog/Geometry"_qs).toByteArray());
     m_pinWindow->setChecked(Config::inst()->value(u"MainWindow/ItemScannerDialog/Pinned"_qs, false).toBool());
 
-    m_errorMessageTimeout.setInterval(10s);
-    m_errorMessageTimeout.setSingleShot(true);
-    connect(&m_errorMessageTimeout, &QTimer::timeout, this, [this]() {
-        if (m_state == State::Error)
-            setState(State::Idle);
-    });
-    m_noMatchMessageTimeout.setInterval(10s);
-    m_noMatchMessageTimeout.setSingleShot(true);
-    connect(&m_noMatchMessageTimeout, &QTimer::timeout, this, [this]() {
-        if (m_state == State::NoMatch)
-            setState(State::Idle);
+    updateItemTypeFilters();
+    connect(m_capture, &Scanner::Capture::supportedItemTypeFiltersChanged,
+            this, &ItemScannerDialog::updateItemTypeFilters);
+    connect(m_capture, &Scanner::Capture::currentItemTypeFilterChanged,
+            this, &ItemScannerDialog::updateItemTypeFilters);
+
+    connect(m_capture, &Scanner::Capture::stateChanged,
+            this, [this](Scanner::Capture::State newState) {
+        updateStatusText();
+
+        if (newState == Scanner::Capture::State::Scanning)
+            m_bottomStack->setCurrentWidget(m_progress);
+        else
+            m_bottomStack->setCurrentWidget(m_status);
     });
 
-    m_cameraStopTimer.setInterval(10s);
-    m_cameraStopTimer.setSingleShot(true);
-    connect(&m_cameraStopTimer, &QTimer::timeout, this, [this]() {
-        if (m_state == State::SoonInactive)
-            setState(State::Inactive);
+    connect(m_capture, &Scanner::Capture::captureAndScanFinished,
+            this, [this](const QVector<const BrickLink::Item *> &items) {
+        emit itemsScanned(items);
+        if (!m_pinWindow->isChecked())
+            accept();
     });
 }
 
@@ -251,8 +186,43 @@ ItemScannerDialog::~ItemScannerDialog()
     Config::inst()->setValue(u"MainWindow/ItemScannerDialog/Pinned"_qs, m_pinWindow->isChecked());
 }
 
+void ItemScannerDialog::checkSystemPermissions(QObject *context, const std::function<void(bool)> &callback)
+{
+    Scanner::Capture::checkSystemPermissions(context, callback);
+}
+
 void ItemScannerDialog::setItemType(const BrickLink::ItemType *itemType)
 {
+    m_capture->setCurrentItemTypeFilter(itemType);
+}
+
+void ItemScannerDialog::updateCameraDevices()
+{
+    const auto allCameraDevices = QMediaDevices::videoInputs();
+
+    QByteArray oldCameraId = m_selectCamera->currentData().toByteArray();
+    int newCurrentIndex = -1;
+    m_selectCamera->setCurrentIndex(-1);
+    m_selectCamera->clear();
+
+    const auto camIcon = QIcon::fromTheme(u"camera-photo"_qs);
+    for (const auto &cameraDevice : allCameraDevices) {
+        m_selectCamera->addItem(camIcon, cameraDevice.description(), cameraDevice.id());
+        if (cameraDevice.id() == oldCameraId)
+            newCurrentIndex = m_selectCamera->count() - 1;
+    }
+    if (newCurrentIndex >= 0)
+        m_selectCamera->setCurrentIndex(newCurrentIndex);
+
+    setEnabled(!allCameraDevices.isEmpty());
+    updateStatusText();
+}
+
+void ItemScannerDialog::updateItemTypeFilters()
+{
+    const auto supportedItemTypes = m_capture->supportedItemTypeFilters();
+    const auto *currentItemType = m_capture->currentItemTypeFilter();
+
     QAbstractButton *first = nullptr;
     bool checkedAny = false;
 
@@ -260,181 +230,24 @@ void ItemScannerDialog::setItemType(const BrickLink::ItemType *itemType)
     for (auto *b : buttons) {
         int id = m_selectItemType->id(b);
         const auto itt = BrickLink::core()->itemType(char(id));
-        bool valid = m_validItemTypes.contains(itt);
-        bool checked = valid && (itt == itemType);
-        b->setVisible(valid);
+        bool supported = !itt || supportedItemTypes.contains(itt);
+        bool checked = supported && (itt == currentItemType);
+        b->setVisible(supported);
         b->setChecked(checked);
         checkedAny = checkedAny || checked;
-        if (!first && valid)
+        if (!first && supported)
             first = b;
     }
     if (!checkedAny && first)
         first->setChecked(true);
 }
 
-void ItemScannerDialog::updateCameraDevices()
-{
-    const auto allCameraDevices = m_mediaDevices->videoInputs();
-
-    m_selectCamera->clear();
-    const auto camIcon = QIcon::fromTheme(u"camera-photo"_qs);
-    for (const auto &cameraDevice : allCameraDevices)
-        m_selectCamera->addItem(camIcon, cameraDevice.description(), cameraDevice.id());
-
-    setEnabled(!allCameraDevices.isEmpty());
-    setState(State::Idle);
-}
-
-void ItemScannerDialog::updateCamera(const QByteArray &cameraId)
-{
-    QCamera *camera = nullptr;
-
-    const auto allCameraDevices = QMediaDevices::videoInputs();
-    for (const auto &cameraDevice : allCameraDevices) {
-        if (cameraDevice.id() == cameraId) {
-            camera = new QCamera(cameraDevice);
-            break;
-        }
-    }
-
-    if (m_camera) {
-        disconnect(m_camera.get(), &QCamera::activeChanged,
-                   m_cameraPreviewWidget, &CameraPreviewWidget::setActive);
-    }
-
-    if (camera) {
-        connect(camera, &QCamera::activeChanged,
-                m_cameraPreviewWidget, &CameraPreviewWidget::setActive);
-    } else {
-        return;
-    }
-
-    m_camera.reset(camera);
-    m_captureSession->setCamera(camera);
-    m_camera->start();
-
-
-    updateCameraResolution(1920);
-}
-
-void ItemScannerDialog::setupCapture()
-{
-    connect(m_imageCapture, &QImageCapture::errorOccurred,
-            this, [this](int id, QImageCapture::Error error, const QString &errorString) {
-        Q_UNUSED(error)
-
-        if (!m_currentCaptureId.has_value() || m_currentCaptureId.value() != id) {
-            qCritical() << "SCANNERDLG" << "Ignoring errorOccurred(id:" << id << "), current:"
-                        << m_currentCaptureId.value_or(-1);
-            return;
-        }
-        m_currentCaptureId.reset();
-        m_lastError = errorString;
-        setState(State::Error);
-    });
-
-    connect(m_imageCapture, &QImageCapture::imageCaptured,
-            this, [this](int id, const QImage &img) {
-        if (!m_currentCaptureId.has_value() || m_currentCaptureId.value() != id) {
-            qCritical() << "SCANNERDLG" << "Ignoring imageCaptured(id:" << id << "), current:"
-                        << m_currentCaptureId.value_or(-1);
-            return;
-        }
-        m_currentCaptureId.reset();
-        m_lastScanTime.restart();
-
-        m_currentScan = ItemScanner::inst()->scan(img, char(m_selectItemType->checkedId()),
-                                                  m_selectBackend->currentData().toByteArray());
-
-        if (!m_currentScan) {
-            onScanFailed(0, tr("Scanning failed"));
-            return;
-        }
-
-        m_progress->setValue(0);
-        m_progress->setRange(0, s_averageScanTime);
-        setState(State::Scanning);
-    });
-
-    connect(m_imageCapture, &QImageCapture::readyForCaptureChanged,
-            this, [this](bool ready) {
-        if (ready && !m_tryCaptureBefore.hasExpired())
-            capture();
-    });
-}
-
-bool ItemScannerDialog::canCapture() const
-{
-    return (m_state != State::Scanning) && (m_state != State::Capturing);
-}
-
-void ItemScannerDialog::capture()
-{
-    if (canCapture()) {
-        if (m_imageCapture->isReadyForCapture()) {
-            setState(State::Capturing);
-            m_currentCaptureId = m_imageCapture->capture();
-        } else {
-            // The cam might not be ready yet (e.g. window activation). Wait for it to become ready
-            // and try again.
-            m_tryCaptureBefore = QDeadlineTimer(1000);
-        }
-    }
-}
-
-void ItemScannerDialog::updateCameraResolution(int preferredImageSize)
-{
-    if (!m_camera)
-        return;
-
-    QList<QSize> allRes = m_camera->cameraDevice().photoResolutions();
-
-    if (!allRes.isEmpty()) {
-        std::sort(allRes.begin(), allRes.end(), [](const auto &r1, const auto &r2) {
-            return r1.width() < r2.width();
-        });
-
-        QSize usedRes = allRes.at(0);
-
-        for (const QSize &s : allRes) {
-            if (s.width() > usedRes.width())
-                usedRes = s;
-            if (s.width() >= preferredImageSize) // try to find a better one
-                break;
-        }
-
-        m_imageCapture->setResolution(usedRes);
-    }
-}
-
-void ItemScannerDialog::updateBackend(const QByteArray &backendId)
-{
-    QByteArray itemTypeIds;
-    int preferredImageSize = 0;
-
-    for (const auto &backend : ItemScanner::inst()->availableBackends()) {
-        if (backend.id == backendId) {
-            itemTypeIds = backend.itemTypeFilter;
-            preferredImageSize = backend.preferredImageSize;
-            break;
-        }
-    }
-
-    m_validItemTypes.clear();
-    for (char c : std::as_const(itemTypeIds)) {
-        const auto itt = BrickLink::core()->itemType(c);
-        if (itt || (c == '*'))
-            m_validItemTypes << itt;
-    }
-
-    setItemType(BrickLink::core()->itemType(char(m_selectItemType->checkedId())));
-    updateCameraResolution(preferredImageSize);
-}
-
 void ItemScannerDialog::changeEvent(QEvent *e)
 {
-    if ((e->type() == QEvent::ActivationChange) && m_camera) {
-        setState(isActiveWindow() ? State::Idle : State::SoonInactive);
+    if ((e->type() == QEvent::ActivationChange) && (m_selectCamera->currentIndex() != -1)) {
+        auto activeState = isActiveWindow() ? Scanner::Capture::ActiveState::Active
+                                            : Scanner::Capture::ActiveState::SoonInactive;
+        m_capture->setVideoOutputActiveState(activeState);
     } else if (e->type() == QEvent::LanguageChange) {
         languageChange();
     }
@@ -444,52 +257,20 @@ void ItemScannerDialog::changeEvent(QEvent *e)
 void ItemScannerDialog::keyPressEvent(QKeyEvent *e)
 {
     if (e->key() == Qt::Key_Space)
-        capture();
+        m_capture->captureAndScan();
     QDialog::keyPressEvent(e);
 }
 
 void ItemScannerDialog::hideEvent(QHideEvent *e)
 {
-    setState(State::Inactive);
+    m_capture->setVideoOutputActiveState(Scanner::Capture::ActiveState::Inactive);
     QDialog::hideEvent(e);
-}
-
-void ItemScannerDialog::onScanFinished(uint id, const QVector<ItemScanner::Result> &itemsAndScores)
-{
-    if (id == m_currentScan) {
-        m_currentScan = 0;
-        QVector<const BrickLink::Item *> items;
-        items.reserve(itemsAndScores.size());
-        for (const auto &is : itemsAndScores)
-            items << is.item;
-
-        int elapsed = int(m_lastScanTime.elapsed());
-        s_averageScanTime = s_averageScanTime ? (s_averageScanTime + elapsed) / 2 : elapsed;
-
-        if (items.isEmpty()) {
-            setState(State::NoMatch);
-        } else {
-            setState(State::Idle);
-            if (!m_pinWindow->isChecked())
-                accept();
-            emit itemsScanned(items);
-        }
-    }
-}
-
-void ItemScannerDialog::onScanFailed(uint id, const QString &error)
-{
-    if (id == m_currentScan) {
-        m_currentScan = 0;
-        m_lastError = error;
-        setState(State::Error);
-    }
 }
 
 void ItemScannerDialog::languageChange()
 {
     setWindowTitle(tr("Item Scanner"));
-    setState(m_state);
+    updateStatusText();
 
     m_labelCamera->setText(tr("Camera"));
     m_labelBackend->setText(tr("Service"));
@@ -498,49 +279,25 @@ void ItemScannerDialog::languageChange()
     m_pinWindow->setToolTip(tr("Keep this window open"));
 }
 
-void ItemScannerDialog::setState(State newState)
+void ItemScannerDialog::updateStatusText()
 {
-    switch (newState) {
-    case State::Idle:
+    switch (m_capture->state()) {
+    case Scanner::Capture::State::Idle:
         if (m_selectCamera->count())
             m_status->setText(tr("Click into the camera preview or press Space to capture an image."));
         else
             m_status->setText(u"<b>" + tr("There is no camera connected to this computer.") + u"</b>");
-        if (m_camera && !m_camera->isActive())
-            m_camera->start();
-        m_cameraStopTimer.stop();
         break;
-    case State::SoonInactive:
-        m_cameraStopTimer.start();
-        break;
-    case State::Inactive:
-        if (m_camera && m_camera->isActive())
-            m_camera->stop();
-        break;
-    case State::Capturing:
-        break;
-    case State::Scanning:
-        break;
-    case State::NoMatch:
+    case Scanner::Capture::State::NoMatch:
         m_status->setText(u"<b>" + tr("No matching item found - try again.") + u"</b>");
-        m_noMatchMessageTimeout.start();
         break;
-    case State::Error:
-        m_status->setText(u"<b>"_qs + tr("An error occurred:") + u"</b><br>" + m_lastError);
-        m_errorMessageTimeout.start();
+    case Scanner::Capture::State::Error:
+        m_status->setText(u"<b>"_qs + tr("An error occurred:") + u"</b><br>" + m_capture->lastError());
+        break;
+    default:
         break;
     }
-    if (newState == m_state)
-        return;
-
-    if (newState == State::Scanning) {
-        m_progressTimer->start();
-        m_bottomStack->setCurrentWidget(m_progress);
-    } else {
-        m_progressTimer->stop();
-        m_bottomStack->setCurrentWidget(m_status);
-    }
-    m_state = newState;
 }
+
 
 #include "moc_itemscannerdialog.cpp"

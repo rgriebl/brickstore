@@ -16,86 +16,82 @@
 
 #include "bricklink/core.h"
 #include "bricklink/item.h"
-#include "itemscanner.h"
+#include "core.h"
 
 Q_LOGGING_CATEGORY(LogScanner, "scanner")
 
+namespace Scanner {
 
-QIcon ItemScanner::Backend::icon() const
-{
-    return QIcon(u":/Scanner/service_"_qs + QString::fromLatin1(id));
-}
-
-class ItemScannerPrivate
+class CorePrivate
 {
 public:
     QNetworkAccessManager *nam;
     QByteArray defaultBackendId;
-    QVector<ItemScanner::Backend> availableBackends;
-
-    const ItemScanner::Backend *backendFromId(const QByteArray &id) const
-    {
-        for (const auto &b : availableBackends) {
-            if (b.id == id)
-                return &b;
-        }
-        return nullptr;
-    }
+    QVector<Core::Backend> availableBackends;
 
     QHash<QByteArray, bool> scanning;
     uint nextId = 0;
 };
 
 
-ItemScanner *ItemScanner::s_inst = nullptr;
+Core *Core::s_inst = nullptr;
 
-ItemScanner *ItemScanner::inst()
+Core *Core::inst()
 {
     if (!s_inst)
-        s_inst = new ItemScanner();
+        s_inst = new Core();
     return s_inst;
 }
 
-ItemScanner::~ItemScanner()
+Core::~Core()
 {
-    delete d;
     s_inst = nullptr;
 }
 
-ItemScanner::ItemScanner()
+Core::Core()
     : QObject()
-    , d(new ItemScannerPrivate)
+    , d(new CorePrivate)
 {
     d->nam = new QNetworkAccessManager(this);
 
     d->availableBackends = {
-        { "brickognize", u"Brickognize.com"_qs, "*PSM", 1024 }
+        { "brickognize", u"Brickognize.com"_qs, "PSM", 1024 }
     };
     d->defaultBackendId = d->availableBackends.constFirst().id;
 }
 
-const QVector<ItemScanner::Backend> &ItemScanner::availableBackends() const
+QByteArrayList Core::availableBackendIds() const
 {
-    return d->availableBackends;
+    QByteArrayList result;
+    result.reserve(d->availableBackends.size());
+    for (const auto &b : d->availableBackends)
+        result << b.id;
+    return result;
 }
 
-void ItemScanner::setDefaultBackendId(const QByteArray &id)
+void Core::setDefaultBackendId(const QByteArray &id)
 {
-    if (d->backendFromId(id))
+    if (backendFromId(id))
         d->defaultBackendId = id;
 }
 
-QByteArray ItemScanner::defaultBackendId() const
+QByteArray Core::defaultBackendId() const
 {
     return d->defaultBackendId;
 }
 
-    int scan(const QImage &image, const QByteArray &backendId = { });
-
-
-uint ItemScanner::scan(const QImage &image, char itemTypeId, const QByteArray &backendId)
+const Core::Backend *Core::backendFromId(const QByteArray &id) const
 {
-    auto *backend = d->backendFromId(backendId.isEmpty() ? defaultBackendId() : backendId);
+    for (const auto &b : d->availableBackends) {
+        if (b.id == id)
+            return &b;
+    }
+    return nullptr;
+}
+
+uint Core::scan(const QImage &image, const BrickLink::ItemType *filter, const QByteArray &backendId)
+{
+    auto *backend = backendFromId(backendId.isEmpty() ? defaultBackendId() : backendId);
     if (!backend)
         return 0;
 
@@ -103,9 +99,18 @@ uint ItemScanner::scan(const QImage &image, char itemTypeId, const QByteArray &b
         qCCritical(LogScanner) << "Called scan while another scan is still is progress";
         return 0;
     }
+
+    char itemTypeId = filter ? filter->id() : 0;
+    if (itemTypeId && !backend->itemTypeFilter.contains(itemTypeId)) {
+        qCWarning(LogScanner) << "Backend can not filter on the request item-type" << itemTypeId;
+        itemTypeId = 0;
+    }
+
     d->scanning[backend->id] = true;
 
     uint scanId = ++d->nextId;
+    if (!scanId) // overflow
+        scanId = ++d->nextId;
 
     if (backend->id == "brickognize") {
         QString path = u"/predict/"_qs;
@@ -196,8 +201,20 @@ uint ItemScanner::scan(const QImage &image, char itemTypeId, const QByteArray &b
                         // qCDebug(LogScanner) << "Match:" << item->itemTypeId() << itemId
                         //                     << " Score:" << score;
                     } else {
-                        qCWarning(LogScanner) << "Brickognize returned an invalid match! type:"
-                                              << type << "id:" << itemId;
+                        auto inc = new BrickLink::Incomplete;
+                        inc->m_item_id = itemId.toLatin1();
+                        inc->m_itemtype_id = itemTypeId;
+                        BrickLink::Lot lot;
+                        lot.setIncomplete(inc);
+                        const auto lastMonth = QDateTime::currentDateTime().addMonths(-3);
+
+                        if (BrickLink::core()->resolveIncomplete(&lot, 0, lastMonth)
+                                != BrickLink::Core::ResolveResult::Fail) {
+                            itemsAndScores.emplace_back(lot.item(), score);
+                        } else {
+                            qCWarning(LogScanner) << "Brickognize returned an invalid match! type:"
+                                                  << type << "id:" << itemId;
+                        }
                     }
                 }
                 std::sort(itemsAndScores.begin(), itemsAndScores.end(), [](const auto &is1, const auto &is2) {
@@ -214,4 +231,11 @@ uint ItemScanner::scan(const QImage &image, char itemTypeId, const QByteArray &b
     return scanId;
 }
 
-#include "moc_itemscanner.cpp"
+QString Core::Backend::icon() const
+{
+    return u":/Scanner/service_"_qs + QString::fromLatin1(id);
+}
+
+} // namespace Scanner
+
+#include "moc_core.cpp"

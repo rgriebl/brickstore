@@ -55,7 +55,7 @@
 #include "utility/transfer.h"
 #include "common/undo.h"
 #include "common/sentryinterface.h"
-#include "scanner/itemscanner.h"
+#include "scanner/core.h"
 #include "version.h"
 
 #if defined(Q_OS_ANDROID)
@@ -298,7 +298,7 @@ void Application::afterInit()
     currencyUpdateTimer->callOnTimeout(Currency::inst(),
                                        []() { Currency::inst()->updateRates(true /*silent*/); });
 
-    ItemScanner::inst();
+    Scanner::Core::inst();
 
     auto delayedInit = [this]() {
         if ((!BrickLink::core()->database()->isValid()
@@ -998,6 +998,7 @@ void Application::setupQml()
     extern void qml_register_types_LDraw(); qml_register_types_LDraw();
     extern void qml_register_types_BrickLink(); qml_register_types_BrickLink();
     extern void qml_register_types_BrickStore(); qml_register_types_BrickStore();
+    extern void qml_register_types_Scanner(); qml_register_types_Scanner();
 
     m_engine = new QQmlApplicationEngine(this);
     redirectQmlEngineWarnings(LogQml());

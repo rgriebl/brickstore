@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtMultimedia
 
 VideoOutput {
@@ -8,7 +9,8 @@ VideoOutput {
     implicitWidth: 320
     implicitHeight: 180
 
-    property bool active: false
+    property bool active: true
+    property int progress: 0
     signal clicked()
 
     Rectangle {
@@ -27,10 +29,19 @@ VideoOutput {
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: if (root.active) root.clicked()
+    ProgressBar {
+        id: progress
+        anchors.centerIn: parent
+        width: parent.width * 0.8
+        visible: root.active && root.progress
+        value: root.progress / 100
+        onValueChanged: { console.log("V",value,root.progress)}
     }
 
-    Keys.onSpacePressed: if (root.active) root.clicked()
+    MouseArea {
+        anchors.fill: parent
+        onClicked: if (root.active && !root.progress) root.clicked()
+    }
+
+    Keys.onSpacePressed: if (root.active && !root.progress) root.clicked()
 }

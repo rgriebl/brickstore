@@ -78,6 +78,7 @@ qt_add_qml_module(mobile_module
         IncDecPricesDialog.qml
         InfoWidget.qml
         InventoryWidget.qml
+        ItemScannerDialog.qml
         Main.qml
         MainWindow.qml
         PriceGuideWidget.qml
@@ -95,7 +96,6 @@ qt_add_qml_module(mobile_module
         ProgressDialog.qml
         ToastMessage.qml
 
-
     RESOURCES
         qtquickcontrols2.conf
 )
@@ -104,6 +104,7 @@ if (CLANG)
     set_source_files_properties(
         ${CMAKE_CURRENT_BINARY_DIR}/.rcc/qmlcache/mobile_module_SettingsDialog_qml.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/.rcc/qmlcache/mobile_module_View_qml.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/.rcc/qmlcache/mobile_module_ItemScannerDialog_qml.cpp
         PROPERTIES COMPILE_OPTIONS -Wno-shorten-64-to-32
     )
 endif()

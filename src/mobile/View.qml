@@ -7,7 +7,7 @@ import Mobile
 import Qt.labs.qmlmodels
 import BrickStore as BS
 import BrickLink as BL
-
+import Scanner as Scanner
 
 Page {
     id: root
@@ -38,20 +38,39 @@ Page {
         RowLayout {
             anchors.fill: parent
             ToolButton {
-                icon.name: "go-home"
-                onClicked: root.goHomeFunction()
-            }
-            ToolButton {
-                id: editUndo
-                action: BS.ActionManager.quickAction("edit_undo")
-                visible: enabled || editRedo.enabled
-                display: Button.IconOnly
-            }
-            ToolButton {
-                id: editRedo
-                action: BS.ActionManager.quickAction("edit_redo")
-                visible: enabled || editUndo.enabled
-                display: Button.IconOnly
+                icon.name: "application-menu"
+                onClicked: viewMenu.open()
+
+                AutoSizingMenu {
+                    id: viewMenu
+                    x: parent.width / 2 - width
+                    y: parent.height / 2
+
+                    transformOrigin: Menu.TopRight
+                    modal: true
+                    cascade: false
+
+                    ActionMenuItem { actionName: "go-home"; onClicked: root.goHomeFunction() }
+                    ActionMenuItem { actionName: "document_save" }
+                    ActionMenuItem { actionName: "document_save_as" }
+                    AutoSizingMenu {
+                        title: BS.ActionManager.quickAction("document_export").text
+                        modal: true
+                        cascade: false
+                        ActionMenuItem { actionName: "document_export_bl_xml" }
+                        ActionMenuItem { actionName: "document_export_bl_xml_clip" }
+                        ActionMenuItem { actionName: "document_export_bl_update_clip" }
+                        ActionMenuItem { actionName: "document_export_bl_wantedlist_clip" }
+                    }
+                    ActionMenuItem {
+                        // workaround for Qt bug: the overlay doesn't get removed in Qt 6.6+
+                        onClicked: { viewMenu.modal = false }
+                        actionName: "document_close"
+                    }
+                    ActionMenuSeparator { }
+                    ActionMenuItem { actionName: "edit_undo" }
+                    ActionMenuItem { actionName: "edit_redo" }
+                }
             }
             Label {
                 Layout.fillWidth: true
@@ -64,43 +83,13 @@ Page {
             }
             ToolButton {
                 icon.name: "help-about"
-                onClicked: {
-                    if (!root.document)
-                        return
-
-                    infoDialog.open()
-                }
+                icon.color: "transparent"
+                onClicked: if (root.document) infoDialog.open()
             }
             ToolButton {
-                icon.name: "overflow-menu"
-                onClicked: viewMenu.open()
-
-                AutoSizingMenu {
-                    id: viewMenu
-                    x: parent.width / 2 - width
-                    y: parent.height / 2
-
-                    transformOrigin: Menu.TopRight
-                    modal: true
-                    cascade: false
-
-                    MenuItem { action: BS.ActionManager.quickAction("document_save") }
-                    MenuItem { action: BS.ActionManager.quickAction("document_save_as") }
-                    AutoSizingMenu {
-                        title: BS.ActionManager.quickAction("document_export").text
-                        modal: true
-                        cascade: false
-                        MenuItem { action: BS.ActionManager.quickAction("document_export_bl_xml") }
-                        MenuItem { action: BS.ActionManager.quickAction("document_export_bl_xml_clip") }
-                        MenuItem { action: BS.ActionManager.quickAction("document_export_bl_update_clip") }
-                        MenuItem { action: BS.ActionManager.quickAction("document_export_bl_wantedlist_clip") }
-                    }
-                    MenuItem {
-                        // workaround for Qt bug: the overlay doesn't get removed in Qt 6.6+
-                        onClicked: { viewMenu.modal = false }
-                        action: BS.ActionManager.quickAction("document_close")
-                    }
-                }
+                action: BS.ActionManager.quickAction("edit_additems")
+                display: AbstractButton.IconOnly
+                icon.color: "transparent"
             }
         }
     }
@@ -504,6 +493,19 @@ Page {
         onAccepted: root.document.costAdjust(item.fixed, item.value)
     }
 
+    DialogLoader {
+        id: addItemsDialog
+
+        Component {
+            id: addItems
+
+            ItemScannerDialog {
+                document: root.document
+            }
+        }
+        sourceComponent: addItems
+    }
+
     property QtObject connectionContext: null
     property bool active: document && (document.document === BS.ActionManager.activeDocument)
 
@@ -515,6 +517,13 @@ Page {
                          "edit_color": () => { selectColorDialog.open() },
                          "edit_price_inc_dec": () => { adjustPriceDialog.open() },
                          "edit_cost_inc_dec": () => { adjustCostDialog.open() },
+                         "edit_additems": () => {
+                             Scanner.Core.checkSystemPermissions(this, function(granted) {
+                                 if (granted) {
+                                     addItemsDialog.open()
+                                 }
+                             })
+                         },
                      })
         } else {
             BS.ActionManager.disconnectQuickActionTable(connectionContext)

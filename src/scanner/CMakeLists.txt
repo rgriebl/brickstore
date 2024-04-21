@@ -2,8 +2,12 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 qt_add_library(scanner_module STATIC
-    itemscanner.h
-    itemscanner.cpp
+    core.h
+    core.cpp
+    capture.h
+    capture.cpp
+    qmlapi.h
+    qmlapi.cpp
 )
 
 qt_add_qml_module(scanner_module
@@ -13,9 +17,12 @@ qt_add_qml_module(scanner_module
     IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
     NO_PLUGIN
     RESOURCE_PREFIX /
+    IMPORTS
+        BrickLink
     DEPENDENCIES
         QtQuick
         QtMultimedia
+        BrickLink
 
     QML_FILES
         CameraPreview.qml

@@ -8,6 +8,7 @@
 QT_FORWARD_DECLARE_CLASS(QQuickWidget)
 QT_FORWARD_DECLARE_CLASS(QQmlEngine)
 
+namespace Scanner {
 
 class CameraPreviewWidget : public QWidget
 {
@@ -26,3 +27,5 @@ public:
 private:
     QQuickWidget *m_widget = nullptr;
 };
+
+} // namespace Scanner
