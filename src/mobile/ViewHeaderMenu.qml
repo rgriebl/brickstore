@@ -62,7 +62,7 @@ AutoSizingMenu {
                     text: name
                     ToolButton {
                         id: moveDown
-                        enabled: delegate.index < (root.document.columnModel.count - 1)
+                        enabled: delegate.index < ((root.document?.columnModel.count ?? 0) - 1)
                         height: parent.height
                         width: height
                         anchors.right: parent.right

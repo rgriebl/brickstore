@@ -70,25 +70,22 @@ void MobileApplication::init()
 
     MobileFileOpenHandler::create();
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)) && (QT_VERSION <= QT_VERSION_CHECK(6, 7, 0))
     // the scrolling speed is broken in Qt 6.6+
     auto dpr = qApp->primaryScreen()->devicePixelRatio();
+    qInfo() << "Fixing QML Flickable speed with a factor of" << dpr;
     new EventFilter(qApp, { QEvent::ChildAdded }, [dpr](QObject *o, QEvent *) {
-        static QSet<QObject *> flickables;
-
-        if (o && o->inherits("QQuickFlickable")) {
-            if (!flickables.contains(o)) {
-                flickables.insert(o);
-                connect(o, &QObject::destroyed, qApp, [](QObject *dead) {
-                    flickables.remove(dead);
-                });
-                auto flickable = static_cast<QQuickFlickable *>(o);
-                auto maxFlickV = flickable->maximumFlickVelocity();
-                flickable->setMaximumFlickVelocity(maxFlickV * dpr);
-                qWarning() << "Fixed flickable speed:" << flickable << "DPR:" << dpr << "MFV:" << maxFlickV;
+        static QSet<QObject *> seen;
+        if (auto flickable = qobject_cast<QQuickFlickable *>(o)) {
+            if (!seen.contains(o)) {
+                seen.insert(o);
+                connect(o, &QObject::destroyed, qApp, [](QObject *dead) { seen.remove(dead); });
+                flickable->setMaximumFlickVelocity(flickable->maximumFlickVelocity() * dpr);
             }
         }
         return EventFilter::ContinueEventProcessing;
     });
+#endif
 
     // add all relevant QML modules here
     extern void qml_register_types_Mobile(); qml_register_types_Mobile();
