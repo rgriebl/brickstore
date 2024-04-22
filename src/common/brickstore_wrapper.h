@@ -436,6 +436,42 @@ public:
      }
 };
 
+class QmlExtraConfig : public QObject, public QQmlParserStatus
+{
+    Q_OBJECT
+    Q_INTERFACES(QQmlParserStatus)
+    QML_NAMED_ELEMENT(ExtraConfig)
+    Q_PROPERTY(QString category READ category WRITE setCategory NOTIFY categoryChanged FINAL)
+
+public:
+    explicit QmlExtraConfig(QObject *parent = nullptr);
+    ~QmlExtraConfig() override;
+
+    QString category() const;
+    void setCategory(const QString &newCategory);
+    Q_SIGNAL void categoryChanged(const QString &newCategory);
+
+protected:
+    void timerEvent(QTimerEvent *event) override;
+
+    void classBegin() override;
+    void componentComplete() override;
+
+private:
+    QSettings *instance();
+    void init();
+    void reset();
+    void load();
+    void store();
+    Q_SLOT void _q_propertyChanged();
+    QVariant readProperty(const QMetaProperty &property) const;
+
+    QString m_category;
+    int m_timerId = 0;
+    bool m_initialized = false;
+    mutable QPointer<QSettings> m_settings = nullptr;
+    QHash<const char *, QVariant> m_changedProperties = {};
+};
 
 class QmlOnlineState
 {

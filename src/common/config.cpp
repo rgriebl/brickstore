@@ -39,8 +39,13 @@ static const char *organization = "brickforge.de";
 #else
 static const char *organization = "BrickStore";
 #endif
-static const char *application = "BrickStore";
 
+#if defined(BS_MOBILE) && !(defined(Q_OS_IOS) || defined(Q_OS_ANDROID))
+// use different mobile settings on the desktop, when running mobile builds
+static const char *application = "BrickStoreMobile";
+#else
+static const char *application = "BrickStore";
+#endif
 
 Config::Config()
     : QSettings(QString::fromLatin1(organization), QString::fromLatin1(application))

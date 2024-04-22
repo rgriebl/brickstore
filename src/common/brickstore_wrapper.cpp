@@ -1328,5 +1328,163 @@ void ProxySelectionModel::transfer(const QItemSelectionModel *from, QItemSelecti
 }
 
 
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+// this is a copy of Qt's QQmlSettings, but adjusted to our needs:
+// we cannot set the global organization name for backwards compatibility
+
+QmlExtraConfig::QmlExtraConfig(QObject *parent)
+    : QObject(parent)
+{ }
+
+QmlExtraConfig::~QmlExtraConfig()
+{
+    reset(); // flush pending changes
+}
+
+QString QmlExtraConfig::category() const
+{
+    return m_category;
+}
+
+void QmlExtraConfig::setCategory(const QString &newCategory)
+{
+    if (m_category != newCategory) {
+        reset();
+        m_category = newCategory;
+        if (m_initialized)
+            load();
+        emit categoryChanged(newCategory);
+    }
+}
+
+void QmlExtraConfig::timerEvent(QTimerEvent *event)
+{
+    QObject::timerEvent(event);
+    if (event->timerId() != m_timerId)
+        return;
+    killTimer(m_timerId);
+    m_timerId = 0;
+    store();
+}
+
+void QmlExtraConfig::classBegin()
+{ }
+
+void QmlExtraConfig::componentComplete()
+{
+    init();
+}
+
+QSettings *QmlExtraConfig::instance()
+{
+    if (m_settings)
+        return m_settings;
+
+    m_settings = new QSettings(Config::inst()->organizationName(), Config::inst()->applicationName(), this);
+
+    if (m_settings->status() != QSettings::NoError) {
+        qmlWarning(this) << "Failed to initialize QSettings instance. Status code is: " << int(m_settings->status());
+        return m_settings;
+    }
+
+    if (!m_category.isEmpty())
+        m_settings->beginGroup(m_category);
+
+    if (m_initialized)
+        load();
+
+    return m_settings;
+}
+
+void QmlExtraConfig::init()
+{
+    if (m_initialized)
+        return;
+    load();
+    m_initialized = true;
+}
+
+void QmlExtraConfig::reset()
+{
+    if (m_initialized && m_settings && !m_changedProperties.isEmpty())
+        store();
+    delete m_settings;
+}
+
+void QmlExtraConfig::load()
+{
+    const QMetaObject *mo = metaObject();
+    const int offset = mo->propertyOffset();
+    const int count = mo->propertyCount();
+
+    // don't save built-in properties if there aren't any qml properties
+    if (offset == 1)
+        return;
+
+    for (int i = offset; i < count; ++i) {
+        QMetaProperty property = mo->property(i);
+        const QString propertyName = QString::fromUtf8(property.name());
+
+        const QVariant previousValue = readProperty(property);
+        const QVariant currentValue = instance()->value(propertyName,
+                                                        previousValue);
+
+        if (!currentValue.isNull() && (!previousValue.isValid()
+                                       || (currentValue.canConvert(previousValue.metaType())
+                                           && previousValue != currentValue))) {
+            property.write(this, currentValue);
+            qDebug() << "BS.ExtraConfig: load " << property.name() << ":" << currentValue << "default:" << previousValue;
+        }
+
+        // ensure that a non-existent setting gets written
+        // even if the property wouldn't change later
+        if (!instance()->contains(propertyName))
+            _q_propertyChanged();
+
+        // setup change notifications on first load
+        if (!m_initialized && property.hasNotifySignal()) {
+            static const int propertyChangedIndex = mo->indexOfSlot("_q_propertyChanged()");
+            QMetaObject::connect(this, property.notifySignalIndex(), this, propertyChangedIndex);
+        }
+    }
+}
+
+void QmlExtraConfig::store()
+{
+    for (auto it = m_changedProperties.cbegin(); it != m_changedProperties.cend(); ++it) {
+        instance()->setValue(QString::fromUtf8(it.key()), it.value());
+        qDebug() << "BS.ExtraConfig: store" << it.key() << ":" << it.value();
+    }
+    m_changedProperties.clear();
+}
+
+void QmlExtraConfig::_q_propertyChanged()
+{
+    const QMetaObject *mo = metaObject();
+    const int offset = mo->propertyOffset();
+    const int count = mo->propertyCount();
+    for (int i = offset; i < count; ++i) {
+        const QMetaProperty &property = mo->property(i);
+        const QVariant value = readProperty(property);
+        m_changedProperties.insert(property.name(), value);
+        qDebug() << "BS.ExtraConfig: cache" << property.name() << ":" << value;
+    }
+    if (m_timerId != 0)
+        killTimer(m_timerId);
+    m_timerId = startTimer(500);
+}
+
+QVariant QmlExtraConfig::readProperty(const QMetaProperty &property) const
+{
+    QVariant var = property.read(this);
+    if (var.metaType() == QMetaType::fromType<QJSValue>())
+        var = var.value<QJSValue>().toVariant();
+    return var;
+}
+
+
 #include "moc_brickstore_wrapper.cpp"
 #include "moc_brickstore_wrapper_p.cpp"
