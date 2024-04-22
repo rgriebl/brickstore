@@ -3,6 +3,8 @@
 
 #include <QDir>
 #include <QCoreApplication>
+#include <QMetaEnum>
+#include <QStandardPaths>
 
 #include "config.h"
 #include "recentfiles.h"
@@ -26,6 +28,20 @@ RecentFiles::RecentFiles(QObject *parent)
     for (int i = 0; i < size; ++i) {
         config->setArrayIndex(i);
         auto path = config->value(u"Path"_qs).toString();
+
+        if (path.startsWith(u"${")) { // replace QStandardPath
+            int pos = path.indexOf(u'}');
+            if (pos > 0) {
+                const QByteArray stdPathName = path.mid(2, pos - 2).toLatin1();
+                bool exists;
+                auto stdPathLocation = static_cast<QStandardPaths::StandardLocation>(
+                    QMetaEnum::fromType<QStandardPaths::StandardLocation>().keyToValue(
+                        stdPathName.constData(), &exists));
+                if (exists)
+                    path = QStandardPaths::writableLocation(stdPathLocation) + path.mid(pos + 1);
+            }
+        }
+
         auto name = config->value(u"Name"_qs).toString();
         auto pinned = config->value(u"Pinned"_qs).toBool();
         m_entries.insert(pinned ? m_pinnedCount++ : m_entries.count(), { path, name, pinned });
@@ -45,7 +61,44 @@ void RecentFiles::save()
     for (int i = 0; i < m_entries.size(); ++i) {
         const auto &pan = m_entries.at(i);
         config->setArrayIndex(i);
-        config->setValue(u"Path"_qs, pan.path);
+        auto path = pan.path;
+
+        static const auto allStdPathLocations = {
+            QStandardPaths::DesktopLocation,
+            QStandardPaths::DocumentsLocation,
+            QStandardPaths::MusicLocation,
+            QStandardPaths::MoviesLocation,
+            QStandardPaths::PicturesLocation,
+            QStandardPaths::AppDataLocation,
+            QStandardPaths::AppConfigLocation,
+            QStandardPaths::CacheLocation,
+            QStandardPaths::AppLocalDataLocation,
+            QStandardPaths::GenericCacheLocation,
+            QStandardPaths::GenericConfigLocation,
+            QStandardPaths::GenericDataLocation,
+            QStandardPaths::RuntimeLocation,
+            QStandardPaths::ConfigLocation,
+            QStandardPaths::DownloadLocation,
+            QStandardPaths::HomeLocation,
+            QStandardPaths::FontsLocation,
+            QStandardPaths::ApplicationsLocation,
+            QStandardPaths::TempLocation,
+            QStandardPaths::PublicShareLocation,
+            QStandardPaths::TemplatesLocation,
+        };
+
+        for (auto stdPathLocation : allStdPathLocations) {
+            const QString stdPath = QStandardPaths::writableLocation(stdPathLocation);
+            if (path.startsWith(stdPath)) {
+                const char *stdPathName = QMetaEnum::fromType<QStandardPaths::StandardLocation>()
+                                              .valueToKey(int(stdPathLocation));
+                if (stdPathName)
+                    path = u"${" + QString::fromLatin1(stdPathName) + u'}' + path.mid(stdPath.length());
+                break;
+            }
+        }
+
+        config->setValue(u"Path"_qs, path);
         config->setValue(u"Name"_qs, pan.name);
         config->setValue(u"Pinned"_qs, pan.pinned);
     }
