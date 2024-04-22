@@ -16,6 +16,12 @@ FullscreenDialog {
     property var goBackFunction
     onBackClicked: goBackFunction()
 
+    BS.ExtraConfig {
+        category: "ImportCartDialog"
+
+        property alias domesticOrInternational: domesticOrInternational.currentIndex
+    }
+
     toolButtons: ToolButton {
         icon.name: "view-refresh"
         onClicked: BL.BrickLink.carts.startUpdate()

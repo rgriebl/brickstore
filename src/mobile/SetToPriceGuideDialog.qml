@@ -4,6 +4,7 @@
 import QtQuick.Controls
 import Mobile
 import BrickLink as BL
+import BrickStore as BS
 
 
 AutoSizingDialog {
@@ -12,32 +13,38 @@ AutoSizingDialog {
     keepPaddingInSmallMode: true
     standardButtons: DialogButtonBox.Cancel | DialogButtonBox.Ok
 
-    property int time: BL.BrickLink.Time.PastSix
-    property int price: BL.BrickLink.Price.WAverage
-    property bool forceUpdate: false
+    property alias forceUpdate: force.checked
+    property int time: timePastSix.checked ? BL.BrickLink.Time.PastSix
+                                           : BL.BrickLink.Time.Current
+    property int price: priceLow.checked ? BL.BrickLink.Price.Lowest
+                                         : (priceAvg.checked ? BL.BrickLink.Price.Average
+                                                             : (priceWAvg.checked ? BL.BrickLink.Price.WAverage
+                                                                                  : BL.BrickLink.Price.Highest))
 
-    ButtonGroup {
-        id: timeGroup
-        onCheckedButtonChanged: root.time = checkedButton.value
-    }
-    ButtonGroup {
-        id: priceGroup
-        onCheckedButtonChanged: root.price = checkedButton.value
+    BS.ExtraConfig {
+        category: "SetToPriceGuideDialog"
+
+        property alias time: root.time
+        property alias price: root.price
     }
 
-    function checkButton(buttons, value) {
-        for (let i = 0; i < buttons.length; ++i) {
-            if (buttons[i].value === value) {
-                buttons[i].checked = true
-                break
+    Connections { // 2-way binding for ExtraConfig
+        target: root
+        function onTimeChanged() {
+            switch (root.time) {
+            case BL.BrickLink.Time.PastSix: timePastSix.checked = true; break
+            case BL.BrickLink.Time.Current: timeCurrent.checked = true; break
             }
         }
-    }
 
-    Component.onCompleted: {
-        force.checked = root.forceUpdate
-        checkButton(timeButtons.children, root.time)
-        checkButton(priceButtons.children, root.price)
+        function onPriceChanged() {
+            switch (root.price) {
+            case BL.BrickLink.Price.Lowest:   priceLow.checked = true; break;
+            case BL.BrickLink.Price.Average:  priceAvg.checked = true; break;
+            case BL.BrickLink.Price.WAverage: priceWAvg.checked = true; break;
+            case BL.BrickLink.Price.Highest:  priceHigh.checked = true; break;
+            }
+        }
     }
 
     ScrollableLayout {
@@ -56,17 +63,8 @@ AutoSizingDialog {
             Flow {
                 Layout.fillWidth: true
                 spacing: layout.spacing
-                id: timeButtons
-                CheckButton {
-                    ButtonGroup.group: timeGroup
-                    text: qsTr("Last 6 Months Sales")
-                    value: BL.BrickLink.Time.PastSix
-                }
-                CheckButton {
-                    ButtonGroup.group: timeGroup
-                    text: qsTr("Current Inventory")
-                    value: BL.BrickLink.Time.Current
-                }
+                CheckButton { id: timePastSix; text: qsTr("Last 6 Months Sales"); checked: true }
+                CheckButton { id: timeCurrent; text: qsTr("Current Inventory") }
             }
             Label {
                 text: qsTr("Which price:")
@@ -76,27 +74,10 @@ AutoSizingDialog {
             Flow {
                 Layout.fillWidth: true
                 spacing: layout.spacing
-                id: priceButtons
-                CheckButton {
-                    ButtonGroup.group: priceGroup
-                    text: qsTr("Minimum")
-                    value: BL.BrickLink.Price.Lowest
-                }
-                CheckButton {
-                    ButtonGroup.group: priceGroup
-                    text: qsTr("Average")
-                    value: BL.BrickLink.Price.Average
-                }
-                CheckButton {
-                    ButtonGroup.group: priceGroup
-                    text: qsTr("Quantity Average")
-                    value: BL.BrickLink.Price.WAverage
-                }
-                CheckButton {
-                    ButtonGroup.group: priceGroup
-                    text: qsTr("Maximum")
-                    value: BL.BrickLink.Price.Highest
-                }
+                CheckButton { id: priceLow;  text: qsTr("Minimum") }
+                CheckButton { id: priceAvg;  text: qsTr("Average") }
+                CheckButton { id: priceWAvg; text: qsTr("Quantity Average"); checked: true }
+                CheckButton { id: priceHigh; text: qsTr("Maximum") }
             }
             RowLayout {
                 IconImage {
@@ -130,7 +111,6 @@ AutoSizingDialog {
                     id: force
                     Layout.fillWidth: true
                     text: qsTr("Download even if already in cache.")
-                    onToggled: root.forceUpdate = checked
                 }
             }
             Item {

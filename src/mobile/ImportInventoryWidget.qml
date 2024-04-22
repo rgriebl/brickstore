@@ -12,7 +12,7 @@ Pane {
 
     property BL.Item currentItem: BL.BrickLink.noItem
 
-    property int quantity: quantity.value
+    property alias quantity: quantity.value
     property int condition: conditionNew.checked ? BL.BrickLink.Condition.New
                                                  : BL.BrickLink.Condition.Used
     property int extraParts: extraInclude.checked ? BL.BrickLink.Status.Include
@@ -27,6 +27,33 @@ Pane {
                                 | (partOutSetsInSet.checked ? BL.BrickLink.PartOutTraits.SetsInSet : 0)
                                 | (partOutMinifigs.checked ? BL.BrickLink.PartOutTraits.Minifigs : 0)
 
+    Connections { // 2-way binding for ExtraConfig
+        target: root
+        function onConditionChanged() {
+            switch (root.condition) {
+            case BL.BrickLink.Condition.New:  conditionNew.checked = true; break
+            case BL.BrickLink.Condition.Used: conditionUsed.checked = true; break
+            }
+        }
+
+        function onExtraPartsChanged() {
+            switch (root.extraParts) {
+            case BL.BrickLink.Status.Include: extraInclude.checked = true; break
+            case BL.BrickLink.Status.Exclude: extraExclude.checked = true; break
+            case BL.BrickLink.Status.Extra:   extraExtra.checked = true; break
+            }
+        }
+
+        function onPartOutTraitsChanged() {
+            const pot = root.partOutTraits
+            includeInstructions.checked = (pot & BL.BrickLink.PartOutTraits.Instructions)
+            includeOriginalBox.checked  = (pot & BL.BrickLink.PartOutTraits.OriginalBox)
+            includeAlternates.checked   = (pot & BL.BrickLink.PartOutTraits.Alternates)
+            includeCounterParts.checked = (pot & BL.BrickLink.PartOutTraits.CounterParts)
+            partOutSetsInSet.checked    = (pot & BL.BrickLink.PartOutTraits.SetsInSet)
+            partOutMinifigs.checked     = (pot & BL.BrickLink.PartOutTraits.Minifigs)
+        }
+    }
 
     onCurrentItemChanged: layout._possibleTraits = root.currentItem.partOutTraits()
 
@@ -77,7 +104,7 @@ Pane {
                     Layout.fillWidth: true
                     spacing: importDetailsGrid.columnSpacing
                     CheckButton { text: qsTr("New"); checked: true; id: conditionNew }
-                    CheckButton { text: qsTr("Used") }
+                    CheckButton { text: qsTr("Used"); id: conditionUsed }
                 }
                 ItemDelegate {
                     text: qsTr("Extra parts:")

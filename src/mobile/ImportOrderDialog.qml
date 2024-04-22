@@ -18,6 +18,13 @@ FullscreenDialog {
     property var goBackFunction
     onBackClicked: goBackFunction()
 
+    BS.ExtraConfig {
+        category: "ImportOrderDialog"
+
+        property alias updateLastNDays: root.updateLastNDays
+        property alias receivedOrPlaced: receivedOrPlaced.currentIndex
+    }
+
     toolButtons: ToolButton {
         icon.name: "view-refresh"
         enabled: BL.BrickLink.orders.updateStatus !== BL.BrickLink.Updating

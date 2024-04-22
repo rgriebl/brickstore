@@ -22,6 +22,19 @@ FullscreenDialog {
             pages.currentIndex = pages.currentIndex - 1
     }
 
+    BS.ExtraConfig {
+        category: "ImportInventoryDialog"
+
+        property alias itemType: ittTabs.currentIndex
+        property alias itemZoom: zoom.value
+        property alias itemFilter: filter.text
+
+        property alias importQuantity: importWidget.quantity
+        property alias importCondition: importWidget.condition
+        property alias importExtraParts: importWidget.extraParts
+        property alias importPartOutTraits: importWidget.partOutTraits
+    }
+
     toolButtons: ToolButton {
         property bool lastPage: pages.currentIndex === (pages.count - 1)
         text: lastPage ? qsTr("Import") : qsTr("Next")
@@ -68,16 +81,18 @@ FullscreenDialog {
                             text: name
                         }
                     }
-                    onCurrentItemChanged: {
+
+                    currentIndex: 0
+                    onCurrentItemChanged: updateFilters()
+
+                    function updateFilters() {
                         catList.model.filterItemType = currentItem.itemTypePointer
                         itemListModel.filterItemType = currentItem.itemTypePointer
                     }
 
-                    currentIndex: 0
-
                     // the sort comes after the first setCurrentIndex, so we have to re-do the
                     // filterItemType settings
-                    Component.onCompleted: Qt.callLater(function() { ittTabs.onCurrentItemChanged() })
+                    Component.onCompleted: Qt.callLater(ittTabs.updateFilters)
                 }
 
                 ListView {
@@ -142,14 +157,12 @@ FullscreenDialog {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
-                    property real scaleFactor: zoom.value / 100
-
                     FontMetrics { id: fm; font: itemListPage.font }
 
                     property int labelHeight: fm.height + 8
 
                     clip: true
-                    cellWidth: width / 8 * scaleFactor
+                    cellWidth: zoom.value / 100 * Screen.pixelDensity * 20 // 20mm
                     cellHeight: cellWidth * 3 / 4 + labelHeight
                     cacheBuffer: cellHeight
                     ScrollIndicator.vertical: ScrollIndicator { minimumSize: 0.05 }
