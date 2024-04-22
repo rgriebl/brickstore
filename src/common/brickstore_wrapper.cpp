@@ -1436,7 +1436,7 @@ void QmlExtraConfig::load()
                                        || (currentValue.canConvert(previousValue.metaType())
                                            && previousValue != currentValue))) {
             property.write(this, currentValue);
-            qDebug() << "BS.ExtraConfig: load " << property.name() << ":" << currentValue << "default:" << previousValue;
+            //qDebug() << "BS.ExtraConfig: load " << property.name() << ":" << currentValue << "default:" << previousValue;
         }
 
         // ensure that a non-existent setting gets written
@@ -1456,7 +1456,7 @@ void QmlExtraConfig::store()
 {
     for (auto it = m_changedProperties.cbegin(); it != m_changedProperties.cend(); ++it) {
         instance()->setValue(QString::fromUtf8(it.key()), it.value());
-        qDebug() << "BS.ExtraConfig: store" << it.key() << ":" << it.value();
+        //qDebug() << "BS.ExtraConfig: store" << it.key() << ":" << it.value();
     }
     m_changedProperties.clear();
 }
@@ -1470,7 +1470,7 @@ void QmlExtraConfig::_q_propertyChanged()
         const QMetaProperty &property = mo->property(i);
         const QVariant value = readProperty(property);
         m_changedProperties.insert(property.name(), value);
-        qDebug() << "BS.ExtraConfig: cache" << property.name() << ":" << value;
+        //qDebug() << "BS.ExtraConfig: cache" << property.name() << ":" << value;
     }
     if (m_timerId != 0)
         killTimer(m_timerId);

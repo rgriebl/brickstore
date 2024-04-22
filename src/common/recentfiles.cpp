@@ -121,7 +121,7 @@ void RecentFiles::pin(int row, bool down)
             endMoveRows();
             save();
 
-            finalRow = m_pinnedCount;
+            finalRow = int(m_pinnedCount);
         }
         // We might end up with more than MaxRecentFiles entries, but we allow it to give
         // the user a chance to non-destructively undo this operation.

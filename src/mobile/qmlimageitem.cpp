@@ -17,22 +17,10 @@ QImage QmlImageItem::image() const
     return m_image;
 }
 
-QImage QmlImageItem::fallbackImage() const
-{
-    return m_fallbackImage;
-}
-
 void QmlImageItem::setImage(const QImage &image)
 {
     m_image = image;
     update();
-}
-
-void QmlImageItem::setFallbackImage(const QImage &image)
-{
-    m_fallbackImage = image;
-    if (image.isNull())
-        update();
 }
 
 void QmlImageItem::clear()
@@ -44,8 +32,6 @@ void QmlImageItem::paint(QPainter *painter)
 {
     QImage image = m_image;
 
-    if (image.isNull())
-        image = m_fallbackImage;
     if (image.isNull())
         return;
 

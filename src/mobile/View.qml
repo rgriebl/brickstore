@@ -268,8 +268,7 @@ Page {
                         required property var edit
                         background: QImageItem {
                             fillColor: "white"
-                            image: (picCell.edit as BL.Picture)?.image
-                            fallbackImage: BL.BrickLink.noImage(width, height)
+                            image: (picCell.edit as BL.Picture)?.image ?? BL.BrickLink.noImage(width, height)
                         }
                     }
                 }
