@@ -3,7 +3,6 @@
 
 import Mobile
 import Qt5Compat.GraphicalEffects
-import QtQuick.Controls.Basic as Basic
 import BrickStore as BS
 import BrickLink as BL
 import LDraw

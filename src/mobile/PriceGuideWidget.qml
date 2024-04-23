@@ -4,7 +4,6 @@
 pragma ComponentBehavior: Bound
 
 import Mobile
-import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 import BrickLink as BL
 import BrickStore as BS
