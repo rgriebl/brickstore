@@ -22,7 +22,7 @@ Control {
     }
 
     Popup {
-        // iOS: black bar over the notch in portrait mode
+        // show a black bar over the notch / camera cutout
         modal: false
         enabled: false
         closePolicy: Popup.NoAutoClose

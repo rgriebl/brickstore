@@ -11,20 +11,31 @@ import android.util.Log;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.core.graphics.Insets;
 import io.sentry.SentryLevel;
 import io.sentry.android.core.SentryAndroid;
 
 public class ExtendedQtActivity extends QtActivity
 {
-    public static native void changeUiTheme(boolean isDark);
+    public static native void changeScreenMargins(int left, int top, int right, int bottom);
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
 
-        boolean isDark = ((this.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES);
-        changeUiTheme(isDark);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        // ViewCompat.getWindowInsetsController(getWindow().getDecorView()).setAppearanceLightNavigationBars(false);
+        ViewCompat.setOnApplyWindowInsetsListener(getWindow().getDecorView(), (view, windowInsets) -> {
+            int insetsTypes = WindowInsetsCompat.Type.displayCutout() | WindowInsetsCompat.Type.systemBars();
+            Insets insets = windowInsets.getInsets(insetsTypes);
+            changeScreenMargins(insets.left, insets.top, insets.right, insets.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
 
         Intent intent = getIntent();
         if ((intent != null) && (intent.getAction() == Intent.ACTION_VIEW))
@@ -35,9 +46,6 @@ public class ExtendedQtActivity extends QtActivity
     public void onConfigurationChanged(Configuration newConfig)
     {
         super.onConfigurationChanged(newConfig);
-
-        boolean isDark = ((newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES);
-        changeUiTheme(isDark);
     }
 
     public static native void openUrl(String url);

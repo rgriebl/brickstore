@@ -12,8 +12,8 @@ ApplicationWindow {
     width: 1280
     height: 720
 
-    // ios: colored statusbar background
-    flags: Qt.Window | (Style.isIOS ? Qt.MaximizeUsingFullscreenGeometryHint : 0)
+    // colored statusbar background
+    flags: Qt.Window | ((Style.isAndroid || Style.isIOS) ? Qt.MaximizeUsingFullscreenGeometryHint : 0)
 
     Binding { // used to apply the dark/light theme for the complete app (Style is a singleton)
         target: Style

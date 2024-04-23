@@ -1,11 +1,13 @@
 // Copyright (C) 2004-2024 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <QGuiApplication>
-#include <QScreen>
 #include <QFontDatabase>
-#include <QQmlProperty>
+#include <QGuiApplication>
 #include <QQmlEngine>
+#include <QQmlProperty>
+#include <QScreen>
+#include <QStyleHints>
+#include <QQmlApplicationEngine>
 #include "common/config.h"
 #include "common/application.h"
 #include "qmlstyle.h"
@@ -14,71 +16,23 @@
 #  include <jni.h>
 #  include <QJniObject>
 
-// WindowManager.LayoutParams
-#  define FLAG_TRANSLUCENT_STATUS 0x04000000
-#  define FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS 0x80000000
-// View
-#  define SYSTEM_UI_FLAG_LIGHT_STATUS_BAR 0x00002000
+static QMargins staticScreenMargins;
 
-static bool darkThemeOS_value;
+void androidSetScreenMargins(const QMargins &margins)
+{
+    QmlStyle *inst = nullptr;
+    if (Application::inst() && Application::inst()->qmlEngine())
+        inst = Application::inst()->qmlEngine()->singletonInstance<QmlStyle *>("Mobile", "Style");
+    if (inst)
+        inst->setScreenMargins(margins);
+    else
+        staticScreenMargins = margins;
+}
 
 extern "C" JNIEXPORT void JNICALL
-Java_de_brickforge_brickstore_ExtendedQtActivity_changeUiTheme(JNIEnv *, jobject, jboolean jisDark)
+Java_de_brickforge_brickstore_ExtendedQtActivity_changeScreenMargins(JNIEnv *, jobject, jint left, jint top, jint right, jint bottom)
 {
-    darkThemeOS_value = jisDark;
-}
-
-static bool darkThemeOS()
-{
-    return darkThemeOS_value;
-}
-
-static void setStatusBarColor(const QColor &color)
-{
-    if (QNativeInterface::QAndroidApplication::sdkVersion() < 23)
-        return;
-    QNativeInterface::QAndroidApplication::runOnAndroidMainThread([=]() {
-        QJniObject activity = QNativeInterface::QAndroidApplication::context();
-        QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
-        window.callMethod<void>("addFlags", "(I)V", FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.callMethod<void>("clearFlags", "(I)V", FLAG_TRANSLUCENT_STATUS);
-        QJniObject view = window.callObjectMethod("getDecorView", "()Landroid/view/View;");
-        int visibility = view.callMethod<int>("getSystemUiVisibility", "()I");
-        visibility &= ~SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-        view.callMethod<void>("setSystemUiVisibility", "(I)V", visibility);
-
-        window.callMethod<void>("setStatusBarColor", "(I)V", color.rgba());
-    });
-}
-
-#else
-#  if defined(Q_CC_MSVC)
-#    pragma warning(push)
-#    pragma warning(disable: 4458)
-#    pragma warning(disable: 4201)
-#  endif
-#  include <QtGui/private/qguiapplication_p.h>
-#  if defined(Q_CC_MSVC)
-#    pragma warning(pop)
-#  endif
-#  include <QtGui/qpa/qplatformtheme.h>
-
-
-static bool darkThemeOS()
-{
-    if (const QPlatformTheme *theme = QGuiApplicationPrivate::platformTheme()) {
-#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
-        return (theme->appearance() == QPlatformTheme::Appearance::Dark);
-#else
-        return (theme->colorScheme() == Qt::ColorScheme::Dark);
-#endif
-    }
-    return false;
-}
-
-static void setStatusBarColor(const QColor &color)
-{
-    Q_UNUSED(color)
+    androidSetScreenMargins({ left, top, right, bottom });
 }
 
 #endif
@@ -104,12 +58,33 @@ QmlStyle::QmlStyle(QObject *parent)
         }
     });
 
-    connect(QGuiApplication::primaryScreen(), &QScreen::geometryChanged,
-            this, &QmlStyle::screenMarginsChanged);
+#if defined(Q_OS_IOS)
+    static auto iosScreenMargins = []() -> QMargins {
+        auto screen = QGuiApplication::primaryScreen();
+        const auto available = screen->availableGeometry();
+        const auto full = screen->geometry();
+        return { available.left() - full.left(), available.top() - full.top(),
+                full.right() - available.right(), full.bottom() - available.bottom() };
+    };
+    m_screenMargins = iosScreenMargins();
+    qWarning() << "IOS SCREEN MARGINS CHANGED" << m_screenMargins;
     connect(QGuiApplication::primaryScreen(), &QScreen::availableGeometryChanged,
-            this, &QmlStyle::screenMarginsChanged);
-    connect(QGuiApplication::primaryScreen(), &QScreen::orientationChanged,
-            this, &QmlStyle::screenMarginsChanged);
+            this, [this]() {
+        setScreenMargins(iosScreenMargins());
+    });
+#elif defined(Q_OS_ANDROID)
+    m_screenDpr = QGuiApplication::primaryScreen()->devicePixelRatio();
+    m_screenMargins = staticScreenMargins;
+#endif
+}
+
+void QmlStyle::setScreenMargins(const QMargins &newMargins)
+{
+    if (m_screenMargins != newMargins) {
+        m_screenMargins = newMargins;
+        qWarning() << "SCREEN MARGINS CHANGED" << m_screenMargins;
+        emit screenMarginsChanged();
+    }
 }
 
 QSizeF QmlStyle::physicalScreenSize() const
@@ -127,8 +102,7 @@ bool QmlStyle::smallSize() const
 
 bool QmlStyle::darkTheme() const
 {
-    // 0: light, 1: dark, 2: system (see qquickmaterialstyle_p.h)
-    return m_theme.isValid() ? (m_theme.read().toInt() == 1) : false;
+    return m_theme == Application::DarkTheme;
 }
 
 QFont QmlStyle::monospaceFont() const
@@ -196,48 +170,22 @@ bool QmlStyle::isAndroid() const
 
 int QmlStyle::topScreenMargin() const
 {
-    if (isIOS()) {
-        const auto scr = QGuiApplication::primaryScreen();
-        return scr->availableGeometry().y();
-    } else {
-        return 0;
-    }
+    return m_screenMargins.top() / m_screenDpr;
 }
 
 int QmlStyle::bottomScreenMargin() const
 {
-    if (isIOS()) {
-        const auto scr = QGuiApplication::primaryScreen();
-        return scr->geometry().bottom() - scr->availableGeometry().bottom();
-    } else {
-        return 0;
-    }
+    return m_screenMargins.bottom() / m_screenDpr;
 }
 
 int QmlStyle::leftScreenMargin() const
 {
-    int lsm = 0;
-
-    if (isIOS()) {
-        const auto scr = QGuiApplication::primaryScreen();
-        lsm = (scr->orientation() == Qt::InvertedLandscapeOrientation)
-                ? 0 : scr->availableGeometry().x();
-    }
-    //qWarning() << "Left screen margin:" << lsm;
-    return lsm;
+    return m_screenMargins.left() / m_screenDpr;
 }
 
 int QmlStyle::rightScreenMargin() const
 {
-    int rsm = 0;
-
-    if (isIOS()) {
-        const auto scr = QGuiApplication::primaryScreen();
-        rsm = (scr->orientation() == Qt::LandscapeOrientation)
-                ? 0 : (scr->geometry().right() - scr->availableGeometry().right());
-    }
-    //qWarning() << "Right screen margin:" << rsm;
-    return rsm;
+    return m_screenMargins.right() / m_screenDpr;
 }
 
 QObject *QmlStyle::rootWindow() const
@@ -259,34 +207,42 @@ void QmlStyle::setRootWindow(QObject *root)
     m_backgroundColor = QQmlProperty(root, u"Material.backgroundColor"_qs, qmlContext(root));
     m_accentTextColor = QQmlProperty(root, u"Material.primaryHighlightedTextColor"_qs, qmlContext(root));
     m_accentColor = QQmlProperty(root, u"Material.accentColor"_qs, qmlContext(root));
-    m_theme = QQmlProperty(root, u"Material.theme"_qs, qmlContext(root));
+    m_materialTheme = QQmlProperty(root, u"Material.theme"_qs, qmlContext(root));
 
     emit styleColorChanged();
 
-    m_theme.connectNotifySignal(this, SLOT(updateTheme()));
+    //m_materialTheme.connectNotifySignal(this, SLOT(updateTheme()));
     connect(Config::inst(), &Config::uiThemeChanged,
+            this, &QmlStyle::updateTheme);
+    connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged,
             this, &QmlStyle::updateTheme);
     updateTheme();
 }
 
 void QmlStyle::updateTheme()
 {
-    // 0: light, 1: dark, 2: system (see qquickmaterialstyle_p.h)
-    int materialTheme;
+    Application::Theme theme;
+    bool systemIsDark = (QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark);
 
     switch (Config::inst()->uiTheme()) {
-    case Config::UITheme::Light:         materialTheme = 0; break;
-    case Config::UITheme::Dark:          materialTheme = 1; break;
+    case Config::UITheme::Light:         theme = Application::LightTheme; break;
+    case Config::UITheme::Dark:          theme = Application::DarkTheme; break;
     default:
-    case Config::UITheme::SystemDefault: materialTheme = (darkThemeOS() ? 1 : 0); break;
+    case Config::UITheme::SystemDefault: theme = systemIsDark ? Application::DarkTheme
+                                                              : Application::LightTheme; break;
     }
 
-    setStatusBarColor(m_primaryColor.read().value<QColor>());
+    // 0: light, 1: dark, 2: system (see qquickmaterialstyle_p.h)
+    int materialThemeEnum = (theme == Application::DarkTheme) ? 1 : 0;
+    if (m_materialTheme.read().toInt() != materialThemeEnum)
+        m_materialTheme.write(materialThemeEnum);
 
-    if (m_theme.read().toInt() != materialTheme)
-        m_theme.write(materialTheme);
+    Application::inst()->setIconTheme(theme);
 
-    Application::inst()->setIconTheme(darkTheme() ? Application::DarkTheme : Application::LightTheme);
+    if (theme != m_theme) {
+        m_theme = theme;
+        emit darkThemeChanged(theme == Application::DarkTheme);
+    }
 }
 
 QColor QmlStyle::colorProperty(const QQmlProperty &property, const char *fallbackColor) const

@@ -2,11 +2,9 @@
 <resources>
     <style name="splashScreenTheme" parent="@android:style/Theme.Material.NoActionBar">
         <item name="android:windowBackground">@drawable/splashscreen</item>
-<!-- Qt switches to a black status bar while displaying the internal splash screen, making it
-     flicker blue -> black -> blue. We better keep the default color, until this is fixed in Qt.
-        <item name="android:colorPrimaryDark">@color/blue_500</item>
-        <item name="android:colorPrimary">@color/blue_500</item>
-        <item name="android:windowLightStatusBar">false</item> -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>
 

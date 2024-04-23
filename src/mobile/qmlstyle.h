@@ -11,6 +11,10 @@
 #include <QtQml/QQmlProperty>
 #include <QtQml/QQmlEngine>
 
+#include "common/application.h"
+
+
+class QmlStylePrivate;
 
 class QmlStyle : public QObject
 {
@@ -76,12 +80,12 @@ signals:
     void screenMarginsChanged();
     void rootWindowChanged(); // dummy, never emitted
 
-private slots:
-    void updateTheme();
-
 private:
+    void updateTheme();
+    void setScreenMargins(const QMargins &newMargins);
     QColor colorProperty(const QQmlProperty &property, const char *fallbackColor) const;
 
+    Application::Theme m_theme;
     QPointer<QObject> m_root;
     bool m_smallSize = false;
 
@@ -93,5 +97,10 @@ private:
     QQmlProperty m_backgroundColor;
     QQmlProperty m_accentTextColor;
     QQmlProperty m_accentColor;
-    QQmlProperty m_theme;
-};;
+    QQmlProperty m_materialTheme;
+
+    QMargins m_screenMargins;
+    qreal m_screenDpr = qreal(1);
+
+    friend void androidSetScreenMargins(const QMargins &margins);
+};
