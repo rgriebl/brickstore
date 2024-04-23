@@ -355,6 +355,7 @@ class QmlDebug : public QObject
     QML_NAMED_ELEMENT(Debug)
     QML_UNCREATABLE("")
     Q_PROPERTY(bool showTracers READ showTracers WRITE setShowTracers NOTIFY showTracersChanged FINAL)
+    Q_PROPERTY(bool slowAnimations READ slowAnimations WRITE setSlowAnimations NOTIFY slowAnimationsChanged FINAL)
     Q_PROPERTY(QAbstractListModel *log READ log CONSTANT FINAL)
 
 public:
@@ -362,13 +363,17 @@ public:
 
     bool showTracers() const;
     void setShowTracers(bool newShowTracers);
-    QAbstractListModel *log() const;
+    Q_SIGNAL void showTracersChanged(bool newShowTracers);
 
-signals:
-    void showTracersChanged(bool newShowTracers);
+    bool slowAnimations() const;
+    void setSlowAnimations(bool newSlowAnimations);
+    Q_SIGNAL void slowAnimationsChanged(bool slowAnimations);
+
+    QAbstractListModel *log() const;
 
 private:
     bool m_showTracers;
+    bool m_slowAnimations;
 };
 
 class QmlAnnouncements

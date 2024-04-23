@@ -10,6 +10,7 @@
 #include <QGuiApplication>
 #include <QPalette>
 #include <QWindow>
+#include <QtCore/private/qabstractanimation_p.h>
 
 #include "utility/utility.h"
 #include "utility/exception.h"
@@ -1086,6 +1087,20 @@ void QmlDebug::setShowTracers(bool newShowTracers)
     if (m_showTracers != newShowTracers) {
         m_showTracers = newShowTracers;
         emit showTracersChanged(newShowTracers);
+    }
+}
+
+bool QmlDebug::slowAnimations() const
+{
+    return m_slowAnimations;
+}
+
+void QmlDebug::setSlowAnimations(bool newSlowAnimations)
+{
+    if (m_slowAnimations != newSlowAnimations) {
+        m_slowAnimations = newSlowAnimations;
+        QUnifiedTimer::instance()->setSlowModeEnabled(m_slowAnimations);
+        emit slowAnimationsChanged(m_slowAnimations);
     }
 }
 
