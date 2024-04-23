@@ -12,7 +12,7 @@ FullscreenDialog {
     id: root
     title: qsTr("Part out")
 
-    property BL.Item currentItem: BL.BrickLink.noItem
+    property alias currentItem: itemList.currentItem
 
     property var goBackFunction
     onBackClicked: {
@@ -26,8 +26,8 @@ FullscreenDialog {
         category: "ImportInventoryDialog"
 
         property alias itemType: ittTabs.currentIndex
-        property alias itemZoom: zoom.value
-        property alias itemFilter: filter.text
+        property alias itemZoom: itemList.zoom
+        property alias itemFilterText: itemList.filterText
 
         property alias importQuantity: importWidget.quantity
         property alias importCondition: importWidget.condition
@@ -87,7 +87,7 @@ FullscreenDialog {
 
                     function updateFilters() {
                         catList.model.filterItemType = currentItem.itemTypePointer
-                        itemListModel.filterItemType = currentItem.itemTypePointer
+                        itemList.model.filterItemType = currentItem.itemTypePointer
                     }
 
                     // the sort comes after the first setCurrentIndex, so we have to re-do the
@@ -114,10 +114,10 @@ FullscreenDialog {
                         required property string name
                         required property var categoryPointer
                         text: name
-                        highlighted: (itemListModel.filterCategory === categoryPointer)
+                        highlighted: (itemList.model.filterCategory === categoryPointer)
 
                         onClicked: {
-                            itemListModel.filterCategory = categoryPointer
+                            itemList.model.filterCategory = categoryPointer
                             pages.currentIndex = 1
                         }
                     }
@@ -126,107 +126,13 @@ FullscreenDialog {
         }
 
         Pane {
-            id: itemListPage
             padding: 0
-
-            ColumnLayout {
+            ItemList {
+                id: itemList
                 anchors.fill: parent
+                filterWithoutInventory: true
 
-                RowLayout {
-                    Layout.topMargin: 8
-                    Layout.leftMargin: 8
-                    Layout.rightMargin: 8
-
-                    TextField {
-                        id: filter
-                        Layout.fillWidth: true
-                        placeholderText: qsTr("Filter")
-                    }
-                    SpinBox {
-                        id: zoom
-                        from: 50
-                        to: 500
-                        value: 100
-                        stepSize: 25
-                        textFromValue: function(value, locale) { return value + "%" }
-                    }
-                }
-                GridView {
-                    id: itemList
-
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-
-                    FontMetrics { id: fm; font: itemListPage.font }
-
-                    property int labelHeight: fm.height + 8
-
-                    clip: true
-                    cellWidth: zoom.value / 100 * Screen.pixelDensity * 20 // 20mm
-                    cellHeight: cellWidth * 3 / 4 + labelHeight
-                    cacheBuffer: cellHeight
-                    ScrollIndicator.vertical: ScrollIndicator { minimumSize: 0.05 }
-
-                    model: BL.ItemModel {
-                        id: itemListModel
-                        filterWithoutInventory: true
-                        filterText: filter.text
-
-                        Component.onCompleted: { sort(1, Qt.AscendingOrder) }
-                    }
-
-                    property var noImage: BL.BrickLink.noImage(cellWidth, cellHeight)
-
-                    delegate: MouseArea {
-                        id: delegate
-                        width: GridView.view.cellWidth
-                        height: GridView.view.cellHeight
-                        required property string id
-                        required property string name
-                        required property var itemPointer
-                        property BL.Item blitem: BL.BrickLink.item(delegate.itemPointer)
-                        property BL.Picture pic: BL.BrickLink.picture(blitem, blitem.defaultColor)
-
-                        QImageItem {
-                            anchors.fill: parent
-                            anchors.bottomMargin: itemList.labelHeight
-                            image: delegate.pic && delegate.pic.isValid ? delegate.pic.image : itemList.noImage
-                        }
-                        Label {
-                            x: 8
-                            width: parent.width - 2 * x
-                            height: itemList.labelHeight
-                            anchors.bottom: parent.bottom
-                            fontSizeMode: Text.Fit
-                            minimumPixelSize: 5
-                            clip: true
-                            text: delegate.id
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        onClicked: {
-                            root.currentItem = blitem
-                            pages.currentIndex = 2
-                        }
-                    }
-
-                    PinchHandler {
-                        target: null
-
-                        property real startScale
-
-                        grabPermissions: PointerHandler.CanTakeOverFromAnything
-
-                        onActiveChanged: {
-                            if (active)
-                                startScale = zoom.value / 100
-                        }
-                        onActiveScaleChanged: {
-                            if (active)
-                                zoom.value = startScale * activeScale * 100
-                        }
-                    }
-                }
+                onItemSelected: pages.currentIndex = 2
             }
         }
 

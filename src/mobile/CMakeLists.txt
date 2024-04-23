@@ -78,6 +78,7 @@ qt_add_qml_module(mobile_module
         IncDecPricesDialog.qml
         InfoWidget.qml
         InventoryWidget.qml
+        ItemList.qml
         ItemScannerDialog.qml
         Main.qml
         MainWindow.qml
