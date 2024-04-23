@@ -120,21 +120,21 @@ QCoro::Task<UIHelpers::StandardButton> MobileUIHelpers::showMessageBox(QString m
                                                                        QString title)
 {
     Q_UNUSED(icon)
+    Q_UNUSED(defaultButton)
 
-    auto messageDialog = createDialog<QQuickMessageDialog>(s_engine, {
-                                                               { u"title"_qs, title },
-                                                               { u"text"_qs, msg },
-                                                               { u"buttons"_qs, int(buttons) }
-                                                           });
-
-    if (!messageDialog)
-        co_return defaultButton;
-
-    auto [button, role] = co_await qCoro(messageDialog, &QQuickMessageDialog::buttonClicked);
-
-    Q_UNUSED(role)
-    messageDialog->deleteLater();
-    co_return static_cast<StandardButton>(button);
+    const QVariantMap properties = {
+        { u"title"_qs, title },
+        { u"text"_qs, msg },
+        { u"standardButtons"_qs, int(buttons) },
+    };
+    auto dialog = createPopup<QQuickDialog>(s_engine, u"Mobile/MessageDialog.qml"_qs, properties);
+    if (!dialog)
+        co_return { };
+    co_await qCoro(dialog, &QQuickDialog::closed);
+    dialog->deleteLater();
+    auto buttonResult = static_cast<StandardButton>(dialog->property("buttonResult").toInt());
+    qWarning() << "showMessageBox:" << buttonResult;
+    co_return buttonResult;
 }
 
 QCoro::Task<std::optional<QString>> MobileUIHelpers::getInputString(QString text,

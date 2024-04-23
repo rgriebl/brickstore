@@ -81,6 +81,7 @@ qt_add_qml_module(mobile_module
         ItemScannerDialog.qml
         Main.qml
         MainWindow.qml
+        MessageDialog.qml
         PriceGuideWidget.qml
         ScrollableLayout.qml
         SelectColor.qml
