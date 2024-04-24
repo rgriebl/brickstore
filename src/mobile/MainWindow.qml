@@ -347,42 +347,43 @@ Control {
             }
         })
 
-        connectionContext = BS.ActionManager.connectQuickActionTable({
-            "document_import_bl_inv": () => {
-                setActiveDocument(null)
-                homeStack.push("ImportInventoryDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
-            },
-            "document_import_bl_order": () => {
-                BS.BrickStore.checkBrickLinkLogin().then(function(ok) {
-                    if (ok) {
-                        setActiveDocument(null)
-                        homeStack.push("ImportOrderDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
-                    }
-                })
-            },
-            "document_import_bl_cart": () => {
-                BS.BrickStore.checkBrickLinkLogin().then(function(ok) {
-                    if (ok) {
-                        setActiveDocument(null)
-                        homeStack.push("ImportCartDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
-                    }
-                })
-            },
-            "document_import_bl_wanted": () => {
-                BS.BrickStore.checkBrickLinkLogin().then(function(ok) {
-                    if (ok) {
-                        setActiveDocument(null)
-                        homeStack.push("ImportWantedListDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
-                    }
-                })
-            },
-            "update_database": () => { BS.BrickStore.updateDatabase() },
-            "help_about": () => { aboutDialog.active = true },
-            "help_systeminfo": () => {
-                homeStack.push("SystemInfoDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
-            },
-            "help_announcements": () => { },
-        })
+        connectionContext = BS.ActionManager.connectQuickActionTable
+        ({
+             "document_import_bl_inv": () => {
+                 setActiveDocument(null)
+                 homeStack.push("ImportInventoryDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
+             },
+             "document_import_bl_order": () => {
+                 BS.BrickStore.checkBrickLinkLogin().then(function(ok) {
+                     if (ok) {
+                         setActiveDocument(null)
+                         homeStack.push("ImportOrderDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
+                     }
+                 })
+             },
+             "document_import_bl_cart": () => {
+                 BS.BrickStore.checkBrickLinkLogin().then(function(ok) {
+                     if (ok) {
+                         setActiveDocument(null)
+                         homeStack.push("ImportCartDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
+                     }
+                 })
+             },
+             "document_import_bl_wanted": () => {
+                 BS.BrickStore.checkBrickLinkLogin().then(function(ok) {
+                     if (ok) {
+                         setActiveDocument(null)
+                         homeStack.push("ImportWantedListDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
+                     }
+                 })
+             },
+             "update_database": () => { BS.BrickStore.updateDatabase() },
+             "help_about": () => { aboutDialog.active = true },
+             "help_systeminfo": () => {
+                 homeStack.push("SystemInfoDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
+             },
+             "help_announcements": () => { },
+         })
 
         for (let i = 0; i < BS.BrickStore.documents.count; ++i)
             createViewForDocument(BS.BrickStore.documents.document(i));

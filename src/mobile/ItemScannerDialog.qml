@@ -7,20 +7,33 @@ import BrickLink as BL
 import BrickStore as BS
 import Scanner as Scanner
 
-
 AutoSizingDialog {
     id: root
-    relativeWidth: .8
-    relativeHeight: .8
 
     required property BS.Document document
+
+    property string addButtonText: qsTr("Add")
+    property string addButtonIconName: "edit-additems"
+
+    property BL.Item currentItem
+
+    BS.ExtraConfig {
+        category: "ItemScannerDialog"
+
+        property alias zoom: itemList.zoom
+        property alias backendId: capture.currentBackendId
+        property alias cameraId: capture.currentCameraId
+    }
 
     Scanner.Capture {
         id: capture
         videoOutput: viewFinder
 
         onCaptureAndScanFinished: function(items) {
-            console.log("scanned", items.length)
+            let f = ""
+            items.forEach(function (item) { f += (f ? "," : "") + item.itemType.id + item.id })
+            itemList.filterText = "scan:" + f
+            pages.currentIndex = 1
         }
 
         onStateChanged: statusText.update()
@@ -28,97 +41,154 @@ AutoSizingDialog {
     }
     MediaDevices { id: mediaDevices }
 
-    ColumnLayout {
-        anchors.fill: parent
+    footer: Control {
+        horizontalPadding: Style.smallSize ? 24 : 48
+        verticalPadding: 6
 
-        Scanner.CameraPreview {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+        contentItem: StackLayout {
+            currentIndex: pages.currentIndex
 
-            id: viewFinder
-            property int buttonInset: 10
-            progress: capture.progress
-            onClicked: capture.captureAndScan()
+            Label {
+                id: statusText
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                textFormat: Text.StyledText
+                wrapMode: Text.WordWrap
 
-            RowLayout {
-                anchors {
-                    top: parent.top
-                    left: parent.left
-                    right: parent.right
-                }
+                Tracer { }
 
-                Button {
-                    id: cameraButton
-                    topInset: viewFinder.buttonInset
-                    bottomInset: viewFinder.buttonInset
-                    leftInset: viewFinder.buttonInset
-                    rightInset: viewFinder.buttonInset
-                    icon.name: "camera-photo"
-                    icon.color: "transparent"
-                    onClicked: cameraMenu.open()
-
-                    AutoSizingMenu {
-                        id: cameraMenu
-                        Repeater {
-                            model: mediaDevices.videoInputs
-                            MenuItem {
-                                text: modelData.description
-                                icon: cameraButton.icon
-                                onTriggered: capture.currentCameraId = modelData.id
-                            }
-                        }
-                    }
-                }
-                Item { Layout.fillWidth: true }
-                Button {
-                    id: backendButton
-                    topInset: viewFinder.buttonInset
-                    bottomInset: viewFinder.buttonInset
-                    leftInset: viewFinder.buttonInset
-                    rightInset: viewFinder.buttonInset
-                    icon.source: Scanner.Core.backendFromId(capture.currentBackendId)?.icon
-                    icon.color: "transparent"
-                    onClicked: backendMenu.open()
-
-                    AutoSizingMenu {
-                        id: backendMenu
-                        Repeater {
-                            model: Scanner.Core.availableBackends
-                            MenuItem {
-                                text: modelData.name
-                                icon.source: modelData.icon
-                                icon.color: "transparent"
-                                onTriggered: capture.currentBackendId = modelData.id
-                            }
-                        }
+                function update() {
+                    switch (capture.state) {
+                    case Scanner.Capture.State.Idle:
+                        if (mediaDevices.videoInputs.length)
+                            text = qsTr("Tap on the camera preview to capture an image.")
+                        else
+                            text = "<b>" + qsTr("There is no camera connected.") + "</b>"
+                        break
+                    case Scanner.Capture.State.NoMatch:
+                        text = "<b>" + qsTr("No matching item found - try again.") + "</b>"
+                        break
+                    case Scanner.Capture.State.Error:
+                        text = "<b>" + qsTr("An error occurred:") + "</b><br>" + capture.lastError
+                        break
                     }
                 }
             }
-        }
 
-        Label {
-            Layout.fillWidth: true
+            RowLayout {
+                Button {
+                    flat: true
+                    icon.name: "help-about"
+                    text: qsTr("Info")
+                    enabled: !itemList.currentItem.isNull
+                    onClicked: {
+                        let item = itemList.currentItem
+                        infoDialog.selection = [{ "item": item, "color": item?.defaultColor, "quantity": 1 }]
+                        infoDialog.open()
+                    }
 
-            id: statusText
-            horizontalAlignment: Text.AlignHCenter
-            textFormat: Text.StyledText
-            wrapMode: Text.WordWrap
-
-            function update() {
-                switch (capture.state) {
-                case Scanner.Capture.State.Idle:
-                    if (mediaDevices.videoInputs.length)
-                        text = qsTr("Tap on the camera preview to capture an image.")
-                    else
-                        text = "<b>" + qsTr("There is no camera connected.") + "</b>"
-                    break
-                case Scanner.Capture.State.NoMatch:
-                    text = "<b>" + qsTr("No matching item found - try again.") + "</b>"
-                    break
-                case Scanner.Capture.State.Error:
-                    text = "<b>" + qsTr("An error occurred:") + "</b><br>" + capture.lastError
-                    break
+                    SelectionInfoDialog { id: infoDialog }
                 }
+                Item { Layout.fillWidth: true }
+                Button {
+                    flat: true
+                    icon.name: "view-refresh"
+                    text: qsTr("Retry")
+                    onClicked: pages.currentIndex = 0
+                }
+                Item { Layout.fillWidth: true }
+                Button {
+                    flat: true
+                    icon.name: root.addButtonIconName
+                    text: root.addButtonText
+                    enabled: !itemList.currentItem.isNull
+                    onClicked: { root.currentItem = itemList.currentItem; root.close() }
+                }
+            }
+        }
+    }
+
+    SwipeView {
+        id: pages
+        interactive: false
+        anchors.fill: parent
+        anchors.leftMargin: -root.leftPadding
+        anchors.rightMargin: -root.rightPadding
+        anchors.bottomMargin: -root.bottomPadding
+        clip: true
+
+        Pane {
+            padding: 0
+
+                Scanner.CameraPreview {
+                    id: viewFinder
+                    anchors.fill: parent
+                    property int buttonInset: 10
+                    progress: capture.progress
+                    onClicked: capture.captureAndScan()
+
+                    RowLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                        }
+
+                        Button {
+                            id: cameraButton
+                            topInset: viewFinder.buttonInset
+                            bottomInset: viewFinder.buttonInset
+                            leftInset: viewFinder.buttonInset
+                            rightInset: viewFinder.buttonInset
+                            icon.name: "camera-photo"
+                            icon.color: "transparent"
+                            onClicked: cameraMenu.open()
+
+                            AutoSizingMenu {
+                                id: cameraMenu
+                                Repeater {
+                                    model: mediaDevices.videoInputs
+                                    MenuItem {
+                                        text: modelData.description
+                                        icon: cameraButton.icon
+                                        onTriggered: capture.currentCameraId = modelData.id
+                                    }
+                                }
+                            }
+                        }
+                        Item { Layout.fillWidth: true }
+                        Button {
+                            id: backendButton
+                            topInset: viewFinder.buttonInset
+                            bottomInset: viewFinder.buttonInset
+                            leftInset: viewFinder.buttonInset
+                            rightInset: viewFinder.buttonInset
+                            icon.source: Scanner.Core.backendFromId(capture.currentBackendId)?.icon
+                            icon.color: "transparent"
+                            onClicked: backendMenu.open()
+
+                            AutoSizingMenu {
+                                id: backendMenu
+                                Repeater {
+                                    model: Scanner.Core.availableBackends
+                                    MenuItem {
+                                        text: modelData.name
+                                        icon.source: modelData.icon
+                                        icon.color: "transparent"
+                                        onTriggered: capture.currentBackendId = modelData.id
+                                    }
+                                }
+                            }
+                        }
+
+                }
+            }
+        }
+        Pane {
+            padding: 0
+            ItemList {
+                id: itemList
+                anchors.fill: parent
             }
         }
     }

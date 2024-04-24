@@ -12,11 +12,12 @@ Loader {
     signal accepted()
     signal rejected()
     signal opened()
+    signal closed()
 
     asynchronous: true
     active: false
     onLoaded: {
-        item.onClosed.connect(() => { if (root) root.active = !root.autoUnload })
+        item.onClosed.connect(() => { if (root) { root.closed(); root.active = !root.autoUnload } })
         item.onAccepted.connect(() => { root.accepted() })
         item.onRejected.connect(() => { root.rejected() })
         item.open()

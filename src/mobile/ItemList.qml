@@ -91,8 +91,8 @@ Control {
                     }
                 }
                 Label {
-                    leftInset: 8
-                    rightInset: 8
+                    leftPadding: 4
+                    rightPadding: 4
                     width: parent.width
                     height: itemList.labelHeight
                     anchors.bottom: parent.bottom
@@ -105,7 +105,6 @@ Control {
                     background: Rectangle {
                         visible: root.currentItem === blitem
                         color: Style.primaryColor
-                        radius: 5
                     }
                 }
                 onClicked: {

@@ -510,6 +510,25 @@ Page {
             }
         }
         sourceComponent: addItems
+        onClosed: {
+            if (!item.currentItem.isNull) {
+                let newItem = item.currentItem
+                let newColor = BL.BrickLink.color(0)
+                if (newItem.itemType.hasColors) {
+                    let knownColors = newItem.knownColors
+                    if (knownColors.length > 0)
+                        newColor = knownColors[0]
+                }
+
+                let row = root.document.lots.add(newItem, newColor)
+                if (row !== -1) {
+                    let index = table.model.index(row, 0)
+                    table.selectionModel.select(index, ItemSelectionModel.Rows
+                                                | ItemSelectionModel.ClearAndSelect)
+                    table.positionViewAtRow(table.rowAtIndex(index), TableView.Contain)
+                }
+            }
+        }
     }
 
     property QtObject connectionContext: null
@@ -518,19 +537,19 @@ Page {
     onActiveChanged: {
         if (active) {
             connectionContext = BS.ActionManager.connectQuickActionTable
-                    ({
-                         "edit_price_to_priceguide": () => { setToPGDialog.open() },
-                         "edit_color": () => { selectColorDialog.open() },
-                         "edit_price_inc_dec": () => { adjustPriceDialog.open() },
-                         "edit_cost_inc_dec": () => { adjustCostDialog.open() },
-                         "edit_additems": () => {
-                             Scanner.Core.checkSystemPermissions(this, function(granted) {
-                                 if (granted) {
-                                     addItemsDialog.open()
-                                 }
-                             })
-                         },
+            ({
+                 "edit_price_to_priceguide": () => { setToPGDialog.open() },
+                 "edit_color": () => { selectColorDialog.open() },
+                 "edit_price_inc_dec": () => { adjustPriceDialog.open() },
+                 "edit_cost_inc_dec": () => { adjustCostDialog.open() },
+                 "edit_additems": () => {
+                     Scanner.Core.checkSystemPermissions(this, function(granted) {
+                         if (granted) {
+                             addItemsDialog.open()
+                         }
                      })
+                 },
+             })
         } else {
             BS.ActionManager.disconnectQuickActionTable(connectionContext)
             connectionContext = null

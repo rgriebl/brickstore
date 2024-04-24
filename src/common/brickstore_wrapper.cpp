@@ -1140,8 +1140,9 @@ int QmlDocumentLots::add(BrickLink::QmlItem item, BrickLink::QmlColor color)
     auto lot = new Lot();
     lot->setItem(item.wrappedObject());
     lot->setColor(color.wrappedObject());
+    auto lotRef = lot;
     m_model->appendLot(std::move(lot));
-    return int(m_model->lots().indexOf(lot));
+    return int(m_model->lots().indexOf(lotRef));
 }
 
 /*! \qmlmethod Document::lots.remove(Lot lot)
