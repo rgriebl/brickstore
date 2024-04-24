@@ -10,26 +10,27 @@ import LDraw
 
 Control {
     id: root
-    property BS.Document document
-    property BL.Lot lot
+    property BL.Item item
+    property BL.Color color
 
     property bool is3D: true
     property bool prefer3D: true
     property BL.Picture picture
     property bool isUpdating: (picture && (picture.updateStatus === BL.BrickLink.UpdateStatus.Updating))
 
-    onLotChanged: { updateInfo() }
+    onItemChanged: { Qt.callLater(updateInfo) }
+    onColorChanged: { Qt.callLater(updateInfo) }
 
     function updateInfo() {
         if (picture)
             picture.release()
         picture = null
 
-        picture = BL.BrickLink.picture(lot.item, lot.color, true)
+        picture = BL.BrickLink.picture(root.item, root.color, true)
         if (picture)
             picture.addRef()
 
-        info3D.renderController.setItemAndColor(lot.item, lot.color)
+        info3D.renderController.setItemAndColor(root.item, root.color)
         root.is3D = prefer3D && info3D.renderController.canRender
     }
 

@@ -103,7 +103,7 @@ public:
     Q_INVOKABLE void sort(int column, Qt::SortOrder order) override;
     Q_INVOKABLE void sortAdditionally(int column, Qt::SortOrder order);
 
-    Q_INVOKABLE DocumentStatistics selectionStatistics(bool ignoreExcluded = false) const;
+    Q_INVOKABLE DocumentStatistics statistics(bool ignoreExcluded = false) const;
 
     Q_INVOKABLE void saveCurrentColumnLayout();
     Q_INVOKABLE void setColumnLayoutFromId(const QString &layoutId);
@@ -525,6 +525,16 @@ private:
     friend class BrickLink::QmlLot::Setter;
 };
 
+
+class QmlDocumentStatistics
+{
+    Q_GADGET
+    QML_FOREIGN(DocumentStatistics)
+    QML_NAMED_ELEMENT(DocumentStatistics)
+    QML_UNCREATABLE("")
+};
+
+
 class QmlLotList
 {
     Q_GADGET
@@ -532,7 +542,6 @@ class QmlLotList
     QML_ANONYMOUS
     QML_SEQUENTIAL_CONTAINER(BrickLink::QmlLot)
 };
-
 
 
 class QmlDocumentList : public QIdentityProxyModel

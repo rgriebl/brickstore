@@ -11,23 +11,18 @@ import BrickStore as BS
 
 Control {
     id: root
-    property BS.Document document: null
+
+    required property string currencyCode
+
     property BL.Item item: BL.BrickLink.noItem
     property BL.Color color: BL.BrickLink.noColor
 
     property BL.PriceGuide priceGuide: null
     property bool isUpdating: (priceGuide && (priceGuide.updateStatus === BL.BrickLink.UpdateStatus.Updating))
-    property real currencyRate: document ? BS.Currency.rate(document.currencyCode) : 0
+    property real currencyRate: BS.Currency.rate(currencyCode)
 
-
-    onItemChanged: { delayedUpdateTimer.start() }
-    onColorChanged: { delayedUpdateTimer.start() }
-
-    Timer {
-        id: delayedUpdateTimer
-        interval: 100
-        onTriggered: { root.updatePriceGuide() }
-    }
+    onItemChanged: { Qt.callLater(root.updatePriceGuide) }
+    onColorChanged: { Qt.callLater(root.updatePriceGuide) }
 
     function updatePriceGuide() {
         if (priceGuide)
@@ -98,7 +93,7 @@ Control {
             }
             HeaderLabel {
                 id: currency
-                text: root.document ? root.document.currencyCode : ''
+                text: root.currencyCode
             }
         }
         HeaderLabel { text: qsTr("New") }

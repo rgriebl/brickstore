@@ -465,7 +465,7 @@ void QmlDocument::sortAdditionally(int column, Qt::SortOrder order)
     model()->multiSort(sc);
 }
 
-DocumentStatistics QmlDocument::selectionStatistics(bool ignoreExcluded) const
+DocumentStatistics QmlDocument::statistics(bool ignoreExcluded) const
 {
     const auto &selected = m_doc->selectedLots();
 

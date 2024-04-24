@@ -11,67 +11,54 @@ AutoSizingDialog {
     relativeWidth: .8
     relativeHeight: .8
 
-    //padding: 0
+    property BS.DocumentStatistics statistics
+    property var selection // can be LotList or simple lots
 
-    required property BS.Document document
-
-    property int selectionSize: 0
     property var simpleLots: []
 
     function updateInfos() {
-        selectionSize = document.selectedLots.length
+        let item = BL.BrickLink.noItem
+        let color = BL.BrickLink.noColor
 
-        if (selectionSize === 1) {
+        if (selection.length === 1) {
+            item = selection[0].item
+            color = selection[0].color
+
             root.title = ''
             infoText.text = ''
-
-            let lot = document.selectedLots[0]
-            info.lot = lot
-
-            priceGuide.item = lot.item
-            priceGuide.color = lot.color
-
-            simpleLots = [ { item: lot.item, color: lot.color, quantity: lot.quantity } ]
-
-            headerText.text = //"<center>"
-                    BL.BrickLink.itemHtmlDescription(lot.item, lot.color, Style.accentColor)
-                    //+ "</center>"
+            headerText.text = BL.BrickLink.itemHtmlDescription(item, color, Style.accentColor)
             headerText.visible = true
         } else {
-            root.title = (selectionSize === 0) ? qsTr("Document statistics")
-                                               : qsTr("Multiple lots selected")
+            root.title = (selection.length === 0) ? qsTr("Document statistics")
+                                                  : qsTr("Multiple lots selected")
+            infoText.text = statistics.asHtmlTable()
             headerText.visible = false
             headerText.text = ''
-
-            let stat = document.selectionStatistics()
-            infoText.text = stat.asHtmlTable()
-
-            info.lot = BL.BrickLink.noLot
-
-            priceGuide.item = BL.BrickLink.noItem
-            priceGuide.color = BL.BrickLink.noColor
-
-            let sl = []
-            document.selectedLots.forEach(function(lot) {
-                if (!lot.item.isNull && !lot.color.isNull)
-                    sl.push({ item: lot.item, color: lot.color, quantity: lot.quantity })
-            })
-            simpleLots = sl
         }
-        if (!tabBar.currentItem.visible)
-            tabBar.currentIndex = 0
+
+        info.item = priceGuide.item = item
+        info.color = priceGuide.color = color
+
+        let sl = []
+        selection.forEach(function(lot) {
+            sl.push({ item: lot.item, color: lot.color, quantity: lot.quantity })
+        })
+        simpleLots = sl
+
+        // if (!tabBar.currentItem.visible)
+        //     tabBar.currentIndex = 0
     }
 
     function clearInfos() {
-        info.lot = BL.BrickLink.noLot
-
-        priceGuide.item = BL.BrickLink.noItem
-        priceGuide.color = BL.BrickLink.noColor
+        info.item = priceGuide.item = BL.BrickLink.noItem
+        info.color = priceGuide.color = BL.BrickLink.noColor
 
         simpleLots = []
     }
 
-    onAboutToShow: { updateInfos() }
+    onAboutToShow: { Qt.callLater(updateInfos) }
+    onStatisticsChanged: { Qt.callLater(updateInfos) }
+    onSelectionChanged: { Qt.callLater(updateInfos) }
     onClosed: { clearInfos() }
 
 
@@ -106,7 +93,7 @@ AutoSizingDialog {
             Repeater {
                 id: tabRepeater
                 model: {
-                    switch (root.selectionSize) {
+                    switch (root.simpleLots.length) {
                     case  0: return tabBar.tabs.slice(0, 1)
                     case  1: return tabBar.tabs
                     default: return tabBar.tabs.filter((_, idx) => idx !== 1)
@@ -116,8 +103,12 @@ AutoSizingDialog {
                     icon.name: modelData.icon
                     text: Style.smallSize ? undefined : modelData.label
                     property int swipeIndex: modelData.index
-                    property bool current: swipeView.currentIndex === swipeIndex
-                    onCurrentChanged: if (current) TabBar.tabBar.currentIndex = TabBar.index
+                    // property bool current: swipeView.currentIndex === swipeIndex
+                    // onCurrentChanged: if (current) TabBar.tabBar.currentIndex = TabBar.index
+                    Component.onCompleted: {
+                        // otherwise the currentIndex increases on every Repeater instantiation
+                        TabBar.tabBar.currentIndex = 0
+                    }
                 }
             }
         }
@@ -132,7 +123,7 @@ AutoSizingDialog {
 
             StackLayout {
                 clip: true
-                currentIndex: (root.selectionSize === 1) ? 1 : 0
+                currentIndex: (root.simpleLots.length === 1) ? 1 : 0
 
                 Label {
                     id: infoText
@@ -141,15 +132,12 @@ AutoSizingDialog {
                     leftPadding: 8
                 }
 
-                InfoWidget {
-                    id: info
-                    document: root.document
-                }
+                InfoWidget { id: info }
             }
 
             ScrollableLayout {
                 id: pgScroller
-                visible: root.selectionSize === 1
+                visible: root.simpleLots.length === 1
 
                 SwipeView.onIsCurrentItemChanged: { if (SwipeView.isCurrentItem) flashScrollIndicators() }
 
@@ -161,7 +149,7 @@ AutoSizingDialog {
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
                         id: priceGuide
-                        document: root.document
+                        currencyCode: root.statistics?.currencyCode ?? 'USD'
                     }
                 }
             }
@@ -170,25 +158,25 @@ AutoSizingDialog {
                 id: appearsIn
                 mode: BL.InventoryModel.Mode.AppearsIn
                 simpleLots: root.simpleLots
-                visible: root.selectionSize > 0
+                visible: root.simpleLots.length > 0
             }
             InventoryWidget {
                 id: consistsOf
                 mode: BL.InventoryModel.Mode.ConsistsOf
                 simpleLots: root.simpleLots
-                visible: root.selectionSize > 0
+                visible: root.simpleLots.length > 0
             }
             InventoryWidget {
                 id: canBuild
                 mode: BL.InventoryModel.Mode.CanBuild
                 simpleLots: root.simpleLots
-                visible: root.selectionSize > 0
+                visible: root.simpleLots.length > 0
             }
             InventoryWidget {
                 id: related
                 mode: BL.InventoryModel.Mode.Relationships
                 simpleLots: root.simpleLots
-                visible: root.selectionSize > 0
+                visible: root.simpleLots.length > 0
             }
         }
     }

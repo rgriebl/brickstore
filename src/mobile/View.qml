@@ -21,8 +21,16 @@ Page {
     DialogLoader {
         id: infoDialog
         autoUnload: false
-        Component.onCompleted: {
-            setSource("SelectionInfoDialog.qml", { "document": root.document })
+
+        Component {
+            id: infoDialogComponent
+            SelectionInfoDialog { }
+        }
+        sourceComponent: infoDialogComponent
+
+        onOpened: {
+            item.statistics = root.document.statistics()
+            item.selection = root.document.selectedLots
         }
     }
 
