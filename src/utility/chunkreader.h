@@ -9,8 +9,20 @@
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
-#define ChunkId(a,b,c,d)    quint32((quint32(d & 0x7f) << 24) | (quint32(c & 0x7f) << 16) | (quint32(b & 0x7f) << 8) | quint32(a & 0x7f))
-#define ChunkVersion(v)     (quint64(v) << 32)
+
+template<std::size_t N>
+constexpr quint32 ChunkId(char const(&str)[N])
+{
+    static_assert(N-1 == 4, "Chunk ID must be 4 characters long");
+    return (quint32(str[3] & 0x7f) << 24) | (quint32(str[2] & 0x7f) << 16) |
+           (quint32(str[1] & 0x7f) << 8) | quint32(str[0] & 0x7f);
+}
+
+constexpr quint64 ChunkVersion(uint v)
+{
+    return quint64(v) << 32;
+}
+
 
 class ChunkReader {
 public:
