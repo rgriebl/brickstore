@@ -27,7 +27,7 @@ Dialog {
     property double doubleMaximum
     property int doubleDecimals
 
-    onDoubleValueChanged: dblSpin.value = doubleValue * dblSpin.factor
+    Component.onCompleted: dblSpin.value = root.doubleValue * dblSpin.factor
 
     FontMetrics {
         id: fm
@@ -47,6 +47,7 @@ Dialog {
             id: text
             visible: root.mode === "string"
             echoMode: root.isPassword ? TextInput.Password : TextInput.Normal
+            inputMethodHints: root.isPassword ? Qt.ImhHiddenText | Qt.ImhSensitiveData | Qt.ImhNoAutoUppercase : 0
             Layout.fillWidth: true
         }
         RowLayout {
@@ -54,6 +55,7 @@ Dialog {
                 id: intSpin
                 visible: root.mode === "int"
                 editable: true
+                inputMethodHints: Qt.ImhDigitsOnly
                 from: intValidator.bottom
                 to: intValidator.top
                 validator: IntValidator { id: intValidator }
@@ -69,26 +71,30 @@ Dialog {
                 id: dblSpin
                 visible: root.mode === "double"
                 editable: true
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
 
                 property int factor: Math.pow(10, root.doubleDecimals)
                 property double readDoubleValue: value / factor
 
                 onReadDoubleValueChanged: root.doubleValue = readDoubleValue
 
-                from: root.doubleMinimum * factor
-                to: root.doubleMaximum * factor
+                from: Math.round(root.doubleMinimum * factor)
+                to: Math.round(root.doubleMaximum * factor)
+                stepSize: factor
 
                 validator: DoubleValidator {
                     id: dblValidator
                     bottom: Math.min(dblSpin.from, dblSpin.to)
-                    top:  Math.max(dblSpin.from, dblSpin.to)
+                    top: Math.max(dblSpin.from, dblSpin.to)
+                    decimals: root.doubleDecimals
+                    notation: DoubleValidator.StandardNotation
                 }
                 textFromValue: function(value, locale) {
                     return Number(value / factor).toLocaleString(locale, 'f', root.doubleDecimals)
                 }
 
                 valueFromText: function(text, locale) {
-                    return Number.fromLocaleString(locale, text) * factor
+                    return Math.round(Number.fromLocaleString(locale, text) * factor)
                 }
                 Layout.fillWidth: true
             }

@@ -27,7 +27,7 @@ Dialog {
     property double maximum: fixed ? maxPrice : 1000
     property int decimals: fixed ? 3 : 2
 
-    onValueChanged: dblSpin.value = value * dblSpin.factor
+    Component.onCompleted: dblSpin.value = root.value * dblSpin.factor
 
     onFixedChanged: dblSpin.value = 0
 
@@ -54,26 +54,29 @@ Dialog {
                 SpinBox {
                     id: dblSpin
                     editable: true
+                    inputMethodHints: Qt.ImhFormattedNumbersOnly
 
                     property int factor: Math.pow(10, root.decimals)
                     property double readDoubleValue: value / factor
 
                     onReadDoubleValueChanged: root.value = readDoubleValue
 
-                    from: root.minimum * factor
-                    to: root.maximum * factor
+                    from: Math.round(root.minimum * factor)
+                    to: Math.round(root.maximum * factor)
 
                     validator: DoubleValidator {
                         id: dblValidator
                         bottom: Math.min(dblSpin.from, dblSpin.to)
                         top: Math.max(dblSpin.from, dblSpin.to)
+                        decimals: root.decimals
+                        notation: DoubleValidator.StandardNotation
                     }
                     textFromValue: function(value, locale) {
                         return Number(value / factor).toLocaleString(locale, 'f', root.decimals)
                     }
 
                     valueFromText: function(text, locale) {
-                        return Number.fromLocaleString(locale, text) * factor
+                        return Math.round(Number.fromLocaleString(locale, text) * factor)
                     }
                     Layout.fillWidth: true
                 }
