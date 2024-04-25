@@ -342,8 +342,6 @@ Control {
                     setActiveDocument(null)
                 else if (homeStack.depth > 1)
                     homeStack.pop()
-                else
-                    close()
             }
         })
 
