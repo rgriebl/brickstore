@@ -210,8 +210,9 @@ void Database::read(const QString &fileName)
         QDataStream &ds = cr.dataStream();
 
         ds.startTransaction();
+        cr.startChunk();
 
-        if (!cr.startChunk() || cr.chunkId() != ChunkId("BSDB"))
+        if (cr.chunkId() != ChunkId("BSDB"))
             throw Exception("invalid database format - wrong magic (%1)").arg(f.fileName());
 
         if (cr.chunkVersion() != int(Version::Latest)) {
@@ -253,12 +254,12 @@ void Database::read(const QString &fileName)
         QSet<ApiQuirk>                   apiQuirks;
 
         while (cr.startChunk()) {
-            switch (cr.chunkId() | ChunkVersion(cr.chunkVersion())) {
-            case ChunkId("DATE") | ChunkVersion(1): {
+            switch (cr.chunkIdAndVersion()) {
+            case ChunkIdAndVersion("DATE", 1): {
                 ds >> generationDate;
                 break;
             }
-            case ChunkId("COL ") | ChunkVersion(1): {
+            case ChunkIdAndVersion("COL ", 1): {
                 quint32 colc = 0;
                 ds >> colc;
                 check();
@@ -272,7 +273,7 @@ void Database::read(const QString &fileName)
                 gotColors = true;
                 break;
             }
-            case ChunkId("LCOL") | ChunkVersion(1): { // optional, can be missing or empty
+            case ChunkIdAndVersion("LCOL", 1): { // optional, can be missing or empty
                 quint32 colc = 0;
                 ds >> colc;
                 check();
@@ -285,7 +286,7 @@ void Database::read(const QString &fileName)
                 }
                 break;
             }
-            case ChunkId("CAT ") | ChunkVersion(1): {
+            case ChunkIdAndVersion("CAT ", 1): {
                 quint32 catc = 0;
                 ds >> catc;
                 check();
@@ -299,7 +300,7 @@ void Database::read(const QString &fileName)
                 gotCategories = true;
                 break;
             }
-            case ChunkId("TYPE") | ChunkVersion(1): {
+            case ChunkIdAndVersion("TYPE", 1): {
                 quint32 ittc = 0;
                 ds >> ittc;
                 check();
@@ -313,7 +314,7 @@ void Database::read(const QString &fileName)
                 gotItemTypes = true;
                 break;
             }
-            case ChunkId("ITEM") | ChunkVersion(1): {
+            case ChunkIdAndVersion("ITEM", 1): {
                 quint32 itc = 0;
                 ds >> itc;
                 check();
@@ -327,7 +328,7 @@ void Database::read(const QString &fileName)
                 gotItems = true;
                 break;
             }
-            case ChunkId("CHGL") | ChunkVersion(2): {
+            case ChunkIdAndVersion("CHGL", 2): {
                 quint32 clid = 0, clic = 0, clcc = 0;
                 ds >> clid >> clic >> clcc;
                 check();
@@ -348,7 +349,7 @@ void Database::read(const QString &fileName)
                 gotChangeLog = true;
                 break;
             }
-            case ChunkId("REL ") | ChunkVersion(1): {
+            case ChunkIdAndVersion("REL ", 1): {
                 quint32 relc = 0;
                 ds >> relc;
                 check();
@@ -362,7 +363,7 @@ void Database::read(const QString &fileName)
                 gotRelationships = true;
                 break;
             }
-            case ChunkId("RELM") | ChunkVersion(1): {
+            case ChunkIdAndVersion("RELM", 1): {
                 quint32 matchc = 0;
                 ds >> matchc;
                 check();
@@ -376,7 +377,7 @@ void Database::read(const QString &fileName)
                 gotRelationshipMatches = true;
                 break;
             }
-            case ChunkId("AKEY") | ChunkVersion(1): {
+            case ChunkIdAndVersion("AKEY", 1): {
                 quint32 akeyc = 0;
                 ds >> akeyc;
                 check();
@@ -392,7 +393,7 @@ void Database::read(const QString &fileName)
                 gotApiKeys = true;
                 break;
             }
-            case ChunkId("QIRK") | ChunkVersion(1): {
+            case ChunkIdAndVersion("QIRK", 1): {
                 quint32 qkeyc = 0;
                 ds >> qkeyc;
                 check();
@@ -413,16 +414,9 @@ void Database::read(const QString &fileName)
                 break;
             }
             }
-            if (!cr.endChunk()) {
-                throw Exception("missed the end of a chunk when reading from database (%1) at position %2")
-                    .arg(f.fileName()).arg(f.pos());
-            }
+            cr.endChunk();
         }
-        if (!cr.endChunk()) {
-            throw Exception("missed the end of the root chunk when reading from database (%1) at position %2")
-                .arg(f.fileName()).arg(f.pos());
-        }
-
+        cr.endChunk();
         ds.commitTransaction();
 
         delete sw;
@@ -541,52 +535,46 @@ void Database::write(const QString &filename, Version version) const
     ChunkWriter cw(&f, QDataStream::LittleEndian);
     QDataStream &ds = cw.dataStream();
 
-    auto check = [&ds, &f](bool ok) {
-        if (!ok || (ds.status() != QDataStream::Ok))
-            throw Exception("failed to write to database (%1) at position %2")
-                .arg(f.fileName()).arg(f.pos());
-    };
+    cw.startChunk("BSDB", uint(version));
 
-    check(cw.startChunk(ChunkId("BSDB"), uint(version)));
-
-    check(cw.startChunk(ChunkId("DATE"), 1));
+    cw.startChunk("DATE", 1);
     ds << QDateTime::currentDateTimeUtc();
-    check(cw.endChunk());
+    cw.endChunk();
 
-    check(cw.startChunk(ChunkId("COL "), 1));
+    cw.startChunk("COL ", 1);
     ds << quint32(m_colors.size());
     for (const Color &col : m_colors)
         writeColorToDatabase(col, ds, version);
-    check(cw.endChunk());
+    cw.endChunk();
 
     if ((version >= Version::V7) && !m_ldrawExtraColors.empty()) {
-        check(cw.startChunk(ChunkId("LCOL"), 1));
+        cw.startChunk("LCOL", 1);
         ds << quint32(m_ldrawExtraColors.size());
         for (const Color &col : m_ldrawExtraColors)
             writeColorToDatabase(col, ds, version);
-        check(cw.endChunk());
+        cw.endChunk();
     }
 
-    check(cw.startChunk(ChunkId("CAT "), 1));
+    cw.startChunk("CAT ", 1);
     ds << quint32(m_categories.size());
     for (const Category &cat : m_categories)
         writeCategoryToDatabase(cat, ds, version);
-    check(cw.endChunk());
+    cw.endChunk();
 
-    check(cw.startChunk(ChunkId("TYPE"), 1));
+    cw.startChunk("TYPE", 1);
     ds << quint32(m_itemTypes.size());
     for (const ItemType &itt : m_itemTypes)
         writeItemTypeToDatabase(itt, ds, version);
-    check(cw.endChunk());
+    cw.endChunk();
 
-    check(cw.startChunk(ChunkId("ITEM"), 1));
+    cw.startChunk("ITEM", 1);
     ds << quint32(m_items.size());
     for (const Item &item : m_items)
         writeItemToDatabase(item, ds, version);
-    check(cw.endChunk());
+    cw.endChunk();
 
     if (version >= Version::V9) {
-        check(cw.startChunk(ChunkId("CHGL"), 2));
+        cw.startChunk("CHGL", 2);
         ds << quint32(m_latestChangelogId)
            << quint32(m_itemChangelog.size())
            << quint32(m_colorChangelog.size());
@@ -594,19 +582,19 @@ void Database::write(const QString &filename, Version version) const
             writeItemChangeLogToDatabase(e, ds, version);
         for (const ColorChangeLogEntry &e : m_colorChangelog)
             writeColorChangeLogToDatabase(e, ds, version);
-        check(cw.endChunk());
+        cw.endChunk();
     } else {
-        check(cw.startChunk(ChunkId("ICHG"), 1));
+        cw.startChunk("ICHG", 1);
         ds << quint32(m_itemChangelog.size());
         for (const ItemChangeLogEntry &e : m_itemChangelog)
             writeItemChangeLogToDatabase(e, ds, version);
-        check(cw.endChunk());
+        cw.endChunk();
 
-        check(cw.startChunk(ChunkId("CCHG"), 1));
+        cw.startChunk("CCHG", 1);
         ds << quint32(m_colorChangelog.size());
         for (const ColorChangeLogEntry &e : m_colorChangelog)
             writeColorChangeLogToDatabase(e, ds, version);
-        check(cw.endChunk());
+        cw.endChunk();
     }
 
     if (version < Version::V11) {
@@ -623,44 +611,44 @@ void Database::write(const QString &filename, Version version) const
         }
         std::sort(oldPccs.begin(), oldPccs.end());
 
-        check(cw.startChunk(ChunkId("PCC "), 1));
+        cw.startChunk("PCC ", 1);
         ds << quint32(oldPccs.size());
         for (const PartColorCode &pcc : std::as_const(oldPccs))
             writePCCToDatabase(pcc, ds, version);
-        check(cw.endChunk());
+        cw.endChunk();
     }
 
     if (version >= Version::V9) {
-        check(cw.startChunk(ChunkId("REL "), 1));
+        cw.startChunk("REL ", 1);
         ds << quint32(m_relationships.size());
         for (const Relationship &rel : m_relationships)
             writeRelationshipToDatabase(rel, ds, version);
-        check(cw.endChunk());
+        cw.endChunk();
 
-        check(cw.startChunk(ChunkId("RELM"), 1));
+        cw.startChunk("RELM", 1);
         ds << quint32(m_relationshipMatches.size());
         for (const RelationshipMatch &match : m_relationshipMatches)
             writeRelationshipMatchToDatabase(match, ds, version);
-        check(cw.endChunk());
+        cw.endChunk();
     }
 
     if (version >= Version::V11) {
-        check(cw.startChunk(ChunkId("AKEY"), 1));
+        cw.startChunk("AKEY", 1);
         ds << quint32(m_apiKeys.size());
         for (auto it = m_apiKeys.cbegin(); it != m_apiKeys.cend(); ++it)
             writeApiKeyToDatabase(it.key(), it.value(), ds, version);
-        check(cw.endChunk());
+        cw.endChunk();
     }
 
     if (version >= Version::V12) {
-        check(cw.startChunk(ChunkId("QIRK"), 1));
+        cw.startChunk("QIRK", 1);
         ds << quint32(m_apiQuirks.size());
         for (const ApiQuirk apiQuirk : m_apiQuirks)
             ds << quint32(apiQuirk);
-        check(cw.endChunk());
+        cw.endChunk();
     }
 
-    check(cw.endChunk()); // BSDB root chunk
+    cw.endChunk(); // BSDB root chunk
 
     if (!f.commit())
         throw Exception(f.errorString());

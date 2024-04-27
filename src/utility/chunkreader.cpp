@@ -3,9 +3,11 @@
 
 #include <array>
 #include <QIODevice>
+#include <QFile>
 
 #include "chunkreader.h"
 #include "chunkwriter.h"
+#include "exception.h"
 
 #if 0
 
@@ -40,6 +42,29 @@ example:
     }
 #endif
 
+class ChunkException : public Exception
+{
+public:
+    ChunkException(QDataStream &ds, const char *msg)
+        : Exception(u"Chunk error%1%2: %3"_qs.arg(fileName(ds.device())).arg(filePos(ds.device())).arg(QString::fromLatin1(msg)))
+    { }
+
+private:
+    static QString fileName(QIODevice *dev)
+    {
+        if (auto file = qobject_cast<QFile *>(dev))
+            return u" in file " + file->fileName();
+        return { };
+    }
+
+    static QString filePos(QIODevice *dev)
+    {
+        if (dev)
+            return u" at position " + QString::number(dev->pos());
+        return { };
+    }
+};
+
 ChunkReader::ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo)
     : m_file(nullptr)
     , m_stream(nullptr)
@@ -61,51 +86,62 @@ ChunkReader::ChunkReader(QIODevice *dev, QDataStream::ByteOrder bo)
 
 QDataStream &ChunkReader::dataStream()
 {
-    static QDataStream nullstream;
-
-    if (!m_file)
-        return nullstream;
     return m_stream;
+}
+
+void ChunkReader::checkStream()
+{
+    if (!m_file)
+        throw ChunkException(dataStream(), "cannot end a chunk without a file");
+    if (m_stream.status() != QDataStream::Ok)
+        throw ChunkException(dataStream(), "data stream is not readable: %1").arg(m_stream.status());
+}
+
+void ChunkReader::checkChunkStarted()
+{
+    if (m_chunks.isEmpty())
+        throw ChunkException(dataStream(), "cannot end or skip a chunk that was never started");
 }
 
 bool ChunkReader::startChunk()
 {
-    if (!m_file || (m_stream.status() != QDataStream::Ok))
-        return false;
+    checkStream();
 
     if (!m_chunks.isEmpty()) {
         const read_chunk_info &parent = std::as_const(m_chunks).top();
 
-        if (m_file->pos() >= (parent.startpos + parent.size))
+        auto filePos = m_file->pos();
+        if (filePos == (parent.startpos + parent.size))
             return false;
+        else if (filePos > (parent.startpos + parent.size))
+            throw ChunkException(dataStream(), "cannot read a nested chunk outside the parent chunk");
     }
 
     read_chunk_info ci;
-
     m_stream >> ci.id >> ci.version >> ci.size;
-    if (m_stream.status() == QDataStream::Ok) {
-        ci.startpos = m_file->pos();
-        m_chunks.push(ci);
-        return true;
-    }
-    return false;
+
+    checkStream();
+    ci.startpos = m_file->pos();
+    m_chunks.push(ci);
+    return true;
 }
 
-bool ChunkReader::skipChunk()
+void ChunkReader::skipChunk()
 {
-    if (!m_file || m_chunks.isEmpty() || (m_stream.status() != QDataStream::Ok))
-        return false;
+    checkStream();
+    checkChunkStarted();
 
     const read_chunk_info &ci = std::as_const(m_chunks).top();
 
     m_stream.skipRawData(int(ci.size));
-    return (m_stream.status() == QDataStream::Ok);
+
+    checkStream();
 }
 
-bool ChunkReader::endChunk()
+void ChunkReader::endChunk()
 {
-    if (!m_file || m_chunks.isEmpty())
-        return false;
+    checkStream();
+    checkChunkStarted();
 
     read_chunk_info ci = m_chunks.pop();
 
@@ -120,10 +156,10 @@ bool ChunkReader::endChunk()
 
     read_chunk_info ciend;
     m_stream >> ciend.size >> ciend.version >> ciend.id;
-    return (m_stream.status() == QDataStream::Ok) &&
-           (ci.id == ciend.id) &&
-           (ci.version == ciend.version) &&
-           (ci.size == ciend.size);
+
+    checkStream();
+    if ((ci.id != ciend.id) || (ci.version != ciend.version) || (ci.size != ciend.size))
+        throw ChunkException(dataStream(), "end of chunk header does not match start of chunk header");
 }
 
 quint32 ChunkReader::chunkId() const
@@ -138,6 +174,11 @@ quint32 ChunkReader::chunkVersion() const
     if (m_chunks.isEmpty())
         return 0;
     return m_chunks.top().version;
+}
+
+quint64 ChunkReader::chunkIdAndVersion() const
+{
+    return chunkId() | (quint64(chunkVersion()) << 32);
 }
 
 qint64 ChunkReader::chunkSize() const
@@ -188,23 +229,32 @@ QDataStream &ChunkWriter::dataStream()
     return m_stream;
 }
 
-bool ChunkWriter::startChunk(quint32 id, quint32 version)
+void ChunkWriter::checkStream()
 {
+    if (!m_file)
+        throw ChunkException(dataStream(), "cannot end a chunk without a file");
+    if (m_stream.status() != QDataStream::Ok)
+        throw ChunkException(dataStream(), "data stream is not writable: %1").arg(m_stream.status());
+}
+
+void ChunkWriter::startChunk(quint32 id, quint32 version)
+{
+    checkStream();
     m_stream << id << version << quint64(0);
+    checkStream();
 
     write_chunk_info ci;
     ci.id = id;
     ci.version = version;
     ci.startpos = m_file->pos();
     m_chunks.push(ci);
-
-    return (m_stream.status() == QDataStream::Ok);
 }
 
-bool ChunkWriter::endChunk()
+void ChunkWriter::endChunk()
 {
-    if (!m_file || m_chunks.isEmpty() || (m_stream.status() != QDataStream::Ok))
-        return false;
+    checkStream();
+    if (m_chunks.isEmpty())
+        throw ChunkException(dataStream(), "cannot end a chunk that was never started");
 
     write_chunk_info ci = m_chunks.pop();
     qint64 endpos = m_file->pos();
@@ -218,6 +268,5 @@ bool ChunkWriter::endChunk()
         m_stream.writeRawData(padbytes.data(), 16 - len % 16);
 
     m_stream << len << ci.version << ci.id;
-
-    return (m_stream.status() == QDataStream::Ok);
+    checkStream();
 }

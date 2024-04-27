@@ -11,18 +11,21 @@ QT_FORWARD_DECLARE_CLASS(QIODevice)
 
 
 template<std::size_t N>
-constexpr quint32 ChunkId(char const(&str)[N])
+constexpr quint64 ChunkIdAndVersion(char const(&str)[N], uint v = 0)
 {
     static_assert(N-1 == 4, "Chunk ID must be 4 characters long");
-    return (quint32(str[3] & 0x7f) << 24) | (quint32(str[2] & 0x7f) << 16) |
-           (quint32(str[1] & 0x7f) << 8) | quint32(str[0] & 0x7f);
+    return (quint64(v) << 32)
+           | (quint32(str[3] & 0x7f) << 24)
+           | (quint32(str[2] & 0x7f) << 16)
+           | (quint32(str[1] & 0x7f) << 8)
+           | (quint32(str[0] & 0x7f));
 }
 
-constexpr quint64 ChunkVersion(uint v)
+template<std::size_t N>
+constexpr quint32 ChunkId(char const(&str)[N])
 {
-    return quint64(v) << 32;
+    return quint32(ChunkIdAndVersion(str));
 }
-
 
 class ChunkReader {
 public:
@@ -30,15 +33,20 @@ public:
 
     QDataStream &dataStream();
 
+    // all 3 throw Exceptions on error
     bool startChunk();
-    bool endChunk();
-    bool skipChunk();
+    void endChunk();
+    void skipChunk();
 
     quint32 chunkId() const;
     quint32 chunkVersion() const;
+    quint64 chunkIdAndVersion() const;
     qint64 chunkSize() const;
 
 private:
+    void checkStream();
+    void checkChunkStarted();
+
     struct read_chunk_info {
         quint32 id;
         quint32 version;
@@ -58,10 +66,18 @@ public:
 
     QDataStream &dataStream();
 
-    bool startChunk(quint32 id, quint32 version = 0);
-    bool endChunk();
+    // all 3 throw Exceptions on error
+    void startChunk(quint32 id, quint32 version = 0);
+    template<std::size_t N>
+    constexpr void startChunk(char const(&str)[N], uint version = 0)
+    {
+        startChunk(ChunkId(str), version);
+    }
+    void endChunk();
 
 private:
+    void checkStream();
+
     struct write_chunk_info {
         quint32 id;
         quint32 version;
