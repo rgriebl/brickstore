@@ -115,6 +115,7 @@ signals:
     void priceGuideUpdated(BrickLink::PriceGuide *priceGuide);
     void pictureUpdated(BrickLink::Picture *picture);
     void currentVatTypeChanged(BrickLink::VatType vatType);
+    void transferProgress(int progress, int total);
 
 private:
     static char firstCharInString(const QString &str);

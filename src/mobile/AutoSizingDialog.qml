@@ -31,32 +31,14 @@ Dialog {
     property Item defaultHeader: null
     property real defaultBackgroundRadius: 0
 
-    property Item smallHeader: ToolBar {
-        id: toolBar
+    property Item smallHeader: HeaderBar {
         width: root.width
         visible: root.header === this
-        topPadding: Style.topScreenMargin
+        title: root.title
 
-        // The text color might be off after switching themes:
-        // https://codereview.qt-project.org/c/qt/qtquickcontrols2/+/311756
-
-        RowLayout {
-            anchors.fill: parent
-            ToolButton {
-                Layout.leftMargin: Style.leftScreenMargin + Style.rightScreenMargin
-                icon.name: "go-previous"
-                onClicked: root.close()
-            }
-            Label {
-                Layout.fillWidth: true
-                font.pointSize: root.font.pointSize * 1.3
-                minimumPointSize: font.pointSize / 2
-                fontSizeMode: Text.Fit
-                text: root.title
-                textFormat: Text.RichText
-                elide: Label.ElideLeft
-                horizontalAlignment: Qt.AlignLeft
-            }
+        leftItem: ToolButton {
+            icon.name: "go-previous"
+            onClicked: root.close()
         }
     }
 

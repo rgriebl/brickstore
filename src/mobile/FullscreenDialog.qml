@@ -11,26 +11,14 @@ Page {
 
     signal backClicked()
 
-    property alias toolButtons: toolbar.data
+    property alias toolButtons: headerBar.rightItem
 
-    header: ToolBar {
-        topPadding: Style.topScreenMargin
-        RowLayout {
-            id: toolbar
-            anchors.fill: parent
-            ToolButton {
-                icon.name: "go-previous"
-                onClicked: root.backClicked()
-            }
-            Label {
-                Layout.fillWidth: true
-                font.pointSize: root.font.pointSize * 1.3
-                minimumPointSize: font.pointSize / 2
-                fontSizeMode: Text.Fit
-                text: root.title
-                elide: Label.ElideLeft
-                horizontalAlignment: Qt.AlignLeft
-            }
+    header: HeaderBar {
+        id: headerBar
+        title: root.title
+        leftItem: ToolButton {
+            icon.name: "go-previous"
+            onClicked: root.backClicked()
         }
     }
 }

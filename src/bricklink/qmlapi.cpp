@@ -748,6 +748,8 @@ QmlBrickLink::QmlBrickLink()
         if (isSignalConnected(sig))
             emit pictureUpdated(pic);
     });
+    connect(core(), &BrickLink::Core::transferProgress,
+            this, &QmlBrickLink::transferProgress);
 }
 
 /*! \qmlproperty Item BrickLink::noItem

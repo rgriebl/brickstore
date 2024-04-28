@@ -36,59 +36,45 @@ Page {
 
     focus: true
 
-    header: ToolBar {
-        id: toolBar
-        topPadding: Style.topScreenMargin
+    header: HeaderBar {
+        title: root.title
 
-        // The text color might be off after switching themes:
-        // https://codereview.qt-project.org/c/qt/qtquickcontrols2/+/311756
+        leftItem: ToolButton {
+            icon.name: "application-menu"
+            onClicked: viewMenu.open()
 
-        RowLayout {
-            anchors.fill: parent
-            ToolButton {
-                icon.name: "application-menu"
-                onClicked: viewMenu.open()
+            AutoSizingMenu {
+                id: viewMenu
+                x: parent.width / 2 - width
+                y: parent.height / 2
 
+                transformOrigin: Menu.TopRight
+                modal: true
+                cascade: false
+
+                ActionMenuItem { actionName: "go_home"; onClicked: root.goHomeFunction() }
+                ActionMenuItem { actionName: "document_save" }
+                ActionMenuItem { actionName: "document_save_as" }
                 AutoSizingMenu {
-                    id: viewMenu
-                    x: parent.width / 2 - width
-                    y: parent.height / 2
-
-                    transformOrigin: Menu.TopRight
+                    title: BS.ActionManager.quickAction("document_export").text
                     modal: true
                     cascade: false
-
-                    ActionMenuItem { actionName: "go_home"; onClicked: root.goHomeFunction() }
-                    ActionMenuItem { actionName: "document_save" }
-                    ActionMenuItem { actionName: "document_save_as" }
-                    AutoSizingMenu {
-                        title: BS.ActionManager.quickAction("document_export").text
-                        modal: true
-                        cascade: false
-                        ActionMenuItem { autoHide: false; actionName: "document_export_bl_xml" }
-                        ActionMenuItem { autoHide: false; actionName: "document_export_bl_xml_clip" }
-                        ActionMenuItem { autoHide: false; actionName: "document_export_bl_update_clip" }
-                        ActionMenuItem { autoHide: false; actionName: "document_export_bl_wantedlist_clip" }
-                    }
-                    ActionMenuItem {
-                        // workaround for Qt bug: the overlay doesn't get removed in Qt 6.6+
-                        onClicked: { viewMenu.modal = false }
-                        actionName: "document_close"
-                    }
-                    ActionMenuSeparator { }
-                    ActionMenuItem { actionName: "edit_undo" }
-                    ActionMenuItem { actionName: "edit_redo" }
+                    ActionMenuItem { autoHide: false; actionName: "document_export_bl_xml" }
+                    ActionMenuItem { autoHide: false; actionName: "document_export_bl_xml_clip" }
+                    ActionMenuItem { autoHide: false; actionName: "document_export_bl_update_clip" }
+                    ActionMenuItem { autoHide: false; actionName: "document_export_bl_wantedlist_clip" }
                 }
+                ActionMenuItem {
+                    // workaround for Qt bug: the overlay doesn't get removed in Qt 6.6+
+                    onClicked: { viewMenu.modal = false }
+                    actionName: "document_close"
+                }
+                ActionMenuSeparator { }
+                ActionMenuItem { actionName: "edit_undo" }
+                ActionMenuItem { actionName: "edit_redo" }
             }
-            Label {
-                Layout.fillWidth: true
-                font.pointSize: root.font.pointSize * 1.3
-                minimumPointSize: font.pointSize / 2
-                fontSizeMode: Text.Fit
-                text: root.title
-                elide: Label.ElideLeft
-                horizontalAlignment: Qt.AlignLeft
-            }
+        }
+        rightItem: RowLayout {
             ToolButton {
                 icon.name: "help-about"
                 onClicked: if (root.document) infoDialog.open()

@@ -44,75 +44,56 @@ Control {
         anchors.rightMargin: Style.rightScreenMargin
 
         initialItem: Page {
-            header: ToolBar {
-                id: toolBar
+            header: HeaderBar {
+                title: ApplicationWindow.window.title
 
-                topPadding: Style.topScreenMargin
+                leftItem: ToolButton {
+                    icon.name: "application-menu"
+                    onClicked: applicationMenu.open()
 
-                // The text color might be off after switching themes:
-                // https://codereview.qt-project.org/c/qt/qtquickcontrols2/+/311756
+                    AutoSizingMenu {
+                        id: applicationMenu
+                        x: parent.width / 2
+                        y: parent.height / 2
+                        transformOrigin: Menu.TopLeft
+                        modal: true
+                        cascade: false
 
-                RowLayout {
-                    anchors.fill: parent
-                    ToolButton {
-                        Layout.leftMargin: (Style.leftScreenMargin + Style.rightScreenMargin) / 2
-                        icon.name: "application-menu"
-                        onClicked: applicationMenu.open()
+                        MenuItem { action: BS.ActionManager.quickAction("configure") }
+                        MenuItem { action: BS.ActionManager.quickAction("update_database") }
+                        MenuSeparator { }
+                        MenuItem { action: BS.ActionManager.quickAction("help_systeminfo") }
+                        MenuItem { action: BS.ActionManager.quickAction("help_about") }
+                    }
 
-                        AutoSizingMenu {
-                            id: applicationMenu
-                            x: parent.width / 2
-                            y: parent.height / 2
-                            transformOrigin: Menu.TopLeft
-                            modal: true
-                            cascade: false
+                    onPressAndHold: debugMenu.open()
 
-                            MenuItem { action: BS.ActionManager.quickAction("configure") }
-                            MenuItem { action: BS.ActionManager.quickAction("update_database") }
-                            MenuSeparator { }
-                            MenuItem { action: BS.ActionManager.quickAction("help_systeminfo") }
-                            MenuItem { action: BS.ActionManager.quickAction("help_about") }
+                    AutoSizingMenu {
+                        id: debugMenu
+                        x: parent.width / 2
+                        y: parent.height / 2
+                        transformOrigin: Menu.TopLeft
+                        modal: true
+                        cascade: false
+
+                        MenuItem {
+                            text: "Show Tracers"
+                            checkable: true
+                            checked: BS.BrickStore.debug.showTracers
+                            onCheckedChanged: BS.BrickStore.debug.showTracers = checked
                         }
-
-                        onPressAndHold: debugMenu.open()
-
-                        AutoSizingMenu {
-                            id: debugMenu
-                            x: parent.width / 2
-                            y: parent.height / 2
-                            transformOrigin: Menu.TopLeft
-                            modal: true
-                            cascade: false
-
-                            MenuItem {
-                                text: "Show Tracers"
-                                checkable: true
-                                checked: BS.BrickStore.debug.showTracers
-                                onCheckedChanged: BS.BrickStore.debug.showTracers = checked
-                            }
-                            MenuItem {
-                                text: "Slow Animations"
-                                checkable: true
-                                checked: BS.BrickStore.debug.slowAnimations
-                                onCheckedChanged: BS.BrickStore.debug.slowAnimations = checked
-                            }
-                            MenuSeparator { }
-                            MenuItem {
-                                text: "Error Log..."
-                                onClicked: { devConsole.open() }
-                            }
+                        MenuItem {
+                            text: "Slow Animations"
+                            checkable: true
+                            checked: BS.BrickStore.debug.slowAnimations
+                            onCheckedChanged: BS.BrickStore.debug.slowAnimations = checked
+                        }
+                        MenuSeparator { }
+                        MenuItem {
+                            text: "Error Log..."
+                            onClicked: { devConsole.open() }
                         }
                     }
-                    Label {
-                        Layout.fillWidth: true
-                        font.pointSize: ApplicationWindow.window.font.pointSize * 1.3
-                        minimumPointSize: font.pointSize / 2
-                        fontSizeMode: Text.Fit
-                        text: ApplicationWindow.window.title
-                        elide: Label.ElideLeft
-                        horizontalAlignment: Qt.AlignLeft
-                    }
-                    Item { Layout.fillWidth: true }
                 }
             }
 
