@@ -8,6 +8,7 @@
 #include <QComboBox>
 #include <QToolButton>
 #include <QIODevice>
+#include <QLineEdit>
 
 #include "bricklink/model.h"
 #include "bricklink/core.h"
@@ -99,6 +100,11 @@ SelectColor::SelectColor(const QVector<Feature> &features, QWidget *parent)
         w_colors->scrollTo(w_colors->currentIndex());
     });
 
+    w_nocolor = new QLineEdit(this);
+    w_nocolor->setReadOnly(true);
+    w_nocolor->setFrame(QFrame::NoFrame);
+    w_nocolor->hide();
+
     setFocusProxy(w_colors);
 
     connect(w_colors->selectionModel(), &QItemSelectionModel::selectionChanged,
@@ -135,6 +141,7 @@ SelectColor::SelectColor(const QVector<Feature> &features, QWidget *parent)
         lay->addWidget(w_filter, 0, 0, 1, 2);
     }
     lay->addWidget(w_colors, 1, 0, 1, 2);
+    lay->addWidget(w_nocolor, 2, 0, 1, 2);
 
     languageChange();
 }
@@ -152,6 +159,7 @@ void SelectColor::languageChange()
             w_filter->setItemText(w_filter->findData(int(ct)), tr("Only \"%1\" Colors").arg(ctName));
     }
     w_lock->setToolTip(tr("Lock color selection: only shows items known to be available in this color"));
+    w_nocolor->setText(tr("No color selected"));
 }
 
 void SelectColor::setWidthToContents(bool b)
@@ -230,6 +238,12 @@ void SelectColor::setColorLock(bool locked)
         w_lock->setChecked(locked);
         emit colorLockChanged(locked ? currentColor() : nullptr);
     }
+}
+
+void SelectColor::setShowInputError(bool show)
+{
+    w_nocolor->setProperty("showInputError", show);
+    w_nocolor->setVisible(show);
 }
 
 QByteArray SelectColor::saveState() const

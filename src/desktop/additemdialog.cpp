@@ -796,14 +796,18 @@ bool AddItemDialog::checkAddPossible()
 
     auto item = w_select_item->currentItem();
 
-    bool acceptable = item && priceOk && qtyOk && bulkOk;
+    bool colorOk = true;
 
     if (item && item->itemType()) {
         if (item->itemType()->hasColors())
-            acceptable = acceptable && w_select_color->currentColor();
+            colorOk = (w_select_color->currentColor());
         else
-            acceptable = acceptable && (w_select_color->currentColor() == BrickLink::core()->color(0));
+            colorOk = (w_select_color->currentColor() == BrickLink::core()->color(0));
     }
+
+    w_select_color->setShowInputError(!colorOk);
+
+    bool acceptable = item && priceOk && qtyOk && bulkOk && colorOk;
 
     for (int i = 0; i < 3; i++) {
         bool tierEnabled = w_tier_price [i]->isEnabled();

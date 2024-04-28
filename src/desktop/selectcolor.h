@@ -9,6 +9,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QTreeView)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
+QT_FORWARD_DECLARE_CLASS(QLineEdit)
 QT_FORWARD_DECLARE_CLASS(QToolButton)
 
 
@@ -32,6 +33,8 @@ public:
     bool colorLock() const;
     void setColorLock(bool locked);
 
+    void setShowInputError(bool show);
+
     QByteArray saveState() const;
     bool restoreState(const QByteArray &ba);
     static QByteArray defaultState();
@@ -52,6 +55,7 @@ protected:
 protected:
     QComboBox *w_filter;
     QTreeView *w_colors;
+    QLineEdit *w_nocolor;
     QToolButton *w_lock;
     BrickLink::ColorModel *m_colorModel;
     const BrickLink::Item *m_item = nullptr;
