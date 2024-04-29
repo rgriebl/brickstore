@@ -36,6 +36,9 @@ Dialog {
         visible: root.header === this
         title: root.title
 
+        leftPadding: Style.leftScreenMargin
+        rightPadding: Style.rightScreenMargin
+
         leftItem: ToolButton {
             icon.name: "go-previous"
             onClicked: root.close()

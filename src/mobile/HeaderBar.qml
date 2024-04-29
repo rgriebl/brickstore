@@ -11,6 +11,7 @@ ToolBar {
     id: root
 
     topPadding: Style.topScreenMargin
+    implicitHeight: topPadding + row.implicitHeight + bottomPadding
 
     property alias title: titleText.text
 
@@ -58,10 +59,8 @@ ToolBar {
     property Item rightItem: Item { }
 
     RowLayout {
+        id: row
         anchors.fill: parent
-        anchors.leftMargin: (Style.leftScreenMargin + Style.rightScreenMargin) / 2
-        anchors.rightMargin: anchors.leftMargin
-
         data: [leftItem, centerItem, rightItem]
     }
 }

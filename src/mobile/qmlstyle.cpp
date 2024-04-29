@@ -67,7 +67,6 @@ QmlStyle::QmlStyle(QObject *parent)
                 full.right() - available.right(), full.bottom() - available.bottom() };
     };
     m_screenMargins = iosScreenMargins();
-    qWarning() << "IOS SCREEN MARGINS CHANGED" << m_screenMargins;
     connect(QGuiApplication::primaryScreen(), &QScreen::availableGeometryChanged,
             this, [this]() {
         setScreenMargins(iosScreenMargins());
@@ -76,13 +75,14 @@ QmlStyle::QmlStyle(QObject *parent)
     m_screenDpr = QGuiApplication::primaryScreen()->devicePixelRatio();
     m_screenMargins = staticScreenMargins;
 #endif
+    qInfo() << "Screen margins:" << m_screenMargins << "/ dpr:" << m_screenDpr;
 }
 
 void QmlStyle::setScreenMargins(const QMargins &newMargins)
 {
     if (m_screenMargins != newMargins) {
         m_screenMargins = newMargins;
-        qWarning() << "SCREEN MARGINS CHANGED" << m_screenMargins;
+        qInfo() << "Screen margins changed:" << m_screenMargins;
         emit screenMarginsChanged();
     }
 }

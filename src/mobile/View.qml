@@ -45,10 +45,9 @@ Page {
 
             AutoSizingMenu {
                 id: viewMenu
-                x: parent.width / 2 - width
+                x: parent.width / 2
                 y: parent.height / 2
-
-                transformOrigin: Menu.TopRight
+                transformOrigin: Menu.TopLeft
                 modal: true
                 cascade: false
 
@@ -69,9 +68,11 @@ Page {
                     onClicked: { viewMenu.modal = false }
                     actionName: "document_close"
                 }
-                ActionMenuSeparator { }
-                ActionMenuItem { actionName: "edit_undo" }
-                ActionMenuItem { actionName: "edit_redo" }
+                ActionMenuSeparator {
+                    visible: undoId.visible || redoId.visible
+                }
+                ActionMenuItem { id: undoId; actionName: "edit_undo" }
+                ActionMenuItem { id: redoId; actionName: "edit_redo" }
             }
         }
         rightItem: RowLayout {
