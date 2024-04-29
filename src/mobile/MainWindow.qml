@@ -28,13 +28,22 @@ Control {
         closePolicy: Popup.NoAutoClose
         z: 1000
         background: Rectangle { color: "black" }
-        visible: Style.leftScreenMargin || Style.rightScreenMargin
-        width: Style.leftScreenMargin ? Style.leftScreenMargin : Style.rightScreenMargin
-        y: 0
-        x: Style.leftScreenMargin ? 0 : parent.width - width
+        visible: Style.leftScreenMargin
+        width: Style.leftScreenMargin
         height: parent.height
     }
-
+    Popup {
+        // show a black bar over the notch / camera cutout
+        modal: false
+        enabled: false
+        closePolicy: Popup.NoAutoClose
+        z: 1000
+        background: Rectangle { color: "black" }
+        visible: Style.rightScreenMargin
+        width: Style.rightScreenMargin
+        x: parent.width - width
+        height: parent.height
+    }
 
     StackView {
         id: homeStack
