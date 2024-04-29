@@ -30,7 +30,7 @@ RecentFiles::RecentFiles(QObject *parent)
         auto path = config->value(u"Path"_qs).toString();
 
         if (path.startsWith(u"${")) { // replace QStandardPath
-            int pos = path.indexOf(u'}');
+            auto pos = path.indexOf(u'}');
             if (pos > 0) {
                 const QByteArray stdPathName = path.mid(2, pos - 2).toLatin1();
                 bool exists;
@@ -83,8 +83,6 @@ void RecentFiles::save()
             QStandardPaths::FontsLocation,
             QStandardPaths::ApplicationsLocation,
             QStandardPaths::TempLocation,
-            QStandardPaths::PublicShareLocation,
-            QStandardPaths::TemplatesLocation,
         };
 
         for (auto stdPathLocation : allStdPathLocations) {
