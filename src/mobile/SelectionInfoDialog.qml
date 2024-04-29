@@ -64,119 +64,135 @@ AutoSizingDialog {
 
     ColumnLayout {
         anchors.fill: parent
-        Label {
+        TextEdit {
             id: headerText
+            readOnly: true
             textFormat: Text.RichText
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
             visible: false
             Layout.fillWidth: true
             Layout.topMargin: 4
+            font.pixelSize: root.font.pixelSize * 1.2
+            color: Style.textColor
+            selectionColor: Style.accentColor
+            selectedTextColor: Style.primaryHighlightedTextColor
         }
-        TabBar {
-            id: tabBar
-
-            background: Item { }
-
-            Layout.fillWidth: true
-            visible: tabRepeater.model.length > 1
-
-            property var tabs: [
-                { label: qsTr("Info"),        index: 0, icon: "help-about" },
-                { label: qsTr("Price Guide"), index: 1, icon: "bricklink-priceguide" },
-                { label: qsTr("Appears In"),  index: 2, icon: "bootstrap-box-arrow-in-right" },
-                { label: qsTr("Consists Of"), index: 3, icon: "bootstrap-box-arrow-right" },
-                { label: qsTr("Can Build"),   index: 4, icon: "bootstrap-bricks" },
-                { label: qsTr("Related"),     index: 5, icon: "bootstrap-share-fill" }
-            ]
-
-            Repeater {
-                id: tabRepeater
-                model: {
-                    switch (root.simpleLots.length) {
-                    case  0: return tabBar.tabs.slice(0, 1)
-                    case  1: return tabBar.tabs
-                    default: return tabBar.tabs.filter((_, idx) => idx !== 1)
-                    }
-                }
-                TabButton {
-                    icon.name: modelData.icon
-                    text: Style.smallSize ? undefined : modelData.label
-                    property int swipeIndex: modelData.index
-                    // property bool current: swipeView.currentIndex === swipeIndex
-                    // onCurrentChanged: if (current) TabBar.tabBar.currentIndex = TabBar.index
-                    Component.onCompleted: {
-                        // otherwise the currentIndex increases on every Repeater instantiation
-                        TabBar.tabBar.currentIndex = 0
-                    }
-                }
-            }
-        }
-
-        SwipeView {
-            id: swipeView
-            interactive: false
-            currentIndex: tabBar.currentItem?.swipeIndex ?? 0
-            clip: true
+        Pane {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.leftMargin: -root.leftPadding
+            Layout.rightMargin: -root.rightPadding
 
-            StackLayout {
-                clip: true
-                currentIndex: (root.simpleLots.length === 1) ? 1 : 0
+            padding: 0
+            ColumnLayout {
+                anchors.fill: parent
+                TabBar {
+                    id: tabBar
 
-                Label {
-                    id: infoText
-                    textFormat: Text.RichText
-                    wrapMode: Text.Wrap
-                    leftPadding: 8
-                }
+                    background: Item { }
 
-                InfoWidget { id: info }
-            }
+                    Layout.fillWidth: true
+                    visible: tabRepeater.model.length > 1
 
-            ScrollableLayout {
-                id: pgScroller
-                visible: root.simpleLots.length === 1
+                    property var tabs: [
+                        { label: qsTr("Info"),        index: 0, icon: "help-about" },
+                        { label: qsTr("Price Guide"), index: 1, icon: "bricklink-priceguide" },
+                        { label: qsTr("Appears In"),  index: 2, icon: "bootstrap-box-arrow-in-right" },
+                        { label: qsTr("Consists Of"), index: 3, icon: "bootstrap-box-arrow-right" },
+                        { label: qsTr("Can Build"),   index: 4, icon: "bootstrap-bricks" },
+                        { label: qsTr("Related"),     index: 5, icon: "bootstrap-share-fill" }
+                    ]
 
-                SwipeView.onIsCurrentItemChanged: { if (SwipeView.isCurrentItem) flashScrollIndicators() }
-
-                ColumnLayout {
-                    width: pgScroller.width
-                    PriceGuideWidget {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
-                        id: priceGuide
-                        currencyCode: root.statistics?.currencyCode ?? 'USD'
+                    Repeater {
+                        id: tabRepeater
+                        model: {
+                            switch (root.simpleLots.length) {
+                            case  0: return tabBar.tabs.slice(0, 1)
+                            case  1: return tabBar.tabs
+                            default: return tabBar.tabs.filter((_, idx) => idx !== 1)
+                            }
+                        }
+                        TabButton {
+                            icon.name: modelData.icon
+                            text: Style.smallSize ? undefined : modelData.label
+                            property int swipeIndex: modelData.index
+                            // property bool current: swipeView.currentIndex === swipeIndex
+                            // onCurrentChanged: if (current) TabBar.tabBar.currentIndex = TabBar.index
+                            Component.onCompleted: {
+                                // otherwise the currentIndex increases on every Repeater instantiation
+                                TabBar.tabBar.currentIndex = 0
+                            }
+                        }
                     }
                 }
-            }
 
-            InventoryWidget {
-                id: appearsIn
-                mode: BL.InventoryModel.Mode.AppearsIn
-                simpleLots: root.simpleLots
-                visible: root.simpleLots.length > 0
-            }
-            InventoryWidget {
-                id: consistsOf
-                mode: BL.InventoryModel.Mode.ConsistsOf
-                simpleLots: root.simpleLots
-                visible: root.simpleLots.length > 0
-            }
-            InventoryWidget {
-                id: canBuild
-                mode: BL.InventoryModel.Mode.CanBuild
-                simpleLots: root.simpleLots
-                visible: root.simpleLots.length > 0
-            }
-            InventoryWidget {
-                id: related
-                mode: BL.InventoryModel.Mode.Relationships
-                simpleLots: root.simpleLots
-                visible: root.simpleLots.length > 0
+                SwipeView {
+                    id: swipeView
+                    interactive: false
+                    currentIndex: tabBar.currentItem?.swipeIndex ?? 0
+                    clip: true
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    StackLayout {
+                        clip: true
+                        currentIndex: (root.simpleLots.length === 1) ? 1 : 0
+
+                        Label {
+                            id: infoText
+                            textFormat: Text.RichText
+                            wrapMode: Text.Wrap
+                            leftPadding: 8
+                        }
+
+                        InfoWidget { id: info }
+                    }
+
+                    ScrollableLayout {
+                        id: pgScroller
+                        visible: root.simpleLots.length === 1
+
+                        SwipeView.onIsCurrentItemChanged: { if (SwipeView.isCurrentItem) flashScrollIndicators() }
+
+                        ColumnLayout {
+                            width: pgScroller.width
+                            PriceGuideWidget {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                Layout.leftMargin: 16
+                                Layout.rightMargin: 16
+                                id: priceGuide
+                                currencyCode: root.statistics?.currencyCode ?? 'USD'
+                            }
+                        }
+                    }
+
+                    InventoryWidget {
+                        id: appearsIn
+                        mode: BL.InventoryModel.Mode.AppearsIn
+                        simpleLots: root.simpleLots
+                        visible: root.simpleLots.length > 0
+                    }
+                    InventoryWidget {
+                        id: consistsOf
+                        mode: BL.InventoryModel.Mode.ConsistsOf
+                        simpleLots: root.simpleLots
+                        visible: root.simpleLots.length > 0
+                    }
+                    InventoryWidget {
+                        id: canBuild
+                        mode: BL.InventoryModel.Mode.CanBuild
+                        simpleLots: root.simpleLots
+                        visible: root.simpleLots.length > 0
+                    }
+                    InventoryWidget {
+                        id: related
+                        mode: BL.InventoryModel.Mode.Relationships
+                        simpleLots: root.simpleLots
+                        visible: root.simpleLots.length > 0
+                    }
+                }
             }
         }
     }

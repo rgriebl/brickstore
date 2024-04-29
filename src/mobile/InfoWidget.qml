@@ -13,10 +13,17 @@ Control {
     property BL.Item item
     property BL.Color color
 
-    property bool is3D: true
-    property bool prefer3D: true
+    property bool is3D: true         // current UI state
+    property bool canRender3D: true  // current LDraw state
+    property bool prefer3D: true     // User preference
     property BL.Picture picture
     property bool isUpdating: (picture && (picture.updateStatus === BL.BrickLink.UpdateStatus.Updating))
+
+    BS.ExtraConfig {
+        category: "InfoWidget"
+
+        property alias prefer3D: root.prefer3D
+    }
 
     onItemChanged: { Qt.callLater(updateInfo) }
     onColorChanged: { Qt.callLater(updateInfo) }
@@ -94,28 +101,37 @@ Control {
             Connections {
                 target: info3D.renderController
                 function onCanRenderChanged(canRender : bool) {
-                    if (!root.is3D && root.prefer3D && canRender)
-                        root.is3D = true;
-                    else if (root.is3D && !canRender)
-                        root.is3D = false;
+                    root.canRender3D = canRender
+
+                    if (root.is3D && !canRender)
+                        root.is3D = false
+                    else if (!root.is3D && root.prefer3D && canRender)
+                        root.is3D = true
                 }
             }
         }
     }
     RowLayout {
+        id: buttons
+        property int buttonInset: 10
+
         anchors {
             bottom: parent.bottom
             left: parent.left
-            leftMargin: Style.smallSize ? 8 : 0
             right: parent.right
-            rightMargin: Style.smallSize ? 8 : 0
         }
 
         Button {
             id: switch2d3dButton
+            topInset: buttons.buttonInset
+            bottomInset: buttons.buttonInset
+            leftInset: buttons.buttonInset
+            rightInset: buttons.buttonInset
+
             font.bold: true
             text: root.is3D ? "2D" : "3D"
-            onClicked: { root.is3D = !root.is3D; root.prefer3D = root.is3D }
+            onClicked: { root.prefer3D = root.is3D = !root.is3D }
+            enabled: root.is3D || root.canRender3D
 
             property color buttonOverlayColor: root.is3D ? Style.primaryTextColor : "black"
 
@@ -127,6 +143,11 @@ Control {
         }
         Item { Layout.fillWidth: true }
         Button {
+            topInset: buttons.buttonInset
+            bottomInset: buttons.buttonInset
+            leftInset: buttons.buttonInset
+            rightInset: buttons.buttonInset
+
             icon.name: root.is3D ? "zoom-fit-best" : "view-refresh"
             icon.color: switch2d3dButton.buttonOverlayColor
             onClicked: {
