@@ -13,6 +13,7 @@
 #include <QMediaDevices>
 #include <QCameraDevice>
 #include <QQmlApplicationEngine>
+#include <QGuiApplication>
 
 #include "bricklink/core.h"
 #include "bricklink/item.h"
@@ -176,6 +177,16 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
         if (!m_pinWindow->isChecked())
             accept();
     });
+
+    connect(qApp, &QGuiApplication::applicationStateChanged,
+            this, [this](Qt::ApplicationState state) {
+        if (m_selectCamera->currentIndex() != -1) {
+            auto activeState = (state == Qt::ApplicationActive)
+                                   ? Scanner::Capture::ActiveState::Active
+                                   : Scanner::Capture::ActiveState::SoonInactive;
+            m_capture->setVideoOutputActiveState(activeState);
+        }
+    });
 }
 
 ItemScannerDialog::~ItemScannerDialog()
@@ -244,13 +255,8 @@ void ItemScannerDialog::updateItemTypeFilters()
 
 void ItemScannerDialog::changeEvent(QEvent *e)
 {
-    if ((e->type() == QEvent::ActivationChange) && (m_selectCamera->currentIndex() != -1)) {
-        auto activeState = isActiveWindow() ? Scanner::Capture::ActiveState::Active
-                                            : Scanner::Capture::ActiveState::SoonInactive;
-        m_capture->setVideoOutputActiveState(activeState);
-    } else if (e->type() == QEvent::LanguageChange) {
+    if (e->type() == QEvent::LanguageChange)
         languageChange();
-    }
     QDialog::changeEvent(e);
 }
 

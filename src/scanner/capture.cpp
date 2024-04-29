@@ -97,7 +97,7 @@ Capture::Capture(QObject *parent)
             setState(State::Idle);
     });
 
-    d->cameraStopTimer.setInterval(10s);
+    d->cameraStopTimer.setInterval(5s);
     d->cameraStopTimer.setSingleShot(true);
     connect(&d->cameraStopTimer, &QTimer::timeout, this, [this]() {
         if (state() == State::SoonInactive)
