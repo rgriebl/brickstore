@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2024.5.1] - 2024-05-01
+
+This is a quite big release for the mobile iOS and Android version. There are too many fixes and new features to mention them all, but here are the most important ones:
+- Adding items is now at least possible via a Brickognize item scan. (I'm still undecided on how to port the hugely complex add-item dialog to the mobile UI)
+- Recent files can now be pinned and cleared (long press the entry) and they should survive app updates.
+- You can now open BSX files directly from the system's "Files" application.
+
+Other noteworthy changes:
+- Item sorting had to be fixed again. It's also twice as fast now.
+- The BrickLink login session is now extended as long as BrickStore is running, which should cut down on the number of "New Login" mails.
+- Windows 10 versions older than 1809 are not compatible anymore, because they do not support modern, secure HTTPS connections.
+- BrickStore's database is now re-generated and served via Microsoft's GitHub cloud infrastructure. This removes the dependency on the health of my personal servers, while also ensuring a consistent download speed worldwide.
+
+
 ## [2024.4.1] - 2024-04-05
 
 **Important**: Price guide updates in all prior 2024.1/.2/.3 versions are broken as of April 4th.
@@ -669,7 +683,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.4.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.5.1...HEAD
+[2024.5.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.5.1
 [2024.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.4.1
 [2024.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.3.1
 [2024.2.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.2.1
