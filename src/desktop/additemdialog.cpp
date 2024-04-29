@@ -472,6 +472,8 @@ AddItemDialog::~AddItemDialog()
     w_picture->setItemAndColor(nullptr);
     w_price_guide->setPriceGuide(nullptr);
     w_inventory->setItem(nullptr, nullptr);
+
+    delete w_ui_additem;
 }
 
 void AddItemDialog::updateCaption()

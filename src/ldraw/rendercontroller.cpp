@@ -255,7 +255,8 @@ QCoro::Task<void> RenderController::updateGeometries()
                 geo->addAttribute(QQuick3DGeometry::Attribute::TexCoord0Semantic, 6 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
 
                 QQuick3DTextureData *texData = generateMaterialTextureData(surfaceColor);
-                texData->setParentItem(geo);
+                texData->setParentItem(geo);  // 3D scene parent
+                texData->setParent(geo);      // owning parent
                 geo->setTextureData(texData);
             }
             geo->setBounds(vmin, vmax);
