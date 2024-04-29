@@ -93,4 +93,13 @@ public class ExtendedQtActivity extends QtActivity
         });
         return true;
     }
+
+    public boolean isSideLoaded()
+    {
+        try {
+            return getPackageManager().getInstallerPackageName(getPackageName()) == null;
+        } catch (Throwable e) {
+            return false;
+        }
+    }
 }

@@ -8,6 +8,8 @@ qt_add_library(common_module STATIC
     announcements.h
     application.cpp
     application.h
+    checkforupdates.cpp
+    checkforupdates.h
     config.cpp
     config.h
     document.cpp

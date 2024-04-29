@@ -640,6 +640,8 @@ signals:
     void showSettings(const QString &page);
     void activeDocumentChanged(QmlDocument *doc);
     void mainWindowChanged(QWindow *newWindow);
+    void versionWasUpdated(const QString &version, const QString &changeLog, const QUrl &releaseUrl);
+    void versionCanBeUpdated(const QString &version, const QString &changeLog, const QUrl &releaseUrl);
 
 private:
     QmlBrickStore();

@@ -63,6 +63,8 @@ Control {
                         MenuItem { action: BS.ActionManager.quickAction("update_database") }
                         MenuSeparator { }
                         MenuItem { action: BS.ActionManager.quickAction("help_systeminfo") }
+                        MenuItem { action: BS.ActionManager.quickAction("help_announcements") }
+                        MenuItem { action: BS.ActionManager.quickAction("help_releasenotes") }
                         MenuItem { action: BS.ActionManager.quickAction("help_about") }
                     }
 
@@ -292,11 +294,30 @@ Control {
         source: "AnnouncementsDialog.qml"
     }
 
+    DialogLoader {
+        id: checkForUpdatesDialog
+
+        function openWithArgs(changeLog, releaseUrl) {
+            setSource("CheckForUpdatesDialog.qml", {
+                          "changeLog": changeLog,
+                          "releaseUrl": releaseUrl
+                      })
+            open()
+        }
+    }
+
     Connections {
         target: BS.BrickStore
         function onShowSettings(page : string) {
             setActiveDocument(null)
             homeStack.push("SettingsDialog.qml", { "page": page, "goBackFunction": () => { homeStack.pop() } })
+        }
+
+        function onVersionWasUpdated(version, changeLog, releaseUrl) {
+            checkForUpdatesDialog.openWithArgs(changeLog, releaseUrl)
+        }
+        function onVersionCanBeUpdated(version, changeLog, releaseUrl) {
+            checkForUpdatesDialog.openWithArgs(changeLog, releaseUrl)
         }
     }
     Connections {
@@ -361,7 +382,6 @@ Control {
              "help_systeminfo": () => {
                  homeStack.push("SystemInfoDialog.qml", { "goBackFunction": () => { homeStack.pop() } })
              },
-             "help_announcements": () => { },
          })
 
         for (let i = 0; i < BS.BrickStore.documents.count; ++i)

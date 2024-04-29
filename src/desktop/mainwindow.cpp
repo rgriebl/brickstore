@@ -29,6 +29,7 @@
 #include "common/actionmanager.h"
 #include "common/announcements.h"
 #include "common/application.h"
+#include "common/checkforupdates.h"
 #include "common/config.h"
 #include "common/document.h"
 #include "common/documentio.h"
@@ -42,7 +43,7 @@
 #include "common/undo.h"
 #include "utility/exception.h"
 
-#include "checkforupdates.h"
+#include "checkforupdatesdialog.h"
 #include "desktopapplication.h"
 #include "desktopuihelpers.h"
 #include "developerconsole.h"
@@ -249,16 +250,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     ActionManager::inst()->qAction("view_fullscreen")->setChecked(windowState() & Qt::WindowFullScreen);
 
-    m_checkForUpdates = new CheckForUpdates(Application::inst()->gitHubUrl(), this);
     connect(Application::inst()->announcements(), &Announcements::newAnnouncements,
             this, [this]() {
         AnnouncementsDialog::showNewAnnouncements(Application::inst()->announcements(), this);
     });
 
-    m_checkForUpdates->check(true /*silent*/);
-    auto checkTimer = new QTimer(this);
-    checkTimer->callOnTimeout(this, [this]() { m_checkForUpdates->check(true /*silent*/); });
-    checkTimer->start(24h);
+    m_checkForUpdatesDialog = new CheckForUpdatesDialog(this);
+    connect(CheckForUpdates::inst(), &CheckForUpdates::versionCanBeUpdated,
+            m_checkForUpdatesDialog, &CheckForUpdatesDialog::showVersionChanges);
 
     setupScripts();
 
@@ -986,7 +985,7 @@ void MainWindow::createActions()
               dlg->setAttribute(Qt::WA_DeleteOnClose);
               dlg->show();
           } },
-        { "check_for_updates", [this](bool) { m_checkForUpdates->check(false /*not silent*/); } },
+        { "check_for_updates", [](bool) { CheckForUpdates::inst()->check(false /*not silent*/); } },
         { "view_filter", [this](bool) {
               if (m_activeViewPane)
                   m_activeViewPane->focusFilter();

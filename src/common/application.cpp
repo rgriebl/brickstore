@@ -39,6 +39,7 @@
 #include "common/actionmanager.h"
 #include "common/announcements.h"
 #include "common/application.h"
+#include "common/checkforupdates.h"
 #include "common/config.h"
 #include "common/document.h"
 #include "common/documentio.h"
@@ -145,6 +146,19 @@ void Application::init()
     (void) Currency::inst();
     (void) SystemInfo::inst();
     (void) RecentFiles::inst();
+    (void) CheckForUpdates::inst();
+
+    CheckForUpdates::Mode updateMode = CheckForUpdates::Mode::NotifyBeforeUpdate;
+#if defined(BS_MOBILE)
+    bool sideLoaded = false;
+#  if defined(Q_OS_ANDROID)
+    sideLoaded = Utility::Android::isSideLoaded();
+    qInfo() << "Android app is side-loaded:" << sideLoaded;
+#  endif
+    if (!sideLoaded)
+        updateMode = CheckForUpdates::Mode::NotifyAfterUpdate;
+#endif
+    CheckForUpdates::inst()->initialize(gitHubUrl(), updateMode);
 
     connect(RecentFiles::inst(), &RecentFiles::openDocument,
             this, &Application::openDocument);
@@ -460,6 +474,7 @@ QCoro::Task<bool> Application::closeAllDocuments()
 
 Application::~Application()
 {
+    delete CheckForUpdates::inst();
     delete BrickLink::core();
     delete LDraw::library();
     delete SystemInfo::inst();

@@ -19,8 +19,8 @@ qt_add_library(desktop_module STATIC
     changecurrencydialog.cpp
     changecurrencydialog.h
     changecurrencydialog.ui
-    checkforupdates.cpp
-    checkforupdates.h
+    checkforupdatesdialog.cpp
+    checkforupdatesdialog.h
     consolidatedialog.cpp
     consolidatedialog.h
     consolidatedialog.ui

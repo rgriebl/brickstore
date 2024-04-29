@@ -20,6 +20,7 @@
 #include "ldraw/library.h"
 #include "common/actionmanager.h"
 #include "common/application.h"
+#include "common/checkforupdates.h"
 #include "common/document.h"
 #include "common/documentmodel.h"
 #include "common/documentio.h"
@@ -60,6 +61,15 @@ QmlBrickStore::QmlBrickStore()
 
     connect(Config::inst(), &Config::defaultCurrencyCodeChanged,
             this, &QmlBrickStore::defaultCurrencyCodeChanged);
+
+    connect(CheckForUpdates::inst(), &CheckForUpdates::versionCanBeUpdated,
+            this, [this](const QVersionNumber &version, const QString &changeLog, const QUrl &releaseUrl) {
+        emit versionCanBeUpdated(version.toString(), changeLog, releaseUrl);
+    });
+    connect(CheckForUpdates::inst(), &CheckForUpdates::versionWasUpdated,
+            this, [this](const QVersionNumber &version, const QString &changeLog, const QUrl &releaseUrl) {
+        emit versionWasUpdated(version.toString(), changeLog, releaseUrl);
+    });
 }
 
 QmlBrickStore *QmlBrickStore::inst()

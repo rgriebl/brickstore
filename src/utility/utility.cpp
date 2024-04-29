@@ -302,3 +302,14 @@ QString Utility::Android::fileNameFromUrl(const QUrl &url)
     return { };
 #endif
 }
+
+bool Utility::Android::isSideLoaded()
+{
+#if defined(Q_OS_ANDROID)
+    QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    return activity.callMethod<jboolean>("isSideLoaded");
+#else
+    return false;
+#endif
+
+}

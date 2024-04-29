@@ -62,6 +62,7 @@ qt_add_qml_module(mobile_module
         AutoSizingMenu.qml
         AutoSizingDialog.qml
         CheckButton.qml
+        CheckForUpdatesDialog.qml
         CornerTag.qml
         DialogLoader.qml
         DeveloperConsole.qml

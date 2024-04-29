@@ -63,6 +63,7 @@ inline QString urlQueryEscape(const QByteArray &str)   { return urlQueryEscape(Q
 namespace Android {
 
 QString fileNameFromUrl(const QUrl &url);
+bool isSideLoaded();
 
 }
 

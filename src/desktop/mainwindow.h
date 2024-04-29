@@ -39,6 +39,7 @@ class ImportOrderDialog;
 class ImportCartDialog;
 class ImportWantedListDialog;
 class CheckForUpdates;
+class CheckForUpdatesDialog;
 class Announcements;
 class DeveloperConsole;
 class ViewPane;
@@ -129,7 +130,7 @@ private:
     QPointer<ImportOrderDialog> m_importorder_dialog;
     QPointer<ImportCartDialog> m_importcart_dialog;
     QPointer<ImportWantedListDialog> m_importwanted_dialog;
-    QPointer<CheckForUpdates> m_checkForUpdates;
+    QPointer<CheckForUpdatesDialog> m_checkForUpdatesDialog;
     QPointer<Announcements> m_announcements;
 
     QAction *m_goHome = nullptr;

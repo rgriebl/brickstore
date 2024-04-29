@@ -69,6 +69,12 @@ SystemInfo::SystemInfo()
     m_map[u"build.number"_qs] = u"" BRICKSTORE_BUILD_NUMBER ""_qs;
     m_map[u"brickstore.locale"_qs] = QLocale().name().left(2);
     m_map[u"brickstore.version"_qs] = QCoreApplication::applicationVersion();
+    m_map[u"brickstore.edition"_qs] =
+#if defined(BS_MOBILE)
+        u"mobile"_qs;
+#else
+        u"desktop"_qs;
+#endif
 
     m_map[u"hw.cpu.arch"_qs] = QSysInfo::currentCpuArchitecture();
 
