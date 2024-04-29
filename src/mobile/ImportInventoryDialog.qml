@@ -45,7 +45,7 @@ FullscreenDialog {
                 BS.BrickStore.importPartInventory(root.currentItem, BL.BrickLink.noColor,
                                                   importWidget.quantity, importWidget.condition,
                                                   importWidget.extraParts, importWidget.partOutTraits)
-                goBackFunction()
+                root.goBackFunction()
             } else if (visible) {
                 pages.currentIndex = pages.currentIndex + 1
             }

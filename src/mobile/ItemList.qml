@@ -70,8 +70,8 @@ Control {
 
             delegate: MouseArea {
                 id: delegate
-                width: GridView.view.cellWidth
-                height: GridView.view.cellHeight
+                width: (GridView.view as GridView).cellWidth
+                height: (GridView.view as GridView).cellHeight
                 required property string id
                 required property string name
                 required property var itemPointer
@@ -83,7 +83,7 @@ Control {
                     anchors.bottomMargin: itemList.labelHeight
                     image: delegate.pic && delegate.pic.isValid ? delegate.pic.image : itemList.noImage
                     Rectangle {
-                        visible: root.currentItem === blitem
+                        visible: root.currentItem === delegate.blitem
                         anchors.fill: parent
                         color: "transparent"
                         border.color: Style.primaryColor
@@ -103,7 +103,7 @@ Control {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                     background: Rectangle {
-                        visible: root.currentItem === blitem
+                        visible: root.currentItem === delegate.blitem
                         color: Style.primaryColor
                     }
                 }

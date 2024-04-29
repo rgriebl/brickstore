@@ -64,7 +64,7 @@ AutoSizingDialog {
                 Layout.fillWidth: true
                 Layout.leftMargin: 8
 
-                width: implicitWidth
+                Layout.preferredWidth: implicitWidth
 
                 textRole: "text"
                 valueRole: "value"

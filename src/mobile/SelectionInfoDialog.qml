@@ -114,6 +114,7 @@ AutoSizingDialog {
                             }
                         }
                         TabButton {
+                            required property var modelData
                             icon.name: modelData.icon
                             text: Style.smallSize ? undefined : modelData.label
                             property int swipeIndex: modelData.index

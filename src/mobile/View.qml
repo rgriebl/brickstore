@@ -296,7 +296,7 @@ Page {
                         CheckBox {
                             anchors.centerIn: parent
                             enabled: false
-                            checked: edit
+                            checked: retainCell.edit
                         }
                     }
                 }

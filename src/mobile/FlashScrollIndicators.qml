@@ -4,7 +4,7 @@ import QtQuick.Controls
 
 QtObject {
     id: root
-    property Item target: parent
+    required property Flickable target
     property bool trigger: false
 
     onTriggerChanged: {

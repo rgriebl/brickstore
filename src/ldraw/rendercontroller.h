@@ -111,13 +111,14 @@ private:
     QTimer *m_updateTimer;
 };
 
-//TODO: QTBUG-104744
-//class QmlVectorRenderGeometry
-//{
-//    Q_GADGET
-//    QML_FOREIGN(QList<QmlRenderGeometry*>)
-//    QML_ANONYMOUS
-//    QML_SEQUENTIAL_CONTAINER(QmlRenderGeometry*)
-//};
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+class QmlVectorRenderGeometry
+{
+    Q_GADGET
+    QML_FOREIGN(QList<LDraw::QmlRenderGeometry *>)
+    QML_ANONYMOUS
+    QML_SEQUENTIAL_CONTAINER(QmlRenderGeometry *)
+};
+#endif
 
 } // namespace LDraw

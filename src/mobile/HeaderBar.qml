@@ -61,6 +61,6 @@ ToolBar {
     RowLayout {
         id: row
         anchors.fill: parent
-        data: [leftItem, centerItem, rightItem]
+        data: [root.leftItem, root.centerItem, root.rightItem]
     }
 }

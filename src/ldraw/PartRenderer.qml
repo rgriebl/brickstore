@@ -5,6 +5,9 @@ import QtQuick
 import QtQuick3D
 import LDraw
 
+//TODO: enable as soon as Qt 6.2 is not supported anymore
+//pragma ComponentBehavior: Bound
+
 Item {
     id: root
 

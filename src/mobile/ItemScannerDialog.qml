@@ -7,6 +7,8 @@ import BrickLink as BL
 import BrickStore as BS
 import Scanner as Scanner
 
+pragma ComponentBehavior: Bound
+
 AutoSizingDialog {
     id: root
 
@@ -149,6 +151,7 @@ AutoSizingDialog {
                                 Repeater {
                                     model: mediaDevices.videoInputs
                                     MenuItem {
+                                        required property var modelData
                                         text: modelData.description
                                         icon: cameraButton.icon
                                         onTriggered: capture.currentCameraId = modelData.id
@@ -172,6 +175,7 @@ AutoSizingDialog {
                                 Repeater {
                                     model: Scanner.Core.availableBackends
                                     MenuItem {
+                                        required property var modelData
                                         text: modelData.name
                                         icon.source: modelData.icon
                                         icon.color: "transparent"

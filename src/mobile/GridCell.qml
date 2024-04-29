@@ -51,7 +51,7 @@ Control {
             let c = root.selected ? Style.primaryColor : Style.backgroundColor
             if (root.alternate)
                 c = Qt.darker(c, 1.1)
-            return Qt.tint(c, tint)
+            return Qt.tint(c, root.tint)
         }
     }
 

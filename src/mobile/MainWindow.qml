@@ -295,7 +295,7 @@ Control {
 
     Connections {
         target: BS.BrickStore.documents
-        function onDocumentAdded(doc : BS.Document) { createViewForDocument(doc) }
+        function onDocumentAdded(doc : BS.Document) { root.createViewForDocument(doc) }
     }
 
     DialogLoader {
@@ -318,7 +318,7 @@ Control {
     Connections {
         target: BS.BrickStore
         function onShowSettings(page : string) {
-            setActiveDocument(null)
+            root.setActiveDocument(null)
             homeStack.push("SettingsDialog.qml", { "page": page, "goBackFunction": () => { homeStack.pop() } })
         }
 

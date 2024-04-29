@@ -6,6 +6,7 @@ import Mobile
 import BrickStore as BS
 import BrickLink as BL
 
+pragma ComponentBehavior: Bound
 
 Control {
     id: root
@@ -81,8 +82,8 @@ Control {
 
                             FontMetrics { id: fm; font: delegate.font }
 
-                            height: fm.height * 3
-                            width: height * 4 / 3
+                            implicitHeight: fm.height * 3
+                            implicitWidth: height * 4 / 3
 
                             property BL.Picture pic: BL.BrickLink.picture(delegate.blitem, BL.BrickLink.noColor)
                             property var noImage: BL.BrickLink.noImage(width, height)

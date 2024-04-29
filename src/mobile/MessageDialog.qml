@@ -44,7 +44,7 @@ Dialog {
         onClicked: function(button) {
             for (let i = DialogButtonBox.FirstButton; i <= DialogButtonBox.LastButton; i <<= 1) {
                 if (buttons.standardButton(i) === button) {
-                    buttonResult = i
+                    root.buttonResult = i
                     Qt.callLater(root.close)
                     break
                 }
