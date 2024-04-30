@@ -3,7 +3,8 @@
 
 [![Build badge](https://img.shields.io/github/actions/workflow/status/rgriebl/brickstore/build_cmake.yml?branch=main&logo=github&label=Build%20matrix)](https://github.com/rgriebl/brickstore/actions)
 [![DL badge](https://img.shields.io/github/downloads/rgriebl/brickstore/latest/total?label=Downloads%20for%20latest%20version)](https://github.com/rgriebl/brickstore/releases)
-[![DB badge](https://img.shields.io/github/v/release/rgriebl/brickstore-database?display_name=release&label=Last%20database%20update%20UTC)](https://github.com/rgriebl/brickstore-database)
+[![DB badge](https://img.shields.io/github/v/release/rgriebl/brickstore-database?display_name=release&label=Last%20database%20update%20(UTC))](https://github.com/rgriebl/brickstore-database)
+[![LD badge](https://img.shields.io/github/v/release/rgriebl/brickstore-ldraw?display_name=release&label=Last%20LDraw%20update%20(UTC)&color=%23cc4444)](https://github.com/rgriebl/brickstore-ldraw)
 
 > [!CAUTION]
 > # Please see https://www.brickstore.dev for more information on downloads and usage.
