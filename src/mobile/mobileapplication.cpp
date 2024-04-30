@@ -113,17 +113,15 @@ void MobileApplication::init()
         emit doc->requestActivation();
 
         QString s = tr("Would you like to consolidate %L1 lots?").arg(list.count());
-        if (co_await UIHelpers::question(s) == UIHelpers::Yes) {
-            const auto modes = DocumentModel::createFieldMergeModes(DocumentModel::MergeMode::MergeAverage);
+        bool doConsolidate = (co_await UIHelpers::question(s) == UIHelpers::Yes);
+        const auto modes = DocumentModel::createFieldMergeModes(DocumentModel::MergeMode::MergeAverage);
 
-            for (auto &consolidate : list) {
-                consolidate.destinationIndex = 0;
-                consolidate.doNotDeleteEmpty = false;
-                consolidate.fieldMergeModes = modes;
-            }
-            co_return true;
+        for (auto &consolidate : list) {
+            consolidate.destinationIndex = doConsolidate ? 0 : -1;
+            consolidate.doNotDeleteEmpty = false;
+            consolidate.fieldMergeModes = modes;
         }
-        co_return false;
+        co_return true;
     });
 
     m_engine->load(QUrl(u"Mobile/Main.qml"_qs));

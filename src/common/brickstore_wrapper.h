@@ -373,7 +373,7 @@ public:
 
 private:
     bool m_showTracers;
-    bool m_slowAnimations;
+    bool m_slowAnimations = false;
 };
 
 class QmlAnnouncements

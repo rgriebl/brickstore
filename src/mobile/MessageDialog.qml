@@ -26,14 +26,15 @@ Dialog {
             if (button?.DialogButtonBox.buttonRole === DialogButtonBox.RejectRole)
                 rejectRoleButtons.push(i)
         }
-        if (buttons.count === 1)
+        if (allButtons.length === 1)
             buttonResult = allButtons[0]
         if (rejectRoleButtons.length === 1)
             buttonResult = rejectRoleButtons[0]
 
-        root.closePolicy = (buttons.count < 2) ? Popup.CloseOnPressOutside | Popup.CloseOnEscape
-                                               : (rejectRoleButtons.length === 1 ? Popup.CloseOnEscape
-                                                                                 : Popup.NoClose)
+        root.closePolicy = (allButtons.length < 2)
+                ? Popup.CloseOnPressOutside | Popup.CloseOnEscape
+                : (rejectRoleButtons.length === 1 ? Popup.CloseOnEscape
+                                                  : Popup.NoAutoClose)
     }
 
     footer: DialogButtonBox {
