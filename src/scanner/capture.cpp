@@ -7,6 +7,7 @@
 #include <QMediaCaptureSession>
 #include <QDeadlineTimer>
 #include <QTimer>
+#include <QGuiApplication>
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0) && QT_CONFIG(permissions)
 #  include <QCoreApplication>
 #  include <QPermissions>
@@ -18,6 +19,7 @@
 
 #include "bricklink/core.h"
 #include "bricklink/itemtype.h"
+#include "common/eventfilter.h"
 #include "core.h"
 #include "capture.h"
 
@@ -56,10 +58,12 @@ public:
     QByteArray currentBackendId;
     int progress = 0;
     Capture::State state = Capture::State::Idle;
+    QPointer<EventFilter> windowTracker;
+    bool appActive = true;
+    bool winVisible = false;
 
     QString lastError;
 
-    QTimer cameraStopTimer;
     QTimer noMatchMessageTimeout;
     QTimer errorMessageTimeout;
     QTimer progressTimer;
@@ -95,13 +99,6 @@ Capture::Capture(QObject *parent)
     connect(&d->noMatchMessageTimeout, &QTimer::timeout, this, [this]() {
         if (state() == State::NoMatch)
             setState(State::Idle);
-    });
-
-    d->cameraStopTimer.setInterval(5s);
-    d->cameraStopTimer.setSingleShot(true);
-    connect(&d->cameraStopTimer, &QTimer::timeout, this, [this]() {
-        if (state() == State::SoonInactive)
-            setState(State::Inactive);
     });
 
     d->progressTimer.setInterval(30ms);
@@ -184,6 +181,19 @@ Capture::Capture(QObject *parent)
 
     setCurrentBackendId(core()->defaultBackendId());
     setCurrentCameraId(QMediaDevices::defaultVideoInput().id());
+
+    connect(qApp, &QGuiApplication::applicationStateChanged,
+            this, [this](Qt::ApplicationState appState) {
+        if (appState == Qt::ApplicationInactive) {
+            d->appActive = false;
+            if (state() != State::Inactive)
+                setState(State::Inactive);
+        } else if (appState == Qt::ApplicationActive) {
+            d->appActive = true;
+            if (d->winVisible && (state() == State::Inactive))
+                setState(State::Idle);
+        }
+    });
 }
 
 Capture::~Capture()
@@ -199,13 +209,26 @@ void Capture::setVideoOutput(QObject *videoOutput)
     d->captureSession->setVideoOutput(videoOutput);
 }
 
-void Capture::setVideoOutputActiveState(ActiveState activeState)
+void Capture::trackWindowVisibility(QObject *window)
 {
-    switch (activeState) {
-    case ActiveState::Active:       setState(State::Idle); break;
-    case ActiveState::Inactive:     setState(State::Inactive); break;
-    case ActiveState::SoonInactive: setState(State::SoonInactive); break;
-    }
+    delete d->windowTracker;
+    d->winVisible = false;
+    if (!window)
+        return;
+
+    d->windowTracker = new EventFilter(window, { QEvent::Hide, QEvent::Show },
+                                       [this](QObject *, QEvent *e) {
+        if (e->type() == QEvent::Hide) {
+            d->winVisible = false;
+            if (state() != State::Inactive)
+                setState(State::Inactive);
+        } else if (e->type() == QEvent::Show) {
+            d->winVisible = true;
+            if (d->appActive && (state() == State::Inactive))
+                setState(State::Idle);
+        }
+        return EventFilter::ContinueEventProcessing;
+    });
 }
 
 void Capture::captureAndScan()
@@ -269,14 +292,12 @@ Capture::State Capture::state() const
 
 void Capture::setState(State newState)
 {
+    qWarning() << "NEW STATE" << newState << "[[ OLD STATE" << d->state << "]]";
+
     switch (newState) {
     case State::Idle:
         if (d->camera && !d->camera->isActive())
             d->camera->start();
-        d->cameraStopTimer.stop();
-        break;
-    case State::SoonInactive:
-        d->cameraStopTimer.start();
         break;
     case State::Inactive:
         if (d->camera && d->camera->isActive())

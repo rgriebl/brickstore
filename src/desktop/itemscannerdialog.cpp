@@ -13,7 +13,6 @@
 #include <QMediaDevices>
 #include <QCameraDevice>
 #include <QQmlApplicationEngine>
-#include <QGuiApplication>
 
 #include "bricklink/core.h"
 #include "bricklink/item.h"
@@ -69,6 +68,7 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
     setFocusProxy(m_cameraPreviewWidget);
     m_cameraPreviewWidget->setFocus();
     m_capture->setVideoOutput(m_cameraPreviewWidget->videoOutput());
+    m_capture->trackWindowVisibility(this);
 
     connect(m_cameraPreviewWidget, &Scanner::CameraPreviewWidget::clicked,
             m_capture, &Scanner::Capture::captureAndScan);
@@ -177,16 +177,6 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
         if (!m_pinWindow->isChecked())
             accept();
     });
-
-    connect(qApp, &QGuiApplication::applicationStateChanged,
-            this, [this](Qt::ApplicationState state) {
-        if (m_selectCamera->currentIndex() != -1) {
-            auto activeState = (state == Qt::ApplicationActive)
-                                   ? Scanner::Capture::ActiveState::Active
-                                   : Scanner::Capture::ActiveState::SoonInactive;
-            m_capture->setVideoOutputActiveState(activeState);
-        }
-    });
 }
 
 ItemScannerDialog::~ItemScannerDialog()
@@ -265,12 +255,6 @@ void ItemScannerDialog::keyPressEvent(QKeyEvent *e)
     if (e->key() == Qt::Key_Space)
         m_capture->captureAndScan();
     QDialog::keyPressEvent(e);
-}
-
-void ItemScannerDialog::hideEvent(QHideEvent *e)
-{
-    m_capture->setVideoOutputActiveState(Scanner::Capture::ActiveState::Inactive);
-    QDialog::hideEvent(e);
 }
 
 void ItemScannerDialog::languageChange()

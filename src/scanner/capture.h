@@ -26,25 +26,19 @@ public:
     void setVideoOutput(QObject *videoOutput);
     Q_SIGNAL void videoOutputChanged();
 
-    enum class ActiveState : int {
-        Active,
-        SoonInactive,
-        Inactive,
-    };
-    void setVideoOutputActiveState(ActiveState activeState);
+    void trackWindowVisibility(QObject *window);
 
     Q_INVOKABLE void captureAndScan();
 
     static void checkSystemPermissions(QObject *context, const std::function<void(bool)> &callback);
 
     enum class State : int {
-        Idle,         // -> Capturing / Window inactive -> SoonInactive
+        Idle,         // -> Capturing / App to background OR dialog hide -> Inactive
         Capturing,    // -> Scanning | Error
         Scanning,     // -> Idle | NoMatch | Error
         NoMatch,      // 10sec -> Idle
         Error,        // 10sec -> Idle
-        SoonInactive, // 10sec -> Inactive / Window active -> Idle
-        Inactive,     // Click -> Idle [dark overlay, play button]
+        Inactive,     // App to foreground or dalog show -> Idle [dim overlay]
     };
     Q_ENUM(State);
 
