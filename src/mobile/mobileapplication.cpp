@@ -25,15 +25,14 @@
 #    include <qpa/qwindowsysteminterface.h>
 #  endif
 
-static struct DisableA11YOnAndroid14  // clazy:exclude=non-pod-global-static
+static struct DisableA11YOnAndroid  // clazy:exclude=non-pod-global-static
 {
-    // QTBUG-xxxxxx: Accessibility crashes in TableView on Android 14
-    DisableA11YOnAndroid14()
+    // QTBUG-xxxxxx: Accessibility crashes in TableView
+    DisableA11YOnAndroid()
     {
-        if (android_get_device_api_level() >= 34)
-            qputenv("QT_ANDROID_DISABLE_ACCESSIBILITY", "1");
+        qputenv("QT_ANDROID_DISABLE_ACCESSIBILITY", "1");
     }
-} disableA11YOnAndroid14;
+} disableA11YOnAndroid;
 #endif
 
 
