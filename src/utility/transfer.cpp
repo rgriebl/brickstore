@@ -23,23 +23,23 @@ TransferJob::~TransferJob()
     delete m_file;
 }
 
-TransferJob *TransferJob::get(const QUrl &url, const QUrlQuery &query)
+TransferJob *TransferJob::get(const QString &url, const QUrlQuery &query)
 {
     return create(HttpGet, url, query, { }, { });
 }
 
-TransferJob *TransferJob::post(const QUrl &url, const QUrlQuery &query)
+TransferJob *TransferJob::post(const QString &url, const QUrlQuery &query)
 {
     return create(HttpPost, url, { }, u"application/x-www-form-urlencoded"_qs,
                   query.toString(QUrl::FullyEncoded).toLatin1());
 }
 
-TransferJob *TransferJob::post(const QUrl &url, const QUrlQuery &query, const QString &contentType, const QByteArray &content)
+TransferJob *TransferJob::post(const QString &url, const QUrlQuery &query, const QString &contentType, const QByteArray &content)
 {
     return create(HttpPost, url, query, contentType, content);
 }
 
-TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QUrlQuery &query,
+TransferJob *TransferJob::create(HttpMethod method, const QString &url, const QUrlQuery &query,
                                  const QString &contentType, const QByteArray &content)
 {
     if (url.isEmpty())
@@ -47,7 +47,7 @@ TransferJob *TransferJob::create(HttpMethod method, const QUrl &url, const QUrlQ
 
     auto *j = new TransferJob();
 
-    j->m_url = url;
+    j->m_url = QUrl(url);
     if (j->m_url.scheme().isEmpty())
         j->m_url.setScheme(u"http"_qs);
     if (!query.isEmpty())

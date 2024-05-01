@@ -86,24 +86,22 @@ bool BrickLink::Store::startUpdate()
     Q_ASSERT(!m_job);
     setUpdateStatus(UpdateStatus::Updating);
 
-    QUrl url(u"https://www.bricklink.com/invExcelFinal.asp"_qs);
-    QUrlQuery query;
-    query.addQueryItem(u"itemType"_qs,      { });
-    query.addQueryItem(u"catID"_qs,         { });
-    query.addQueryItem(u"colorID"_qs,       { });
-    query.addQueryItem(u"invNew"_qs,        { });
-    query.addQueryItem(u"itemYear"_qs,      { });
-    query.addQueryItem(u"viewType"_qs,      u"x"_qs);    // XML
-    query.addQueryItem(u"invStock"_qs,      u"Y"_qs);
-    query.addQueryItem(u"invStockOnly"_qs,  { });
-    query.addQueryItem(u"invQty"_qs,        { });
-    query.addQueryItem(u"invQtyMin"_qs,     u"0"_qs);
-    query.addQueryItem(u"invQtyMax"_qs,     u"0"_qs);
-    query.addQueryItem(u"invBrikTrak"_qs,   { });
-    query.addQueryItem(u"invDesc"_qs,       { });
-    url.setQuery(query);
-
-    m_job = TransferJob::post(url);
+    m_job = TransferJob::post(u"https://www.bricklink.com/invExcelFinal.asp"_qs,
+                              {
+                               { u"itemType"_qs,      { } },
+                               { u"catID"_qs,         { } },
+                               { u"colorID"_qs,       { } },
+                               { u"invNew"_qs,        { } },
+                               { u"itemYear"_qs,      { } },
+                               { u"viewType"_qs,      u"x"_qs },
+                               { u"invStock"_qs,      u"Y"_qs },
+                               { u"invStockOnly"_qs,  { } },
+                               { u"invQty"_qs,        { } },
+                               { u"invQtyMin"_qs,     u"0"_qs },
+                               { u"invQtyMax"_qs,     u"0"_qs },
+                               { u"invBrikTrak"_qs,   { } },
+                               { u"invDesc"_qs,       { } }
+                              });
     m_core->retrieveAuthenticated(m_job);
     return true;
 }

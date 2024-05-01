@@ -682,7 +682,11 @@ Orders::Orders(Core *core)
             bool success = true;
             QString message;
 
-            if (jobCompleted) { // if there are no matching orders, we get an error reply back...
+            // If there are no matching orders, we get an HTML reply back, but at least
+            // the effective URL query changed to reflect the error state
+            bool noOrders = (QUrlQuery(job->effectiveUrl()).queryItemValue(u"error"_qs) == u"EOF");
+
+            if (jobCompleted && !noOrders) {
                 QHash<Order *, QString> orders;
 
                 d->m_db.transaction();
@@ -1404,30 +1408,29 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
 
     static const std::array types = { "received", "placed" };
     for (auto &type : types) {
-        QUrl url(u"https://www.bricklink.com/orderExcelFinal.asp"_qs);
-        QUrlQuery query;
-        query.addQueryItem(u"action"_qs,        u"save"_qs);
-        query.addQueryItem(u"orderType"_qs,     QString::fromLatin1(type));
-        query.addQueryItem(u"viewType"_qs,      u"X"_qs);
+        QUrlQuery query {
+            { u"action"_qs,        u"save"_qs },
+            { u"orderType"_qs,     QString::fromLatin1(type) },
+            { u"viewType"_qs,      u"X"_qs },
+            { u"getStatusSel"_qs,  u"I"_qs },
+            { u"getFiled"_qs,      u"Y"_qs },
+            { u"getDetail"_qs,     u"y"_qs },
+            { u"getDateFormat"_qs, u"0"_qs },    // MM/DD/YY
+            { u"includeMyCost"_qs, u"Y"_qs }
+        };
         if (fromDate.isValid() && toDate.isValid()) {
-            query.addQueryItem(u"getOrders"_qs,     u"date"_qs);
-            query.addQueryItem(u"fMM"_qs,           QString::number(fromDate.month()));
-            query.addQueryItem(u"fDD"_qs,           QString::number(fromDate.day()));
-            query.addQueryItem(u"fYY"_qs,           QString::number(fromDate.year()));
-            query.addQueryItem(u"tMM"_qs,           QString::number(toDate.month()));
-            query.addQueryItem(u"tDD"_qs,           QString::number(toDate.day()));
-            query.addQueryItem(u"tYY"_qs,           QString::number(toDate.year()));
+            query.addQueryItem(u"getOrders"_qs, u"date"_qs);
+            query.addQueryItem(u"fMM"_qs,       QString::number(fromDate.month()));
+            query.addQueryItem(u"fDD"_qs,       QString::number(fromDate.day()));
+            query.addQueryItem(u"fYY"_qs,       QString::number(fromDate.year()));
+            query.addQueryItem(u"tMM"_qs,       QString::number(toDate.month()));
+            query.addQueryItem(u"tDD"_qs,       QString::number(toDate.day()));
+            query.addQueryItem(u"tYY"_qs,       QString::number(toDate.year()));
         } else if (!orderId.isEmpty()) {
-            query.addQueryItem(u"orderID"_qs,       orderId);
+            query.addQueryItem(u"orderID"_qs,   orderId);
         }
-        query.addQueryItem(u"getStatusSel"_qs,  u"I"_qs);
-        query.addQueryItem(u"getFiled"_qs,      u"Y"_qs);
-        query.addQueryItem(u"getDetail"_qs,     u"y"_qs);
-        query.addQueryItem(u"getDateFormat"_qs, u"0"_qs);    // MM/DD/YYYY
-        query.addQueryItem(u"includeMyCost"_qs, u"Y"_qs);
-        url.setQuery(query);
 
-        auto job = TransferJob::post(url);
+        auto job = TransferJob::post(u"https://www.bricklink.com/orderExcelFinal.asp"_qs, query);
         job->setUserData(type, true);
         d->m_jobs << job;
 

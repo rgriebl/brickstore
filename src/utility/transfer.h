@@ -23,9 +23,9 @@ class TransferJob
 public:
     ~TransferJob();
 
-    static TransferJob *get(const QUrl &url, const QUrlQuery &query = { });
-    static TransferJob *post(const QUrl &url, const QUrlQuery &query = { });
-    static TransferJob *post(const QUrl &url, const QUrlQuery &query, const QString &contentType, const QByteArray &content);
+    static TransferJob *get(const QString &url, const QUrlQuery &query = { });
+    static TransferJob *post(const QString &url, const QUrlQuery &query = { });
+    static TransferJob *post(const QString &url, const QUrlQuery &query, const QString &contentType, const QByteArray &content);
 
     QUrl url() const                 { return m_url; }
     QUrl effectiveUrl() const        { return m_effective_url; }
@@ -76,7 +76,7 @@ private:
         HttpPost = 1
     };
 
-    static TransferJob *create(HttpMethod method, const QUrl &url, const QUrlQuery &query, const QString &contentType, const QByteArray &content);
+    static TransferJob *create(HttpMethod method, const QString &url, const QUrlQuery &query, const QString &contentType, const QByteArray &content);
 
     void setStatus(Status st)  { m_status = st; }
     bool abortInternal();
