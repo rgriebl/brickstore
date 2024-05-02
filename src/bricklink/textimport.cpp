@@ -386,7 +386,7 @@ QCoro::Task<QByteArray> TextImport::download(const QUrl &url, const QString &fil
         co_return m_lastRunArchive->readFile(fileName);
     }
 
-    TransferJob *job = TransferJob::get(url);
+    TransferJob *job = TransferJob::get(url.toString(QUrl::RemoveQuery), QUrlQuery(url));
     core()->retrieveAuthenticated(job);
     AwaitableTransferJob atj(job);
 
