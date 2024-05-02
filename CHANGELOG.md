@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2024.5.2] - 2024-05-02
+
+Bugfix release for a few annoying problems with 5.1:
+- BrickLink store and order imports work again now.
+- Camera activation handling is fixed.
+- Android: opening documents from other applications did not work consistently.
+
+
 ## [2024.5.1] - 2024-05-01
 
 This is a quite big release for the mobile iOS and Android version. There are too many fixes and new features to mention them all, but here are the most important ones:
@@ -683,7 +691,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.5.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.5.2...HEAD
+[2024.5.2]: https://github.com/rgriebl/brickstore/releases/tag/v2024.5.2
 [2024.5.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.5.1
 [2024.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.4.1
 [2024.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.3.1
