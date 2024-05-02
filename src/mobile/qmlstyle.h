@@ -49,6 +49,7 @@ class QmlStyle : public QObject
 
 public:
     QmlStyle(QObject *parent = nullptr);
+    ~QmlStyle() override;
 
     QSizeF physicalScreenSize() const;
     bool smallSize() const;
@@ -102,5 +103,6 @@ private:
     QMargins m_screenMargins;
     qreal m_screenDpr = qreal(1);
 
+    static QmlStyle *s_inst; // for Android
     friend void androidSetScreenMargins(const QMargins &margins);
 };

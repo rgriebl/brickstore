@@ -20,13 +20,13 @@ static QMargins staticScreenMargins;
 
 void androidSetScreenMargins(const QMargins &margins)
 {
-    QmlStyle *inst = nullptr;
-    if (Application::inst() && Application::inst()->qmlEngine())
-        inst = Application::inst()->qmlEngine()->singletonInstance<QmlStyle *>("Mobile", "Style");
-    if (inst)
-        inst->setScreenMargins(margins);
-    else
+    if (QmlStyle::s_inst) {
+        QMetaObject::invokeMethod(QmlStyle::s_inst, [=]() {
+                QmlStyle::s_inst->setScreenMargins(margins);
+            }, Qt::QueuedConnection);
+    } else {
         staticScreenMargins = margins;
+    }
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -37,6 +37,7 @@ Java_de_brickforge_brickstore_ExtendedQtActivity_changeScreenMargins(JNIEnv *, j
 
 #endif
 
+QmlStyle *QmlStyle::s_inst = nullptr;
 
 QmlStyle::QmlStyle(QObject *parent)
     : QObject(parent)
@@ -76,6 +77,13 @@ QmlStyle::QmlStyle(QObject *parent)
     m_screenMargins = staticScreenMargins;
 #endif
     qInfo() << "Screen margins:" << m_screenMargins << "/ dpr:" << m_screenDpr;
+
+    s_inst = this;
+}
+
+QmlStyle::~QmlStyle()
+{
+    s_inst = nullptr;
 }
 
 void QmlStyle::setScreenMargins(const QMargins &newMargins)
