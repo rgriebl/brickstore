@@ -17,23 +17,30 @@ class MobileFileOpenHandlerPrivate
 public:
     static void deferredOpenUrl(const QUrl &url)
     {
-        if (MobileFileOpenHandler::s_inst)
-            MobileFileOpenHandler::s_inst->openUrl(url);
-        else
+        if (MobileFileOpenHandler::s_inst) {
+            QMetaObject::invokeMethod(MobileFileOpenHandler::s_inst, [=]() {
+                    MobileFileOpenHandler::s_inst->openUrl(url);
+                }, Qt::QueuedConnection);
+        } else {
+            QMutexLocker locker(&s_mutex);
             s_deferred.append(url);
+        }
     }
 
     static void flushDeferred()
     {
+        QMutexLocker locker(&s_mutex);
         for (const auto &url : std::as_const(s_deferred))
             MobileFileOpenHandler::s_inst->openUrl(url);
         s_deferred.clear();
     }
 
     static QList<QUrl> s_deferred;
+    static QMutex s_mutex;
 };
 
 QList<QUrl> MobileFileOpenHandlerPrivate::s_deferred;
+QMutex MobileFileOpenHandlerPrivate::s_mutex;
 
 extern "C" JNIEXPORT void JNICALL
 Java_de_brickforge_brickstore_ExtendedQtActivity_openUrl(JNIEnv *env, jobject, jstring jurl)

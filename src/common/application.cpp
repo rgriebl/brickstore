@@ -109,11 +109,19 @@ void Application::init()
     QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
 
     new EventFilter(qApp, { QEvent::FileOpen }, [this](QObject *, QEvent *e) {
-        const QString file = static_cast<QFileOpenEvent *>(e)->file();
-        if (m_canEmitOpenDocuments)
-            emit openDocument(file);
-        else
-            m_queuedDocuments.append(file);
+        auto foe = static_cast<QFileOpenEvent *>(e);
+        QUrl url = foe->url();
+
+        if (m_canEmitOpenDocuments) {
+            if (url.isLocalFile())
+                emit openDocument(url.toLocalFile());
+            else if (url.isValid()) // e.g. Android content:// urls
+                emit openDocument(url.toString());
+            else if (!foe->file().isEmpty())
+                emit openDocument(foe->file());
+        } else {
+            m_queuedDocuments.append(url);
+        }
         return EventFilter::StopEventProcessing;
     });
     new EventFilter(qApp, { QEvent::LanguageChange }, [this](QObject *, QEvent *) {

@@ -77,7 +77,9 @@ DesktopApplication::DesktopApplication(int &argc, char **argv)
     m_clp.process(QCoreApplication::arguments());
 
     m_translationOverride = m_clp.value(u"load-translation"_qs);
-    m_queuedDocuments << m_clp.positionalArguments();
+    const auto documents = m_clp.positionalArguments();
+    for (const auto &document : documents)
+        m_queuedDocuments << QUrl::fromLocalFile(document);
 
     if (m_clp.isSet(u"version"_qs)) {
         QString s = QCoreApplication::applicationName() + u' '  +

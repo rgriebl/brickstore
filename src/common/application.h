@@ -107,7 +107,7 @@ protected:
     QStringList m_startupErrors;
     QStringList m_startupMessages;
     QString m_translationOverride;
-    QStringList m_queuedDocuments;
+    QList<QUrl> m_queuedDocuments;
     bool m_canEmitOpenDocuments = false;
 
     std::unique_ptr<QTranslator> m_trans_qt;
