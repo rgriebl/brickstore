@@ -33,13 +33,13 @@ public:
         , m_timeout((timeout < 3000) ? 3000 : timeout)
     {
         setAttribute(Qt::WA_TranslucentBackground);
-        setAutoFillBackground(false);
+        setAutoFillBackground(true);
 
-        QPalette pal = palette();
-        bool isDark = (pal.color(QPalette::Window).lightness() < 128);
-        pal.setBrush(QPalette::WindowText, isDark ? Qt::black : Qt::white);
-        pal.setBrush(QPalette::Window, QColor(isDark ? "#dddddd" : "#444444"));
-        setPalette(pal);
+        m_palette = palette();
+        bool isDark = (m_palette.color(QPalette::Window).lightness() < 128);
+        m_palette.setBrush(QPalette::WindowText, isDark ? Qt::black : Qt::white);
+        m_palette.setBrush(QPalette::Window, QColor(isDark ? "#dddddd" : "#444444"));
+        setPalette(m_palette);
         auto *layout = new QHBoxLayout(this);
         layout->setContentsMargins(20, 10, 20, 10);
         auto *label = new QLabel(u"<b>" + message + u"</b>");
@@ -50,13 +50,30 @@ public:
 
     void open(const QRect &area)
     {
-        auto fadeIn = new QPropertyAnimation(this, "windowOpacity");
+        auto fadeIn = new QVariantAnimation(this);
         fadeIn->setStartValue(0.);
         fadeIn->setEndValue(1.);
         fadeIn->setDuration(m_fadeTime);
-        auto fadeOut = new QPropertyAnimation(this, "windowOpacity");
+        auto fadeOut = new QVariantAnimation(this);
+        fadeOut->setStartValue(1.);
         fadeOut->setEndValue(0.);
         fadeOut->setDuration(m_fadeTime);
+
+        auto fader = [this](const QVariant &v) {
+            double f = v.toDouble();
+            auto win = m_palette.color(QPalette::Window);
+            auto txt = m_palette.color(QPalette::WindowText);
+            win.setAlphaF(f);
+            txt.setAlphaF(f);
+            auto pal = m_palette;
+            pal.setColor(QPalette::Window, win);
+            pal.setColor(QPalette::WindowText, txt);
+            setPalette(pal);
+        };
+
+        connect(fadeIn, &QVariantAnimation::valueChanged, this, fader);
+        connect(fadeOut, &QVariantAnimation::valueChanged, this, fader);
+
         auto seq = new QSequentialAnimationGroup(this);
         seq->addAnimation(fadeIn);
         seq->addPause(m_timeout);
@@ -68,6 +85,7 @@ public:
         QPoint p = area.center() - rect().center();
         p.ry() += area.height() / 4;
         move(p);
+        fader(0);
         show();
         seq->start();
     }
@@ -101,6 +119,7 @@ private:
     QString m_message;
     QAbstractAnimation *m_animation = nullptr;
     int m_timeout = -1;
+    QPalette m_palette;
     static constexpr int m_fadeTime = 1500;
 };
 
