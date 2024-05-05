@@ -84,6 +84,16 @@ endif()
 
 include(BuildQCoro)
 
+set(BS_WAYLAND_DECORATIONS OFF)
+if (LINUX AND (${Qt6_VERSION} VERSION_LESS "6.8.0") AND (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.5.0"))
+    # Qt < 6.8.0 draws very ugly window decorations on Gnome
+    find_package(Wayland QUIET)
+    if (Wayland_FOUND AND (${Wayland_VERSION} VERSION_GREATER_EQUAL "1.20.0"))
+        include(BuildQAdwaitaDecorations)
+        set(BS_WAYLAND_DECORATIONS ON)
+    endif()
+endif()
+
 set(copts)
 set(cxxopts)
 if (MSVC)
@@ -722,4 +732,5 @@ message(STATUS "  ASAN ........... ${SANITIZE}")
 message(STATUS "  Qt Modeltest ... ${MODELTEST}")
 message(STATUS "  Parallel STL ... ${PARALLEL_STL}")
 message(STATUS "  Linux/libsecret  ${BS_LIBSECRET}")
+message(STATUS "  Wayland deco ... ${BS_WAYLAND_DECORATIONS}")
 message(STATUS "")

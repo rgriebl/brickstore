@@ -62,6 +62,9 @@
 DesktopApplication::DesktopApplication(int &argc, char **argv)
     : Application(argc, argv)
 {
+#if defined(Q_OS_LINUX)
+    qputenv("QT_WAYLAND_DECORATION", "adwaita");
+#endif
 #if defined(Q_OS_WINDOWS)
     // the Vista style scales very badly when scaled to non-integer factors
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::RoundPreferFloor);

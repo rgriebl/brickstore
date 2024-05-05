@@ -148,7 +148,8 @@ void Application::init()
     (void) Config::inst()->upgrade(BRICKSTORE_MAJOR, BRICKSTORE_MINOR, BRICKSTORE_PATCH);
     checkSentryConsent();
 
-    QIcon::setThemeSearchPaths({ u":/assets/icons"_qs });
+    QIcon::setThemeSearchPaths(QStringList { u":/assets/icons"_qs } + QIcon::themeSearchPaths());
+    QIcon::setFallbackThemeName(QIcon::themeName());
 
     (void) OnlineState::inst();
     (void) Currency::inst();

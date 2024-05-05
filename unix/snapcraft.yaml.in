@@ -22,7 +22,6 @@ apps:
     extensions: [ gnome ]
     environment:
       QT_QPA_PLATFORMTHEME: gtk3
-      DISABLE_WAYLAND: 1
     plugs:
       - x11
       - unity7
