@@ -179,24 +179,32 @@ Page {
                 Component.onCompleted: { setSource("ViewEditMenu.qml", { "document": root.document }) }
             }
 
+            pointerNavigationEnabled: false
+
             TapHandler {
                 gesturePolicy: TapHandler.ReleaseWithinBounds
-                function mapPoint(point) {
-                    point = table.mapFromItem(target, point)
-                    let cell = table.cellAtPos(point)
+                function mapPoint(p) {
+                    p = table.mapFromItem(target, p)
+                    let cell = table.cellAtPosition(p)
                     let lx = cell.x < 0 ? -1 : root.document.logicalColumn(cell.x)
                     return { row: cell.y, column: lx }
                 }
 
+                function toggleRowSelection(m) {
+                    if (m.row >= 0 && m.column >= 0) {
+                        table.selectionModel.setCurrentIndex(table.model.index(m.row, m.column),
+                                                             ItemSelectionModel.Rows | ItemSelectionModel.Toggle)
+                    }
+                }
+
                 onTapped: function(eventPoint) {
                     let m = mapPoint(eventPoint.position)
-                    if (m.row >= 0 && m.column >= 0) {
-                        table.selectionModel.select(table.model.index(m.row, m.column),
-                                                    ItemSelectionModel.Rows | ItemSelectionModel.Toggle)
-                    }
+                    toggleRowSelection(m)
                 }
                 onLongPressed: function() {
                     let m = mapPoint(point.position)
+                    if (!table.selectionModel.hasSelection)
+                        toggleRowSelection(m)
                     editMenu.open(m.column)
                 }
             }
