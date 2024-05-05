@@ -1,0 +1,38 @@
+app-id: dev.brickstore.BrickStore
+runtime: org.gnome.Platform
+runtime-version: '46'
+sdk: org.gnome.Sdk
+command: brickstore
+modules:
+  - name: brickstore
+    buildsystem: simple
+    build-commands:
+      - cp -a usr/* /app/
+      - chrpath -r /app/lib: /app/bin/brickstore
+    sources:
+      - type: dir
+        path: BrickStore-Install
+
+  - name: libtbb
+    buildsystem: cmake-ninja
+    config-opts:
+      - "-DTBB_TEST=OFF"
+    sources:
+      - type: archive
+        url: https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.12.0.tar.gz
+        sha256: c7bb7aa69c254d91b8f0041a71c5bcc3936acb64408a1719aec0b2b7639dd84f
+    cleanup:
+      - "/include"
+      - "/lib/cmake"
+      - "/bin"
+
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=pulseaudio
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --socket=cups
+  - --device=dri
+  - --device=all # webcam
+  - --filesystem=home

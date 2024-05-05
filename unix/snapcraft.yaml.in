@@ -14,6 +14,8 @@ icon: snap/gui/brickstore.png
 
 apps:
   brickstore:
+    command-chain:
+      - bin/graphics-core22-wrapper
     command: usr/bin/brickstore
     common-id: dev.brickstore.BrickStore
     desktop: usr/share/applications/brickstore.desktop
@@ -33,11 +35,47 @@ apps:
       - camera
       - password-manager-service
 
+plugs:
+  graphics-core22:
+    interface: content
+    target: $SNAP/graphics
+    default-provider: mesa-core22
+
 parts:
   brickstore:
     plugin: dump
     source: BrickStore-Install/
     parse-info: [ usr/share/metainfo/dev.brickstore.BrickStore.appdata.xml ]
+    stage-packages:
+      - libtbb12
+      - libxcb-cursor0
+      - libxcb-icccm4
+      - libxcb-image0
+      - libxcb-keysyms1
+      - libxcb-render-util0
+      - libxcb-shape0
+      - libxcb-xkb1
+      - libxkbcommon-x11-0
+
+  graphics-core22:
+      after: [ brickstore ]
+      source: https://github.com/MirServer/graphics-core.git
+      plugin: dump
+      override-prime: |
+        craftctl default
+        ${CRAFT_PART_SRC}/bin/graphics-core22-cleanup mesa-core22 nvidia-core22
+      prime:
+        - bin/graphics-core22-wrapper
+
+layout:
+  /usr/share/libdrm:
+    bind: $SNAP/graphics/libdrm
+  /usr/share/drirc.d:
+    symlink: $SNAP/graphics/drirc.d
+  /usr/share/X11/XErrorDB:
+    symlink: $SNAP/graphics/X11/XErrorDB
+  /usr/share/X11/locale:
+    symlink: $SNAP/graphics/X11/locale
 
 architectures:
   - build-on: amd64

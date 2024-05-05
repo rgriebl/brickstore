@@ -66,13 +66,13 @@ jobs:
           environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
           cmake_extra_config: '-DCMAKE_TOOLCHAIN_FILE=%Qt6_DIR%/lib/cmake/Qt6/qt.toolchain.cmake -DQT_HOST_PATH=%Qt6_DIR%/../msvc2019_64'
 
-        - name: "Ubuntu 22.04 64bit"
+        - name: "Ubuntu 22.04"
           artifact: "Ubuntu-22.04"
           runs-on: ubuntu-22.04
           os: linux
           debian_container: "buildpack-deps:22.04"
 
-        - name: "Debian 12 Backend 64bit"
+        - name: "Debian 12 Backend"
           artifact: "Debian-12-Backend"
           runs-on: ubuntu-22.04
           os: linux
@@ -81,7 +81,7 @@ jobs:
           generate_docs: true
           generate_docker: true
 
-        - name: "Linux AppImage 64bit"
+        - name: "Linux AppImage"
           artifact: "Linux-AppImage"
           runs-on: ubuntu-20.04
           os: linux
@@ -91,11 +91,21 @@ jobs:
           qt_version: '6.6.3'
           qt_arch: 'gcc_64'
 
-        - name: "Ubuntu Snap 64bit"
+        - name: "Ubuntu Snap"
           artifact: "Linux-Snap"
           runs-on: ubuntu-22.04
           os: linux
           snap: true
+          qt_tools: tools_opensslv3_src
+          qt_host: 'linux'
+          qt_version: '6.6.3'
+          qt_arch: 'gcc_64'
+
+        - name: "Linux Flatpak"
+          artifact: "Linux-Flatpak"
+          runs-on: ubuntu-22.04
+          os: linux
+          flatpak: true
           qt_tools: tools_opensslv3_src
           qt_host: 'linux'
           qt_version: '6.6.3'
@@ -165,7 +175,7 @@ jobs:
 
     - name: Cache Qt from aqtinstall
       id: cache-qt
-      if: (matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap
+      if: (matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap || matrix.config.flatpak
       uses: actions/cache@v4
       with:
         path: "${{ runner.workspace }}/Qt/"
@@ -173,7 +183,7 @@ jobs:
 
     - name: Install Qt via aqtinstall
       if: |
-        ((matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap)
+        ((matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap || matrix.config.flatpak)
         && (steps.cache-qt.outputs.cache-hit != 'true')
       shell: sh
       run: |
@@ -198,7 +208,7 @@ jobs:
 
     - name: Install Qt via aqtinstall (finalize)
       if: |
-        ((matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap)
+        ((matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap || matrix.config.flatpak)
       shell: sh
       run: |
         # Set and export Qt6_DIR
@@ -289,7 +299,7 @@ jobs:
         name: ${{ matrix.config.artifact }}
         path: "build/*.deb"
 
-    # Build for Linux (AppImage / Snap)
+    # Build for Linux (AppImage / Snap / Flatpak)
     #################################################
 
     - name: Build for Linux (AppImage)
@@ -306,8 +316,8 @@ jobs:
         env DESTDIR=build/BrickStore-Install cmake --install build --config RelWithDebInfo --prefix /usr
       shell: bash
 
-    - name: Build for Linux (Snap)
-      if: matrix.config.snap
+    - name: Build for Linux (Snap / Flatpak)
+      if: matrix.config.snap || matrix.config.flatpak
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y update
         sudo DEBIAN_FRONTEND=noninteractive apt -y install \
@@ -319,8 +329,8 @@ jobs:
         env DESTDIR=build/BrickStore-Install cmake --install build --config RelWithDebInfo --prefix /usr
       shell: bash
 
-    - name: OpenSSLv3 for Linux (AppImage / Snap)
-      if: matrix.config.appimage || matrix.config.snap
+    - name: OpenSSLv3 for Linux (AppImage / Snap / Flatpak)
+      if: matrix.config.appimage || matrix.config.snap || matrix.config.flatpak
       run: |
         cd ${Qt6_DIR}/../../Tools/OpenSSLv3/src
         ./Configure --prefix=/usr --libdir=lib --openssldir=/etc/ssl '-Wl,-rpath,\$$ORIGIN,--enable-new-dtags'
@@ -365,36 +375,39 @@ jobs:
         name: ${{ matrix.config.artifact }}
         path: "*.AppImage"
 
-    - name: Create Linux Snap 1
-      if: matrix.config.snap
+    - name: Create Linux Snap / Flatpak 1
+      if: matrix.config.snap || matrix.config.flatpak
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y install libfuse2
-        mkdir -p .linuxdeploy
-        wget  -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
-        chmod +x .linuxdeploy/linuxdeploy-x86_64.AppImage
-        wget  -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
-        chmod +x .linuxdeploy/linuxdeploy-plugin-qt-x86_64.AppImage
-        env VERSION=`cat VERSION_NUMBER` QML_SOURCES_PATHS=src EXTRA_QT_PLUGINS=svg \
-            "QMAKE=${Qt6_DIR}/bin/qmake" "LD_LIBRARY_PATH=${Qt6_DIR}/lib" \
-            .linuxdeploy/linuxdeploy-x86_64.AppImage \
-                --appdir=build/BrickStore-Install \
-                -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva.so \
-                -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva-drm.so \
-                -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva-x11.so \
-                --plugin qt
-        find build/BrickStore-Install -maxdepth 1 -iname "AppRun*" -or -not -type d | xargs rm -rf
-        # cqtdeployer would be much faster, but doesn't run on 20.04
-        # wget  -P .cqtdeployer -N "https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2285/CQtDeployer_1.6.2285.1507045_Linux_x86_64.zip"
-        # unzip -u .cqtdeployer/CQtDeployer_1.6.2285.1507045_Linux_x86_64.zip -d .cqtdeployer
-        # chmod +x .cqtdeployer/bin/CQtDeployer
-        # chmod +x .cqtdeployer/CQtDeployer.sh
-        # cd build
-        # ../.cqtdeployer/CQtDeployer.sh force-clear \
-        #     -bin bin/brickstore -qmlDir ../src/ldraw \
-        #     -qmake "${Qt6_DIR}/bin/qmake" \
-        #     -targetDir BrickStore-Install/usr -libOut lib -binOut bin \
-        #     -disableRunScript brickstore -disableShortCut brickstore \
-        #     -enablePlugins multimedia
+        wget  -P .cqtdeployer -N "https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2351/CQtDeployer_1.6.2351.ec4840f_Linux_x86_64.zip"
+        unzip -u .cqtdeployer/CQtDeployer_1.6.2351.ec4840f_Linux_x86_64.zip -d .cqtdeployer
+        chmod +x .cqtdeployer/bin/CQtDeployer
+        chmod +x .cqtdeployer/CQtDeployer.sh
+        cd build
+        ../.cqtdeployer/CQtDeployer.sh \
+            -bin bin/brickstore -qmlDir ../src \
+            -qmake "${Qt6_DIR}/bin/qmake" \
+            -targetDir BrickStore-Install/usr -libOut lib -binOut bin \
+            -disableRunScript brickstore -disableShortCut brickstore
+
+    - name: Create Linux Flatpak 2
+      if: matrix.config.flatpak
+      run: |
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install flatpak flatpak-builder
+        flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+        cd build
+        flatpak-builder --user --verbose --install-deps-from flathub --force-clean --repo fp-repo \
+            fp-build ./flatpak.yaml
+        flatpak build-bundle --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo fp-repo \
+            BrickStore-`cat ../VERSION_NUMBER`-`flatpak --default-arch`.flatpak \
+            dev.brickstore.BrickStore
+
+    - name: Upload Linux Flatpak
+      if: matrix.config.flatpak
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.config.artifact }}
+        path: "build/*.flatpak"
 
     - name: Create Linux Snap 2
       if: matrix.config.snap

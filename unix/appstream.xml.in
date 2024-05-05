@@ -5,7 +5,7 @@
   <project_license>GPL-3.0-only</project_license>
   <name>BrickStore</name>
   <summary>@DESCRIPTION@</summary>
-  <content_rating />
+  <content_rating type="oars-1.1" />
   <description>
     <p>
 BrickStore is a BrickLink offline management tool. It is multi-platform (Windows, macOS, Linux, Android and iOS), multilingual (currently English, German, Spanish, Swedish and French), fast and stable.

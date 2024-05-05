@@ -660,7 +660,8 @@ elseif (LINUX)
 
     set(SNAP_DIR "${CMAKE_BINARY_DIR}/snap")
     file(COPY "${CMAKE_SOURCE_DIR}/assets/generated-app-icons/brickstore.png" DESTINATION "${SNAP_DIR}/gui/")
-    configure_file("${CMAKE_SOURCE_DIR}/unix/snapcraft.yaml.in" "${SNAP_DIR}/snapcraft.yaml" @ONLY)
+    configure_file(unix/snapcraft.yaml.in "${SNAP_DIR}/snapcraft.yaml" @ONLY)
+    configure_file(unix/flatpak.yaml.in flatpak.yaml @ONLY)
 
 elseif (IOS)
     # the idea here comes from https://github.com/OlivierLDff/QtIosCMake/blob/master/AddQtIosApp.cmake
