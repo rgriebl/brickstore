@@ -152,7 +152,12 @@ ItemScannerDialog::ItemScannerDialog(QWidget *parent)
 
     languageChange();
 
-    restoreGeometry(Config::inst()->value(u"MainWindow/ItemScannerDialog/Geometry"_qs).toByteArray());
+    if (!restoreGeometry(Config::inst()->value(u"MainWindow/ItemScannerDialog/Geometry"_qs).toByteArray())) {
+        // the camera preview is most likely just black without this
+        QMetaObject::invokeMethod(this, [this]() {
+                m_cameraPreviewWidget->resize(m_cameraPreviewWidget->size() + QSize(1, 1));
+            }, Qt::QueuedConnection);
+    }
     m_pinWindow->setChecked(Config::inst()->value(u"MainWindow/ItemScannerDialog/Pinned"_qs, false).toBool());
 
     updateItemTypeFilters();
