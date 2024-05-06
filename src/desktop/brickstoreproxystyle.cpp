@@ -193,6 +193,8 @@ int BrickStoreProxyStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *
     } else if (hint == SH_ItemView_ActivateItemOnSingleClick) {
         if (widget && widget->property("singleClickActivation").toBool())
             return true;
+        else
+            return false;
     }
     return QProxyStyle::styleHint(hint, option, widget, returnData);
 }

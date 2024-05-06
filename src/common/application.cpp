@@ -21,6 +21,8 @@
 #include <QtGui/QImageWriter>
 #include <QtGui/QDesktopServices>
 #include <QtGui/QWindow>
+#include <QtNetwork/QSslSocket>
+#include <QtNetwork/QNetworkInformation>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQuick3D/QQuick3D>
@@ -226,6 +228,12 @@ void Application::init()
     connect(this, &Application::languageChanged,
             am, &ActionManager::retranslate);
     am->retranslate();
+
+    qInfo() << "Network:";
+    qInfo() << "  TLS backend:" << QSslSocket::activeBackend();
+    qInfo() << "  Reachability backend:" << (QNetworkInformation::instance()
+                                             ? QNetworkInformation::instance()->backendName()
+                                            : u"(none)"_qs);
 
     qInfo() << "UI:";
     qInfo() << "  Device pixel ratio:" << qApp->devicePixelRatio()
