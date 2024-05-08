@@ -26,8 +26,11 @@ Only made possible by [Dan Jezek's](https://www.danjezek.com/) support
 ## 3rd-Party Components
 
 This projects contains other open-source 3rd-party components under different licenses:
-* 3rdparty/minizip: see LICENSE.ZLIB
-* 3rdparty/lzma: see LICENSE.LGPLv21
-* 3rdparty/qcoro: see LICENSE.MIT
-* 3rdpath/qtwinextras: see LICENSE.GPL
 * assets/icons: see COPYING-ICONS and COPYING-FLAGS
+* 3rdparty/minizip: ZLIB license
+* 3rdparty/lzma: LGPL-2.1 license
+* 3rdpath/qtwinextras: GPL-3 license
+* 3rdpath/qtsingleapplication: BSD-3 license
+* https://github.com/danvratil/qcoro: MIT license
+* https://github.com/getsentry/sentry-native.git: MIT license
+* https://github.com/FedoraQt/QAdwaitaDecorations.git: LGPL-2.1 license

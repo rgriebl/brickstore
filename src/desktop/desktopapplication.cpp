@@ -6,13 +6,9 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
-#include <QtCore/QByteArray>
-#include <QtCore/QDataStream>
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QProcess>
 #include <QtCore/QMessageLogContext>
-#include <QtNetwork/QLocalServer>
-#include <QtNetwork/QLocalSocket>
 #include <QtWidgets/QProxyStyle>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QToolTip>
@@ -48,6 +44,7 @@
 #  include "common/systeminfo.h"
 #endif
 
+#include "qtsingleapplication/qtlocalpeer.h"
 #include "common/config.h"
 #include "common/scriptmanager.h"
 #include "desktop/brickstoreproxystyle.h"
@@ -260,102 +257,26 @@ QCoro::Task<bool> DesktopApplication::closeAllDocuments()
 
 bool DesktopApplication::notifyOtherInstance()
 {
-    // We need a long timeout here. If multiple docs are opened at the same time from the Windows
-    // Explorer, it will launch multiple BrickStore processes in parallel (one for each document).
-    // With a short timeout, the clients may not get back the confirmation ('X') in time.
-    const int timeout = 10000;
-    enum { Undecided, Server, Client } state = Undecided;
-    QString socketName = u"BrickStore"_qs;
-    QLocalServer *server = nullptr;
+    auto peer = new QtLocalPeer(this, QCoreApplication::applicationName());
+    connect(peer, &QtLocalPeer::messageReceived, this,
+            [this](const QString &message) {
+        const auto files = message.split(QChar::Null);
+        for (const auto &file : std::as_const(files))
+            QCoreApplication::postEvent(qApp, new QFileOpenEvent(file), Qt::LowEventPriority);
 
-#if defined(Q_OS_WINDOWS)
-    // QLocalServer::listen() would succeed for any number of callers
-    HANDLE semaphore = ::CreateSemaphore(nullptr, 0, 1, L"Local\\BrickStore");
-    state = (semaphore && (::GetLastError() == ERROR_ALREADY_EXISTS)) ? Client : Server;
-#endif
-    if (state != Client) {
-        server = new QLocalServer(this);
+        raise();
+    });
 
-        bool res = server->listen(socketName);
-#if defined(Q_OS_UNIX)
-        if (!res && server->serverError() == QAbstractSocket::AddressInUseError) {
-            QFile::remove(QDir::cleanPath(QDir::tempPath()) + u'/' + socketName);
-            res = server->listen(socketName);
+    if (peer->isClient()) {
+        const QStringList args = QCoreApplication::arguments().mid(1);
+        QStringList files;
+        files.reserve(args.size());
+        for (const auto &arg : args) {
+            QFileInfo fi(arg);
+            if (fi.isFile())
+                files << fi.absoluteFilePath();
         }
-#endif
-        if (res) {
-            connect(server, &QLocalServer::newConnection,
-                    this, [this, server]() {
-                if (!server)
-                    return;
-                QLocalSocket *client = server->nextPendingConnection();
-                if (!client)
-                    return;
-
-                QDataStream ds(client);
-                QStringList files;
-                bool header = true;
-                int need = sizeof(qint32);
-                while (need) {
-                    auto got = client->bytesAvailable();
-                    if (got < need) {
-                        client->waitForReadyRead(timeout);
-                    } else if (header) {
-                        need = 0;
-                        ds >> need;
-                        header = false;
-                    } else {
-                        ds >> files;
-                        need = 0;
-                    }
-                }
-                // client->write("X", 1);
-                client->close();
-
-                for (const auto &f : std::as_const(files))
-                    QCoreApplication::postEvent(qApp, new QFileOpenEvent(f), Qt::LowEventPriority);
-
-                raise();
-            });
-            state = Server;
-        }
-    }
-    if (state != Server) {
-        QLocalSocket client(this);
-
-        for (int i = 0; i < 2; ++i) { // try twice
-            client.connectToServer(socketName);
-            if (client.waitForConnected(timeout) || i)
-                break;
-            else
-                QThread::msleep(static_cast<unsigned long>(timeout) / 4);
-        }
-
-        if (client.state() == QLocalSocket::ConnectedState) {
-            const auto fileArgs = QCoreApplication::arguments().mid(1);
-            QStringList files;
-            files.reserve(fileArgs.size());
-            for (const QString &arg : fileArgs) {
-                QFileInfo fi(arg);
-                if (fi.exists() && fi.isFile())
-                    files << fi.absoluteFilePath();
-            }
-            QByteArray data;
-            QDataStream ds(&data, QIODevice::WriteOnly);
-            ds << qint32(0) << files;
-            ds.device()->seek(0);
-            ds << qint32(data.size() - int(sizeof(qint32)));
-
-            bool res = (client.write(data) == data.size());
-            res = res && client.waitForBytesWritten(timeout);
-//            res = res && client.waitForReadyRead(timeout);
-//            res = res && (client.read(1) == QByteArray(1, 'X'));
-
-            if (res) {
-                delete server;
-                return true;
-            }
-        }
+        return peer->sendMessage(files.join(QChar::Null), 5000);
     }
     return false;
 }

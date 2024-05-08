@@ -66,3 +66,24 @@ if (WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/qtwinextras
     )
 endif()
+
+if (BS_DESKTOP)
+    target_sources(${PROJECT_NAME} PUBLIC
+        qtsingleapplication/qtlockedfile.h
+        qtsingleapplication/qtlockedfile.cpp
+        qtsingleapplication/qtlocalpeer.h
+        qtsingleapplication/qtlocalpeer.cpp
+    )
+    target_include_directories(${PROJECT_NAME} PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/qtsingleapplication
+    )
+    if (WIN32)
+        target_sources(${PROJECT_NAME} PUBLIC
+            qtsingleapplication/qtlockedfile_win.cpp
+        )
+    else()
+        target_sources(${PROJECT_NAME} PUBLIC
+            qtsingleapplication/qtlockedfile_unix.cpp
+        )
+    endif()
+endif()

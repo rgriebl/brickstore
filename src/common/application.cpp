@@ -643,14 +643,12 @@ void Application::setMainWindow(QWindow *newWindow)
 
 void Application::raise()
 {
-    const auto tlWindows = qApp->topLevelWindows();
-    if (!tlWindows.isEmpty()) {
-        QWindow *win = tlWindows.constFirst();
-        if (win->windowState() == Qt::WindowMinimized)
-            win->setWindowStates(win->windowStates() & ~Qt::WindowMinimized);
-        win->raise();
-        if (!win->isActive())
-            win->requestActivate();
+    if (m_mainWindow) {
+        if (m_mainWindow->windowState() == Qt::WindowMinimized)
+            m_mainWindow->setWindowStates(m_mainWindow->windowStates() & ~Qt::WindowMinimized);
+        m_mainWindow->raise();
+        if (!m_mainWindow->isActive())
+            m_mainWindow->requestActivate();
     }
 }
 
