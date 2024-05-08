@@ -19,6 +19,8 @@ public:
         NotifyAfterUpdate
     };
 
+    ~CheckForUpdates() override;
+
     static CheckForUpdates *inst();
     void initialize(const QString &baseUrl, Mode mode);
 

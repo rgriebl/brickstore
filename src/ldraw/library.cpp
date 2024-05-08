@@ -158,6 +158,7 @@ Library *Library::create(const QString &updateUrl)
 Library::~Library()
 {
     shutdownPartLoaderThread();
+    s_inst = nullptr;
 }
 
 QFuture<Part *> Library::partFromId(const QByteArray &id)

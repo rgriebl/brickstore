@@ -25,6 +25,11 @@ using namespace std::chrono_literals;
 
 CheckForUpdates *CheckForUpdates::s_inst = nullptr;
 
+CheckForUpdates::~CheckForUpdates()
+{
+    s_inst = nullptr;
+}
+
 CheckForUpdates *CheckForUpdates::inst()
 {
     if (!s_inst)

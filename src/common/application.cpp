@@ -53,6 +53,7 @@
 #include "common/brickstore_wrapper.h"
 #include "common/currency.h"
 #include "common/eventfilter.h"
+#include "utility/appstatistics.h"
 #include "utility/exception.h"
 #include "common/systeminfo.h"
 #include "utility/transfer.h"
@@ -158,6 +159,7 @@ void Application::init()
     (void) SystemInfo::inst();
     (void) RecentFiles::inst();
     (void) CheckForUpdates::inst();
+    (void) AppStatistics::inst();
 
     CheckForUpdates::Mode updateMode = CheckForUpdates::Mode::NotifyBeforeUpdate;
 #if defined(BS_MOBILE)
@@ -491,6 +493,7 @@ QCoro::Task<bool> Application::closeAllDocuments()
 
 Application::~Application()
 {
+    delete AppStatistics::inst();
     delete CheckForUpdates::inst();
     delete BrickLink::core();
     delete LDraw::library();
@@ -498,6 +501,9 @@ Application::~Application()
     delete Currency::inst();
 //    delete DocumentList::inst();
     delete Config::inst();
+
+    if (m_defaultMessageHandler)
+        qInstallMessageHandler(m_defaultMessageHandler);
 
     s_inst = nullptr;
     delete m_app;
@@ -871,13 +877,13 @@ void Application::setupLogging()
         if ((type == QtWarningMsg) && msg.startsWith(u"stale focus object"))
             return;
 #endif
+        if (!s_inst)
+            return;
+
         if (s_inst && s_inst->m_defaultMessageHandler)
             (*s_inst->m_defaultMessageHandler)(type, ctx, msg);
 
         addSentryBreadcrumb(type, ctx, msg);
-
-        if (!s_inst)
-            return;
 
         try {
             // we may not be in the main thread here, but even if we are, we could be recursing

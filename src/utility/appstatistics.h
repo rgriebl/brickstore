@@ -21,6 +21,7 @@ class AppStatistics : public QAbstractTableModel
 
 public:
     static AppStatistics *inst();
+    ~AppStatistics() override;
 
     int addSource(const QString &name, const QString &unit = { });
     void removeSource(int sourceId);

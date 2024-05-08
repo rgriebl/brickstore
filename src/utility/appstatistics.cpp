@@ -16,6 +16,11 @@ AppStatistics *AppStatistics::inst()
     return s_inst;
 }
 
+AppStatistics::~AppStatistics()
+{
+    s_inst = nullptr;
+}
+
 int AppStatistics::addSource(const QString &name, const QString &unit)
 {
     Q_ASSERT(QThread::currentThread() == thread());
