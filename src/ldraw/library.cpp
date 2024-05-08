@@ -4,6 +4,7 @@
 #include <array>
 
 #include <QFile>
+#include <QSaveFile>
 #include <QTextStream>
 #include <QCoreApplication>
 #include <QMap>

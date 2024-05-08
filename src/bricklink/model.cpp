@@ -3,7 +3,6 @@
 
 #include <QtCore/QBuffer>
 #include <QtCore/QStringBuilder>
-#include <QtCore/QThreadStorage>
 #include <QtCore/QRegularExpression>
 #include <QtCore/QBitArray>
 #include <QtConcurrent/QtConcurrentMap>

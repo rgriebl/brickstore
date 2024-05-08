@@ -1,7 +1,6 @@
 // Copyright (C) 2004-2024 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <QtConcurrent>
 #include <QProcess>
 #include <QLibraryInfo>
 #include <QGuiApplication>
@@ -25,9 +24,14 @@
 #  endif
 #  include <windows.h>
 #elif defined(Q_OS_MACOS) || defined(Q_OS_IOS)
+#  include <QJsonDocument>
+#  include <QJsonArray>
+#  include <QJsonObject>
+#  include <QJsonValue>
 #  include <sys/types.h>
 #  include <sys/sysctl.h>
 #elif defined(Q_OS_LINUX)
+#  include <QFile>
 #  include <sys/sysinfo.h>
 #endif
 

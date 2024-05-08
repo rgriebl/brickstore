@@ -13,7 +13,6 @@
 #include <QtCore/QMap>
 #include <QtCore/QPair>
 #include <QtCore/QUrl>
-#include <QtCore/QThreadPool>
 #include <QtGui/QImage>
 #include <QtGui/QIcon>
 

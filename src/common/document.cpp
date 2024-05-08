@@ -8,6 +8,7 @@
 #include <QtCore/QSaveFile>
 #include <QtCore/QStandardPaths>
 #include <QtCore/QBitArray>
+#include <QtCore/QThreadPool>
 #include <QtGui/QClipboard>
 #include <QtGui/QCursor>
 #include <QtGui/QImage>
