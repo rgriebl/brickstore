@@ -134,6 +134,7 @@ target_link_libraries(desktop_module PRIVATE
     common_module
     bricklink_module
     ldraw_module
+    scanner_module
 )
 
 if (MACOS)
