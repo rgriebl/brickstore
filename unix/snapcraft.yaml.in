@@ -18,7 +18,7 @@ apps:
       - bin/graphics-core22-wrapper
     command: usr/bin/brickstore
     common-id: dev.brickstore.BrickStore
-    desktop: usr/share/applications/brickstore.desktop
+    desktop: usr/share/applications/dev.brickstore.BrickStore.desktop
     extensions: [ gnome ]
     environment:
       QT_QPA_PLATFORMTHEME: gtk3
@@ -44,7 +44,7 @@ parts:
   brickstore:
     plugin: dump
     source: BrickStore-Install/
-    parse-info: [ usr/share/metainfo/dev.brickstore.BrickStore.appdata.xml ]
+    parse-info: [ usr/share/metainfo/dev.brickstore.BrickStore.metainfo.xml ]
     stage-packages:
       - libtbb12
       - libxcb-cursor0

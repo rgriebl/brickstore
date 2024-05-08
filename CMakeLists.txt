@@ -510,8 +510,11 @@ add_custom_target("Other-Files" SOURCES
     macos/PrivacyInfo.xcprivacy
     scripts/git-release.sh
     translations/translations.json
-    unix/brickstore.desktop
-    unix/brickstore-mime.xml
+    unix/dev.brickstore.BrickStore.desktop
+    unix/dev.brickstore.BrickStore.mime.xml
+    unix/dev.brickstore.BrickStore.metainfo.xml.in
+    unix/flatpak.yaml.in
+    unix/snapcraft.yaml.in
     windows/brickstore.iss
     windows/brickstore.rc.in
 )
@@ -625,14 +628,14 @@ elseif (ANDROID)
 
 elseif (LINUX)
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
-    install(FILES unix/brickstore.desktop DESTINATION share/applications)
-    install(FILES unix/brickstore-mime.xml DESTINATION share/mime/packages)
-    install(FILES assets/generated-app-icons/brickstore.png DESTINATION share/icons/hicolor/256x256/apps)
-    install(FILES assets/generated-app-icons/brickstore_doc.png DESTINATION share/icons/hicolor/128x128/mimetypes)
+    install(FILES unix/dev.brickstore.BrickStore.desktop DESTINATION share/applications)
+    install(FILES unix/dev.brickstore.BrickStore.mime.xml DESTINATION share/mime/packages)
+    install(FILES assets/generated-app-icons/brickstore.png DESTINATION share/icons/hicolor/256x256/apps RENAME dev.brickstore.BrickStore.png)
+    install(FILES assets/generated-app-icons/brickstore_doc.png DESTINATION share/icons/hicolor/128x128/mimetypes RENAME dev.brickstore.BrickStore.doc.png)
 
     string(TIMESTAMP APPSTREAM_RELEASE_DATE "%Y-%m-%d")
-    configure_file(unix/appstream.xml.in unix/appstream.xml @ONLY)
-    install(FILES ${CMAKE_BINARY_DIR}/unix/appstream.xml DESTINATION share/metainfo RENAME dev.brickstore.BrickStore.appdata.xml)
+    configure_file(unix/dev.brickstore.BrickStore.metainfo.xml.in unix/dev.brickstore.BrickStore.metainfo.xml @ONLY)
+    install(FILES ${CMAKE_BINARY_DIR}/unix/dev.brickstore.BrickStore.metainfo.xml DESTINATION share/metainfo)
 
     # Arch has Qt 6.2+ and is handled upstream via AUR
     # Ubuntu finally has a Qt 6.2+ starting with 22.04 LTS (jammy)

@@ -358,9 +358,6 @@ jobs:
             "QMAKE=${Qt6_DIR}/bin/qmake" "LD_LIBRARY_PATH=${Qt6_DIR}/lib" \
             .linuxdeploy/linuxdeploy-x86_64.AppImage \
                 --appdir=build/BrickStore-Install \
-                -e build/bin/brickstore \
-                -i assets/generated-app-icons/brickstore.png \
-                -d unix/brickstore.desktop \
                 -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva.so \
                 -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva-drm.so \
                 -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva-x11.so \

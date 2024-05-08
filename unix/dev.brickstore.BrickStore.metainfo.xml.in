@@ -31,7 +31,7 @@ All data from www.bricklink.com is owned by BrickLink. Both BrickLink and LEGO a
     </p>
   </description>
 
-  <launchable type="desktop-id">brickstore.desktop</launchable>
+  <launchable type="desktop-id">dev.brickstore.BrickStore.desktop</launchable>
 
   <screenshots>
     <screenshot type="default">
