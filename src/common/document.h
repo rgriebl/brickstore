@@ -88,10 +88,12 @@ class Document : public QObject
     Q_OBJECT
 
 public:
-    Document(QObject *parent = nullptr);
-    Document(DocumentModel *model, QObject *parent = nullptr);
-    Document(DocumentModel *model, const QByteArray &columnsState, QObject *parent = nullptr);
-    Document(DocumentModel *model, const QByteArray &columnsState, bool restoredFromAutosave, QObject *parent = nullptr);
+    static Document *create(QObject *parent = nullptr);
+    static Document *create(DocumentModel *model, QObject *parent = nullptr);
+    static Document *create(DocumentModel *model, const QByteArray &columnsState,
+                            QObject *parent = nullptr);
+    static Document *create(DocumentModel *model, const QByteArray &columnsState,
+                            bool restoredFromAutosave, QObject *parent = nullptr);
     ~Document() override;
 
     void setActive(bool active);
@@ -266,6 +268,9 @@ signals:
     void orderChanged(BrickLink::Order *order);
 
 private:
+    explicit Document(DocumentModel *model, const QByteArray &columnsState,
+                      bool restoredFromAutosave, QObject *parent = nullptr);
+
     void applyTo(const LotList &lots,
                  const char *actionName, const std::function<DocumentModel::ApplyToResult (const Lot &, Lot &)> &callback);
     bool updatePriceToGuide(BrickLink::Lot *lot, const BrickLink::PriceGuide *pg);

@@ -142,26 +142,36 @@ void ColumnLayoutCmd::undo()
 ///////////////////////////////////////////////////////////////////////
 
 
-Document::Document(QObject *parent)
-    : Document(new DocumentModel(), parent)
-{ }
+Document *Document::create(QObject *parent)
+{
+    return create(new DocumentModel(), parent);
+}
 
-Document::Document(DocumentModel *model, QObject *parent)
-    : Document(model, QByteArray { }, parent)
-{ }
+Document *Document::create(DocumentModel *model, QObject *parent)
+{
+    return create(model, QByteArray { }, parent);
+}
+
+Document *Document::create(DocumentModel *model, const QByteArray &columnsState, QObject *parent)
+{
+    return create(model, columnsState, false, parent);
+}
+
+Document *Document::create(DocumentModel *model, const QByteArray &columnsState,
+                           bool restoredFromAutosave, QObject *parent)
+{
+    auto doc = new Document(model, columnsState, restoredFromAutosave, parent);
+    DocumentList::inst()->add(doc);
+    return doc;
+}
 
 Document::Document(DocumentModel *model, const QByteArray &columnsState, bool restoredFromAutosave,
                    QObject *parent)
-    : Document(model, columnsState, parent)
-{
-    m_restoredFromAutosave = restoredFromAutosave;
-}
-
-Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject *parent)
     : QObject(parent)
     , m_model(model)
     , m_selectionModel(new QItemSelectionModel(m_model, this))
     , m_uuid(QUuid::createUuid())
+    , m_restoredFromAutosave(restoredFromAutosave)
 {
     setTitle(tr("Untitled"));
 
@@ -466,8 +476,6 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, QObject
                   Application::openUrl(BrickLink::Core::urlForStoreItemSearch(lot->item(), lot->color()));
           } },
     };
-
-    DocumentList::inst()->add(this);
 }
 
 
@@ -1763,7 +1771,7 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
     auto pr = BrickLink::IO::fromPartInventory(item, color, multiply, condition, extraParts,
                                                partOutTraits, status);
 
-    auto *document = new Document(new DocumentModel(std::move(pr))); // Document own the items now
+    auto *document = create(new DocumentModel(std::move(pr))); // Document own the items now
     document->setTitle(tr("Inventory for %1").arg(QString::fromLatin1(item->id())));
 
     auto thumbnail = BrickLink::core()->pictureCache()->picture(item, color, true);
@@ -2563,7 +2571,7 @@ int Document::processAutosaves(AutosaveAction action)
                     DocumentIO::BsxContents bsx;
                     auto model = new DocumentModel(std::move(pr), true /*mark as modified*/);
                     model->restoreSortFilterState(savedSortFilterState);
-                    auto *doc = new Document(model, columnState, true /* is autosave restore*/);
+                    auto *doc = create(model, columnState, true /* is autosave restore*/);
 
                     if (!savedFileName.isEmpty()) {
                         QFileInfo fi(savedFileName);

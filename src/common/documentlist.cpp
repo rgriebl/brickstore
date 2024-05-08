@@ -147,30 +147,25 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
 
 void DocumentList::add(Document *document)
 {
-    // Please note: Document might not be 100% initialized at this point, because we got called
-    // from the base constructor!
+    emit documentCreated(document);
 
-    QMetaObject::invokeMethod(this, [this, document]() {
-        emit documentCreated(document);
+    beginInsertRows({ }, rowCount(), rowCount());
+    m_documents.append(document);
+    endInsertRows();
 
-        beginInsertRows({ }, rowCount(), rowCount());
-        m_documents.append(document);
-        endInsertRows();
+    auto updateDisplay = [this, document]() {
+        int row = int(m_documents.indexOf(document));
+        emit dataChanged(index(row), index(row), { Qt::DisplayRole, Qt::ToolTipRole });
+    };
+    connect(document, &Document::filePathChanged,
+            this, updateDisplay);
+    connect(document, &Document::titleChanged,
+            this, updateDisplay);
+    connect(document->model(), &DocumentModel::modificationChanged,
+            this, updateDisplay);
 
-        auto updateDisplay = [this, document]() {
-            int row = int(m_documents.indexOf(document));
-            emit dataChanged(index(row), index(row), { Qt::DisplayRole, Qt::ToolTipRole });
-        };
-        connect(document, &Document::filePathChanged,
-                this, updateDisplay);
-        connect(document, &Document::titleChanged,
-                this, updateDisplay);
-        connect(document->model(), &DocumentModel::modificationChanged,
-                this, updateDisplay);
-
-        emit documentAdded(document);
-        emit countChanged(count());
-    }, Qt::QueuedConnection);
+    emit documentAdded(document);
+    emit countChanged(count());
 }
 
 void DocumentList::remove(Document *document)

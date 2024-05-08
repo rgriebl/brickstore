@@ -40,6 +40,6 @@ private:
     QVector<Document *> m_documents;
     static DocumentList *s_inst;
 
-    friend Document::Document(DocumentModel *, const QByteArray &, QObject *);
+    friend Document *Document::create(DocumentModel *, const QByteArray &, bool, QObject *);
     friend Document::~Document();
 };

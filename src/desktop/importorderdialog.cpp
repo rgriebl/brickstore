@@ -297,7 +297,7 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
         ++orderCount;
     }
     if (combined) {
-        auto doc = new Document(new DocumentModel(std::move(combinedPr))); // Document owns the items now
+        auto doc = Document::create(new DocumentModel(std::move(combinedPr))); // Document owns the items now
         doc->setTitle(tr("Multiple Orders"));
         doc->setThumbnail(u"view-financial-list"_qs);
     }

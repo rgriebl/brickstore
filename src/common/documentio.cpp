@@ -59,7 +59,7 @@ Document *DocumentIO::importBrickLinkStore(BrickLink::Store *store)
         pr.addLot(new Lot(*lot));
     pr.setCurrencyCode(store->currencyCode());
 
-    auto *document = new Document(new DocumentModel(std::move(pr)));
+    auto *document = Document::create(new DocumentModel(std::move(pr)));
     document->setTitle(tr("Store %1").arg(QLocale().toString(store->lastUpdated(), QLocale::ShortFormat)));
     document->setThumbnail(u"bricklink-store"_qs);
     return document;
@@ -75,7 +75,7 @@ Document *DocumentIO::importBrickLinkOrder(BrickLink::Order *order)
         pr.addLot(std::move(lot));
     pr.setCurrencyCode(order->currencyCode());
 
-    auto *document = new Document(new DocumentModel(std::move(pr)));
+    auto *document = Document::create(new DocumentModel(std::move(pr)));
     document->setOrder(order);
     document->setTitle(tr("Order %1 (%2)").arg(order->id(), order->otherParty()));
     document->setThumbnail(u"view-financial-list"_qs);
@@ -92,7 +92,7 @@ Document *DocumentIO::importBrickLinkCart(BrickLink::Cart *cart)
         pr.addLot(new Lot(*lot));
     pr.setCurrencyCode(cart->currencyCode());
 
-    auto *document = new Document(new DocumentModel(std::move(pr)));
+    auto *document = Document::create(new DocumentModel(std::move(pr)));
     document->setTitle(tr("Cart in store %1").arg(cart->storeName()));
     document->setThumbnail(u"bricklink-cart"_qs);
     return document;
@@ -107,7 +107,7 @@ Document *DocumentIO::importBrickLinkWantedList(BrickLink::WantedList *wantedLis
     for (const auto *lot : lots)
         pr.addLot(new Lot(*lot));
 
-    auto *document = new Document(new DocumentModel(std::move(pr)));
+    auto *document = Document::create(new DocumentModel(std::move(pr)));
     QString name = wantedList->name().isEmpty() ? QString::number(wantedList->id())
                                                 : wantedList->name();
     document->setTitle(tr("Wanted List %1").arg(name));
@@ -133,7 +133,7 @@ QCoro::Task<Document *> DocumentIO::importBrickLinkXML(QString fileName)
             auto result = BrickLink::IO::fromBrickLinkXML(f.readAll(),
                                                           BrickLink::IO::Hint::PlainOrWanted,
                                                           f.fileTime(QFile::FileModificationTime));
-            auto *document = new Document(new DocumentModel(std::move(result))); // Document owns the items now
+            auto *document = Document::create(new DocumentModel(std::move(result))); // Document owns the items now
             document->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
             co_return document;
 
@@ -196,7 +196,7 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
         if (!b || !pr.hasLots())
             throw Exception(tr("Could not parse the LDraw data"));
 
-        document = new Document(new DocumentModel(std::move(pr))); // Document owns the items now
+        document = Document::create(new DocumentModel(std::move(pr))); // Document owns the items now
         document->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
         co_return document;
 
@@ -634,7 +634,7 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
                 auto model = std::make_unique<DocumentModel>(std::move(bsx), (bsx.fixedLotCount() != 0) /*forceModified*/);
                 if (!bsx.guiSortFilterState.isEmpty())
                     model->restoreSortFilterState(bsx.guiSortFilterState);
-                return new Document(model.release(), bsx.guiColumnLayout);
+                return Document::create(model.release(), bsx.guiColumnLayout);
             }
             default:
                 break;

@@ -262,7 +262,7 @@ void Application::afterInit()
     }
 
     ActionManager::ActionTable applicationActionTable = {
-        { "document_new", [](bool) { new Document(); } },
+        { "document_new", [](bool) { Document::create(); } },
         { "document_open", [](bool) { Document::load(); } },
         { "document_import_bl_xml", [](bool) { DocumentIO::importBrickLinkXML(); } },
         { "document_import_ldraw_model", [](bool) { DocumentIO::importLDrawModel(); } },
