@@ -29,6 +29,9 @@ DeveloperConsole::DeveloperConsole(const QString &prompt,
     , m_prompt(new QLabel)
     , m_executeFunction(executeFunction)
 {
+    m_history = Config::inst()->value(u"MainWindow/DeveloperConsole/History"_qs).toStringList();
+    m_historyIndex = int(m_history.size());
+
     setWindowTitle(u"Developer Console"_qs);
     setSizeGripEnabled(true);
 
@@ -75,12 +78,12 @@ DeveloperConsole::DeveloperConsole(const QString &prompt,
             auto [message, succeeded] = m_executeFunction(cmd);
             if (succeeded) {
                 m_log->appendPlainText(message);
-                m_history.removeAll(cmd);
-                m_history.append(cmd);
             } else {
                 m_log->appendHtml(uR"(<span style="color:#ff0000">ERROR</span>: <i>)"
                                   + message + uR"(</i>)");
             }
+            m_history.removeAll(cmd);
+            m_history.append(cmd);
             m_log->moveCursor(QTextCursor::End);
         }
         m_cmd->clear();
@@ -124,6 +127,11 @@ DeveloperConsole::DeveloperConsole(const QString &prompt,
 
     m_cmd->setFocus();
     setFocusProxy(m_cmd);
+}
+
+DeveloperConsole::~DeveloperConsole()
+{
+    Config::inst()->setValue(u"MainWindow/DeveloperConsole/History"_qs, m_history);
 }
 
 void DeveloperConsole::setPrompt(const QString &prompt)

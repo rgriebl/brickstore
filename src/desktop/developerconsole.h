@@ -20,6 +20,7 @@ class DeveloperConsole : public QDialog
 public:
     DeveloperConsole(const QString &prompt, const std::function<std::tuple<QString, bool>(QString)> &executeFunction,
                      QWidget *parent = nullptr);
+    ~DeveloperConsole() override;
 
     void setPrompt(const QString &prompt);
 
