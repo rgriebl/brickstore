@@ -264,7 +264,6 @@ class QmlItemType : public QmlWrapperBase<const ItemType>
     Q_GADGET
     QML_NAMED_ELEMENT(ItemType)
     QML_UNCREATABLE("")
-    Q_CLASSINFO("bsNoStringify", "categories")
     Q_PROPERTY(bool isNull READ isNull)
 
     Q_PROPERTY(QString id READ id CONSTANT)

@@ -1,21 +1,26 @@
 // Copyright (C) 2004-2024 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <QStandardPaths>
-#include <QFileInfo>
+#include <QAssociativeIterable>
 #include <QDir>
-#include <QMessageLogger>
+#include <QFileInfo>
+#include <QJSValue>
 #include <QLoggingCategory>
-#include <QQmlContext>
+#include <QMessageLogger>
+#include <QModelIndex>
 #include <QQmlComponent>
+#include <QQmlContext>
 #include <QQmlEngine>
-#include <QQmlInfo>
 #include <QQmlExpression>
+#include <QQmlInfo>
+#include <QSequentialIterable>
+#include <QStack>
+#include <QStandardPaths>
 
 #include "utility/exception.h"
+
 #include "script.h"
 #include "scriptmanager.h"
-
 
 Q_LOGGING_CATEGORY(LogScript, "script")
 
@@ -61,41 +66,60 @@ static QString stringifyType(QMetaType mt)
     }
 }
 
-static QString stringify(const QVariant &value, int level = 0, bool indentFirstLine = false);
+static QString stringify(const QVariant &value, int level, bool indentFirstLine, QStack<std::pair<const QObject *, const QMetaObject *>> &recursionGuard);
 
-static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int level, bool indentFirstLine)
+static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int level, bool indentFirstLine, QStack<std::pair<const QObject *, const QMetaObject *>> &recursionGuard)
 {
     QString str;
     QString indent = QString(level * 2, u' ');
     QString nextIndent = QString((level + 1) * 2, u' ');
 
-    bool isGadget = mo->metaType().flags().testFlag(QMetaType::IsGadget);
-
     if (indentFirstLine)
         str.append(indent);
 
-    str = str + QString::fromLatin1(mo->className()) + u" {\n";
+    const auto guardKey = std::make_pair(o , mo);
 
-    if (!isGadget && mo->superClass()
-            && ((mo->superClass() != &QObject::staticMetaObject) || !o->objectName().isEmpty())) {
-        str = str + nextIndent + u"superclass: "
-                + stringifyQObject(o, mo->superClass(), level + 1, false) + u'\n';
+    if (recursionGuard.contains(guardKey)) {
+        str.append(u"<recursion detected>");
+        return str;
     }
+    recursionGuard.push(guardKey);
+
+    str = str + stringifyType(mo->metaType()) + u" {\n";
 
     QByteArrayList noStringify;
     if (int nostr = mo->indexOfClassInfo("bsNoStringify"); nostr >= 0)
         noStringify = QByteArray(mo->classInfo(nostr).value()).split(',');
 
-    for (int i = mo->propertyOffset(); i < mo->propertyCount(); ++i) {
-        QMetaProperty p = mo->property(i);
-        QString valueStr;
-        if (noStringify.contains(p.name()))
-            valueStr = u"..."_qs;
-        else
-            valueStr = stringify(isGadget ? p.readOnGadget(o) : p.read(o), level + 1, false);
-        str = str + nextIndent + stringifyType(p.metaType()) + u' '
-              + QString::fromLatin1(p.name()) + u": " + valueStr + u'\n';
+    auto stringifyProperties = [&](const QMetaObject *mo) {
+        bool isGadget = mo->metaType().flags().testFlag(QMetaType::IsGadget);
+        qsizetype count = 0;
+
+        for (int i = mo->propertyOffset(); i < mo->propertyCount(); ++i) {
+            QMetaProperty p = mo->property(i);
+            QString valueStr;
+            if (noStringify.contains(p.name()))
+                valueStr = u"<...>"_qs;
+            else
+                valueStr = stringify(isGadget ? p.readOnGadget(o) : p.read(o), level + 1, false, recursionGuard);
+            str = str + nextIndent + stringifyType(p.metaType()) + u' '
+                  + QString::fromLatin1(p.name()) + u": " + valueStr + u'\n';
+            ++count;
+        }
+        return count;
+    };
+
+    QList<const QMetaObject *> superMos;
+    for (auto *smo = mo; smo; smo = smo->superClass()) {
+        if ((smo != &QObject::staticMetaObject) || !o->objectName().isEmpty())
+            superMos.prepend(smo);
+        if (smo->metaType().flags().testFlag(QMetaType::IsGadget))
+            break;
     }
+    int propCount = 0;
+    for (const auto *smo : superMos)
+        propCount += stringifyProperties(smo);
+
 /*
     for (int i = mo->methodOffset(); i < mo->methodCount(); ++i) {
         QMetaMethod m = mo->method(i);
@@ -113,18 +137,30 @@ static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int lev
                 + u'(' + params.join(u", ") + u")\n";
     }
 */
-    str = str + indent + u'}';
+    if (!propCount)
+        str[str.length() - 1] = u'}';
+    else
+        str = str + indent + u'}';
+
+    Q_ASSERT(recursionGuard.top() == guardKey);
+    recursionGuard.pop();
     return str;
 }
 
-static QString stringifyQGadget(const void *g, const QMetaObject *mo, int level, bool indentFirstLine)
+
+static QString stringify(const QVariant &value, int level = 0, bool indentFirstLine = false)
 {
-    Q_ASSERT(g && mo && mo->metaType().flags().testFlag(QMetaType::IsGadget));
-    return stringifyQObject(reinterpret_cast<const QObject *>(g), mo, level, indentFirstLine);
+    QStack<std::pair<const QObject *, const QMetaObject *>> recursionGuard;
+    return stringify(value, level, indentFirstLine, recursionGuard);
 }
 
-static QString stringify(const QVariant &value, int level, bool indentFirstLine)
+static QString stringify(const QVariant &value, int level, bool indentFirstLine, QStack<std::pair<const QObject *, const QMetaObject *>> &recursionGuard)
 {
+    if (value.typeId() == qMetaTypeId<QJSValue>())
+        return stringify(value.value<QJSValue>().toVariant(), level, indentFirstLine, recursionGuard);
+    if (value.typeId() == qMetaTypeId<QVariant>())
+        return stringify(value.value<QVariant>(), level, indentFirstLine, recursionGuard);
+
     QString str;
     QString indent = QString(level * 2, u' ');
     QString nextIndent = QString((level + 1) * 2, u' ');
@@ -132,88 +168,95 @@ static QString stringify(const QVariant &value, int level, bool indentFirstLine)
     if (indentFirstLine)
         str.append(indent);
 
-    switch (int(value.typeId())) {
-    case QMetaType::QVariantList: {
-        QListIterator<QVariant> it(value.toList());
-        if (!it.hasNext()) {
-            str.append(u"[]");
-        } else {
-            str = str.append(u"[\n");
-
-            while (it.hasNext()) {
-                str = str + stringify(it.next(), level + 1, true);
-                if (it.hasNext())
-                    str.append(u',');
-                str.append(u'\n');
-            }
-            str = str + indent + u']';
-        }
-        break;
-    }
-    case QMetaType::QVariantMap: {
-        QMapIterator<QString, QVariant> it(value.toMap());
-        if (!it.hasNext()) {
+    if (value.canConvert<QVariantHash>()) {
+        QAssociativeIterable hash = value.value<QAssociativeIterable>();
+        if (hash.size() == 0) {
             str.append(u"{}");
+        } else if (level > 0) {
+            str = str + u"{ <" + QString::number(hash.size()) + u" mappings> }";
         } else {
             str.append(u"{\n");
 
-            while (it.hasNext()) {
-                it.next();
-                str = str + nextIndent + it.key() + u": " + stringify(it.value(), level + 1, false);
-                if (it.hasNext())
+            for (auto it = hash.constBegin(); it != hash.constEnd(); ++it) {
+                str = str + nextIndent + it.key().toString() + u": " + stringify(it.value(), level + 1, false, recursionGuard);
+                if ((it + 1) != hash.constEnd())
                     str.append(u',');
                 str.append(u'\n');
             }
             str = str + indent + u'}';
         }
-        break;
-    }
-    case QMetaType::QString: {
-        if (level > 0)
-            str = str + u'"' + value.toString().remove(u"\0"_qs) + u'"';
-        else
-            str = value.toString().remove(u"\0"_qs);
-        break;
-    }
-    case QMetaType::QSize:
-    case QMetaType::QSizeF: {
-        const auto s = value.toSizeF();
-        str = QString::number(s.width()) + u" x " + QString::number(s.height());
-        break;
-    }
-    case QMetaType::QDateTime: {
-        const auto dt = value.toDateTime();
-        str = dt.isValid() ? dt.toString() : u"<invalid date>"_qs;
-        break;
-    }
-    case QMetaType::QObjectStar: {
-        auto *o = qvariant_cast<QObject *>(value);
-        if (!o) {
-            str.append(u"<invalid QObject>");
+    } else if (value.canConvert<QVariantList>() && (value.typeId() != QMetaType::QString)) {
+        QSequentialIterable list = value.value<QSequentialIterable>();
+        if (list.size() == 0) {
+            str.append(u"[]");
+        } else if (level > 0) {
+            str = str + u"[ <" + QString::number(list.size()) + u" items> ]";
+        } else {
+            str = str.append(u"[\n");
+
+            for (qsizetype i = 0; i < list.size(); ++i) {
+                str = str + stringify(list.at(i), level + 1, true, recursionGuard);
+                if (i < (list.size() - 1))
+                    str.append(u',');
+                str.append(u'\n');
+            }
+            str = str + indent + u']';
+        }
+    } else {
+        switch (int(value.typeId())) {
+        case QMetaType::QString: {
+            if (level > 0)
+                str = str + u'"' + value.toString().remove(u"\0"_qs) + u'"';
+            else
+                str = value.toString().remove(u"\0"_qs);
             break;
         }
-        str.append(stringifyQObject(o, o->metaObject(), level, false));
-        break;
-    }
-    case QMetaType::Nullptr:
-        str = u"null"_qs;
-        break;
-    default: {
-        QMetaType meta(value.typeId());
-        if (meta.flags().testFlag(QMetaType::IsGadget)) {
-            str.append(stringifyQGadget(value.data(), meta.metaObject(), level, false));
-        } else if (meta.flags().testFlag(QMetaType::PointerToQObject)) {
+        case QMetaType::QSize:
+        case QMetaType::QSizeF: {
+            const auto s = value.toSizeF();
+            str = QString::number(s.width()) + u" x " + QString::number(s.height());
+            break;
+        }
+        case QMetaType::QDateTime: {
+            const auto dt = value.toDateTime();
+            str = dt.isValid() ? dt.toString() : u"<invalid date>"_qs;
+            break;
+        }
+        case QMetaType::QModelIndex: {
+            const auto idx = value.toModelIndex();
+            str = u"index(r: " + QString::number(idx.row()) + u", c: " + QString::number(idx.column()) + u")";
+            break;
+        }
+        case QMetaType::QObjectStar: {
             auto *o = qvariant_cast<QObject *>(value);
             if (!o) {
                 str.append(u"<invalid QObject>");
                 break;
             }
-            str.append(stringifyQObject(o, o->metaObject(), level, false));
-        } else {
-            str.append(value.toString());
+            str.append(stringifyQObject(o, o->metaObject(), level, false, recursionGuard));
+            break;
         }
-        break;
-    }
+        case QMetaType::Nullptr:
+            str = u"null"_qs;
+            break;
+        default: {
+            QMetaType meta(value.typeId());
+            if (meta.flags().testFlag(QMetaType::IsGadget)) {
+                if (value.data() && meta.metaObject())
+                    str.append(stringifyQObject(reinterpret_cast<const QObject *>(value.data()), meta.metaObject(), level, false, recursionGuard));
+            } else if (meta.flags().testFlag(QMetaType::PointerToQObject)) {
+                auto *o = qvariant_cast<QObject *>(value);
+                if (!o) {
+                    str.append(u"<invalid QObject>");
+                    break;
+                }
+                str.append(stringifyQObject(o, o->metaObject(), level, false, recursionGuard));
+            } else {
+                str.append(value.toString());
+            }
+            break;
+        }
+        }
     }
     return str;
 }

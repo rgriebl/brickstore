@@ -28,11 +28,6 @@
 #include <bricklink/qmlapi.h>
 #include "utility/utility.h"
 
-class QmlColor;
-class QmlCategory;
-class QmlItemType;
-class QmlItem;
-class QmlLot;
 class QmlPriceGuide;
 class QmlPicture;
 class QmlDocumentColumnModel;
