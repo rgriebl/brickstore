@@ -342,7 +342,8 @@ QVariantList QmlItem::knownColors() const
 
 QStringList QmlItem::alternateIds() const
 {
-    return QString::fromLatin1(wrapped->alternateIds()).split(u' ');
+    auto str = QString::fromLatin1(wrapped->alternateIds());
+    return str.isEmpty() ? QStringList { } : str.split(u' ');
 }
 
 QVariantList QmlItem::consistsOf() const
