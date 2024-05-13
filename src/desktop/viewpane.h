@@ -40,9 +40,8 @@ public:
     bool canUnsplit() const;
     void unsplit();
 
-    void updateCurrencyRates();
     void documentCurrencyChanged(const QString &ccode);
-    QCoro::Task<> changeDocumentCurrency(QAction *a);
+    QCoro::Task<> changeDocumentCurrency();
     void updateStatistics();
     void updateBlockState(bool blocked);
     void focusFilter();

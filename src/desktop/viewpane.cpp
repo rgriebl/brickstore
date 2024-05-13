@@ -210,11 +210,6 @@ ViewPane::ViewPane(const std::function<ViewPane *(Document *, QWidget *)> &viewP
     topLayout->addWidget(m_toolBar, 0);
     topLayout->addWidget(m_filter, 1'000'000);
 
-    connect(m_currency, &QToolButton::triggered,
-            this, &ViewPane::changeDocumentCurrency);
-    connect(Currency::inst(), &Currency::ratesChanged,
-            this, &ViewPane::updateCurrencyRates);
-
     fontChange();
     paletteChange();
     languageChange();
@@ -410,7 +405,6 @@ void ViewPane::setView(View *view)
             m_viewConnectionContext, checkOrder);
     checkOrder();
 
-    updateCurrencyRates();
     updateBlockState(false);
     documentCurrencyChanged(m_model->currencyCode());
     updateStatistics();
@@ -468,58 +462,26 @@ void ViewPane::setActive(bool b)
     }
 }
 
-
-void ViewPane::updateCurrencyRates()
-{
-    if (!m_model)
-        return;
-
-    delete m_currency->menu();
-    auto m = new QMenu(m_currency);
-
-    QString defCurrency = Config::inst()->defaultCurrencyCode();
-
-    if (!defCurrency.isEmpty()) {
-        auto a = m->addAction(tr("Default currency (%1)").arg(defCurrency));
-        a->setObjectName(defCurrency);
-        m->addSeparator();
-    }
-
-    const auto ccodes = Currency::inst()->currencyCodes();
-    for (const QString &c : ccodes) {
-        auto a = m->addAction(c);
-        a->setObjectName(c);
-        if (c == m_model->currencyCode())
-            a->setEnabled(false);
-    }
-    m_currency->setMenu(m);
-}
-
 void ViewPane::documentCurrencyChanged(const QString &ccode)
 {
-    m_currency->setText(ccode + u"  ");
-    // the menu might still be open right now, so we need to delay deleting the actions
-    QMetaObject::invokeMethod(this, &ViewPane::updateCurrencyRates, Qt::QueuedConnection);
+    m_currency->setText(ccode);
 }
 
-QCoro::Task<> ViewPane::changeDocumentCurrency(QAction *a)
+QCoro::Task<> ViewPane::changeDocumentCurrency()
 {
     if (!m_model)
         co_return;
 
-    QString ccode = a->objectName();
+    ChangeCurrencyDialog dlg(m_model->currencyCode(), this);
+    dlg.setWindowModality(Qt::ApplicationModal);
+    dlg.show();
 
-    if (ccode != m_model->currencyCode()) {
-        ChangeCurrencyDialog dlg(m_model->currencyCode(), ccode, m_model->legacyCurrencyCode(), this);
-        dlg.setWindowModality(Qt::ApplicationModal);
-        dlg.show();
+    if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
+        QString ccode = dlg.currencyCode();
+        double rate = dlg.exchangeRate();
 
-        if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
-            double rate = dlg.exchangeRate();
-
-            if (rate > 0)
-                m_model->setCurrencyCode(ccode, rate);
-        }
+        if (!ccode.isEmpty() && (rate > 0))
+            m_model->setCurrencyCode(ccode, rate);
     }
 }
 
@@ -674,6 +636,7 @@ void ViewPane::languageChange()
 
     m_order->setToolTip(tr("Show order information"));
     m_value->setText(tr("Currency:"));
+    m_currency->setToolTip(tr("Change currency"));
 
     m_split->setToolTip(tr("Split"));
     m_splitH->setText(tr("Split horizontally"));
@@ -801,12 +764,13 @@ void ViewPane::createToolBar()
     m_value = new CollapsibleLabel(this);
     currencyLayout->addWidget(m_value);
     m_currency = new QToolButton(this);
-    m_currency->setPopupMode(QToolButton::InstantPopup);
     m_currency->setToolButtonStyle(Qt::ToolButtonTextOnly);
     m_currency->setProperty("iconScaling", true);
     m_currency->setFocusPolicy(Qt::NoFocus);
+    connect(m_currency, &QToolButton::clicked, this, &ViewPane::changeDocumentCurrency);
     currencyLayout->addWidget(m_currency);
     pageLayout->addLayout(currencyLayout, 10'000);
+
     m_profit = new CollapsibleLabel(this);
     m_profit->hide();
     pageLayout->addWidget(m_profit, 100);

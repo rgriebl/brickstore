@@ -766,12 +766,28 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 
     w_currency_update->setProperty("iconScaling", true);
 
+    auto *m = new QMenu(w_currency);
+    w_currency->setMenu(m);
+    connect(m, &QMenu::aboutToShow, this, [m]() {
+        m->clear();
+
+        const auto rateProviders = Currency::inst()->rateProviders();
+        for (const auto &rp : rateProviders) {
+            auto rpm = m->addMenu(Currency::inst()->rateProviderName(rp));
+
+            const auto ccodes = Currency::inst()->rateProviderCurrencyCodes(rp);
+            for (const auto &ccode : ccodes)
+                rpm->addAction(ccode)->setObjectName(ccode);
+        }
+    });
+    connect(m, &QMenu::triggered, this, [this](QAction *a) {
+        currentCurrencyChanged(a->objectName());
+    });
+
     connect(w_docdir, QOverload<int>::of(&QComboBox::activated),
             this, &SettingsDialog::selectDocDir);
     connect(w_upd_reset, &QAbstractButton::clicked,
             this, &SettingsDialog::resetUpdateIntervals);
-    connect(w_currency, &QComboBox::currentTextChanged,
-            this, &SettingsDialog::currentCurrencyChanged);
     connect(w_currency_update, &QAbstractButton::clicked,
             Currency::inst(), &Currency::updateRates);
     connect(Currency::inst(), &Currency::ratesChanged,
@@ -999,6 +1015,7 @@ void SettingsDialog::currentCurrencyChanged(const QString &ccode)
     else if (!qFuzzyCompare(rate, 1))
         s = tr("1 %1 equals %2 USD").arg(ccode).arg(double(1) / rate, 0, 'f', 3);
 
+    w_currency->setText(ccode);
     w_currency_status->setText(s);
     m_preferedCurrency = ccode;
 }
@@ -1041,18 +1058,7 @@ void SettingsDialog::resizeEvent(QResizeEvent *e)
 
 void SettingsDialog::currenciesUpdated()
 {
-    QString oldprefered = m_preferedCurrency;
-    QStringList currencies = Currency::inst()->currencyCodes();
-    currencies.sort();
-    currencies.removeOne(u"USD"_qs);
-    currencies.prepend(u"USD"_qs);
-    w_currency->clear();
-    w_currency->insertItems(0, currencies);
-    if (currencies.count() > 1)
-        w_currency->insertSeparator(1);
-    w_currency->setCurrentIndex(std::max(0, w_currency->findText(oldprefered)));
-
-//    currentCurrencyChanged(w_currency->currentText());
+    currentCurrencyChanged(m_preferedCurrency);
 }
 
 void SettingsDialog::load()

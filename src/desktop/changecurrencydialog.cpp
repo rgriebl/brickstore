@@ -8,7 +8,10 @@
 #include <QValidator>
 #include <QButtonGroup>
 #include <QMouseEvent>
+#include <QPushButton>
+#include <QMenu>
 
+#include "common/config.h"
 #include "common/currency.h"
 #include "common/eventfilter.h"
 #include "changecurrencydialog.h"
@@ -16,33 +19,61 @@
 
 using namespace std::placeholders;
 
-
-ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &to,
-                                           bool wasLegacy, QWidget *parent)
+ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, QWidget *parent)
     : QDialog(parent)
     , m_from(from)
-    , m_to(to)
-    , m_wasLegacy(wasLegacy)
+    , m_to(from)
 {
     setupUi(this);
 
-    w_updateEcb->setProperty("iconScaling", true);
+    w_updateProvider->setProperty("iconScaling", true);
 
     w_oldCurrency->setText(w_oldCurrency->text().arg(from));
 
-    m_labelEcbFormat = w_labelEcb->text().arg(from);
+    m_labelProviderFormat = w_labelProvider->text().arg(from);
     m_labelCustomFormat = w_labelCustom->text().arg(from);
 
-    connect(w_updateEcb, &QAbstractButton::clicked,
+    connect(w_updateProvider, &QAbstractButton::clicked,
             Currency::inst(), &Currency::updateRates);
     connect(Currency::inst(), &Currency::ratesChanged,
             this, &ChangeCurrencyDialog::ratesUpdated);
-    connect(w_newCurrency, &QComboBox::currentTextChanged,
-            this, &ChangeCurrencyDialog::currencyChanged);
+
+    auto *m = new QMenu(w_newCurrency);
+    w_newCurrency->setMenu(m);
+    connect(m, &QMenu::aboutToShow, this, [this, m]() {
+        m->clear();
+
+        auto setup = [this](QAction *a, const QString &ccode) {
+            a->setObjectName(ccode);
+            if (ccode == m_from)
+                a->setEnabled(false);
+            return a;
+        };
+
+        const QString defaultCode = Config::inst()->defaultCurrencyCode();
+        if (!defaultCode.isEmpty()) {
+            setup(m->addAction(tr("Default currency (%1)").arg(defaultCode)), defaultCode);
+            m->addSeparator();
+        }
+
+        const auto rateProviders = Currency::inst()->rateProviders();
+        for (const auto &rp : rateProviders) {
+            auto rpm = m->addMenu(Currency::inst()->rateProviderName(rp));
+
+            const auto ccodes = Currency::inst()->rateProviderCurrencyCodes(rp);
+            for (const auto &ccode : ccodes)
+                setup(rpm->addAction(ccode), ccode);
+        }
+    });
+    connect(m, &QMenu::triggered, this, [this](QAction *a) {
+         currencyChanged(a->objectName());
+    });
+    currencyChanged(m_from);
 
     auto *grp = new QButtonGroup(this);
-    grp->addButton(w_radioEcb);
+    grp->addButton(w_radioProvider);
     grp->addButton(w_radioCustom);
+    w_radioProvider->setChecked(true);
 
     auto checkRadioOnLabelClick = [](QRadioButton *r, QObject *, QEvent *e) {
         if (static_cast<QMouseEvent *>(e)->button() == Qt::LeftButton)
@@ -50,31 +81,8 @@ ChangeCurrencyDialog::ChangeCurrencyDialog(const QString &from, const QString &t
         return EventFilter::ContinueEventProcessing;
     };
 
-    new EventFilter(w_labelEcb,    { QEvent::MouseButtonPress }, std::bind(checkRadioOnLabelClick, w_radioEcb, _1, _2));
-    new EventFilter(w_labelCustom, { QEvent::MouseButtonPress }, std::bind(checkRadioOnLabelClick, w_radioCustom, _1, _2));
-    new EventFilter(w_labelLegacy, { QEvent::MouseButtonPress }, std::bind(checkRadioOnLabelClick, w_radioLegacy, _1, _2));
-
-    if (m_from != u"USD")
-        m_wasLegacy = false;
-
-    if (m_wasLegacy) {
-        const QString legacyCCode = QLocale::system().currencySymbol(QLocale::CurrencyIsoCode);
-        double legacyRate = Currency::inst()->legacyRate();
-
-        if (!legacyCCode.isEmpty() && !qFuzzyIsNull(legacyRate) && (m_to == legacyCCode)) {
-            w_labelLegacy->setText(w_labelLegacy->text().arg(legacyCCode,
-                                                             Currency::toDisplayString(legacyRate)));
-        } else {
-            m_wasLegacy = false;
-        }
-    }
-    if (m_wasLegacy) {
-        grp->addButton(w_radioLegacy);
-        w_radioLegacy->setChecked(true);
-    } else {
-        w_widgetLegacy->hide();
-        w_radioEcb->setChecked(true);
-    }
+    new EventFilter(w_labelProvider, { QEvent::MouseButtonPress }, std::bind(checkRadioOnLabelClick, w_radioProvider, _1, _2));
+    new EventFilter(w_labelCustom,   { QEvent::MouseButtonPress }, std::bind(checkRadioOnLabelClick, w_radioCustom, _1, _2));
 
     w_editCustom->setValidator(new SmartDoubleValidator(0, 100000, 3, 1, w_editCustom));
     w_editCustom->setText(Currency::toDisplayString(1));
@@ -91,21 +99,7 @@ void ChangeCurrencyDialog::changeEvent(QEvent *e)
 
 void ChangeCurrencyDialog::ratesUpdated()
 {
-    QString oldto = m_to;
-    QStringList currencies = Currency::inst()->currencyCodes();
-    currencies.sort();
-    currencies.removeOne(m_from);
-    bool wasUSD = (m_from == u"USD");
-
-    if (!wasUSD) {
-        currencies.removeOne(u"USD"_qs);
-        currencies.prepend(u"USD"_qs);
-    }
-    w_newCurrency->clear();
-    w_newCurrency->insertItems(0, currencies);
-    if (!wasUSD && currencies.count() > 1)
-        w_newCurrency->insertSeparator(1);
-    w_newCurrency->setCurrentIndex(std::max(0, w_newCurrency->findText(oldto)));
+    currencyChanged(m_to);
 }
 
 void ChangeCurrencyDialog::languageChange()
@@ -115,14 +109,23 @@ void ChangeCurrencyDialog::languageChange()
 
 void ChangeCurrencyDialog::currencyChanged(const QString &to)
 {
-    double rateFrom = Currency::inst()->rate(m_from);
-    double rateTo = Currency::inst()->rate(to);
-    m_rate = 1;
-    if (!qFuzzyIsNull(rateFrom) && !qFuzzyIsNull(rateTo))
-        m_rate = rateTo / rateFrom;
+    m_to = to;
+    m_rate = Currency::inst()->crossRate(m_from, m_to);
 
-    w_labelEcb->setText(m_labelEcbFormat.arg(to, Currency::toDisplayString(m_rate)));
-    w_labelCustom->setText(m_labelCustomFormat.arg(to));
+    auto rp = Currency::inst()->rateProviderForCurrencyCode(m_to);
+
+    w_newCurrency->setText(m_to + u"  ");
+    w_labelProvider->setText(m_labelProviderFormat.arg(to, Currency::toDisplayString(m_rate),
+                                                       Currency::inst()->rateProviderName(rp),
+                                                       Currency::inst()->rateProviderUrl(rp).toString()));
+    w_labelCustom->setText(m_labelCustomFormat.arg(m_to));
+
+    w_buttons->button(QDialogButtonBox::Ok)->setEnabled(m_from != m_to);
+}
+
+QString ChangeCurrencyDialog::currencyCode() const
+{
+    return m_to;
 }
 
 double ChangeCurrencyDialog::exchangeRate() const

@@ -23,16 +23,24 @@ public:
     static Currency *inst();
     ~Currency() override;
 
-    QHash<QString, double> rates() const;
-    QHash<QString, double> customRates() const;
     Q_INVOKABLE double rate(const QString &currencyCode) const;
     Q_INVOKABLE double crossRate(const QString &fromCode, const QString &toCode) const;
-    Q_INVOKABLE double customRate(const QString &currencyCode) const;
-    QStringList currencyCodes() const;
     double legacyRate() const;
 
-    Q_INVOKABLE void setCustomRate(const QString &currencyCode, double rate);
-    Q_INVOKABLE void unsetCustomRate(const QString &currenyCode);
+    QStringList currencyCodes() const;
+
+    enum class RateProvider {
+        ECB = 0,
+        FloatRates,
+
+        Invalid = -1
+    };
+
+    QVector<RateProvider> rateProviders() const;
+    QString rateProviderName(RateProvider provider) const;
+    QUrl rateProviderUrl(RateProvider provider) const;
+    QStringList rateProviderCurrencyCodes(RateProvider provider) const;
+    RateProvider rateProviderForCurrencyCode(const QString &currencyCode) const;
 
     QDateTime lastUpdate() const;
 
@@ -54,11 +62,9 @@ private:
     Currency(const Currency &);
     static Currency *s_inst;
 
-    static void parseRates(const QStringList &ratesList, QHash<QString, double> &ratesMap);
-
     QNetworkAccessManager *m_nam;
-    QHash<QString, double> m_rates;
-    QHash<QString, double> m_customRates;
+    QHash<RateProvider, QHash<QString, double>> m_rates;
+    std::vector<std::tuple<QString, RateProvider, double>> m_r; // ccode (sorted), provider, rate
     QDateTime m_lastUpdate;
     bool m_silent = false;
     double m_legacyRate = 0;
