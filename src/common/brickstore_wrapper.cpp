@@ -1334,12 +1334,14 @@ ProxySelectionModel::ProxySelectionModel(QmlDocument *qmlDoc, Document *doc)
     connect(m_doc->selectionModel(), &QItemSelectionModel::currentChanged,
             this, [this](const QModelIndex &current, const QModelIndex &) {
         auto otherCurrent = m_qmlDoc->mapFromSource(current);
-        setCurrentIndex(otherCurrent, QItemSelectionModel::NoUpdate);
+        if (currentIndex().constInternalPointer() != otherCurrent.constInternalPointer())
+            setCurrentIndex(otherCurrent, QItemSelectionModel::NoUpdate);
     });
     connect(this, &QItemSelectionModel::currentChanged,
             this, [this](const QModelIndex &current, const QModelIndex &) {
         auto otherCurrent = m_qmlDoc->mapToSource(current);
-        m_doc->selectionModel()->setCurrentIndex(otherCurrent, QItemSelectionModel::NoUpdate);
+        if (m_doc->selectionModel()->currentIndex().constInternalPointer() != otherCurrent.constInternalPointer())
+            m_doc->selectionModel()->setCurrentIndex(otherCurrent, QItemSelectionModel::NoUpdate);
     });
 }
 
