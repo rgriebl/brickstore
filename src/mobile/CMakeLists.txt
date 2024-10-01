@@ -51,6 +51,7 @@ qt_add_qml_module(mobile_module
         QtQml
         QtQuick
         QtQuick.Layouts
+        QtQuick.Controls.impl
         ${QUICK_CONTROLS}
 
     QML_FILES
