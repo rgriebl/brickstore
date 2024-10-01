@@ -228,7 +228,7 @@ Control {
         }
     }
 
-    function indexOfDocument(doc : BS.Document) : int {
+    function indexOfDocument(doc /*: BS.Document QTBUG-123341*/) : int {
         for (let i = 0; i < views.length; ++i) {
             if (views[i].document === doc)
                 return i
@@ -239,7 +239,7 @@ Control {
     property var views: []
     property View currentView: null
 
-    function setActiveDocument(doc : BS.Document) {
+    function setActiveDocument(doc /*: BS.Document QTBUG-123341*/) {
         let index = indexOfDocument(doc)
         let view = index >= 0 ? views[index] : null
 
@@ -260,7 +260,7 @@ Control {
         }
     }
 
-    function createViewForDocument(doc : BS.Document) {
+    function createViewForDocument(doc /*: BS.Document QTBUG-123341*/) {
         console.log("Document added:", doc.title, doc.fileName)
 
         doc.requestActivation.connect(() => { root.setActiveDocument(doc) })
@@ -295,7 +295,7 @@ Control {
 
     Connections {
         target: BS.BrickStore.documents
-        function onDocumentAdded(doc : BS.Document) { root.createViewForDocument(doc) }
+        function onDocumentAdded(doc /*: BS.Document QTBUG-123341*/) { root.createViewForDocument(doc) }
     }
 
     DialogLoader {
