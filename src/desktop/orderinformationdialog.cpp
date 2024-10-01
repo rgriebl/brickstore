@@ -10,6 +10,13 @@
 #include "orderinformationdialog.h"
 
 
+static QString simplifyLatin1(const QString &s)
+{
+    auto t = s.normalized(QString::NormalizationForm_KD);
+    t.removeIf([](const QChar &c) { return c.combiningClass() > 0; });
+    return t;
+}
+
 OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QWidget *parent)
     : QDialog(parent)
 {
@@ -24,6 +31,7 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
 
         if (visible) {
             label->setText(value);
+            label->setProperty("bsText", value);
             label->setMinimumWidth(label->fontMetrics().horizontalAdvance(value) + 64);
             if (button) {
                 connect(button, &QToolButton::clicked, button, [label]() {
@@ -57,8 +65,20 @@ OrderInformationDialog::OrderInformationDialog(const BrickLink::Order *order, QW
     w_addressCopy->setProperty("bsAddress", order->address());
     w_addressCopy->setProperty("iconScaling", true);
     QObject::connect(w_addressCopy, &QToolButton::clicked, this, [this]() {
-        QGuiApplication::clipboard()->setText(w_addressCopy->property("bsAddress").toString(),
-                                              QClipboard::Clipboard);
+        auto s = w_addressCopy->property("bsAddress").toString();
+        if (w_simplifyUnicode->isChecked())
+            s = simplifyLatin1(s);
+        QGuiApplication::clipboard()->setText(s, QClipboard::Clipboard);
+    });
+    w_simplifyUnicode->setProperty("iconScaling", true);
+    QObject::connect(w_simplifyUnicode, &QToolButton::clicked, this, [this](bool simplified) {
+        for (auto *adr : { w_address1, w_address2, w_address3, w_address4,
+                          w_address5, w_address6, w_address7, w_address8 }) {
+            auto s = adr->property("bsText").toString();
+            if (simplified)
+                s = simplifyLatin1(s);
+            adr->setText(s);
+        }
     });
 
     const QStringList adr = order->address().split(u"\n"_qs);

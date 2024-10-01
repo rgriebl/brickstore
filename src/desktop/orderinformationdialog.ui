@@ -160,17 +160,16 @@
           <property name="sizeConstraint">
            <enum>QLayout::SetNoConstraint</enum>
           </property>
-          <item row="0" column="1">
-           <widget class="QToolButton" name="w_addressCopy">
+          <item row="1" column="0" colspan="3">
+           <widget class="QLabel" name="w_countryFlag">
             <property name="text">
-             <string notr="true">C</string>
+             <string notr="true">Flag</string>
             </property>
-            <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+            <property name="scaledContents">
+             <bool>false</bool>
             </property>
-            <property name="autoRaise">
-             <bool>true</bool>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -181,16 +180,37 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QLabel" name="w_countryFlag">
-            <property name="text">
-             <string notr="true">Flag</string>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="w_addressCopy">
+            <property name="font">
+             <font>
+              <family>Segoe UI</family>
+             </font>
             </property>
-            <property name="scaledContents">
+            <property name="text">
+             <string notr="true">C</string>
+            </property>
+            <property name="icon">
+             <iconset theme="edit-copy"/>
+            </property>
+            <property name="autoRaise">
              <bool>false</bool>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QToolButton" name="w_simplifyUnicode">
+            <property name="toolTip">
+             <string>Simplify Latin characters</string>
+            </property>
+            <property name="text">
+             <string notr="true">ȃ̩b̴̖̀</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="autoRaise">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -219,8 +239,7 @@
                <string notr="true">C</string>
               </property>
               <property name="icon">
-               <iconset theme="edit-copy">
-                <normaloff>.</normaloff>.</iconset>
+               <iconset theme="edit-copy"/>
               </property>
               <property name="autoRaise">
                <bool>true</bool>
@@ -247,8 +266,7 @@
                <string notr="true">C</string>
               </property>
               <property name="icon">
-               <iconset theme="edit-copy">
-                <normaloff>.</normaloff>.</iconset>
+               <iconset theme="edit-copy"/>
               </property>
               <property name="autoRaise">
                <bool>true</bool>
@@ -275,8 +293,7 @@
                <string notr="true">C</string>
               </property>
               <property name="icon">
-               <iconset theme="edit-copy">
-                <normaloff>.</normaloff>.</iconset>
+               <iconset theme="edit-copy"/>
               </property>
               <property name="autoRaise">
                <bool>true</bool>
@@ -300,8 +317,7 @@
                <string notr="true">C</string>
               </property>
               <property name="icon">
-               <iconset theme="edit-copy">
-                <normaloff>.</normaloff>.</iconset>
+               <iconset theme="edit-copy"/>
               </property>
               <property name="autoRaise">
                <bool>true</bool>
@@ -328,8 +344,7 @@
                <string notr="true">C</string>
               </property>
               <property name="icon">
-               <iconset theme="edit-copy">
-                <normaloff>.</normaloff>.</iconset>
+               <iconset theme="edit-copy"/>
               </property>
               <property name="autoRaise">
                <bool>true</bool>
@@ -356,8 +371,7 @@
                <string notr="true">C</string>
               </property>
               <property name="icon">
-               <iconset theme="edit-copy">
-                <normaloff>.</normaloff>.</iconset>
+               <iconset theme="edit-copy"/>
               </property>
               <property name="autoRaise">
                <bool>true</bool>
@@ -384,8 +398,7 @@
                <string notr="true">C</string>
               </property>
               <property name="icon">
-               <iconset theme="edit-copy">
-                <normaloff>.</normaloff>.</iconset>
+               <iconset theme="edit-copy"/>
               </property>
               <property name="autoRaise">
                <bool>true</bool>
@@ -412,8 +425,7 @@
                <string notr="true">C</string>
               </property>
               <property name="icon">
-               <iconset theme="edit-copy">
-                <normaloff>.</normaloff>.</iconset>
+               <iconset theme="edit-copy"/>
               </property>
               <property name="autoRaise">
                <bool>true</bool>
@@ -449,8 +461,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -554,8 +565,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -595,8 +605,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -636,8 +645,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -677,8 +685,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -718,8 +725,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -759,8 +765,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -800,8 +805,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -841,8 +845,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -898,8 +901,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -954,8 +956,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -995,8 +996,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -1036,8 +1036,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
@@ -1080,8 +1079,7 @@
              <string notr="true">C</string>
             </property>
             <property name="icon">
-             <iconset theme="edit-copy">
-              <normaloff>.</normaloff>.</iconset>
+             <iconset theme="edit-copy"/>
             </property>
             <property name="autoRaise">
              <bool>true</bool>
