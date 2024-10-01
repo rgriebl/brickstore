@@ -164,8 +164,8 @@ FullscreenDialog {
 
                 }
                 onClicked: {
-                    BS.BrickStore.importBrickLinkOrder(delegate.order)
                     root.goBackFunction()
+                    BS.BrickStore.importBrickLinkOrder(delegate.order)
                 }
             }
         }
