@@ -132,8 +132,9 @@ Currency::~Currency()
         QStringList sl;
         sl.reserve(rateProviderDefinitions().size());
 
-        for (const auto &[ccode, rate] : std::as_const(m_rates).value(p.rateProvider).asKeyValueRange())
-            sl << u"%1|%2"_qs.arg(ccode).arg(rate);
+        const auto rateHash = std::as_const(m_rates).value(p.rateProvider);
+        for (auto it = rateHash.cbegin(); it != rateHash.cend(); ++it)
+            sl << u"%1|%2"_qs.arg(it.key()).arg(it.value());
         Config::inst()->setValue(u"Rates/" + p.id, sl.join(u","));
     }
     s_inst = nullptr;
