@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2024.10.1] - 2024-10-04
+
+A lot of small fixes, notably:
+- Date based filters were not applied correctly as all 2-digit year values were incorrectly parsed as 19xx.
+- Added more currency exchange rates from [Float Rates](https://floatrates.com) in addition to the existing [ECB](https://ecb.eu) rates. 
+- Added a **Flatpak** build for Linux.
+- Better desktop integration for Wayland/Gnome based setups.
+- Android/iOS: Importing orders does not mess up the document order anymore.
+- Android/iOS: Fixed glitches with the selection, especially when deleting lots.
+
 
 ## [2024.5.2] - 2024-05-02
 
@@ -691,7 +701,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.5.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.10.1...HEAD
+[2024.10.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.10.1
 [2024.5.2]: https://github.com/rgriebl/brickstore/releases/tag/v2024.5.2
 [2024.5.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.5.1
 [2024.4.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.4.1
