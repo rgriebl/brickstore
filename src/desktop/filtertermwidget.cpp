@@ -429,6 +429,10 @@ void FilterWidget::setDocument(Document *doc)
     m_doc = doc;
     if (!m_doc) {
         setFilter({ });
+        if (isVisible()) {
+            setVisible(false);
+            emit visibilityChanged(false);
+        }
     } else {
         m_viewConnectionContext = new QObject(this);
 
