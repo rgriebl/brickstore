@@ -16,6 +16,7 @@
 #include <QPointer>
 #include <QDynamicPropertyChangeEvent>
 #include <QKeyEvent>
+#include <QVariantAnimation>
 #if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
 #  include <QDialog>
 #endif
@@ -370,13 +371,35 @@ bool BrickStoreProxyStyle::eventFilter(QObject *o, QEvent *e)
             auto *dpce = static_cast<QDynamicPropertyChangeEvent *>(e);
             if (dpce->propertyName() == "showInputError") {
                 auto *w = qobject_cast<QWidget *>(o);
-
                 QPalette pal = QApplication::palette(w);
+
                 if (w->property("showInputError").toBool()) {
-                    pal.setColor(QPalette::Base,
-                                 Utility::gradientColor(pal.color(QPalette::Base), Qt::red, 0.25));
+                    auto anim = new QVariantAnimation(w);
+                    QColor base = pal.color(QPalette::Base);
+                    anim->setDuration(2000);
+                    anim->setStartValue(base);
+                    anim->setEndValue(Utility::gradientColor(base, Qt::red, 0.33));
+                    anim->setEasingCurve(QEasingCurve::InOutQuart);
+                    connect(anim, &QAbstractAnimation::finished,
+                            this, [anim]() {
+                        anim->setDirection(anim->direction() == QAbstractAnimation::Forward ? QAbstractAnimation::Backward : QAbstractAnimation::Forward);
+                        anim->start();
+                    });
+                    connect(anim, &QVariantAnimation::valueChanged,
+                            w, [w](const QVariant &value) {
+                        QPalette pal = QApplication::palette(w);
+                        pal.setColor(QPalette::Base, value.value<QColor>());
+                        w->setPalette(pal);
+                    });
+                    anim->start();
+                    w->setProperty("bsShowInputErrorAnimation", QVariant::fromValue(anim));
+                } else {
+                    if (auto anim = w->property("bsShowInputErrorAnimation").value<QVariantAnimation *>()) {
+                        anim->stop();
+                        delete anim;
+                    }
+                    w->setPalette(pal);
                 }
-                w->setPalette(pal);
             }
         }
     } else if (qobject_cast<QAbstractItemView *>(o)) {
