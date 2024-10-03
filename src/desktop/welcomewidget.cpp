@@ -58,7 +58,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
     layout->setRowStretch(0, 1);
     layout->setRowStretch(1, 0);
     layout->setRowStretch(2, 0);
-    layout->setRowStretch(3, 7);
+    layout->setRowStretch(3, 70);
     layout->setRowStretch(4, 0);
     layout->setRowStretch(5, 0);
     layout->setRowStretch(6, 1);
@@ -151,7 +151,7 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
         b->setFocusPolicy(Qt::NoFocus);
         import_layout->addWidget(b);
     }
-    layout->addWidget(m_import_frame, 2, 1);
+    layout->addWidget(m_import_frame, 2, 1, 2, 1);
 
     m_versions = new QLabel();
     m_versions->setAlignment(Qt::AlignCenter);
