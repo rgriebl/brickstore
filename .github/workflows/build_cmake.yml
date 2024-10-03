@@ -13,7 +13,7 @@ env:
       qt6-base-dev qt6-base-private-dev qt6-base-dev-tools
       qt6-qpa-plugins
   BRICKSTORE_GUI_QT6_DEB_PACKAGES: >-
-      libsecret-1-dev
+      libsecret-1-dev libcups2-dev
       qt6-declarative-dev qt6-declarative-private-dev
       qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
       qt6-gtk-platformtheme libqt6svg6-dev qt6-multimedia-dev
@@ -89,7 +89,8 @@ jobs:
           qt_tools: tools_opensslv3_src
           qt_host: 'linux'
           qt_version: '6.7.3'
-          qt_arch: 'gcc_64'
+          qt_arch: 'linux_gcc_64'
+          qt_dir: 'gcc_64'
 
         - name: "Ubuntu Snap"
           artifact: "Linux-Snap"
@@ -99,7 +100,8 @@ jobs:
           qt_tools: tools_opensslv3_src
           qt_host: 'linux'
           qt_version: '6.7.3'
-          qt_arch: 'gcc_64'
+          qt_arch: 'linux_gcc_64'
+          qt_dir: 'gcc_64'
 
         - name: "Linux Flatpak"
           artifact: "Linux-Flatpak"
@@ -109,7 +111,8 @@ jobs:
           qt_tools: tools_opensslv3_src
           qt_host: 'linux'
           qt_version: '6.7.3'
-          qt_arch: 'gcc_64'
+          qt_arch: 'linux_gcc_64'
+          qt_dir: 'gcc_64'
 
         - name: "macOS Universal"
           artifact: "macOS"
@@ -130,7 +133,7 @@ jobs:
           qt_version: '6.4.3'
           qt_arch: 'clang_64'
           qt_dir: 'macos'
-          cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64" -DSENTRY=ON'
+          cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64"'
 
         - name: "Android"
           artifact: "Android"
@@ -139,7 +142,7 @@ jobs:
           android_abi: 'arm64-v8a'
           android_ndk: '26.3.11579264'
           qt_host: 'linux'
-          qt_host_arch: 'gcc_64'
+          qt_host_arch: 'linux_gcc_64'
           qt_target: 'android'
           qt_version: '6.7.3'
           qt_arch: 'android_x86_64'
@@ -308,7 +311,7 @@ jobs:
         sudo DEBIAN_FRONTEND=noninteractive apt -y update
         sudo DEBIAN_FRONTEND=noninteractive apt -y install \
             g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
-            libxcb-\* libpulse-dev libgstreamer\*1.0-dev libsecret-1-dev libva-dev
+            libxcb-\* libpulse-dev libgstreamer\*1.0-dev libsecret-1-dev libva-dev libcups2-dev
         ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
@@ -322,7 +325,7 @@ jobs:
         sudo DEBIAN_FRONTEND=noninteractive apt -y update
         sudo DEBIAN_FRONTEND=noninteractive apt -y install \
             g++ cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
-            libxcb-\* libpulse-dev libgstreamer\*1.0-dev libsecret-1-dev libva-dev
+            libxcb-\* libpulse-dev libgstreamer\*1.0-dev libsecret-1-dev libva-dev libcups2-dev
         ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         cmake --build build --config RelWithDebInfo --parallel --verbose

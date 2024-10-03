@@ -13,8 +13,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(SENTRY_VERSION 0.7.2)
-set(QCORO_VERSION  0.9.0)
+set(SENTRY_VERSION 0.7.10)
+set(QCORO_VERSION  0.10.0)
 
 # for QtCreator
 set(QML_IMPORT_PATH ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/imports CACHE STRING "" FORCE)
@@ -88,9 +88,11 @@ set(BS_WAYLAND_DECORATIONS OFF)
 if (LINUX AND (${Qt6_VERSION} VERSION_LESS "6.8.0") AND (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.5.0"))
     # Qt < 6.8.0 draws very ugly window decorations on Gnome
     find_package(Wayland QUIET)
-    if (Wayland_FOUND AND (${Wayland_VERSION} VERSION_GREATER_EQUAL "1.20.0"))
-        include(BuildQAdwaitaDecorations)
-        set(BS_WAYLAND_DECORATIONS ON)
+    if (Wayland_FOUND)
+        if (${Wayland_VERSION} VERSION_GREATER_EQUAL "1.20.0")
+            include(BuildQAdwaitaDecorations)
+            set(BS_WAYLAND_DECORATIONS ON)
+        endif()
     endif()
 endif()
 

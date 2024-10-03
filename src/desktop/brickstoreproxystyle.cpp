@@ -378,7 +378,7 @@ bool BrickStoreProxyStyle::eventFilter(QObject *o, QEvent *e)
                     QColor base = pal.color(QPalette::Base);
                     anim->setDuration(2000);
                     anim->setStartValue(base);
-                    anim->setEndValue(Utility::gradientColor(base, Qt::red, 0.33));
+                    anim->setEndValue(Utility::gradientColor(base, Qt::red, 0.33f));
                     anim->setEasingCurve(QEasingCurve::InOutQuart);
                     connect(anim, &QAbstractAnimation::finished,
                             this, [anim]() {
