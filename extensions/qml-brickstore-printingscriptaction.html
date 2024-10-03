@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
 <!-- script.cpp -->
+  <meta name="description" content="Use this type to add a print action to your extension.">
   <title>PrintingScriptAction QML Type | BrickStore Extensions</title>
   <link rel="stylesheet" type="text/css" href="style/extensions.css" />
 </head>
@@ -11,8 +12,8 @@
 <div class="main-rounded">
 <div class="navigationbar">
     <ul>
-<li><a href="index.html">BrickStore Extensions</a></li>
-<li><a href="qml-brickstore-brickstore.html">BrickStore</a></li>
+<li><a href="index.html" translate="no">BrickStore Extensions</a></li>
+<li><a href="brickstore-qmlmodule.html" translate="no">BrickStore</a></li>
 <li>PrintingScriptAction</li>
     </ul>
 </div>
@@ -29,55 +30,55 @@
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <div class="context">
-<h1 class="title">PrintingScriptAction QML Type</h1>
+<h1 class="title" translate="no">PrintingScriptAction QML Type</h1>
 <!-- $$$PrintingScriptAction-brief -->
 <p>Use this type to add a print action to your extension. <a href="#details">More...</a></p>
 <!-- @@@PrintingScriptAction -->
-<div class="table"><table class="alignedsummary">
+<div class="table"><table class="alignedsummary" translate="no">
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> import BrickStore 1.0</td></tr></table></div><ul>
 <li><a href="qml-brickstore-printingscriptaction-members.html">List of all members, including inherited members</a></li>
 </ul>
 <h2 id="properties">Properties</h2>
 <ul>
-<li class="fn"><b><a href="qml-brickstore-printingscriptaction.html#printFunction-prop">printFunction</a></b> : string</li>
-<li class="fn"><b><a href="qml-brickstore-printingscriptaction.html#text-prop">text</a></b> : string</li>
+<li class="fn" translate="no"><b><a href="qml-brickstore-printingscriptaction.html#printFunction-prop" translate="no">printFunction</a></b> : string</li>
+<li class="fn" translate="no"><b><a href="qml-brickstore-printingscriptaction.html#text-prop" translate="no">text</a></b> : string</li>
 </ul>
 <!-- $$$PrintingScriptAction-description -->
 <h2 id="details">Detailed Description</h2>
 <!-- @@@PrintingScriptAction -->
 <h2>Property Documentation</h2>
 <!-- $$$printFunction -->
-<div class="qmlitem"><div class="qmlproto">
+<div class="qmlitem"><div class="qmlproto" translate="no">
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="printFunction-prop">
 <td class="tblQmlPropNode"><p>
 <span class="name">printFunction</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>This property holds a reference to the JavaScript function which should be called for printing. The function is called with three parameters: <code>(job, document, lots)</code>.</p>
+<div class="qmldoc"><p>This property holds a reference to the JavaScript function which should be called for printing. The function is called with three parameters: <code translate="no">(job, document, lots)</code>.</p>
 <div class="table"><table class="generic">
  <thead><tr class="qt-style"><th >Parameter</th><th >Type</th><th >Description</th></tr></thead>
-<tr valign="top" class="odd"><td ><code>job</code></td><td ><a href="qml-brickstore-printjob.html">PrintJob</a></td><td >The current print job.</td></tr>
-<tr valign="top" class="even"><td ><code>document</code></td><td >Document</td><td >The document that gets printed.</td></tr>
-<tr valign="top" class="odd"><td ><code>lots</code></td><td >list&lt;<a href="qml-bricklink-lot.html">Lot</a>&gt;</td><td >The selected lots, or all lots if there is no selection.</td></tr>
+<tr valign="top" class="odd"><td ><code translate="no">job</code></td><td ><a href="qml-brickstore-printjob.html" translate="no">PrintJob</a></td><td >The current print job.</td></tr>
+<tr valign="top" class="even"><td ><code translate="no">document</code></td><td >Document</td><td >The document that gets printed.</td></tr>
+<tr valign="top" class="odd"><td ><code translate="no">lots</code></td><td >list&lt;<a href="qml-bricklink-lot.html" translate="no">Lot</a>&gt;</td><td >The selected lots, or all lots if there is no selection.</td></tr>
 </table></div>
 <p>For example, the classic print script looks like this:</p>
-<pre class="cpp plain">PrintingScriptAction {
+<pre class="cpp plain" translate="no">PrintingScriptAction {
     text: &quot;Print: Classic layout&quot;
     printFunction: printJob
 }
 
 function printJob(job, doc, lots)
-{ ..&#x2e; }</pre>
+{ ... }</pre>
 </div></div><!-- @@@printFunction -->
 <br/>
 <!-- $$$text -->
-<div class="qmlitem"><div class="qmlproto">
+<div class="qmlitem"><div class="qmlproto" translate="no">
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="text-prop">
 <td class="tblQmlPropNode"><p>
 <span class="name">text</span> : <span class="type">string</span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>The user visible text of the menu entry in the <code>Extras</code> menu, that triggers the <a href="qml-brickstore-printingscriptaction.html#printFunction-prop">printFunction</a>.</p>
+<div class="qmldoc"><p>The user visible text of the menu entry in the <code translate="no">Extras</code> menu, that triggers the <a href="qml-brickstore-printingscriptaction.html#printFunction-prop" translate="no">printFunction</a>.</p>
 </div></div><!-- @@@text -->
 <br/>
 </div>

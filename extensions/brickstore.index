@@ -46,7 +46,7 @@
                 <parameter type="Color" name="color" default=""/>
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
-            <function name="pictureUpdated" fullname="BrickLink.BrickLink.pictureUpdated" href="qml-bricklink-bricklink.html#pictureUpdated-signal" status="active" access="public" documented="true" meta="qmlsignal" type="">
+            <function name="pictureUpdated" fullname="BrickLink.BrickLink.pictureUpdated" href="qml-bricklink-bricklink.html#pictureUpdated-signal" status="active" access="public" documented="true" meta="qmlsignal">
                 <parameter type="Picture" name="picture" default=""/>
             </function>
             <function name="priceGuide" fullname="BrickLink.BrickLink.priceGuide" href="qml-bricklink-bricklink.html#priceGuide-method" status="active" access="public" documented="true" meta="qmlmethod" type="PriceGuide">
@@ -60,7 +60,7 @@
                 <parameter type="Color" name="color" default=""/>
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
-            <function name="priceGuideUpdated" fullname="BrickLink.BrickLink.priceGuideUpdated" href="qml-bricklink-bricklink.html#priceGuideUpdated-signal" status="active" access="public" documented="true" meta="qmlsignal" type="">
+            <function name="priceGuideUpdated" fullname="BrickLink.BrickLink.priceGuideUpdated" href="qml-bricklink-bricklink.html#priceGuideUpdated-signal" status="active" access="public" documented="true" meta="qmlsignal">
                 <parameter type="PriceGuide" name="priceGuide" default=""/>
             </function>
             <qmlproperty name="database" fullname="BrickLink.BrickLink.database" href="qml-bricklink-bricklink.html#database-prop" status="active" access="public" documented="true" type="Database" attached="false" writable="false"/>
@@ -136,13 +136,13 @@
             <function name="lots.at" fullname="BrickStore.Document.lots.at" href="qml-brickstore-document.html#lots.at-method" status="active" access="public" documented="true" meta="qmlmethod" type="Lot">
                 <parameter type="int" name="index" default=""/>
             </function>
-            <function name="lots.remove" fullname="BrickStore.Document.lots.remove" href="qml-brickstore-document.html#lots.remove-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+            <function name="lots.remove" fullname="BrickStore.Document.lots.remove" href="qml-brickstore-document.html#lots.remove-method" status="active" access="public" documented="true" meta="qmlmethod">
                 <parameter type="Lot" name="lot" default=""/>
             </function>
-            <function name="lots.removeAt" fullname="BrickStore.Document.lots.removeAt" href="qml-brickstore-document.html#lots.removeAt-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+            <function name="lots.removeAt" fullname="BrickStore.Document.lots.removeAt" href="qml-brickstore-document.html#lots.removeAt-method" status="active" access="public" documented="true" meta="qmlmethod">
                 <parameter type="int" name="index" default=""/>
             </function>
-            <function name="lots.removeVisibleAt" fullname="BrickStore.Document.lots.removeVisibleAt" href="qml-brickstore-document.html#lots.removeVisibleAt-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+            <function name="lots.removeVisibleAt" fullname="BrickStore.Document.lots.removeVisibleAt" href="qml-brickstore-document.html#lots.removeVisibleAt-method" status="active" access="public" documented="true" meta="qmlmethod">
                 <parameter type="int" name="index" default=""/>
             </function>
             <function name="lots.visibleAt" fullname="BrickStore.Document.lots.visibleAt" href="qml-brickstore-document.html#lots.visibleAt-method" status="active" access="public" documented="true" meta="qmlmethod" type="Lot">
@@ -156,6 +156,11 @@
             <qmlproperty name="visibleLotCount" fullname="BrickStore.Document.visibleLotCount" href="qml-brickstore-document.html#visibleLotCount-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="ExtensionScriptAction" qml-module-name="BrickStore" fullname="BrickStore.ExtensionScriptAction" href="qml-brickstore-extensionscriptaction.html" status="active" access="public" documented="true" groups="qml-extension" title="ExtensionScriptAction" fulltitle="ExtensionScriptAction" subtitle="" brief="Use this type to add an UI action to your extension"/>
+        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="144" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="">
+            <contents name="the-simple-changes" title="The simple changes" level="2"/>
+            <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
+            <contents name="complex-changes" title="Complex changes" level="2"/>
+        </page>
         <qmlclass name="Item" qml-module-name="BrickLink" fullname="BrickLink.Item" href="qml-bricklink-item.html" status="active" access="public" documented="true" groups="qml-api" title="Item" fulltitle="Item" subtitle="" brief="This value type represents a BrickLink item">
             <function name="hasKnownColor" fullname="BrickLink.Item.hasKnownColor" href="qml-bricklink-item.html#hasKnownColor-method" status="active" access="public" documented="true" meta="qmlmethod" type="bool">
                 <parameter type="Color" name="color" default=""/>
@@ -264,7 +269,7 @@
             <qmlproperty name="vatChargeSeller" fullname="BrickLink.Order.vatChargeSeller" href="qml-bricklink-order.html#vatChargeSeller-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="Picture" qml-module-name="BrickLink" fullname="BrickLink.Picture" href="qml-bricklink-picture.html" status="active" access="public" documented="true" groups="qml-api" title="Picture" fulltitle="Picture" subtitle="" brief="This value type represents a picture of a BrickLink item">
-            <function name="update" fullname="BrickLink.Picture.update" href="qml-bricklink-picture.html#update-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+            <function name="update" fullname="BrickLink.Picture.update" href="qml-bricklink-picture.html#update-method" status="active" access="public" documented="true" meta="qmlmethod">
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
             <qmlproperty name="color" fullname="BrickLink.Picture.color" href="qml-bricklink-picture.html#color-prop" status="active" access="public" documented="true" type="ColorPointer" attached="false" writable="false"/>
@@ -275,11 +280,6 @@
             <qmlproperty name="lastUpdated" fullname="BrickLink.Picture.lastUpdated" href="qml-bricklink-picture.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
             <qmlproperty name="updateStatus" fullname="BrickLink.Picture.updateStatus" href="qml-bricklink-picture.html#updateStatus-prop" status="active" access="public" documented="true" type="UpdateStatus" attached="false" writable="false"/>
         </qmlclass>
-        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="144" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="">
-            <contents name="the-simple-changes" title="The simple changes" level="2"/>
-            <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
-            <contents name="complex-changes" title="Complex changes" level="2"/>
-        </page>
         <qmlclass name="PriceGuide" qml-module-name="BrickLink" fullname="BrickLink.PriceGuide" href="qml-bricklink-priceguide.html" status="active" access="public" documented="true" groups="qml-api" title="PriceGuide" fulltitle="PriceGuide" subtitle="" brief="This value type represents the price guide for a BrickLink item">
             <function name="lots" fullname="BrickLink.PriceGuide.lots" href="qml-bricklink-priceguide.html#lots-method" status="active" access="public" documented="true" meta="qmlmethod" type="int">
                 <parameter type="Time" name="time" default=""/>
@@ -294,7 +294,7 @@
                 <parameter type="Time" name="time" default=""/>
                 <parameter type="Condition" name="condition" default=""/>
             </function>
-            <function name="update" fullname="BrickLink.PriceGuide.update" href="qml-bricklink-priceguide.html#update-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+            <function name="update" fullname="BrickLink.PriceGuide.update" href="qml-bricklink-priceguide.html#update-method" status="active" access="public" documented="true" meta="qmlmethod">
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
             <qmlproperty name="color" fullname="BrickLink.PriceGuide.color" href="qml-bricklink-priceguide.html#color-prop" status="active" access="public" documented="true" type="ColorPointer" attached="false" writable="false"/>
@@ -305,7 +305,7 @@
             <qmlproperty name="updateStatus" fullname="BrickLink.PriceGuide.updateStatus" href="qml-bricklink-priceguide.html#updateStatus-prop" status="active" access="public" documented="true" type="UpdateStatus" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="PrintJob" qml-module-name="BrickStore" fullname="BrickStore.PrintJob" href="qml-brickstore-printjob.html" status="active" access="public" documented="true" groups="qml-printing" title="PrintJob" fulltitle="PrintJob" subtitle="" brief="An instance of this type represents an active print job">
-            <function name="abort" fullname="BrickStore.PrintJob.abort" href="qml-brickstore-printjob.html#abort-method" status="active" access="public" documented="true" meta="qmlmethod" type=""/>
+            <function name="abort" fullname="BrickStore.PrintJob.abort" href="qml-brickstore-printjob.html#abort-method" status="active" access="public" documented="true" meta="qmlmethod"/>
             <function name="addPage" fullname="BrickStore.PrintJob.addPage" href="qml-brickstore-printjob.html#addPage-method" status="active" access="public" documented="true" meta="qmlmethod" type="PrintPage"/>
             <function name="getPage" fullname="BrickStore.PrintJob.getPage" href="qml-brickstore-printjob.html#getPage-method" status="active" access="public" documented="true" meta="qmlmethod" type="PrintPage">
                 <parameter type="int" name="index" default=""/>
@@ -314,32 +314,32 @@
             <qmlproperty name="paperSize" fullname="BrickStore.PrintJob.paperSize" href="qml-brickstore-printjob.html#paperSize-prop" status="active" access="public" documented="true" type="size" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="PrintPage" qml-module-name="BrickStore" fullname="BrickStore.PrintPage" href="qml-brickstore-printpage.html" status="active" access="public" documented="true" groups="qml-printing" title="PrintPage" fulltitle="PrintPage" subtitle="" brief="An instance of this type represents the canvas of a printer page">
-            <function name="drawEllipse" fullname="BrickStore.PrintPage.drawEllipse" href="qml-brickstore-printpage.html#drawEllipse-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+            <function name="drawEllipse" fullname="BrickStore.PrintPage.drawEllipse" href="qml-brickstore-printpage.html#drawEllipse-method" status="active" access="public" documented="true" meta="qmlmethod">
                 <parameter type="real" name="left" default=""/>
                 <parameter type="real" name="top" default=""/>
                 <parameter type="real" name="width" default=""/>
                 <parameter type="real" name="height" default=""/>
             </function>
-            <function name="drawImage" fullname="BrickStore.PrintPage.drawImage" href="qml-brickstore-printpage.html#drawImage-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+            <function name="drawImage" fullname="BrickStore.PrintPage.drawImage" href="qml-brickstore-printpage.html#drawImage-method" status="active" access="public" documented="true" meta="qmlmethod">
                 <parameter type="real" name="left" default=""/>
                 <parameter type="real" name="top" default=""/>
                 <parameter type="real" name="width" default=""/>
                 <parameter type="real" name="height" default=""/>
                 <parameter type="image" name="image" default=""/>
             </function>
-            <function name="drawLine" fullname="BrickStore.PrintPage.drawLine" href="qml-brickstore-printpage.html#drawLine-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+            <function name="drawLine" fullname="BrickStore.PrintPage.drawLine" href="qml-brickstore-printpage.html#drawLine-method" status="active" access="public" documented="true" meta="qmlmethod">
                 <parameter type="real" name="x1" default=""/>
                 <parameter type="real" name="y1" default=""/>
                 <parameter type="real" name="x2" default=""/>
                 <parameter type="real" name="y2" default=""/>
             </function>
-            <function name="drawRect" fullname="BrickStore.PrintPage.drawRect" href="qml-brickstore-printpage.html#drawRect-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+            <function name="drawRect" fullname="BrickStore.PrintPage.drawRect" href="qml-brickstore-printpage.html#drawRect-method" status="active" access="public" documented="true" meta="qmlmethod">
                 <parameter type="real" name="left" default=""/>
                 <parameter type="real" name="top" default=""/>
                 <parameter type="real" name="width" default=""/>
                 <parameter type="real" name="height" default=""/>
             </function>
-            <function name="drawText" fullname="BrickStore.PrintPage.drawText" href="qml-brickstore-printpage.html#drawText-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
+            <function name="drawText" fullname="BrickStore.PrintPage.drawText" href="qml-brickstore-printpage.html#drawText-method" status="active" access="public" documented="true" meta="qmlmethod">
                 <parameter type="real" name="left" default=""/>
                 <parameter type="real" name="top" default=""/>
                 <parameter type="real" name="width" default=""/>
