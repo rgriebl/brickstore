@@ -524,7 +524,7 @@ QVector<Filter> FilterWidget::filterFromTerms() const
     }
 
     // remove any trailing and'ed default filters
-    for (auto i = result.size() - 1; i > 0; ++i) {
+    for (auto i = result.size() - 1; i > 0; --i) {
         if ((result.at(i - 1).combination() == Filter::Combination::And)
                 && (result.at(i) == Filter { })) {
             result.removeLast();
