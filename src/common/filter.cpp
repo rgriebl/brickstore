@@ -44,18 +44,40 @@ void Filter::setExpression(const QString &expr)
         m_asRegExp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
     }
     m_asDateTime = QDateTime { };
+
+    int baseYear = std::min(2000, QDate::currentDate().year() - 90);
     for (auto fmt : { QLocale::LongFormat, QLocale::ShortFormat, QLocale::NarrowFormat }) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 7, 0)
         m_asDateTime = loc.toDateTime(expr, fmt);
-        if (m_asDateTime.isValid())
+#else
+        m_asDateTime = loc.toDateTime(expr, fmt, baseYear);
+#endif
+
+        if (m_asDateTime.isValid()) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 7, 0)
+            const QDate d = m_asDateTime.date();
+            if (d.year() < 2000)
+                m_asDateTime.setDate(d.addYears(100));
+#endif
             break;
+        }
     }
     if (!m_asDateTime.isValid()) {
         for (auto fmt : { QLocale::LongFormat, QLocale::ShortFormat, QLocale::NarrowFormat }) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 7, 0)
             QDate d = loc.toDate(expr, fmt);
+#else
+            QDate d = loc.toDate(expr, fmt, baseYear);
+#endif
             if (d.isValid()) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 7, 0)
+                if (d.year() < 2000)
+                    d = d.addYears(100);
+#endif
                 m_asDateTime.setDate(d);
                 m_asDateTime.setTime(QTime(0, 0));
                 m_asDateTime.setTimeSpec(Qt::UTC);
+                m_isDate = true;
                 break;
             }
         }

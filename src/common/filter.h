@@ -107,6 +107,8 @@ public:
             return m_isDouble;
         else if constexpr (std::is_same_v<T, QRegularExpression>)
             return m_isRegExp;
+        else if constexpr (std::is_same_v<T, QDate>)
+            return m_isDate;
         else
             return false;
     }
@@ -119,6 +121,8 @@ public:
             return m_asDouble;
         else if constexpr (std::is_same_v<T, QRegularExpression>)
             return m_asRegExp;
+        else if constexpr (std::is_same_v<T, QDate>)
+            return m_asDateTime.date();
         else if constexpr (std::is_same_v<T, QDateTime>)
             return m_asDateTime;
         else {
@@ -134,6 +138,7 @@ private:
     bool        m_isInt = false;
     bool        m_isDouble = false;
     bool        m_isRegExp = false;
+    bool        m_isDate = false;
     int         m_asInt = 0;
     double      m_asDouble = 0;
     QDateTime   m_asDateTime;

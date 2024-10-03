@@ -2765,6 +2765,7 @@ bool DocumentModel::filterAcceptsLot(const Lot *lot) const
         for (int col = firstcol; col <= lastcol && !rowResult; ++col) {
             const auto field = static_cast<Field>(col);
             const auto &c = m_columns.value(field);
+
             if (!c.filterable)
                 continue;
 
@@ -2870,9 +2871,15 @@ bool DocumentModel::filterAcceptsLot(const Lot *lot) const
                     }
                     case QMetaType::QDateTime: {
                         if (auto dt = f.as<QDateTime>(); dt.isValid()) {
-                            // round down to the nearest minute
-                            i1 = dt.addSecs(-dt.time().second()).toSecsSinceEpoch();
-                            i2 = v.toDateTime().addSecs(-v.toDateTime().time().second()).toSecsSinceEpoch();
+                            if (f.is<QDate>()) {
+                                // just compare the date, not the time
+                                i1 = dt.toLocalTime().date().toJulianDay();
+                                i2 = v.toDateTime().toLocalTime().date().toJulianDay();
+                            } else {
+                                // round down to the nearest minute
+                                i1 = dt.addSecs(-dt.time().second()).toSecsSinceEpoch();
+                                i2 = v.toDateTime().addSecs(-v.toDateTime().time().second()).toSecsSinceEpoch();
+                            }
                             isInt = true;
                         }
                         break;
