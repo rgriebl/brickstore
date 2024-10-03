@@ -267,11 +267,11 @@
             <function name="update" fullname="BrickLink.Picture.update" href="qml-bricklink-picture.html#update-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
-            <qmlproperty name="color" fullname="BrickLink.Picture.color" href="qml-bricklink-picture.html#color-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
+            <qmlproperty name="color" fullname="BrickLink.Picture.color" href="qml-bricklink-picture.html#color-prop" status="active" access="public" documented="true" type="ColorPointer" attached="false" writable="false"/>
             <qmlproperty name="image" fullname="BrickLink.Picture.image" href="qml-bricklink-picture.html#image-prop" status="active" access="public" documented="true" type="image" attached="false" writable="false"/>
             <qmlproperty name="isNull" fullname="BrickLink.Picture.isNull" href="qml-bricklink-picture.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
             <qmlproperty name="isValid" fullname="BrickLink.Picture.isValid" href="qml-bricklink-picture.html#isValid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="item" fullname="BrickLink.Picture.item" href="qml-bricklink-picture.html#item-prop" status="active" access="public" documented="true" type="Item" attached="false" writable="false"/>
+            <qmlproperty name="item" fullname="BrickLink.Picture.item" href="qml-bricklink-picture.html#item-prop" status="active" access="public" documented="true" type="ItemPointer" attached="false" writable="false"/>
             <qmlproperty name="lastUpdated" fullname="BrickLink.Picture.lastUpdated" href="qml-bricklink-picture.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
             <qmlproperty name="updateStatus" fullname="BrickLink.Picture.updateStatus" href="qml-bricklink-picture.html#updateStatus-prop" status="active" access="public" documented="true" type="UpdateStatus" attached="false" writable="false"/>
         </qmlclass>
@@ -297,10 +297,10 @@
             <function name="update" fullname="BrickLink.PriceGuide.update" href="qml-bricklink-priceguide.html#update-method" status="active" access="public" documented="true" meta="qmlmethod" type="">
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
-            <qmlproperty name="color" fullname="BrickLink.PriceGuide.color" href="qml-bricklink-priceguide.html#color-prop" status="active" access="public" documented="true" type="Color" attached="false" writable="false"/>
+            <qmlproperty name="color" fullname="BrickLink.PriceGuide.color" href="qml-bricklink-priceguide.html#color-prop" status="active" access="public" documented="true" type="ColorPointer" attached="false" writable="false"/>
             <qmlproperty name="isNull" fullname="BrickLink.PriceGuide.isNull" href="qml-bricklink-priceguide.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
             <qmlproperty name="isValid" fullname="BrickLink.PriceGuide.isValid" href="qml-bricklink-priceguide.html#isValid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
-            <qmlproperty name="item" fullname="BrickLink.PriceGuide.item" href="qml-bricklink-priceguide.html#item-prop" status="active" access="public" documented="true" type="Item" attached="false" writable="false"/>
+            <qmlproperty name="item" fullname="BrickLink.PriceGuide.item" href="qml-bricklink-priceguide.html#item-prop" status="active" access="public" documented="true" type="ItemPointer" attached="false" writable="false"/>
             <qmlproperty name="lastUpdated" fullname="BrickLink.PriceGuide.lastUpdated" href="qml-bricklink-priceguide.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
             <qmlproperty name="updateStatus" fullname="BrickLink.PriceGuide.updateStatus" href="qml-bricklink-priceguide.html#updateStatus-prop" status="active" access="public" documented="true" type="UpdateStatus" attached="false" writable="false"/>
         </qmlclass>

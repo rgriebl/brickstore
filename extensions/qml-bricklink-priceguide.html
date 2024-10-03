@@ -40,10 +40,10 @@
 </ul>
 <h2 id="properties">Properties</h2>
 <ul>
-<li class="fn"><b><a href="qml-bricklink-priceguide.html#color-prop">color</a></b> : Color</li>
+<li class="fn"><b><a href="qml-bricklink-priceguide.html#color-prop">color</a></b> : ColorPointer</li>
 <li class="fn"><b><a href="qml-bricklink-priceguide.html#isNull-prop">isNull</a></b> : bool</li>
 <li class="fn"><b><a href="qml-bricklink-priceguide.html#isValid-prop">isValid</a></b> : bool</li>
-<li class="fn"><b><a href="qml-bricklink-priceguide.html#item-prop">item</a></b> : Item</li>
+<li class="fn"><b><a href="qml-bricklink-priceguide.html#item-prop">item</a></b> : ItemPointer</li>
 <li class="fn"><b><a href="qml-bricklink-priceguide.html#lastUpdated-prop">lastUpdated</a></b> : date</li>
 <li class="fn"><b><a href="qml-bricklink-priceguide.html#updateStatus-prop">updateStatus</a></b> : UpdateStatus</li>
 </ul>
@@ -86,9 +86,10 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="color-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">color</span> : <span class="type"><a href="qml-bricklink-color.html">Color</a></span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">color</span> : <span class="type">ColorPointer</span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>The BrickLink color reference this price guide is requested for.</p>
+<div class="qmldoc"><p>The BrickLink color reference this price guide is requested for as a raw C++ pointer. You can convert it to a QML Color object like this:</p>
+<pre class="cpp">let color <span class="operator">=</span> BrickLink<span class="operator">.</span>color(pg<span class="operator">.</span>color)</pre>
 </div></div><!-- @@@color -->
 <br/>
 <!-- $$$isNull -->
@@ -116,9 +117,10 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="item-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">item</span> : <span class="type"><a href="qml-bricklink-item.html">Item</a></span></p></td></tr>
+<span class="qmlextra">[read-only] </span><span class="name">item</span> : <span class="type">ItemPointer</span></p></td></tr>
 </table></div></div>
-<div class="qmldoc"><p>The BrickLink item reference this price guide is requested for.</p>
+<div class="qmldoc"><p>The BrickLink item reference this price guide is requested for as a raw C++ pointer. You can convert it to a QML Item object like this:</p>
+<pre class="cpp">let item <span class="operator">=</span> BrickLink<span class="operator">.</span>item(pg<span class="operator">.</span>item)</pre>
 </div></div><!-- @@@item -->
 <br/>
 <!-- $$$lastUpdated -->
