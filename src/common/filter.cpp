@@ -48,6 +48,7 @@ void Filter::setExpression(const QString &expr)
     int baseYear = std::min(2000, QDate::currentDate().year() - 90);
     for (auto fmt : { QLocale::LongFormat, QLocale::ShortFormat, QLocale::NarrowFormat }) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 7, 0)
+        Q_UNUSED(baseYear)
         m_asDateTime = loc.toDateTime(expr, fmt);
 #else
         m_asDateTime = loc.toDateTime(expr, fmt, baseYear);

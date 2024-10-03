@@ -1,7 +1,7 @@
 # Copyright (C) 2004-2024 Robert Griebl
 # SPDX-License-Identifier: GPL-3.0-only
 
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 MAINTAINER Robert Griebl <robert@griebl.org>
 
 ARG BRICKSTORE_BACKEND_DEB=brickstore-backend.deb
