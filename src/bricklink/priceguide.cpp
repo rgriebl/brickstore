@@ -1112,13 +1112,21 @@ void PriceGuideCachePrivate::retrieveFailed(PriceGuide *pg, const QString &error
     Returns whether this PriceGuide is \c null. Since this type is a value wrapper around a C++
     object, we cannot use the normal JavaScript \c null notation.
 */
-/*! \qmlproperty Item PriceGuide::item
+/*! \qmlproperty ItemPointer PriceGuide::item
     \readonly
-    The BrickLink item reference this price guide is requested for.
+    The BrickLink item reference this price guide is requested for as a raw
+    C++ pointer. You can convert it to a QML Item object like this:
+    \code
+    let item = BrickLink.item(pg.item)
+    \endcode
 */
-/*! \qmlproperty Color PriceGuide::color
+/*! \qmlproperty ColorPointer PriceGuide::color
     \readonly
-    The BrickLink color reference this price guide is requested for.
+    The BrickLink color reference this price guide is requested for as a raw
+    C++ pointer. You can convert it to a QML Color object like this:
+    \code
+    let color = BrickLink.color(pg.color)
+    \endcode
 */
 /*! \qmlproperty date PriceGuide::lastUpdated
     \readonly
