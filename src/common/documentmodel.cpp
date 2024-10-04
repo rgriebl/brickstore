@@ -2457,16 +2457,27 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
         if ((columns.size() != 1) || (columns.at(0).first != -1)) {
             // make the sort deterministic
             auto columnsPlusIndex = columns;
-            columnsPlusIndex.append(qMakePair(0, columns.isEmpty() ? Qt::AscendingOrder
-                                                                   : columns.constFirst().second));
+            bool needIndex = true;
+            for (const auto &[columnIndex, sortOrder] : columns) {
+                if (columnIndex == 0) {
+                    needIndex = false;
+                    break;
+                }
+            }
+            if (needIndex) {
+                columnsPlusIndex.append(qMakePair(0, columns.isEmpty() ? Qt::AscendingOrder
+                                                                       : columns.constFirst().second));
+            }
+
             qParallelSort(m_sortedLots.begin(), m_sortedLots.end(),
                           [this, columnsPlusIndex](const auto *lot1, const auto *lot2) {
                 std::partial_ordering o = std::partial_ordering::equivalent;
-                for (const auto &sc : columnsPlusIndex) {
-                    const auto &column = m_columns.value(sc.first);
+                for (const auto &[columnIndex, sortOrder] : columnsPlusIndex) {
+                    const auto &column = m_columns.value(columnIndex);
+
                     if (column.compareFn) {
                         o = column.compareFn(lot1, lot2);
-                    } else {
+                    } else if (column.dataFn) {
                         const auto v1 = column.dataFn(lot1);
                         const auto v2 = column.dataFn(lot2);
 
@@ -2490,7 +2501,7 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
                         }
                     }
                     if (o != 0) {
-                        if (sc.second == Qt::DescendingOrder)
+                        if (sortOrder == Qt::DescendingOrder)
                             o = (o < 0) ? std::partial_ordering::greater : std::partial_ordering::less;
                         break;
                     }
