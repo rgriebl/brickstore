@@ -719,7 +719,7 @@ void PictureCachePrivate::transferJobFinished(TransferJob *j, Picture *pic)
 /*! \qmlproperty ItemPointer Picture::item
     \readonly
     The BrickLink item reference this picture is requested for as a raw
-    C++ pointer. You can convert it to a QML Item object like this:
+    C++ pointer. You can convert it to a QML \l Item object like this:
     \code
     let item = BrickLink.item(pic.item)
     \endcode
@@ -727,7 +727,7 @@ void PictureCachePrivate::transferJobFinished(TransferJob *j, Picture *pic)
 /*! \qmlproperty ColorPointer Picture::color
     \readonly
     The BrickLink color reference this picture is requested for as a raw
-    C++ pointer. You can convert it to a QML Color object like this:
+    C++ pointer. You can convert it to a QML \l Color object like this:
     \code
     let color = BrickLink.color(pic.color)
     \endcode

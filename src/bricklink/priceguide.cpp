@@ -1115,7 +1115,7 @@ void PriceGuideCachePrivate::retrieveFailed(PriceGuide *pg, const QString &error
 /*! \qmlproperty ItemPointer PriceGuide::item
     \readonly
     The BrickLink item reference this price guide is requested for as a raw
-    C++ pointer. You can convert it to a QML Item object like this:
+    C++ pointer. You can convert it to a QML \l Item object like this:
     \code
     let item = BrickLink.item(pg.item)
     \endcode
@@ -1123,7 +1123,7 @@ void PriceGuideCachePrivate::retrieveFailed(PriceGuide *pg, const QString &error
 /*! \qmlproperty ColorPointer PriceGuide::color
     \readonly
     The BrickLink color reference this price guide is requested for as a raw
-    C++ pointer. You can convert it to a QML Color object like this:
+    C++ pointer. You can convert it to a QML \l Color object like this:
     \code
     let color = BrickLink.color(pg.color)
     \endcode
