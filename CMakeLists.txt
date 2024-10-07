@@ -195,11 +195,13 @@ if (WIN32)
         NOMINMAX
     )
 elseif (LINUX)
-    find_package(TBB QUIET)
+    # we need at least 2021.6 for the task_scheduler_handle shutdown mechanism
+    find_package(TBB 2021.6 QUIET)
     if (TBB_FOUND)
         set(PARALLEL_STL ON)
         add_compile_definitions(
             BS_HAS_PARALLEL_STL
+            BS_LIBSTDCPP_USES_TBB
             TBB_SUPPRESS_DEPRECATED_MESSAGES=1
         )
     endif()
