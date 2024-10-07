@@ -65,6 +65,7 @@ public:
 
 AddItemDialog::AddItemDialog(QWidget *parent)
     : QWidget(parent, Qt::Window)
+    , m_delayedUpdateItemAndColor(0ms, this)
     , m_favoriteFilters(new QStringListModel(this))
 {
     auto verticalLayout = new QVBoxLayout(this);
@@ -622,9 +623,16 @@ void AddItemDialog::updateItemAndColor()
     auto item = w_select_item->currentItem();
     auto color = w_select_color->currentColor();
 
-    w_picture->setItemAndColor(item, color);
-    w_price_guide->setPriceGuide(BrickLink::core()->priceGuideCache()->priceGuide(item, color, true));
-    w_inventory->setItem(item, color);
+    // delay these, as this function might be called up to 3 times in a row with differing colors
+    if (!m_delayedUpdateItemAndColor) {
+        m_delayedUpdateItemAndColor.set([this](const BrickLink::Item *item, const BrickLink::Color *color) {
+            w_picture->setItemAndColor(item, color);
+            w_price_guide->setPriceGuide(BrickLink::core()->priceGuideCache()->priceGuide(item, color, true));
+            w_inventory->setItem(item, color);
+        });
+    }
+
+    m_delayedUpdateItemAndColor(item, color);
 
     checkAddPossible();
 }

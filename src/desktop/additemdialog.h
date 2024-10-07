@@ -8,6 +8,7 @@
 #include <QDateTime>
 
 #include "bricklink/global.h"
+#include "utility/calllater.h"
 
 QT_FORWARD_DECLARE_CLASS(QStringListModel)
 QT_FORWARD_DECLARE_CLASS(QPushButton)
@@ -103,6 +104,8 @@ private:
 
     QAction *m_toggles[3];
     QAction *m_sellerMode;
+
+    CallLater<const BrickLink::Item *, const BrickLink::Color *> m_delayedUpdateItemAndColor;
 
     QStringListModel *m_favoriteFilters;
 
