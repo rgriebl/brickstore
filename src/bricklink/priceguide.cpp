@@ -634,10 +634,16 @@ PriceGuideCache::PriceGuideCache(Core *core)
         // DB schema upgrade code goes here...
     }
 
-    for (int i = 0; i < 1; ++i) // one writer should be enough
-        d->m_threads.append(QThread::create(&PriceGuideCachePrivate::saveThread, d, d->m_db.connectionName(), i));
-    for (int i = 0; i < QThread::idealThreadCount(); ++i)
-        d->m_threads.append(QThread::create(&PriceGuideCachePrivate::loadThread, d, d->m_db.connectionName(), i));
+    for (int i = 0; i < 1; ++i) { // one writer should be enough
+        auto t = QThread::create(&PriceGuideCachePrivate::saveThread, d, d->m_db.connectionName(), i);
+        t->setObjectName(u"PG Saver %1"_qs.arg(i));
+        d->m_threads.append(t);
+    }
+    for (int i = 0; i < std::min(4, QThread::idealThreadCount()); ++i) {
+        auto t = QThread::create(&PriceGuideCachePrivate::loadThread, d, d->m_db.connectionName(), i);
+        t->setObjectName(u"PG Loader %1"_qs.arg(i));
+        d->m_threads.append(t);
+    }
 
     for (auto *thread : d->m_threads)
         thread->start(QThread::LowPriority);

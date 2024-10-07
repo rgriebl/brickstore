@@ -58,6 +58,7 @@ PersistentCookieJar::PersistentCookieJar(const QString &datadir, const QString &
         }
     });
 
+    m_saveThread->setObjectName(u"CookieSaver"_qs);
     m_saveThread->start();
 }
 

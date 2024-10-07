@@ -229,10 +229,16 @@ PictureCache::PictureCache(Core *core, quint64 physicalMem)
 
     //TODO: on mobile: if DB size > maxSize, remove old entries until size <= maxSize
 
-    for (int i = 0; i < 1 /*qMax(2, QThread::idealThreadCount() / 4)*/; ++i)
-        d->m_threads.append(QThread::create(&PictureCachePrivate::saveThread, d, d->m_db.connectionName(), i));
-    for (int i = 0; i < qMax(2, QThread::idealThreadCount()); ++i)
-        d->m_threads.append(QThread::create(&PictureCachePrivate::loadThread, d, d->m_db.connectionName(), i));
+    for (int i = 0; i < 1 /*qMax(2, QThread::idealThreadCount() / 4)*/; ++i) {
+        auto t = QThread::create(&PictureCachePrivate::saveThread, d, d->m_db.connectionName(), i);
+        t->setObjectName(u"Pic Saver %1"_qs.arg(i));
+        d->m_threads.append(t);
+    }
+    for (int i = 0; i < std::clamp(QThread::idealThreadCount(), 2, 8); ++i) {
+        auto t = QThread::create(&PictureCachePrivate::loadThread, d, d->m_db.connectionName(), i);
+        t->setObjectName(u"Pic Loader %1"_qs.arg(i));
+        d->m_threads.append(t);
+    }
 
     for (auto *thread : d->m_threads)
         thread->start(QThread::LowPriority);

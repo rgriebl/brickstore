@@ -228,9 +228,11 @@ void Library::partLoaderThread()
 
 void Library::startPartLoaderThread()
 {
-    if (!m_partLoaderThread)
+    if (!m_partLoaderThread) {
         m_partLoaderThread.reset(QThread::create(&Library::partLoaderThread, this));
-    m_partLoaderThread->start();
+        m_partLoaderThread->setObjectName(u"Part Loader"_qs);
+        m_partLoaderThread->start(QThread::LowPriority);
+    }
 }
 
 void Library::shutdownPartLoaderThread()
