@@ -211,7 +211,8 @@ void Library::partLoaderThread()
 {
     while (!m_partLoaderShutdown) {
         m_partLoaderMutex.lock();
-        m_partLoaderCondition.wait(&m_partLoaderMutex);
+        if (m_partLoaderJobs.isEmpty())
+            m_partLoaderCondition.wait(&m_partLoaderMutex);
 
         if (m_partLoaderShutdown) {
             m_partLoaderMutex.unlock();
