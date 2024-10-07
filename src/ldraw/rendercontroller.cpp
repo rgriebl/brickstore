@@ -31,7 +31,6 @@ RenderController::RenderController(QObject *parent)
     , m_lineGeo(new QQuick3DGeometry())
     , m_lines(new QmlRenderLineInstancing())
     , m_clearColor(Qt::white)
-    , m_updateTimer(new QTimer(this))
 {
     static const float lineGeo[] = {
         0, -0.5, 0,
@@ -46,17 +45,11 @@ RenderController::RenderController(QObject *parent)
     m_lineGeo->setStride(3 * sizeof(float));
     m_lineGeo->addAttribute(QQuick3DGeometry::Attribute::PositionSemantic, 0, QQuick3DGeometry::Attribute::F32Type);
     m_lineGeo->setVertexData(QByteArray::fromRawData(reinterpret_cast<const char *>(lineGeo), sizeof(lineGeo)));
-
-    m_updateTimer->setInterval(200ms);
-    m_updateTimer->setSingleShot(true);
-    connect(m_updateTimer, &QTimer::timeout, this, &RenderController::updateGeometries);
-    m_updateTimer->start();
 }
 
 RenderController::~RenderController()
 {
-    for (auto *geo : m_geos)
-        delete geo;
+    qDeleteAll(m_geos);
     delete m_lines;
     delete m_lineGeo;
     if (m_part)
@@ -137,43 +130,52 @@ void RenderController::setItemAndColor(const BrickLink::Item *item, const BrickL
     if (!color)
         color = BrickLink::core()->color(0); // not-applicable
 
-    if (item == m_item) {
-        if (!item || (color == m_color))
-            return;
+    // no change
+    if ((item == m_item) && (!item || (color == m_color)))
+        return;
 
-        // switch color - redraw, if we have a Part loaded already
-        m_color = color;
-        if (m_part)
-            m_updateTimer->start();
-    } else {
-        // new item
-        if (m_part)
-            m_part->release();
-        m_part = nullptr;
-        m_item = item;
-        m_color = color;
+    // new item
+    auto oldPart = m_part; // do not release immediately, as it might be re-used on color change
+    m_part = nullptr;
+    m_item = item;
+    m_color = color;
 
-        m_updateTimer->start();
+    emit canRenderChanged(canRender());
 
-        if (item) {
-            LDraw::library()->partFromBrickLinkId(item->id()).then(this, [this, item](Part *part) {
-                bool stillCurrentItem = (item == m_item);
+    if (item) {
+        LDraw::library()->partFromBrickLinkId(item->id())
+            .then(this, [this, item, color](Part *part) {
+            if (!part)
+                return;
+            if (item != m_item) {
+                part->release();
+                return;
+            }
 
-                if ((m_part != part) && stillCurrentItem) {
-                    if (m_part)
-                        m_part->release();
-                    m_part = part;
-                    if (m_part)
-                        m_part->addRef();
-                }
-                // the future comes already ref'ed
-                if (part)
+            if (m_part)
+                m_part->release();
+            m_part = part;
+            part->addRef();
+
+            emit canRenderChanged(canRender());
+
+            QtConcurrent::run(&RenderController::calculateRenderData, this, part, color)
+                .then(this, [this, color, part](RenderData data) {
                     part->release();
-                if (stillCurrentItem)
-                    updateGeometries();
-            });
-        }
+                    if (part != m_part)
+                        return;
+                    if (color != m_color) {
+                        part->release();
+                        return;
+                    }
+                    applyRenderData(data);
+                });
+        });
     }
+    applyRenderData({});
+
+    if (oldPart)
+        oldPart->release();
 }
 
 bool RenderController::canRender() const
@@ -181,140 +183,122 @@ bool RenderController::canRender() const
     return (m_part);
 }
 
-QCoro::Task<void> RenderController::updateGeometries()
+RenderController::RenderData RenderController::calculateRenderData(Part *part, const BrickLink::Color *color)
 {
-    m_updateTimer->stop();
+    if (!part)
+        return { };
+    part->addRef();
 
-    if (!m_part) {
-        qDeleteAll(m_geos);
-        m_geos.clear();
-        m_lines->clear();
-
-        emit surfacesChanged();
-        emit itemOrColorChanged();
-        emit canRenderChanged(canRender());
-        co_return;
-    }
-
-    // in
-    Part *part = m_part;
-    const BrickLink::Color *color = m_color;
-
-    // out
-    float radius = 0;
-    QVector3D center;
-    QList<QmlRenderGeometry *> geos;
     QByteArray lineBuffer;
+    QList<QmlRenderGeometry *> geos;
+    QVector3D center;
+    float radius = 0;
+    QHash<const BrickLink::Color *, QByteArray> surfaceBuffers;
 
-    QPointer<RenderController> guard(this);
+    fillVertexBuffers(part, color, color, QMatrix4x4(), false, surfaceBuffers, lineBuffer);
 
-    co_await QtConcurrent::run([part, color, &lineBuffer, &geos, &radius, &center]() {
-        QHash<const BrickLink::Color *, QByteArray> surfaceBuffers;
-        RenderController::fillVertexBuffers(part, color, color, QMatrix4x4(), false, surfaceBuffers, lineBuffer);
+    for (auto it = surfaceBuffers.cbegin(); it != surfaceBuffers.cend(); ++it) {
+        const QByteArray &data = it.value();
+        if (data.isEmpty())
+            continue;
 
-        for (auto it = surfaceBuffers.cbegin(); it != surfaceBuffers.cend(); ++it) {
-            const QByteArray &data = it.value();
-            if (data.isEmpty())
-                continue;
+        const BrickLink::Color *surfaceColor = it.key();
+        const bool isTextured = surfaceColor->hasParticles() || (surfaceColor->id() == 0);
 
-            const BrickLink::Color *surfaceColor = it.key();
-            const bool isTextured = surfaceColor->hasParticles() || (surfaceColor->id() == 0);
+        const int stride = (3 + 3 + (isTextured ? 2 : 0)) * sizeof(float);
 
-            const int stride = (3 + 3 + (isTextured ? 2 : 0)) * sizeof(float);
+        auto geo = new QmlRenderGeometry(surfaceColor);
 
-            auto geo = new QmlRenderGeometry(surfaceColor);
+        // calculate bounding box
+        static constexpr auto fmin = std::numeric_limits<float>::min();
+        static constexpr auto fmax = std::numeric_limits<float>::max();
 
-            // calculate bounding box
-            static constexpr auto fmin = std::numeric_limits<float>::min();
-            static constexpr auto fmax = std::numeric_limits<float>::max();
+        QVector3D vmin = QVector3D(fmax, fmax, fmax);
+        QVector3D vmax = QVector3D(fmin, fmin, fmin);
 
-            QVector3D vmin = QVector3D(fmax, fmax, fmax);
-            QVector3D vmax = QVector3D(fmin, fmin, fmin);
-
-            for (int i = 0; i < data.size(); i += stride) {
-                auto v = reinterpret_cast<const float *>(it->constData() + i);
-                vmin = QVector3D(std::min(vmin.x(), v[0]), std::min(vmin.y(), v[1]), std::min(vmin.z(), v[2]));
-                vmax = QVector3D(std::max(vmax.x(), v[0]), std::max(vmax.y(), v[1]), std::max(vmax.z(), v[2]));
-            }
-
-            // calculate bounding sphere
-            QVector3D surfaceCenter = (vmin + vmax) / 2;
-            float surfaceRadius = 0;
-
-            for (int i = 0; i < data.size(); i += stride) {
-                auto v = reinterpret_cast<const float *>(it->constData() + i);
-                surfaceRadius = std::max(surfaceRadius, (surfaceCenter - QVector3D { v[0], v[1], v[2] }).lengthSquared());
-            }
-            surfaceRadius = std::sqrt(surfaceRadius);
-
-            geo->setPrimitiveType(QQuick3DGeometry::PrimitiveType::Triangles);
-            geo->setStride(stride);
-            geo->addAttribute(QQuick3DGeometry::Attribute::PositionSemantic, 0, QQuick3DGeometry::Attribute::F32Type);
-            geo->addAttribute(QQuick3DGeometry::Attribute::NormalSemantic, 3 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
-            if (isTextured) {
-                geo->addAttribute(QQuick3DGeometry::Attribute::TexCoord0Semantic, 6 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
-
-                QQuick3DTextureData *texData = generateMaterialTextureData(surfaceColor);
-                texData->setParentItem(geo);  // 3D scene parent
-                texData->setParent(geo);      // owning parent
-                geo->setTextureData(texData);
-            }
-            geo->setBounds(vmin, vmax);
-            geo->setCenter(surfaceCenter);
-            geo->setRadius(surfaceRadius);
-            geo->setVertexData(data);
-
-            geos.append(geo);
+        for (int i = 0; i < data.size(); i += stride) {
+            auto v = reinterpret_cast<const float *>(it->constData() + i);
+            vmin = QVector3D(std::min(vmin.x(), v[0]), std::min(vmin.y(), v[1]), std::min(vmin.z(), v[2]));
+            vmax = QVector3D(std::max(vmax.x(), v[0]), std::max(vmax.y(), v[1]), std::max(vmax.z(), v[2]));
         }
 
-        for (auto *geo : std::as_const(geos)) {
-            // Merge all the bounding spheres. This is not perfect, but very, very close in most cases
-            const auto geoCenter = geo->center();
-            const auto geoRadius = geo->radius();
+        // calculate bounding sphere
+        QVector3D surfaceCenter = (vmin + vmax) / 2;
+        float surfaceRadius = 0;
 
-            if (qFuzzyIsNull(radius)) { // first one
+        for (int i = 0; i < data.size(); i += stride) {
+            auto v = reinterpret_cast<const float *>(it->constData() + i);
+            surfaceRadius = std::max(surfaceRadius, (surfaceCenter - QVector3D { v[0], v[1], v[2] }).lengthSquared());
+        }
+        surfaceRadius = std::sqrt(surfaceRadius);
+
+        geo->setPrimitiveType(QQuick3DGeometry::PrimitiveType::Triangles);
+        geo->setStride(stride);
+        geo->addAttribute(QQuick3DGeometry::Attribute::PositionSemantic, 0, QQuick3DGeometry::Attribute::F32Type);
+        geo->addAttribute(QQuick3DGeometry::Attribute::NormalSemantic, 3 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
+        if (isTextured) {
+            geo->addAttribute(QQuick3DGeometry::Attribute::TexCoord0Semantic, 6 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
+
+            QQuick3DTextureData *texData = generateMaterialTextureData(surfaceColor);
+            texData->setParentItem(geo);  // 3D scene parent
+            texData->setParent(geo);      // owning parent
+            geo->setTextureData(texData);
+        }
+        geo->setBounds(vmin, vmax);
+        geo->setCenter(surfaceCenter);
+        geo->setRadius(surfaceRadius);
+        geo->setVertexData(data);
+
+        geos.append(geo);
+    }
+
+    for (auto *geo : std::as_const(geos)) {
+        // Merge all the bounding spheres. This is not perfect, but very, very close in most cases
+        const auto geoCenter = geo->center();
+        const auto geoRadius = geo->radius();
+
+        if (qFuzzyIsNull(radius)) { // first one
+            center = geoCenter;
+            radius = geoRadius;
+        } else {
+            QVector3D d = geoCenter - center;
+            float l = d.length();
+
+            if ((l + radius) < geoRadius) { // the old one is inside the new one
                 center = geoCenter;
                 radius = geoRadius;
-            } else {
-                QVector3D d = geoCenter - center;
-                float l = d.length();
-
-                if ((l + radius) < geoRadius) { // the old one is inside the new one
-                    center = geoCenter;
-                    radius = geoRadius;
-                } else if ((l + geoRadius) > radius) { // the new one is NOT inside the old one -> we need to merge
-                    float nr = (radius + l + geoRadius) / 2;
-                    center = center + (geoCenter - center).normalized() * (nr - radius);
-                    radius = nr;
-                }
+            } else if ((l + geoRadius) > radius) { // the new one is NOT inside the old one -> we need to merge
+                float nr = (radius + l + geoRadius) / 2;
+                center = center + (geoCenter - center).normalized() * (nr - radius);
+                radius = nr;
             }
         }
-    });
+    }
 
-    if (!guard) // Sentry report: we've been deleted while the co-routine was running
-        co_return;
+    part->release();
+    return { lineBuffer, geos, center, radius };
+}
 
-    qDeleteAll(m_geos);
-    m_geos.clear();
+void RenderController::applyRenderData(const RenderData &data)
+{
     m_lines->clear();
+    if (!data.lineBuffer.isEmpty())
+        m_lines->setBuffer(data.lineBuffer);
+    m_lines->update();
+    qDeleteAll(m_geos);
+    m_geos = data.geos;
 
-    m_geos = geos;
     emit surfacesChanged();
 
-    m_lines->setBuffer(lineBuffer);
-    m_lines->update();
-
-
-    if (m_center != center) {
-        m_center = center;
+    if (m_center != data.center) {
+        m_center = data.center;
         emit centerChanged();
     }
-    if (!qFuzzyCompare(m_radius, radius)) {
-        m_radius = radius;
+    if (!qFuzzyCompare(m_radius, data.radius)) {
+        m_radius = data.radius;
         emit radiusChanged();
     }
     emit itemOrColorChanged();
-    emit canRenderChanged(canRender());
 }
 
 std::vector<std::pair<float, float>> RenderController::uvMapToNearestPlane(const QVector3D &normal,

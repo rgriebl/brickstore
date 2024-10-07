@@ -84,7 +84,16 @@ signals:
     void clearColorChanged(const QColor &clearColor);
 
 private:
-    QCoro::Task<void> updateGeometries();
+    struct RenderData {
+        QByteArray lineBuffer;
+        QList<QmlRenderGeometry *> geos;
+        QVector3D center;
+        float radius = 0;
+    };
+
+    RenderData calculateRenderData(Part *part, const BrickLink::Color *color);
+    void applyRenderData(const RenderData &data);
+
     static void fillVertexBuffers(Part *part, const BrickLink::Color *modelColor,
                                   const BrickLink::Color *baseColor, const QMatrix4x4 &matrix,
                                   bool inverted, QHash<const BrickLink::Color *, QByteArray> &surfaceBuffers,
@@ -107,8 +116,6 @@ private:
     float m_radius = 0;
     bool m_tumblingAnimationActive = false;
     QColor m_clearColor;
-
-    QTimer *m_updateTimer;
 };
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
