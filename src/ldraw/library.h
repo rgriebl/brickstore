@@ -111,6 +111,8 @@ private:
     QStringList m_searchpath;
     QHash<QString, QString> m_partIdMapping;
     Q3Cache<QString, Part> m_cache;  // path -> part
+    // (filename, parentdir) -> (resolved filename, resolved parentdir, inZip)
+    QHash<std::pair<QString, QString>, std::tuple<QString, QString, bool>> m_lookupCache;
 
     QVector<PartLoaderJob *> m_partLoaderJobs;
     QMutex m_partLoaderMutex;
@@ -118,6 +120,8 @@ private:
     std::unique_ptr<QThread> m_partLoaderThread;
     QAtomicInt m_partLoaderShutdown = 0;
     QAtomicInt m_partLoaderClear = 0;
+    int m_lookupStatId = -1;
+    int m_partsStatId = -1;
 
     friend class PartElement;
 };

@@ -22,6 +22,7 @@
 #  include <shlobj.h>
 #endif
 
+#include "utility/appstatistics.h"
 #include "utility/exception.h"
 #include "utility/transfer.h"
 #include "minizip/minizip.h"
@@ -83,6 +84,9 @@ Library::Library(const QString &updateUrl, QObject *parent)
     , m_transfer(new Transfer(this))
 {
     m_cache.setMaxCost(50 * 1024 * 1024); // 50MB
+
+    m_partsStatId = AppStatistics::inst()->addSource(u"LDraw parts in memory cache"_qs);
+    m_lookupStatId = AppStatistics::inst()->addSource(u"LDraw parts path cache size"_qs);
 
     connect(m_transfer, &Transfer::progress,
             this, [this](TransferJob *j, int done, int total) {
@@ -256,6 +260,10 @@ void Library::shutdownPartLoaderThread()
 
     // the parts in cache are referencing each other, so a plain clear will not work
     m_cache.clearRecursive();
+    m_lookupCache.clear();
+
+    AppStatistics::inst()->update(m_partsStatId, m_cache.count());
+    AppStatistics::inst()->update(m_lookupStatId, m_cache.count());
 }
 
 QString Library::path() const
@@ -470,72 +478,89 @@ void Library::emitUpdateStartedIfNecessary()
 
 Part *Library::findPart(const QString &_filename, const QString &_parentdir)
 {
-    QString filename = _filename;
-    filename.replace(u'\\', u'/');
-    QString parentdir = _parentdir;
-    if (!parentdir.isEmpty() && !parentdir.startsWith(u"!ZIP!"))
-        parentdir = QDir(parentdir).canonicalPath();
-
+    QString filename;
+    QString parentdir;
     bool inZip = false;
-    bool found = false;
 
-    // add the logo on studs     //TODO: make this configurable
-    if (filename == u"stud.dat")
-        filename = u"stud-logo4.dat"_qs;
-    else if (filename == u"stud2.dat")
-        filename = u"stud2-logo4.dat"_qs;
+    auto lookup = m_lookupCache.find({ _filename, _parentdir });
 
-    if (QFileInfo(filename).isRelative()) {
-        // search order is parentdir => p => parts => models
+    if (lookup != m_lookupCache.end()) {
+        filename = std::get<0>(*lookup);
+        parentdir = std::get<1>(*lookup);
+        inZip = std::get<2>(*lookup);
+    } else {
+        filename = _filename;
+        filename.replace(u'\\', u'/');
+        parentdir = _parentdir;
+        if (!parentdir.isEmpty() && !parentdir.startsWith(u"!ZIP!"))
+            parentdir = QDir(parentdir).canonicalPath();
 
-        QStringList searchpath = m_searchpath;
-        if (!parentdir.isEmpty() && !searchpath.contains(parentdir))
-            searchpath.prepend(parentdir);
+        bool found = false;
 
-        for (const QString &sp : std::as_const(searchpath)) {
+        // add the logo on studs     //TODO: make this configurable
+        if (filename == u"stud.dat")
+            filename = u"stud-logo4.dat"_qs;
+        else if (filename == u"stud2.dat")
+            filename = u"stud2-logo4.dat"_qs;
 
-            if (sp.startsWith(u"!ZIP!")) {
-                filename = filename.toLower();
-                QString testname = sp.mid(5) + u'/' + filename;
-                if (m_zip->contains(testname)) {
-                    QFileInfo fi(filename);
-                    parentdir = sp;
-                    if (fi.path() != u".")
-                        parentdir = parentdir + u'/' + fi.path();
-                    filename = testname;
-                    inZip = true;
-                    found = true;
-                    break;
-                }
-            } else {
-                QString testname = sp + u'/' + filename;
+        if (QFileInfo(filename).isRelative()) {
+            // search order is parentdir => p => parts => models
+
+            QStringList searchpath = m_searchpath;
+            if (!parentdir.isEmpty() && !searchpath.contains(parentdir))
+                searchpath.prepend(parentdir);
+
+            for (const QString &sp : std::as_const(searchpath)) {
+
+                if (sp.startsWith(u"!ZIP!")) {
+                    filename = filename.toLower();
+                    QString testname = sp.mid(5) + u'/' + filename;
+                    if (m_zip->contains(testname)) {
+                        QFileInfo fi(filename);
+                        parentdir = sp;
+                        if (fi.path() != u".")
+                            parentdir = parentdir + u'/' + fi.path();
+                        filename = testname;
+                        inZip = true;
+                        found = true;
+                        break;
+                    }
+                } else {
+                    QString testname = sp + u'/' + filename;
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS) && !defined(Q_OS_IOS)
-                if (!QFile::exists(testname))
-                    testname = testname.toLower();
+                    if (!QFile::exists(testname))
+                        testname = testname.toLower();
 #endif
-                if (QFile::exists(testname)) {
-                    filename = testname;
-                    parentdir = QFileInfo(testname).path();
-                    found = true;
-                    break;
+                    if (QFile::exists(testname)) {
+                        filename = testname;
+                        parentdir = QFileInfo(testname).path();
+                        found = true;
+                        break;
+                    }
                 }
             }
-        }
-    } else {
+        } else {
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS) && !defined(Q_OS_IOS)
-        if (!QFile::exists(filename))
-            filename = filename.toLower();
+            if (!QFile::exists(filename))
+                filename = filename.toLower();
 #endif
-        if (QFile::exists(filename)) {
-            parentdir = QFileInfo(filename).path();
-            found = true;
+            if (QFile::exists(filename)) {
+                parentdir = QFileInfo(filename).path();
+                found = true;
+            }
         }
+        if (!found) {
+            filename = parentdir = QString { };
+        } else if (!inZip) {
+            filename = QFileInfo(filename).canonicalFilePath();
+        }
+        m_lookupCache.insert({ _filename, _parentdir }, { filename, parentdir, inZip });
+
+        AppStatistics::inst()->update(m_lookupStatId, m_lookupCache.count());
     }
 
-    if (!found)
+    if (filename.isEmpty() && parentdir.isEmpty())
         return nullptr;
-    if (!inZip)
-        filename = QFileInfo(filename).canonicalFilePath();
 
     Part *p = m_cache[filename];
     if (!p) {
@@ -568,6 +593,7 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
                 }
 
                 //qCInfo(LogLDraw) << "Cache at" << m_cache.totalCost() << "/" <<  m_cache.maxCost() << "with" << m_cache.size() << "parts";
+                AppStatistics::inst()->update(m_partsStatId, m_cache.count());
             }
         }
     }
