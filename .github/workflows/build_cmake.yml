@@ -45,26 +45,26 @@ jobs:
         config:
         - name: "Windows Intel 64bit"
           artifact: "Windows-x64"
-          runs-on: windows-2019
+          runs-on: windows-2022
           os: windows
           qt_host: 'windows'
           qt_version: '6.8.0'
-          qt_arch: 'win64_msvc2019_64'
-          qt_dir: "msvc2019_64"
-          environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          qt_arch: 'win64_msvc2022_64'
+          qt_dir: "msvc2022_64"
+          environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           cmake_extra_config: '-DSENTRY=ON'
 
         - name: "Windows ARM 64bit"
           artifact: "Windows-ARM64"
-          runs-on: windows-2019
+          runs-on: windows-2022
           os: windows
           qt_host: 'windows'
-          qt_host_arch: 'win64_msvc2019_64'
+          qt_host_arch: 'win64_msvc2022_64'
           qt_version: '6.8.0'
-          qt_arch: 'win64_msvc2019_arm64'
-          qt_dir: "msvc2019_arm64"
-          environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
-          cmake_extra_config: '-DCMAKE_TOOLCHAIN_FILE=%Qt6_DIR%/lib/cmake/Qt6/qt.toolchain.cmake -DQT_HOST_PATH=%Qt6_DIR%/../msvc2019_64'
+          qt_arch: 'win64_msvc2022_arm64_cross_compiled'
+          qt_dir: "msvc2022_arm64"
+          environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
+          cmake_extra_config: '-DCMAKE_TOOLCHAIN_FILE=%Qt6_DIR%/lib/cmake/Qt6/qt.toolchain.cmake -DQT_HOST_PATH=%Qt6_DIR%/../msvc2022_64'
 
         - name: "Ubuntu 22.04"
           artifact: "Ubuntu-22.04"
@@ -144,7 +144,7 @@ jobs:
           qt_host: 'linux'
           qt_host_arch: 'linux_gcc_64'
           qt_target: 'android'
-          qt_version: '6.8.0'
+          qt_version: '6.7.3'
           qt_arch: 'android_x86_64'
           qt_extra_archs: 'android_arm64_v8a android_armv7 android_x86'
           cmake_extra_config: '-DSENTRY=ON'
@@ -156,7 +156,7 @@ jobs:
           qt_host: 'mac'
           qt_host_arch: 'clang_64'
           qt_target: 'ios'
-          qt_version: '6.8.0'
+          qt_version: '6.7.3'
           qt_arch: 'ios'
           cmake_extra_config: ''
           xcode: '15.2'
@@ -223,13 +223,13 @@ jobs:
         echo "Qt6_DIR=$Qt6_DIR" >> $GITHUB_ENV
 
         # Fix broken Windows / ARM64 setup
-        if [ "${{ matrix.config.qt_arch }}" = "win64_msvc2019_arm64" ]; then
+        if [ "${{ matrix.config.qt_arch }}" = "win64_msvc2022_arm64" ]; then
           # Qt < 6.5.0
-          sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2019_64/," "${Qt6_DIR}/bin/qtpaths.bat"
-          sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2019_64/," "${Qt6_DIR}/bin/qmake.bat"
+          sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2022_64/," "${Qt6_DIR}/bin/qtpaths.bat"
+          sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2022_64/," "${Qt6_DIR}/bin/qmake.bat"
           # Qt >= 6.5.0
-          sed -i "s,\\\Users\\\qt\\\work\\\install\\\,`echo -E ${Qt6_DIR} | sed -e 's,\\\,\\\\\\\,g'`\\\..\\\msvc2019_64\\\," "${Qt6_DIR}/bin/qtpaths.bat"
-          sed -i "s,\\\Users\\\qt\\\work\\\install\\\,`echo -E ${Qt6_DIR} | sed -e 's,\\\,\\\\\\\,g'`\\\..\\\msvc2019_64\\\," "${Qt6_DIR}/bin/qmake.bat"
+          sed -i "s,\\\Users\\\qt\\\work\\\install\\\,`echo -E ${Qt6_DIR} | sed -e 's,\\\,\\\\\\\,g'`\\\..\\\msvc2022_64\\\," "${Qt6_DIR}/bin/qtpaths.bat"
+          sed -i "s,\\\Users\\\qt\\\work\\\install\\\,`echo -E ${Qt6_DIR} | sed -e 's,\\\,\\\\\\\,g'`\\\..\\\msvc2022_64\\\," "${Qt6_DIR}/bin/qmake.bat"
           ${Qt6_DIR}/bin/qmake.bat -query
         fi
 
