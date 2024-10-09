@@ -36,6 +36,7 @@
 #  if defined(Q_CC_MSVC)
 #    pragma warning(pop)
 #  endif
+#  include <QStyleHints>
 #elif defined(Q_OS_MACOS)
 #  include <QtCore/QVersionNumber>
 #  include <QtCore/QSysInfo>
@@ -330,13 +331,18 @@ void DesktopApplication::setUITheme()
 
 #if defined(Q_OS_WINDOWS)
     auto qwa = qApp->nativeInterface<QNativeInterface::Private::QWindowsApplication>();
+#  if QT_VERSION < QT_VERSION_CHECK(6, 8, 0)
+    bool isDarkMode = qwa && qwa->isDarkMode();
+#  else
+    bool isDarkMode = (QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark);
+#  endif
 
-    if (qwa && qwa->isDarkMode()) {
+    if (qwa && isDarkMode) {
         // let Qt handle the window frames, but we handle the style ourselves
         qwa->setDarkModeHandling(QNativeInterface::Private::QWindowsApplication::DarkModeWindowFrames);
     }
 
-    if ((theme == Config::UITheme::SystemDefault) && qwa && qwa->isDarkMode()) {
+    if ((theme == Config::UITheme::SystemDefault) && isDarkMode) {
         // Qt's Windows Vista style only supports light mode, so we have to fake dark mode
         theme = Config::UITheme::Dark;
     } else if (theme == Config::UITheme::Light) {
