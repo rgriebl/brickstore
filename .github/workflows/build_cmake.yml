@@ -60,7 +60,7 @@ jobs:
           os: windows
           qt_host: 'windows'
           qt_host_arch: 'win64_msvc2022_64'
-          qt_version: '6.8.0'
+          qt_version: '6.7.2'
           qt_arch: 'win64_msvc2022_arm64_cross_compiled'
           qt_dir: "msvc2022_arm64"
           environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
