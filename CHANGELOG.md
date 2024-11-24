@@ -10,6 +10,7 @@ A lot of small fixes, notably:
 - Added more currency exchange rates from [Float Rates](https://floatrates.com) in addition to the existing [ECB](https://ecb.eu) rates. 
 - Linux:
   - Added a **Flatpak** build.
+  - Replaced the Ubuntu 22.04 package with a 24.04 one. Using the Ubuntu Snap or the Flatpak is the preferred way to install BrickStore though.
   - Better desktop integration for Wayland/Gnome based setups.
 - Android/iOS:
   - Importing orders does not mess up the document order anymore.

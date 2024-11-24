@@ -10,17 +10,18 @@
 
 namespace LDraw {
 
+template <typename T, const int N> static T *parseVectors(const QStringList &list)
+{
+    QVector3D v[N];
+
+    for (int i = 0; i < N; ++i)
+        v[i] = QVector3D(list[3*i + 1].toFloat(), list[3*i + 2].toFloat(), list[3*i + 3].toFloat());
+    return T::create(list[0].toInt(), v);
+}
+
 Element *Element::fromString(const QString &line, const QString &dir)
 {
     Element *e = nullptr;
-
-    static auto parseVectors = []<typename T, const int N>(const QStringList &list) {
-        QVector3D v[N];
-
-        for (int i = 0; i < N; ++i)
-            v[i] = QVector3D(list[3*i + 1].toFloat(), list[3*i + 2].toFloat(), list[3*i + 3].toFloat());
-        return T::create(list[0].toInt(), v);
-    };
 
     static const int element_count_lut[] = {
          0,
@@ -60,16 +61,16 @@ Element *Element::fromString(const QString &line, const QString &dir)
                     break;
                 }
                 case 2:
-                    e = parseVectors.template operator()<LineElement, 2>(list);
+                    e = parseVectors<LineElement, 2>(list);
                     break;
                 case 3:
-                    e = parseVectors.template operator()<TriangleElement, 3>(list);
+                    e = parseVectors<TriangleElement, 3>(list);
                     break;
                 case 4:
-                    e = parseVectors.template operator()<QuadElement, 4>(list);
+                    e = parseVectors<QuadElement, 4>(list);
                     break;
                 case 5:
-                    e = parseVectors.template operator()<CondLineElement, 4>(list);
+                    e = parseVectors<CondLineElement, 4>(list);
                     break;
                 }
             }

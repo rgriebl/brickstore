@@ -15,7 +15,7 @@ env:
   BRICKSTORE_GUI_QT6_DEB_PACKAGES: >-
       libsecret-1-dev libcups2-dev
       qt6-declarative-dev qt6-declarative-private-dev
-      qt6-quick3d-dev qt6-quick3d-dev-tools libqt6shadertools6-dev
+      qt6-quick3d-dev qt6-quick3d-dev-tools qt6-shadertools-dev
       qt6-gtk-platformtheme libqt6svg6-dev qt6-multimedia-dev
       qt6-image-formats-plugins
       qml6-module-qt5compat-graphicaleffects qml6-module-qtmultimedia
@@ -60,17 +60,17 @@ jobs:
           os: windows
           qt_host: 'windows'
           qt_host_arch: 'win64_msvc2022_64'
-          qt_version: '6.7.2'
+          qt_version: '6.8.0'
           qt_arch: 'win64_msvc2022_arm64_cross_compiled'
           qt_dir: "msvc2022_arm64"
           environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
           cmake_extra_config: '-DCMAKE_TOOLCHAIN_FILE=%Qt6_DIR%/lib/cmake/Qt6/qt.toolchain.cmake -DQT_HOST_PATH=%Qt6_DIR%/../msvc2022_64'
 
-        - name: "Ubuntu 22.04"
-          artifact: "Ubuntu-22.04"
+        - name: "Ubuntu 24.04"
+          artifact: "Ubuntu-24.04"
           runs-on: ubuntu-22.04
           os: linux
-          debian_container: "buildpack-deps:22.04"
+          debian_container: "buildpack-deps:24.04"
 
         - name: "Debian 12 Backend"
           artifact: "Debian-12-Backend"
@@ -190,7 +190,7 @@ jobs:
         && (steps.cache-qt.outputs.cache-hit != 'true')
       shell: sh
       run: |
-        python3 -m pip install aqtinstall
+        python3 -m pip install git+https://github.com/miurahr/aqtinstall@master
         if [ "${{ matrix.config.qt_host_arch }}" != "" ]; then
           python3 -m aqt -c .github/aqt-settings.ini install-qt -O "${{ runner.workspace }}/Qt/" \
                          ${{ matrix.config.qt_host }} desktop \
@@ -223,7 +223,7 @@ jobs:
         echo "Qt6_DIR=$Qt6_DIR" >> $GITHUB_ENV
 
         # Fix broken Windows / ARM64 setup
-        if [ "${{ matrix.config.qt_arch }}" = "win64_msvc2022_arm64" ]; then
+        if [ "${{ matrix.config.qt_arch }}" = "win64_msvc2022_arm64_cross_compiled" ]; then
           # Qt < 6.5.0
           sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2022_64/," "${Qt6_DIR}/bin/qtpaths.bat"
           sed -i "s,/Users/qt/work/install/,`echo -E ${Qt6_DIR} | tr '\\' '/'`/../msvc2022_64/," "${Qt6_DIR}/bin/qmake.bat"
