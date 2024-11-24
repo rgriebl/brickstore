@@ -17,9 +17,6 @@
 #include <QDynamicPropertyChangeEvent>
 #include <QKeyEvent>
 #include <QVariantAnimation>
-#if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
-#  include <QDialog>
-#endif
 
 #include "utility/utility.h"
 #include "common/config.h"
@@ -154,10 +151,6 @@ void BrickStoreProxyStyle::polish(QWidget *w)
     } else if (auto *cb = qobject_cast<QComboBox *>(w)) {
         if (iconScaling)
             cb->setIconSize(iconSize(iconScaling, PM_ListViewIconSize, this));
-#if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
-        if (qobject_cast<QDialog *>(cb->window()))
-            w->installEventFilter(this);
-#endif
     }
     QProxyStyle::polish(w);
 }
@@ -169,10 +162,6 @@ void BrickStoreProxyStyle::unpolish(QWidget *w)
             || qobject_cast<QSpinBox *>(w)
             || qobject_cast<QAbstractItemView *>(w)) {
         w->removeEventFilter(this);
-    } else if (qobject_cast<QComboBox *>(w)) {
-#if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
-        w->removeEventFilter(this);
-#endif
     }
     QProxyStyle::unpolish(w);
 }
@@ -408,15 +397,6 @@ bool BrickStoreProxyStyle::eventFilter(QObject *o, QEvent *e)
             if (static_cast<QKeyEvent *>(e) == QKeySequence::Copy)
                 return true;
         }
-
-#if QT_VERSION == QT_VERSION_CHECK(6, 4, 0) // QTBUG-107262
-    } else if (qobject_cast<QComboBox *>(o)) {
-        if (e->type() == QEvent::KeyPress) {
-            auto *ke = static_cast<QKeyEvent *>(e);
-            if (ke->key() == Qt::Key_Return || ke->key() == Qt::Key_Enter)
-                ke->ignore();
-        }
-#endif
     }
 
     return QProxyStyle::eventFilter(o, e);

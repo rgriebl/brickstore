@@ -201,11 +201,7 @@ qint64 HashHeaderCheckFilter::writeData(const char *data, qint64 maxSize)
         m_gotHeader = (need == got);
     }
     if (dataSize) {
-#if QT_VERSION < QT_VERSION_CHECK(6, 3, 0)
-        m_hash.addData(data, dataSize);
-#else
         m_hash.addData(QByteArrayView(data, dataSize));
-#endif
         qint64 written = m_target->write(data, dataSize);
         if ((written < 0) || (written != dataSize)) {
             setErrorString(m_target->errorString());

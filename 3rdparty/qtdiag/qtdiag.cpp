@@ -307,10 +307,7 @@ void dumpRhiBackendInfo(QTextStream &str, const char *name, QRhi::Implementation
         { "RenderBufferImport", QRhi::RenderBufferImport },
         { "ThreeDimensionalTextures", QRhi::ThreeDimensionalTextures },
         { "RenderTo3DTextureSlice", QRhi::RenderTo3DTextureSlice },
-#if QT_VERSION >= QT_VERSION_CHECK(6, 3, 0)
         { "TextureArrays", QRhi::TextureArrays },
-#endif
-
         { nullptr, QRhi::Feature(0) }
     };
     struct RhiTextureFormat {
@@ -371,9 +368,7 @@ void dumpRhiBackendInfo(QTextStream &str, const char *name, QRhi::Implementation
         str << "  MaxThreadGroupX: " << rhi->resourceLimit(QRhi::MaxThreadGroupX) << "\n";
         str << "  MaxThreadGroupY: " << rhi->resourceLimit(QRhi::MaxThreadGroupY) << "\n";
         str << "  MaxThreadGroupZ: " << rhi->resourceLimit(QRhi::MaxThreadGroupZ) << "\n";
-#if QT_VERSION >= QT_VERSION_CHECK(6, 3, 0)
         str << "  TextureArraySizeMax: " << rhi->resourceLimit(QRhi::TextureArraySizeMax) << "\n";
-#endif
         str << "  MaxUniformBufferRange: " << rhi->resourceLimit(QRhi::MaxUniformBufferRange) << "\n";
         str << "  Uniform Buffer Alignment: " << rhi->ubufAlignment() << "\n";
         QByteArrayList supportedSampleCounts;
@@ -575,9 +570,7 @@ QString qtDiag(unsigned flags)
 
     str << "\nArchitecture: " << QSysInfo::currentCpuArchitecture() << "; features:";
 #if defined(Q_PROCESSOR_X86)
-#  if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
     DUMP_CPU_FEATURE(HYBRID, "hybrid");
-#  endif
     DUMP_CPU_FEATURE(SSE2, "SSE2");
     DUMP_CPU_FEATURE(SSE3, "SSE3");
     DUMP_CPU_FEATURE(SSSE3, "SSSE3");
@@ -588,9 +581,7 @@ QString qtDiag(unsigned flags)
     DUMP_CPU_FEATURE(AVX512F, "AVX512F");
     DUMP_CPU_FEATURE(AVX512IFMA, "AVX512IFMA");
     DUMP_CPU_FEATURE(AVX512VBMI2, "AVX512VBMI2");
-#  if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
     DUMP_CPU_FEATURE(AVX512FP16, "AVX512FP16");
-#  endif
     DUMP_CPU_FEATURE(RDRND, "RDRAND");
     DUMP_CPU_FEATURE(RDSEED, "RDSEED");
     DUMP_CPU_FEATURE(AES, "AES");

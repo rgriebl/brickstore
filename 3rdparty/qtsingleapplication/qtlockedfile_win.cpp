@@ -9,10 +9,6 @@
 // Maximum number of concurrent read locks. Must not be greater than MAXIMUM_WAIT_OBJECTS
 #define MAX_READERS MAXIMUM_WAIT_OBJECTS
 
-#if QT_VERSION >= 0x050000
-#define QT_WA(unicode, ansi) unicode
-#endif
-
 Qt::HANDLE QtLockedFile::getMutexHandle(int idx, bool doCreate)
 {
     if (mutexname.isEmpty()) {
@@ -26,16 +22,14 @@ Qt::HANDLE QtLockedFile::getMutexHandle(int idx, bool doCreate)
 
     Qt::HANDLE mutex;
     if (doCreate) {
-        QT_WA( { mutex = CreateMutexW(NULL, FALSE, (TCHAR*)mname.utf16()); },
-               { mutex = CreateMutexA(NULL, FALSE, mname.toLocal8Bit().constData()); } );
+        mutex = CreateMutexW(NULL, FALSE, (TCHAR*)mname.utf16());
         if (!mutex) {
             qErrnoWarning("QtLockedFile::lock(): CreateMutex failed");
             return 0;
         }
     }
     else {
-        QT_WA( { mutex = OpenMutexW(SYNCHRONIZE | MUTEX_MODIFY_STATE, FALSE, (TCHAR*)mname.utf16()); },
-               { mutex = OpenMutexA(SYNCHRONIZE | MUTEX_MODIFY_STATE, FALSE, mname.toLocal8Bit().constData()); } );
+        mutex = OpenMutexW(SYNCHRONIZE | MUTEX_MODIFY_STATE, FALSE, (TCHAR*)mname.utf16());
         if (!mutex) {
             if (GetLastError() != ERROR_FILE_NOT_FOUND)
                 qErrnoWarning("QtLockedFile::lock(): OpenMutex failed");

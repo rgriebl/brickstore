@@ -15,9 +15,6 @@
 #if defined(Q_OS_WINDOWS) && defined(max)
 #  undef max
 #endif
-#if QT_VERSION < QT_VERSION_CHECK(6, 3, 0)
-using QLatin1StringView = QLatin1String;
-#endif
 
 QT_FORWARD_DECLARE_CLASS(QFontMetrics)
 QT_FORWARD_DECLARE_CLASS(QRect)

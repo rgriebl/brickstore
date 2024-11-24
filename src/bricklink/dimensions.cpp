@@ -99,21 +99,13 @@ Dimensions Dimensions::parseString(const QString &str, qsizetype offset, Strictn
 
             float f = 0;
 
-            auto hasCaptured = [](QRegularExpressionMatch &m, int group) {
-#if QT_VERSION < QT_VERSION_CHECK(6, 3, 0)
-                return m.capturedStart(group) != -1;
-#else
-                return m.hasCaptured(group);
-#endif
-            };
-
-            if (hasCaptured(nm, 1) && hasCaptured(nm, 2) && hasCaptured(nm, 3)) // a b/c
+            if (nm.hasCaptured(1) && nm.hasCaptured(2) && nm.hasCaptured(3)) // a b/c
                 f = nm.captured(1).toFloat() + nm.captured(2).toFloat() / nm.captured(3).toFloat();
-            else if (hasCaptured(nm, 4) && hasCaptured(nm, 5)) // b/c
+            else if (nm.hasCaptured(4) && nm.hasCaptured(5)) // b/c
                 f = nm.captured(4).toFloat() / nm.captured(5).toFloat();
-            else if (hasCaptured(nm, 6)) // a.x
+            else if (nm.hasCaptured(6)) // a.x
                 f = nm.captured(6).toFloat();
-            else if (hasCaptured(nm, 7)) // a
+            else if (nm.hasCaptured(7)) // a
                 f = nm.captured(7).toFloat();
 
             switch (i) {
