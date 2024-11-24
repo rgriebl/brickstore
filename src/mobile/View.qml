@@ -123,7 +123,7 @@ Page {
                 gesturePolicy: TapHandler.ReleaseWithinBounds
                 function mapPoint(point) {
                     point = header.contentItem.mapFromItem(target, point)
-                    let cell = header.cellAtPos(point)
+                    let cell = header.cellAtPosition(point)
                     let lx = cell.x < 0 ? -1 : root.document.logicalColumn(cell.x)
                     return { row: cell.y, column: lx }
                 }
@@ -183,9 +183,9 @@ Page {
 
             TapHandler {
                 gesturePolicy: TapHandler.ReleaseWithinBounds
-                function mapPoint(p) {
-                    p = table.contentItem.mapFromItem(target, p)
-                    let cell = table.cellAtPosition(p)
+                function mapPoint(point) {
+                    point = table.contentItem.mapFromItem(target, point)
+                    let cell = table.cellAtPosition(point)
                     let lx = cell.x < 0 ? -1 : root.document.logicalColumn(cell.x)
                     return { row: cell.y, column: lx }
                 }
