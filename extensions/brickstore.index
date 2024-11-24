@@ -156,11 +156,6 @@
             <qmlproperty name="visibleLotCount" fullname="BrickStore.Document.visibleLotCount" href="qml-brickstore-document.html#visibleLotCount-prop" status="active" access="public" documented="true" type="string" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="ExtensionScriptAction" qml-module-name="BrickStore" fullname="BrickStore.ExtensionScriptAction" href="qml-brickstore-extensionscriptaction.html" status="active" access="public" documented="true" groups="qml-extension" title="ExtensionScriptAction" fulltitle="ExtensionScriptAction" subtitle="" brief="Use this type to add an UI action to your extension"/>
-        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="144" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="">
-            <contents name="the-simple-changes" title="The simple changes" level="2"/>
-            <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
-            <contents name="complex-changes" title="Complex changes" level="2"/>
-        </page>
         <qmlclass name="Item" qml-module-name="BrickLink" fullname="BrickLink.Item" href="qml-bricklink-item.html" status="active" access="public" documented="true" groups="qml-api" title="Item" fulltitle="Item" subtitle="" brief="This value type represents a BrickLink item">
             <function name="hasKnownColor" fullname="BrickLink.Item.hasKnownColor" href="qml-bricklink-item.html#hasKnownColor-method" status="active" access="public" documented="true" meta="qmlmethod" type="bool">
                 <parameter type="Color" name="color" default=""/>
@@ -280,6 +275,11 @@
             <qmlproperty name="lastUpdated" fullname="BrickLink.Picture.lastUpdated" href="qml-bricklink-picture.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
             <qmlproperty name="updateStatus" fullname="BrickLink.Picture.updateStatus" href="qml-bricklink-picture.html#updateStatus-prop" status="active" access="public" documented="true" type="UpdateStatus" attached="false" writable="false"/>
         </qmlclass>
+        <page name="porting.html" href="porting.html" status="active" location="extensions.qdoc" filepath="/brickstore/doc/extensions.qdoc" lineno="144" documented="true" subtype="page" title="Porting old BrickStore and BrickStock Print Scripts" fulltitle="Porting old BrickStore and BrickStock Print Scripts" subtitle="">
+            <contents name="the-simple-changes" title="The simple changes" level="2"/>
+            <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
+            <contents name="complex-changes" title="Complex changes" level="2"/>
+        </page>
         <qmlclass name="PriceGuide" qml-module-name="BrickLink" fullname="BrickLink.PriceGuide" href="qml-bricklink-priceguide.html" status="active" access="public" documented="true" groups="qml-api" title="PriceGuide" fulltitle="PriceGuide" subtitle="" brief="This value type represents the price guide for a BrickLink item">
             <function name="lots" fullname="BrickLink.PriceGuide.lots" href="qml-bricklink-priceguide.html#lots-method" status="active" access="public" documented="true" meta="qmlmethod" type="int">
                 <parameter type="Time" name="time" default=""/>

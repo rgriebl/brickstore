@@ -134,7 +134,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="category-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">category</span> : <span class="type"><a href="qml-bricklink-category.html" translate="no">Category</a></span></p></td></tr>
+<span class="name">category</span> : <span class="type"><a href="qml-bricklink-category.html" translate="no">Category</a></span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The <a href="qml-bricklink-category.html" translate="no">Category</a> of the lot's item or BrickLink::noCategory, if the lot's item is not valid.</p>
 </div></div><!-- @@@category -->
@@ -144,7 +144,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="categoryName-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">categoryName</span> : <span class="type">string</span></p></td></tr>
+<span class="name">categoryName</span> : <span class="type">string</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The category name of the lot's item. The same as <code translate="no">item.category.name</code>, but you don't have to check for <a href="qml-bricklink-lot.html#isNull-prop" translate="no">isNull</a> on <code translate="no">item</code>.</p>
 </div></div><!-- @@@categoryName -->
@@ -164,7 +164,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="colorName-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">colorName</span> : <span class="type">string</span></p></td></tr>
+<span class="name">colorName</span> : <span class="type">string</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The color name of the lot's item. The same as <code translate="no">color.name</code>, but you don't have to check for <a href="qml-bricklink-lot.html#isNull-prop" translate="no">isNull</a> on <code translate="no">color</code>.</p>
 </div></div><!-- @@@colorName -->
@@ -241,7 +241,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="id-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">id</span> : <span class="type">string</span></p></td></tr>
+<span class="name">id</span> : <span class="type">string</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Obsolete. Please use <a href="qml-bricklink-lot.html#itemId-prop" translate="no">itemId</a> instead.</p>
 </div></div><!-- @@@id -->
@@ -251,7 +251,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="image-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">image</span> : <span class="type">image</span></p></td></tr>
+<span class="name">image</span> : <span class="type">image</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The item's image in the lot's color; can be <code translate="no">null</code>.</p>
 <div class="admonition note">
@@ -264,7 +264,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="incomplete-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">incomplete</span> : <span class="type">bool</span></p></td></tr>
+<span class="name">incomplete</span> : <span class="type">bool</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns <code translate="no">false</code> if this lot has a valid item and color, or <code translate="no">true</code> otherwise.</p>
 </div></div><!-- @@@incomplete -->
@@ -274,7 +274,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="isMarked-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">isMarked</span> : <span class="type">bool</span></p></td></tr>
+<span class="name">isMarked</span> : <span class="type">bool</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>A boolean flag denoting whether this lot is marked in the document, i.e. it has a non-empty <a href="qml-bricklink-lot.html#markerText-prop" translate="no">markerText</a> or <a href="qml-bricklink-lot.html#markerColor-prop" translate="no">markerColor</a>.</p>
 </div></div><!-- @@@isMarked -->
@@ -284,7 +284,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="isNull-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">isNull</span> : <span class="type">bool</span></p></td></tr>
+<span class="name">isNull</span> : <span class="type">bool</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Returns whether this Lot is <code translate="no">null</code>. Since this type is a value wrapper around a C++ object, we cannot use the normal JavaScript <code translate="no">null</code> notation.</p>
 </div></div><!-- @@@isNull -->
@@ -304,7 +304,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="itemId-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">itemId</span> : <span class="type">string</span></p></td></tr>
+<span class="name">itemId</span> : <span class="type">string</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The id of the lot's item. The same as <code translate="no">item.id</code>, but you don't have to check for <a href="qml-bricklink-lot.html#isNull-prop" translate="no">isNull</a> on <code translate="no">item</code>.</p>
 </div></div><!-- @@@itemId -->
@@ -314,7 +314,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="itemName-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">itemName</span> : <span class="type">string</span></p></td></tr>
+<span class="name">itemName</span> : <span class="type">string</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The name of the lot's item. The same as <code translate="no">item.name</code>, but you don't have to check for <a href="qml-bricklink-lot.html#isNull-prop" translate="no">isNull</a> on <code translate="no">item</code>.</p>
 </div></div><!-- @@@itemName -->
@@ -324,7 +324,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="itemType-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">itemType</span> : <span class="type"><a href="qml-bricklink-itemtype.html" translate="no">ItemType</a></span></p></td></tr>
+<span class="name">itemType</span> : <span class="type"><a href="qml-bricklink-itemtype.html" translate="no">ItemType</a></span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The <a href="qml-bricklink-itemtype.html" translate="no">ItemType</a> of the lot's item or BrickLink::noItemType, if the lot's item is not valid.</p>
 </div></div><!-- @@@itemType -->
@@ -334,7 +334,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="itemTypeName-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">itemTypeName</span> : <span class="type">string</span></p></td></tr>
+<span class="name">itemTypeName</span> : <span class="type">string</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The item-type name of the lot's item. The same as <code translate="no">item.itemType.name</code>, but you don't have to check for <a href="qml-bricklink-lot.html#isNull-prop" translate="no">isNull</a> on <code translate="no">item</code>.</p>
 </div></div><!-- @@@itemTypeName -->
@@ -344,7 +344,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="itemYearLastProduced-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">itemYearLastProduced</span> : <span class="type">int</span></p></td></tr>
+<span class="name">itemYearLastProduced</span> : <span class="type">int</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The year the lot's item was last produced.</p>
 </div></div><!-- @@@itemYearLastProduced -->
@@ -354,7 +354,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="itemYearReleased-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">itemYearReleased</span> : <span class="type">int</span></p></td></tr>
+<span class="name">itemYearReleased</span> : <span class="type">int</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>The year the lot's item was first released.</p>
 </div></div><!-- @@@itemYearReleased -->
@@ -394,7 +394,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="name-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">name</span> : <span class="type">string</span></p></td></tr>
+<span class="name">name</span> : <span class="type">string</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Obsolete. Please use <a href="qml-bricklink-lot.html#itemName-prop" translate="no">itemName</a> instead.</p>
 </div></div><!-- @@@name -->
@@ -586,7 +586,7 @@
 <div class="table"><table class="qmlname">
 <tr valign="top" class="odd" id="total-prop">
 <td class="tblQmlPropNode"><p>
-<span class="qmlextra">[read-only] </span><span class="name">total</span> : <span class="type">real</span></p></td></tr>
+<span class="name">total</span> : <span class="type">real</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>A convenience value, returns <a href="qml-bricklink-lot.html#price-prop" translate="no">price</a> times <a href="qml-bricklink-lot.html#quantity-prop" translate="no">quantity</a>.</p>
 </div></div><!-- @@@total -->
