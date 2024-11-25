@@ -5,6 +5,8 @@
 
 #include <QProxyStyle>
 
+class UnderlineShortcutFilter;
+
 class BrickStoreProxyStyle : public QProxyStyle
 {
 public:
@@ -12,6 +14,8 @@ public:
 
     void polish(QWidget *w) override;
     void unpolish(QWidget *w) override;
+    void polish(QApplication *app) override;
+    void unpolish(QApplication *app) override;
 
     int styleHint(StyleHint hint, const QStyleOption *option = nullptr,
                   const QWidget *widget = nullptr, QStyleHintReturn *returnData = nullptr) const override;
@@ -35,4 +39,5 @@ protected:
 
 private:
     bool m_isWindowsVistaStyle = false;
+    UnderlineShortcutFilter *m_underlineShortcutFilter = nullptr;
 };

@@ -17,12 +17,18 @@
 #include <QDynamicPropertyChangeEvent>
 #include <QKeyEvent>
 #include <QVariantAnimation>
+#include <QMenuBar>
+#include <private/qmenubar_p.h>
+#include <private/qstylehelper_p.h>
+
+#if defined(Q_OS_WINDOWS)
+#  include <windows.h>
+#endif
 
 #include "utility/utility.h"
 #include "common/config.h"
 #include "desktop/headerview.h"
 #include "brickstoreproxystyle.h"
-
 
 static QSize toolButtonSize(Config::UISize uiSize, QStyle *style)
 {
@@ -40,6 +46,98 @@ static QSize iconSize(int p, QStyle::PixelMetric pm, QStyle *style)
 {
     int s = style->pixelMetric(pm, nullptr, nullptr) * p / 100;
     return { s, s };
+}
+
+class UnderlineShortcutFilter : public QObject
+{
+public:
+    UnderlineShortcutFilter(BrickStoreProxyStyle *style)
+        : QObject(style)
+    {
+        qApp->installEventFilter(this);
+    }
+    ~UnderlineShortcutFilter()
+    {
+        qApp->removeEventFilter(this);
+    }
+
+    bool status(const QStyleOption *option, const QWidget *widget) const
+    {
+        bool us = false;
+#if defined(Q_OS_WINDOWS)
+        BOOL cues = false;
+        SystemParametersInfo(SPI_GETKEYBOARDCUES, 0, &cues, 0);
+        us = bool(cues);
+#endif
+        if (!us && widget) {
+            const QMenuBar *menuBar = qobject_cast<const QMenuBar *>(widget);
+            if (!menuBar && qobject_cast<const QMenu *>(widget)) {
+                QWidget *w = QApplication::activeWindow();
+                if (w && w != widget)
+                    menuBar = w->findChild<QMenuBar *>();
+            }
+            // If we paint a menu bar draw underlines if it is in the keyboardState
+            if (menuBar) {
+                if (static_cast<const QMenuBarPrivate *>(QMenuBarPrivate::get(menuBar))->keyboardState || m_altDown)
+                    us = true;
+                // Otherwise draw underlines if the toplevel widget has seen an alt-press
+            } else if (m_seenAlt.contains(widget->window())) {
+                us = true;
+            }
+        }
+#if QT_CONFIG(accessibility)
+        if (!us && option && option->type == QStyleOption::SO_MenuItem
+            && QStyleHelper::isInstanceOf(option->styleObject, QAccessible::MenuItem)
+            && option->styleObject->property("_q_showUnderlined").toBool()) {
+            us = true;
+        }
+#else
+        Q_UNUSED(option);
+#endif
+        return us;
+    }
+
+    bool eventFilter(QObject *o, QEvent *e) override;
+
+    bool m_altDown = false;
+    QList<const QWidget *> m_seenAlt;
+};
+
+bool UnderlineShortcutFilter::eventFilter(QObject *o, QEvent *e)
+{
+    if (!o->isWidgetType())
+        return QObject::eventFilter(o, e);
+
+    // Alt key handling - copied from qwindowsstyle.cpp
+    if (((e->type() == QEvent::KeyPress) || (e->type() == QEvent::KeyRelease))
+            && (static_cast<QKeyEvent *>(e)->key() == Qt::Key_Alt)) {
+        QWidget *widget = qobject_cast<QWidget *>(o)->window();
+
+        if (e->type() == QEvent::KeyPress) {
+            // Alt has been pressed - find all widgets that care
+            const QList<QWidget *> children = widget->findChildren<QWidget *>();
+            m_seenAlt.append(widget);
+            m_altDown = true;
+
+            // Repaint all relevant widgets
+            for (QWidget *w : children) {
+                if (!w->isWindow() && w->isVisible())
+                    w->update();
+            }
+        } else {
+            // Update state and repaint the menu bars.
+            m_altDown = false;
+            const QList<QMenuBar *> menuBars = widget->findChildren<QMenuBar *>();
+            for (QWidget *w : menuBars)
+                w->update();
+        }
+    } else if (e->type() == QEvent::Close) {
+        // Reset widget when closing
+        QWidget *widget = qobject_cast<QWidget *>(o);
+        m_seenAlt.removeAll(widget);
+        m_seenAlt.removeAll(widget->window());
+    }
+    return QObject::eventFilter(o, e);
 }
 
 
@@ -166,9 +264,27 @@ void BrickStoreProxyStyle::unpolish(QWidget *w)
     QProxyStyle::unpolish(w);
 }
 
+void BrickStoreProxyStyle::polish(QApplication *app)
+{
+    if (!styleHint(SH_UnderlineShortcut, nullptr) && app && !m_underlineShortcutFilter)
+        m_underlineShortcutFilter = new UnderlineShortcutFilter(this);
+    QProxyStyle::polish(app);
+}
+
+void BrickStoreProxyStyle::unpolish(QApplication *)
+{
+    delete m_underlineShortcutFilter;
+    m_underlineShortcutFilter = nullptr;
+}
+
 int BrickStoreProxyStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const
 {
-    if (hint == SH_ItemView_MovementWithoutUpdatingSelection) {
+    if (hint == SH_UnderlineShortcut) {
+        if (m_underlineShortcutFilter)
+            return m_underlineShortcutFilter->status(option, widget);
+        else
+            return false;
+    } else if (hint == SH_ItemView_MovementWithoutUpdatingSelection) {
         // move the current item within a selection in a QTableView
         return true;
     } else if (hint == SH_ItemView_ScrollMode) {
