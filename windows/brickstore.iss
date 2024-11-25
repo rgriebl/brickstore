@@ -35,6 +35,7 @@ OutputBaseFilename=BrickStore Installer
 CloseApplications=yes
 RestartApplications=yes
 ChangesAssociations=yes
+RestartIfNeededByRun=no
 
 WizardImageAlphaFormat=defined
 WizardSmallImageFile={#SourcePath}\..\assets\generated-installers\windows-installer.bmp
