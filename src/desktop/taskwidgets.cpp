@@ -373,7 +373,7 @@ TaskOpenDocumentsWidget::TaskOpenDocumentsWidget(QWidget *parent)
     setWordWrap(true);
     setSelectionMode(QAbstractItemView::NoSelection);
     setModel(DocumentList::inst());
-    int is = style()->pixelMetric(QStyle::PM_ListViewIconSize, nullptr, this);
+    int is = fontMetrics().height();
     setIconSize({ int(is * 2), int(is * 2) });
 
     m_contextMenu = new QMenu(this);
