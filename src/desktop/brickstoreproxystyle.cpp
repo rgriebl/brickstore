@@ -168,10 +168,7 @@ void BrickStoreProxyStyle::unpolish(QWidget *w)
 
 int BrickStoreProxyStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const
 {
-    if (hint == SH_UnderlineShortcut) {
-        // show _ shortcuts even on macOS
-        return true;
-    } else if (hint == SH_ItemView_MovementWithoutUpdatingSelection) {
+    if (hint == SH_ItemView_MovementWithoutUpdatingSelection) {
         // move the current item within a selection in a QTableView
         return true;
     } else if (hint == SH_ItemView_ScrollMode) {
