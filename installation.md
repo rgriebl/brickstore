@@ -6,7 +6,7 @@ title: Installation Instructions
 ## Windows
 Only Windows 10 and 11, and only 64 bit installations are supported.  As
 Windows doesn't have a concept of "universal apps", there are two
-installers: one for Intel (**x64**) and one for ARM (**arm64**).
+installers: one for Intel/AMD (**x64**) and one for ARM (**arm64**) CPUs.
 
 Start the installer, then when Windows tells you that it "protected your
 PC", click `More info` to reveal the `Run anyway` button.  Click that button
@@ -33,38 +33,29 @@ Please note: the standard version will only install on macOS 11 or newer.
 Both 10.14 and 10.15 are still supported by the *legacy* build though, but
 this might have problems with some web cams not working correctly.
 
-> **Only for very old versions from 2021 and 2022**: These are not digitally signed,
-> so when you start BrickStore from your computer's `Applications` folder,
-> macOS will tell you it "can't be opened", but gives you no way to remove
-> this block directly.  You have to go to your `System Preferences` (Apple
-> menu), then to `Security & Privacy`, `General` and there you will find an
-> `Open Anyway` button to finally unblock BrickStore.
-
 ***
 
 ## Linux
 
 Please note that the Debian *Backend* package is a command-line only utility and its only purpose is to generate BrickStore's database. It is not usable for anything else.
 
-### Ubuntu
-BrickStore is also distributed as a Snap via Ubuntu's Snapcraft store: https://snapcraft.io/brickstore
-You should be able to install it straight from the Ubuntu Software Center.
+### Flatpak
+Starting with version 2024.11.1 a [Flatpak package](https://flatpak.org/) is available for download. Getting BrickStore registered on https://flathub.org/ is planned for a future release.
+The downloaded file should be installable straight from your file manager, or on the commandline via `flatpak install ~/Downloads/BrickStore-<VERSION>-x86_64.flatpak`
 
-### Ubuntu 22.04
-A traditional DEB package for Ubuntu 22.04 (and its derivatives) is also available. If double-clicking the downloaded package brings up the archive manager instead of the software center, you need to fix Ubuntu first: https://itsfoss.com/cant-install-deb-file-ubuntu/
+### Ubuntu Snap
+BrickStore for Ubuntu is primarily distributed as a Snap via Ubuntu's Snapcraft store: https://snapcraft.io/brickstore
+You should be able to install and update it straight from the Ubuntu Software Center.
 
-Of course you can always install via the command line as well: `sudo apt install ./Downloads/Ubuntu-22.04-brickstore_<VERSION>_amd64.deb`
+### AppImage
+An AppImage installation is provided, that is completely distribution independent.
+You can read more about AppImages here: https://appimage.org/
 
-### Mint 21
-You can install the Ubuntu 22.04 package, but the graphical installer currently has a bug and is not able to parse the dependencies correctly: *Error: Dependency is not satisfiable: qt6-base-abi*.
-If that's the case, the simplest solution is to open a terminal and install from there: `sudo apt install ./Downloads/Ubuntu-22.04-brickstore_<VERSION>_amd64.deb`
+### Ubuntu 24.04
+A traditional DEB package for Ubuntu 24.04 (and its derivatives) is also available. You can eihter install it using your distro's graphical package managager or via the command line: `sudo apt install ./Downloads/Ubuntu-24.04-brickstore_<VERSION>_amd64.deb`
 
 ### Arch
 Arch has a well maintained package, available directly via AUR: https://aur.archlinux.org/packages/brickstore
-
-### Generic AppImage
-An AppImage installation is provided, that is completely distribution independent.
-You can read more about AppImages here: https://appimage.org/
 
 ### Compile from sources
 If you cannot use one of the pre-compiled packages, you can however easily build the software yourself using the classic Unix command: `./configure && cmake --build .`.
