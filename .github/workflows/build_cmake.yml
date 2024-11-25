@@ -462,7 +462,7 @@ jobs:
             -D "QT_HOST_PATH=$(readlink -f $Qt6_DIR/../gcc_64)" \
             -D "QT_ANDROID_SDK_BUILD_TOOLS_REVISION=30.0.3" \
             -D "QT_ANDROID_TARGET_SDK_VERSION=34" \
-            -D "ANDROID_NATIVE_API_LEVEL=23" \
+            -D "QT_ANDROID_MIN_SDK_VERSION=26" \
             -D "QT_ANDROID_BUILD_ALL_ABIS=TRUE" \
             -D "ANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/${{ matrix.config.android_ndk }}" \
             -D "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" \
