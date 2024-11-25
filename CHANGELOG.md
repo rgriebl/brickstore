@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2024.11.1] - 2024-11-24
+## [2024.11.1] - 2024-11-25
 
 A lot of small fixes, notably:
 - Date based filters were not applied correctly as all 2-digit year values were incorrectly parsed as 19xx.

@@ -104,7 +104,7 @@ function noMSVCInstalled(Arch: String): Boolean;
 var
     Version: Int64;
 begin
-    Version := PackVersionComponents(14, 29, 30037, 0);
+    Version := PackVersionComponents(14, 42, 34433, 0);
     if Arch = 'arm64' then
         Result := not IsMsiProductInstalled('{DC9BAE42-810B-423A-9E25-E4073F1C7B00}', Version)
     else if Arch = 'x64' then
