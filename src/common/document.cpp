@@ -1744,7 +1744,7 @@ void Document::saveToFile(const QString &fileName)
 {
     QSaveFile f(fileName);
     f.setDirectWriteFallback(true);
-    if (!f.open(QIODevice::WriteOnly)
+    if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)
             || !DocumentIO::createBsxInventory(&f, this)
             || !f.commit()) {
         throw Exception(&f, tr("Failed to save document"));

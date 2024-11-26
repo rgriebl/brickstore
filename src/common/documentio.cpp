@@ -428,6 +428,7 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
         bsx.setCurrencyCode(u"$$$"_qs);  // flag as legacy currency
 
         bool foundRoot = false;
+        QString rootTagName;
         bool foundInventory = false;
 
         auto parseGuiState = [&]() {
@@ -608,6 +609,7 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
                     if (!knownTypes.contains(xml.name().toString()))
                         throw Exception("Expected BrickStoreXML as root element, but got: %1").arg(xml.name());
                     foundRoot = true;
+                    rootTagName = xml.name().toString();
                 } else {
                     if (xml.name() == u"Inventory") {
                         foundInventory = true;
@@ -624,17 +626,26 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
                 }
                 break;
 
-            case QXmlStreamReader::Invalid:
+            case QXmlStreamReader::EndElement:
+                if ((xml.name() == rootTagName) && foundRoot && foundInventory) {
+                    // Exiting here instead of in "EndDocument" lets us skip trailing garbage in
+                    // the XML file that would otherwise prevent the file from being loaded
+
+                    auto model = std::make_unique<DocumentModel>(std::move(bsx), (bsx.fixedLotCount() != 0) /*forceModified*/);
+                    if (!bsx.guiSortFilterState.isEmpty())
+                        model->restoreSortFilterState(bsx.guiSortFilterState);
+                    return Document::create(model.release(), bsx.guiColumnLayout);
+                }
+                break;
+
+            case QXmlStreamReader::Invalid: {
                 throw Exception(xml.errorString());
+            }
 
             case QXmlStreamReader::EndDocument: {
                 if (!foundRoot || !foundInventory)
                     throw Exception("Not a valid BrickStoreXML file");
-
-                auto model = std::make_unique<DocumentModel>(std::move(bsx), (bsx.fixedLotCount() != 0) /*forceModified*/);
-                if (!bsx.guiSortFilterState.isEmpty())
-                    model->restoreSortFilterState(bsx.guiSortFilterState);
-                return Document::create(model.release(), bsx.guiColumnLayout);
+                break;
             }
             default:
                 break;
