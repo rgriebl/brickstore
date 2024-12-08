@@ -415,6 +415,7 @@ if (ANDROID)
         QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/android"
         QT_ANDROID_VERSION_CODE ${VERSION_CODE}
         QT_ANDROID_VERSION_NAME ${VERSION}
+        QT_ANDROID_MIN_SDK_VERSION 28 # starting with 6.8 this shouldn't be needed anymore
     )
 
     if (QT_ANDROID_SDK_BUILD_TOOLS_REVISION) # this has to be set as a target property to stick
