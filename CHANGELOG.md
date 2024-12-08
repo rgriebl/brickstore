@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2024.12.1] - 2024-12-08
+
+A quick-fix release, mostly for Windows users:
+- Microsoft broke a basic system library and now the BrickStore installer has to force a system reboot on installation in case that system library is too old.
+- The Android package erroneously reported a minimum version of Android 6.0 (Marshmallow), but BrickStore really needs at least 9.0 (Pie).
+
+
 ## [2024.11.1] - 2024-11-25
 
 A lot of small fixes, notably:
@@ -704,7 +711,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.11.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.12.1...HEAD
+[2024.12.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.12.1
 [2024.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.11.1
 [2024.5.2]: https://github.com/rgriebl/brickstore/releases/tag/v2024.5.2
 [2024.5.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.5.1
