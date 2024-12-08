@@ -73,6 +73,12 @@
 
 #include <limits.h>
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+#  if defined(__ARM_FEATURE_CRC32)
+#    include <arm_acle.h>
+#  endif
+#endif
+
 QT_BEGIN_NAMESPACE
 
 /*
