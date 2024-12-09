@@ -349,11 +349,6 @@ void DesktopApplication::setUITheme()
         // no need to use Fusion tricks here, just use the default Vista style
         theme = Config::UITheme::SystemDefault;
     }
-    if ((QSysInfo::productVersion().toInt() >= 11) && (theme != Config::UITheme::Dark)) {
-        // The new Windows 11 style looks awful as of 6.8.0
-        theme = Config::UITheme::Light;
-        QGuiApplication::setDesktopSettingsAware(false);
-    }
     if (theme == Config::UITheme::Dark) {
         // prevent Win11 palette updates when the system theme or screen settings change
         QGuiApplication::setDesktopSettingsAware(false);
@@ -391,6 +386,10 @@ void DesktopApplication::setUITheme()
 
         QApplication::setPalette(palette);
         QToolTip::setPalette(palette);
+    } else if (QSysInfo::productVersion().toInt() >= 11) {
+        // The new Windows 11 style still has problems as of 6.8.1
+        QGuiApplication::setDesktopSettingsAware(false);
+        QApplication::setStyle(new BrickStoreProxyStyle(QStyleFactory::create(u"windowsvista"_qs)));
     } else {
         QApplication::setStyle(new BrickStoreProxyStyle());
     }

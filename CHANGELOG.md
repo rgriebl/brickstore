@@ -3,10 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2024.12.1] - 2024-12-08
+## [2024.12.1] - 2024-12-09
 
 A quick-fix release, mostly for Windows users:
 - Microsoft broke a basic system library and now the BrickStore installer has to force a system reboot on installation in case that system library is too old.
+- The Windows 11 native *Light* theme still has a few problems with colors, so BrickStore is switching back to using the old Windows 10 style for the time being.
 - The Android package erroneously reported a minimum version of Android 6.0 (Marshmallow), but BrickStore really needs at least 9.0 (Pie).
 
 
