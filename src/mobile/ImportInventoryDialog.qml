@@ -42,10 +42,10 @@ FullscreenDialog {
         enabled: (pages.currentIndex !== 1) || (!root.currentItem.isNull)
         onClicked: {
             if (lastPage && !root.currentItem.isNull) {
+                root.goBackFunction()
                 BS.BrickStore.importPartInventory(root.currentItem, BL.BrickLink.noColor,
                                                   importWidget.quantity, importWidget.condition,
                                                   importWidget.extraParts, importWidget.partOutTraits)
-                root.goBackFunction()
             } else if (visible) {
                 pages.currentIndex = pages.currentIndex + 1
             }
