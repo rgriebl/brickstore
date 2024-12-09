@@ -714,6 +714,6 @@ jobs:
         SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.UBUNTU_SNAP_LOGIN }}
         SNAPCRAFT_HAS_TTY: "true"
       run: |
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install lxd snapcraft
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install snapcraft
         (yes || true) | snapcraft promote --from-channel edge --to-channel stable brickstore
       shell: bash
