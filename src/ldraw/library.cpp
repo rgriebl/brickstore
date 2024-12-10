@@ -20,6 +20,7 @@
 #  include <windows.h>
 #  include <tchar.h>
 #  include <shlobj.h>
+#  define _DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR 1
 #endif
 
 #include "utility/appstatistics.h"

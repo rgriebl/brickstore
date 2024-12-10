@@ -15,6 +15,7 @@
 
 Q_LOGGING_CATEGORY(LogTransfer, "bs.transfer", QtWarningMsg)
 
+#define _DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR 1
 
 TransferJob::~TransferJob()
 {

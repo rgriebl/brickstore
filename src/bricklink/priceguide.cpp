@@ -27,6 +27,8 @@
 #include "bricklink/item.h"
 #include "bricklink/color.h"
 
+#define _DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR 1
+
 Q_DECLARE_LOGGING_CATEGORY(LogCache)
 Q_DECLARE_LOGGING_CATEGORY(LogSql)
 

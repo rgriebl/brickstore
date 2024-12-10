@@ -14,6 +14,8 @@
 #include "credentialsmanager.h"
 #include "persistentcookiejar.h"
 
+#define _DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR 1
+
 using namespace std::chrono_literals;
 
 
