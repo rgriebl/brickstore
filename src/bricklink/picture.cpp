@@ -349,6 +349,7 @@ void PictureCache::updatePicture(Picture *pic, bool highPriority)
         return;
 
     if (QNetworkInformation::instance()
+        && QNetworkInformation::instance()->supports(QNetworkInformation::Feature::Reachability)
         && (QNetworkInformation::instance()->reachability() != QNetworkInformation::Reachability::Online)) {
         pic->setUpdateStatus(UpdateStatus::UpdateFailed);
         emit pictureUpdated(pic);

@@ -750,6 +750,7 @@ void PriceGuideCache::updatePriceGuide(PriceGuide *pg, bool highPriority)
         return;
 
     if (QNetworkInformation::instance()
+        && QNetworkInformation::instance()->supports(QNetworkInformation::Feature::Reachability)
         && (QNetworkInformation::instance()->reachability() != QNetworkInformation::Reachability::Online)) {
         pg->setUpdateStatus(UpdateStatus::UpdateFailed);
         emit priceGuideUpdated(pg);

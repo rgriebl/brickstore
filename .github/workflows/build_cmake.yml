@@ -184,6 +184,12 @@ jobs:
         path: "${{ runner.workspace }}/Qt/"
         key: "Qt-${{ matrix.config.qt_version }}-${{ matrix.config.qt_host }}-${{ matrix.config.qt_arch }}"
 
+    - name: "Fix Python version"
+      if: matrix.config.appimage
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
     - name: Install Qt via aqtinstall
       if: |
         ((matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap || matrix.config.flatpak)
@@ -312,7 +318,7 @@ jobs:
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y update
         sudo DEBIAN_FRONTEND=noninteractive apt -y install \
-            g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
+            g++-10 ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
             libxcb-\* libpulse-dev libgstreamer\*1.0-dev libsecret-1-dev libva-dev libcups2-dev libfuse2
         ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 \
