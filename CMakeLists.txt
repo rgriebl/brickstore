@@ -207,6 +207,16 @@ elseif (LINUX)
     endif()
 endif()
 
+if (WIN32)
+    # MS broke backwards compatibility with the 17.10 MSVC2022 release:
+    # without this workaround, every thread started via QThread::create crashes
+    # in std::mutex.lock inside MSVCP140.dll
+    # We DO deploy the correct MSVC runtime, but there are sentry reports where
+    # Windows is loading the wrong (old) runtime from a OneDrive installation,
+    # but there's no indication why that is happening.
+    add_compile_definitions(_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
+endif()
+
 set(BS_LIBSECRET OFF)
 if (LINUX AND (BS_DESKTOP OR BS_MOBILE))
     find_package(PkgConfig REQUIRED)
