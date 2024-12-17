@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+## [2024.12.3] - 2024-12-17
+
+More fixes:
+- On Windows, a borked OneDrive installation would stop BrickStore from starting.
+- The Linux AppImage was in permanent *offline* mode and did not load pictures or price-guides.
+
+
 ## [2024.12.2] - 2024-12-09
 
 A fix for yesterday's fix: macOS 12 and 13 would crash on Intel CPUs when displaying 3D models.
@@ -717,7 +725,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.12.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.12.3...HEAD
+[2024.12.3]: https://github.com/rgriebl/brickstore/releases/tag/v2024.12.3
 [2024.12.2]: https://github.com/rgriebl/brickstore/releases/tag/v2024.12.2
 [2024.12.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.12.1
 [2024.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.11.1
