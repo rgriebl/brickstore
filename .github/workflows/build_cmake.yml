@@ -8,16 +8,16 @@ env:
   BRICKSTORE_QT6_DEB_PACKAGES: >-
       build-essential cmake ninja-build
       libglvnd-dev libtbb-dev
+      libsecret-1-dev
       qt6-tools-dev qt6-tools-dev-tools
       qt6-l10n-tools qt6-documentation-tools
       qt6-base-dev qt6-base-private-dev qt6-base-dev-tools
-      qt6-qpa-plugins
-  BRICKSTORE_GUI_QT6_DEB_PACKAGES: >-
-      libsecret-1-dev libcups2-dev
       qt6-declarative-dev qt6-declarative-private-dev
+      qt6-qpa-plugins qt6-image-formats-plugins
+  BRICKSTORE_GUI_QT6_DEB_PACKAGES: >-
+      libcups2-dev
       qt6-quick3d-dev qt6-quick3d-dev-tools qt6-shadertools-dev
       qt6-gtk-platformtheme libqt6svg6-dev qt6-multimedia-dev
-      qt6-image-formats-plugins
       qml6-module-qt5compat-graphicaleffects qml6-module-qtmultimedia
       qml6-module-qtqml-workerscript qml6-module-quick3d
   BRICKSTORE_GUI_QT6_INSTALLER_MODULES: >-
@@ -77,7 +77,7 @@ jobs:
           runs-on: ubuntu-22.04
           os: linux
           debian_container: "buildpack-deps:trixie"
-          cmake_extra_config: "-DBACKEND_ONLY=ON"
+          backend_only: true
           generate_docs: true
           generate_docker: true
 
@@ -259,7 +259,7 @@ jobs:
         sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y update
         sudo docker exec -e DEBIAN_FRONTEND=noninteractive "debian-build" apt -y install \
             $BRICKSTORE_QT6_DEB_PACKAGES \
-            $BRICKSTORE_GUI_QT6_DEB_PACKAGES \
+            ${{ !matrix.config.backend_only && '$BRICKSTORE_GUI_QT6_DEB_PACKAGES' || '' }} \
             debhelper lsb-release fakeroot build-essential
       shell: bash
 
@@ -298,6 +298,7 @@ jobs:
       run: |
         sudo docker exec -w /brickstore "debian-build" /usr/lib/qt6/bin/qt-cmake -G Ninja \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            ${{ matrix.config.backend_only && '-DBACKEND_ONLY=ON' || '' }} \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         sudo docker exec -w /brickstore "debian-build" cmake --build build --config RelWithDebInfo \
             --parallel --target deb-package --verbose
