@@ -64,13 +64,15 @@ For more information about this, [see the corresponding Wiki page](https://githu
 ***
 
 ## Android
-Currently in testing: https://play.google.com/store/apps/details?id=de.brickforge.brickstore
+Can be installed directly from the Gogle Play Store: https://play.google.com/store/apps/details?id=de.brickforge.brickstore
 
-ARMv7 and ARM64 packages are also available for side-loading.
+ARMv7 and ARM64 packages are also available for side-loading on GitHub.
 
 ***
 
 ## iOS
-Currently in public Testflight testing: https://testflight.apple.com/join/qIu2smfl
+BrickStore is now available directly via Apple's App Store: https://apps.apple.com/de/app/brickstore/id1626933201
 
-The IPA package cannot be installed directly, unless you have a jail-broken device.
+The IPA package on GitHub cannot be installed directly, unless you have a jail-broken device.
+
+
