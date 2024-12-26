@@ -33,6 +33,9 @@ static struct DisableA11YOnAndroid  // clazy:exclude=non-pod-global-static
         qputenv("QT_ANDROID_DISABLE_ACCESSIBILITY", "1");
     }
 } disableA11YOnAndroid;
+
+#elif defined(Q_OS_IOS)
+#  include <QtGui/QAccessible>
 #endif
 
 
@@ -60,6 +63,12 @@ MobileApplication::MobileApplication(int &argc, char **argv)
             new QInputDevice(u"Virtual keyboard"_qs, 0, QInputDevice::DeviceType::Keyboard,
                              {}, qApp));
     }
+#endif
+#if defined(Q_OS_IOS)
+    // QML's TableView crashes when empty, if a11y features are enabled
+    // (e.g. "Full Keyboard Access" in the simulator)
+    QAccessible::installUpdateHandler([](QAccessibleEvent *) { });
+    QAccessible::installRootObjectHandler([](QObject *) { });
 #endif
 }
 
