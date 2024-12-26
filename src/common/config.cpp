@@ -828,7 +828,9 @@ bool Config::parseTranslations() const
         m_translations << trans;
     }
     std::sort(m_translations.begin(), m_translations.end(), [](const auto &tr1, const auto &tr2) {
-        if (tr1.language == u"en")
+        if (tr1.language == tr2.language)
+            return false;
+        else if (tr1.language == u"en")
             return true;
         else if (tr2.language == u"en")
             return false;

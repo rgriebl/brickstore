@@ -212,7 +212,9 @@ bool ColorModel::lessThan(const void *p1, const void *p2, int /*column*/, Qt::So
     const auto *c2 = static_cast<const Color *>(p2);
     bool asc = (order == Qt::AscendingOrder);
 
-    if (!c1)
+    if (c1 == c2)
+        return false;
+    else if (!c1)
         return true;
     else if (!c2)
         return false;
@@ -421,7 +423,9 @@ bool CategoryModel::lessThan(const void *p1, const void *p2, int /*column*/, Qt:
     const auto *c2 = static_cast<const Category *>(p2);
     bool asc = (order == Qt::AscendingOrder);
 
-    if (!c1 || c1 == AllCategories) {
+    if (c1 == c2) {
+        return false;
+    } else if (!c1 || c1 == AllCategories) {
         return asc;
     } else if (!c2 || c2 == AllCategories) {
         return !asc;
@@ -557,7 +561,9 @@ bool ItemTypeModel::lessThan(const void *p1, const void *p2, int /*column*/, Qt:
     const auto *i1 = static_cast<const ItemType *>(p1);
     const auto *i2 = static_cast<const ItemType *>(p2);
 
-    if (!i1 || i1 == AllItemTypes)
+    if (i1 == i2)
+        return false;
+    else if (!i1 || i1 == AllItemTypes)
         return true;
     else if (!i2 || i2 == AllItemTypes)
         return false;
@@ -1335,7 +1341,9 @@ bool InventoryModel::lessThan(const QModelIndex &left, const QModelIndex &right)
     const auto e1 = iim->entry(left);
     const auto e2 = iim->entry(right);
 
-    if (!e1 || !e1->m_item)
+    if (e1 == e2)
+        return false;
+    else if (!e1 || !e1->m_item)
         return true;
     else if (!e2 || !e2->m_item)
         return false;
