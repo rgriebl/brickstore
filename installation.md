@@ -73,6 +73,8 @@ ARMv7 and ARM64 packages are also available for side-loading on GitHub.
 ## iOS
 BrickStore is now available directly via Apple's App Store: https://apps.apple.com/de/app/brickstore/id1626933201
 
+Test builds between releases are available via Apple's Testflight program: https://testflight.apple.com/join/qIu2smfl
+
 The IPA package on GitHub cannot be installed directly, unless you have a jail-broken device.
 
 
