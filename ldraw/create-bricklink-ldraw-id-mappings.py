@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# Copyright (C) 2004-2024 Robert Griebl
+# Copyright (C) 2004-2025 Robert Griebl
 # SPDX-License-Identifier: GPL-3.0-only
 
 import os
