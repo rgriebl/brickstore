@@ -3,9 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2024.12.4] - 2024-12-28
 
-iOS: work around a crash when Accessibility features are enabled.
+## [2025.1.1] - 2025-01-09
+
+iOS: Fixed a crash when Accessibility features are enabled.
+iOS and Android: Fixed the invisible language and VAT settings elements.
 
 
 ## [2024.12.3] - 2024-12-17
@@ -729,8 +731,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2024.12.4...HEAD
-[2024.12.4]: https://github.com/rgriebl/brickstore/releases/tag/v2024.12.4
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2025.1.1...HEAD
+[2025.1.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.1.1
 [2024.12.3]: https://github.com/rgriebl/brickstore/releases/tag/v2024.12.3
 [2024.12.2]: https://github.com/rgriebl/brickstore/releases/tag/v2024.12.2
 [2024.12.1]: https://github.com/rgriebl/brickstore/releases/tag/v2024.12.1
