@@ -11,7 +11,7 @@
 <div class="main-rounded">
 <div class="navigationbar">
     <ul>
-<li><a href="index.html" translate="no">BrickStore Extensions</a></li>
+<li><a href="index.html">BrickStore Extensions</a></li>
 <li>Porting old BrickStore and BrickStock Print Scripts</li>
     </ul>
 </div>
@@ -32,8 +32,8 @@
 <h1 class="title">Porting old BrickStore and BrickStock Print Scripts</h1>
 <!-- $$$porting.html-description -->
 <div class="descr" id="details">
-<p>The old BrickStore scripts were based on a JavaScript 4 interpreter, but this JS version was abandoned by the industry (see <a href="https://en.wikipedia.org/wiki/ECMAScript#4th_Edition_(abandoned))" translate="no">Wikipedia</a>).</p>
-<p>The new scripts are running in a state-of-art JavaScript 7 environment as provided by web browsers (see <a href="https://doc.qt.io/qt-5/qtqml-javascript-hostenvironment.html)" translate="no">QML JavaScript environment</a>).</p>
+<p>The old BrickStore scripts were based on a JavaScript 4 interpreter, but this JS version was abandoned by the industry (see <a href="https://en.wikipedia.org/wiki/ECMAScript#4th_Edition_(abandoned))">Wikipedia</a>).</p>
+<p>The new scripts are running in a state-of-art JavaScript 7 environment as provided by web browsers (see <a href="https://doc.qt.io/qt-5/qtqml-javascript-hostenvironment.html)">QML JavaScript environment</a>).</p>
 <p>Sadly JS4 did a few things differently than today's JS7, so you have to adapt your scripts: some of these required changes are just simple search-and-replace jobs, while others require you to rewrite your code a bit.</p>
 <h3 id="the-simple-changes">The simple changes</h3>
 <ul>
@@ -43,7 +43,7 @@
 </ul>
 <h3 id="intermediate-changes">Intermediate changes</h3>
 <ul>
-<li>Replace the <code translate="no">load()</code> function with a new file header. Just copy the one from <a href="https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml" translate="no">classic-print-script.bs.qm</a> (from the start of the file up to <code translate="no">function printJob</code>) and change the <code translate="no">name</code>, <code translate="no">author</code> and <code translate="no">version</code> fields in the <code translate="no"><a href="qml-brickstore-script.html" translate="no">Script</a></code> object. You can also set the text of the menu entry via the <code translate="no">text</code> property of <a href="qml-brickstore-printingscriptaction.html" translate="no">PrintingScriptAction</a>.</li>
+<li>Replace the <code translate="no">load()</code> function with a new file header. Just copy the one from <a href="https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml">classic-print-script.bs.qm</a> (from the start of the file up to <code translate="no">function printJob</code>) and change the <code translate="no">name</code>, <code translate="no">author</code> and <code translate="no">version</code> fields in the <code translate="no"><a href="qml-brickstore-script.html" translate="no">Script</a></code> object. You can also set the text of the menu entry via the <code translate="no">text</code> property of <a href="qml-brickstore-printingscriptaction.html" translate="no">PrintingScriptAction</a>.</li>
 <li>Don't forget to add a <code translate="no"></code>} add the end of the file afterwards to balance the scope: the old scripts only had global JS functions, but all functions are members of the <a href="qml-brickstore-script.html" translate="no">Script</a> object nowadays.</li>
 <li>Rename the existing <code translate="no">function printDoc()</code> function to <code translate="no">function printJob(job, doc, lots)</code>. See below on how to use the <code translate="no">job</code>, <code translate="no">doc</code> and <code translate="no">lots</code> parameters.</li>
 <li>Replace <code translate="no">Document</code> with <code translate="no">doc</code>. <code translate="no">Document</code> was a global object, but <code translate="no">doc</code> is now just a local function parameter to <code translate="no">printJob()</code>, so make sure to forward <code translate="no">doc</code> to sub-routines as needed.</li>
@@ -57,13 +57,13 @@
 <p>Font and Color objects changed a lot! The new JS engine is using the built-in Qt types for fonts and colors and these can be a bit weird, when compared to the old objects:</p>
 <ul>
 <li>Both cannot be created via the <code translate="no">new</code> operator anymore<ul>
-<li>For fonts, you have to use the factory function <code translate="no">Qt.font()</code>: see the <a href="https://doc.qt.io/qt-5/qml-qtqml-qt.html#font-method" translate="no">Qt documentation for Qt.font</a> and the <a href="https://doc.qt.io/qt-5/qml-font.html" translate="no">QML font documentation</a> for the available font properties.</li>
-<li>For colors, see the <a href="https://doc.qt.io/qt-5/qml-color.html" translate="no">QML color documentation</a>.</li>
+<li>For fonts, you have to use the factory function <code translate="no">Qt.font()</code>: see the <a href="https://doc.qt.io/qt-5/qml-qtqml-qt.html#font-method">Qt documentation for Qt.font</a> and the <a href="https://doc.qt.io/qt-5/qml-font.html">QML font documentation</a> for the available font properties.</li>
+<li>For colors, see the <a href="https://doc.qt.io/qt-5/qml-color.html">QML color documentation</a>.</li>
 </ul>
 </li>
 <li>Accessing the <code translate="no">page.font</code> and <code translate="no">page.color</code> properties now returns a reference to the current value, not a copy. This means that you cannot save the current value at the start of the function and reset the property to that value again when the function ends, because the &quot;saved&quot; value changes everytime you change the actual property. If you relied on this behavior (the default print script did), you have to change your approach here to always set the colors and fonts before drawing in a sub-routine.</li>
 </ul>
-<p>Have a look at the <a href="https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml" translate="no">classic-print-script.bs.qml</a> to get an idea how to work with fonts and colors in the new JS engine.</p>
+<p>Have a look at the <a href="https://github.com/rgriebl/brickstore/blob/main/extensions/classic-print-script.bs.qml">classic-print-script.bs.qml</a> to get an idea how to work with fonts and colors in the new JS engine.</p>
 </div>
 <!-- @@@porting.html -->
 </div>

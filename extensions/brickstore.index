@@ -4,19 +4,19 @@
     <namespace name="" status="active" access="public" module="brickstore">
         <qmlclass name="BrickLink" qml-module-name="BrickLink" fullname="BrickLink.BrickLink" href="qml-bricklink-bricklink.html" status="active" access="public" documented="true" groups="qml-api" title="BrickLink" fulltitle="BrickLink" subtitle="" brief="Core singleton managing the data transfer from and to BrickLink">
             <function name="category" fullname="BrickLink.BrickLink.category" href="qml-bricklink-bricklink.html#category-method" status="active" access="public" documented="true" meta="qmlmethod" type="Category">
-                <parameter type="var" name="category" default=""/>
-            </function>
-            <function name="category" fullname="BrickLink.BrickLink.category" href="qml-bricklink-bricklink.html#category-method" status="active" access="public" documented="true" meta="qmlmethod" type="Category">
                 <parameter type="int" name="categoryId" default=""/>
             </function>
-            <function name="color" fullname="BrickLink.BrickLink.color" href="qml-bricklink-bricklink.html#color-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
-                <parameter type="var" name="color" default=""/>
+            <function name="category" fullname="BrickLink.BrickLink.category" href="qml-bricklink-bricklink.html#category-method" status="active" access="public" documented="true" meta="qmlmethod" type="Category">
+                <parameter type="var" name="category" default=""/>
             </function>
             <function name="color" fullname="BrickLink.BrickLink.color" href="qml-bricklink-bricklink.html#color-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
                 <parameter type="string" name="colorName" default=""/>
             </function>
             <function name="color" fullname="BrickLink.BrickLink.color" href="qml-bricklink-bricklink.html#color-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
                 <parameter type="uint" name="colorId" default=""/>
+            </function>
+            <function name="color" fullname="BrickLink.BrickLink.color" href="qml-bricklink-bricklink.html#color-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
+                <parameter type="var" name="color" default=""/>
             </function>
             <function name="colorFromLDrawId" fullname="BrickLink.BrickLink.colorFromLDrawId" href="qml-bricklink-bricklink.html#colorFromLDrawId-method" status="active" access="public" documented="true" meta="qmlmethod" type="Color">
                 <parameter type="int" name="colorId" default=""/>
@@ -26,10 +26,10 @@
                 <parameter type="string" name="itemId" default=""/>
             </function>
             <function name="itemType" fullname="BrickLink.BrickLink.itemType" href="qml-bricklink-bricklink.html#itemType-method" status="active" access="public" documented="true" meta="qmlmethod" type="ItemType">
-                <parameter type="var" name="itemType" default=""/>
+                <parameter type="string" name="itemTypeId" default=""/>
             </function>
             <function name="itemType" fullname="BrickLink.BrickLink.itemType" href="qml-bricklink-bricklink.html#itemType-method" status="active" access="public" documented="true" meta="qmlmethod" type="ItemType">
-                <parameter type="string" name="itemTypeId" default=""/>
+                <parameter type="var" name="itemType" default=""/>
             </function>
             <function name="itemType" fullname="BrickLink.BrickLink.itemType" href="qml-bricklink-bricklink.html#itemType-method" status="active" access="public" documented="true" meta="qmlmethod" type="Item">
                 <parameter type="var" name="item" default=""/>
@@ -52,12 +52,12 @@
             <function name="priceGuide" fullname="BrickLink.BrickLink.priceGuide" href="qml-bricklink-bricklink.html#priceGuide-method" status="active" access="public" documented="true" meta="qmlmethod" type="PriceGuide">
                 <parameter type="Item" name="item" default=""/>
                 <parameter type="Color" name="color" default=""/>
-                <parameter type="VatType" name="vatType" default=""/>
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
             <function name="priceGuide" fullname="BrickLink.BrickLink.priceGuide" href="qml-bricklink-bricklink.html#priceGuide-method" status="active" access="public" documented="true" meta="qmlmethod" type="PriceGuide">
                 <parameter type="Item" name="item" default=""/>
                 <parameter type="Color" name="color" default=""/>
+                <parameter type="VatType" name="vatType" default=""/>
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
             <function name="priceGuideUpdated" fullname="BrickLink.BrickLink.priceGuideUpdated" href="qml-bricklink-bricklink.html#priceGuideUpdated-signal" status="active" access="public" documented="true" meta="qmlsignal">
