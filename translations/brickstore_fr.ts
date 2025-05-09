@@ -7,7 +7,7 @@
         <location filename="../src/desktop/aboutdialog.ui"/>
         <location filename="../src/mobile/AboutDialog.qml" line="+10"/>
         <source>About</source>
-        <translation>A propos de</translation>
+        <translation>&#192; propos de</translation>
     </message>
 </context>
 <context>
@@ -16,12 +16,12 @@
         <location filename="../src/common/actionmanager.cpp" line="+334"/>
         <source>HomePage</source>
         <comment>Go to the homepage</comment>
-        <translation>HomePage</translation>
+        <translation>Accueil</translation>
     </message>
     <message>
         <location line="+0"/>
         <source>Go to the Quick-start page</source>
-        <translation>Va à la page de démarrage rapide</translation>
+        <translation>Aller à la page de démarrage rapide</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -1076,7 +1076,7 @@
         <location line="+7"/>
         <location filename="../src/desktop/announcementsdialog.cpp" line="+23"/>
         <source>Mark read</source>
-        <translation>Lis Mark</translation>
+        <translation>Marqué comme lu</translation>
     </message>
 </context>
 <context>
@@ -1117,14 +1117,14 @@
     <message>
         <location line="+50"/>
         <source>Could not load the BrickLink database files.&lt;br /&gt;&lt;br /&gt;The program is not functional without these files.</source>
-        <translation>N&apos;est pas arrivé à charger la base de données BrickLink.&lt;br /&gt;&lt;br /&gt;Ce programme ne peut pas fonctionner sans ces fichiers.</translation>
+        <translation>Le chargement de la base de données BrickLink a échoué.&lt;br /&gt;&lt;br /&gt;Ce programme ne peut pas fonctionner sans ces fichiers.</translation>
     </message>
     <message numerus="yes">
         <location line="+45"/>
         <source>It seems like BrickStore crashed while %n document(s) had unsaved modifications.</source>
         <translation>
-            <numerusform>Il semble que BrickStore se soit écrasé alors que %n documents avaient des modifications non sauvegardées.</numerusform>
-            <numerusform>Il semble que BrickStore se soit écrasé alors que %n documents avaient des modifications non sauvegardées.</numerusform>
+            <numerusform>Il semble que BrickStore se soit arrêté brutalement alors que %n documents avaient des modifications non sauvegardées.</numerusform>
+            <numerusform>Il semble que BrickStore se soit arrêté brutalement alors que %n documents avaient des modifications non sauvegardées.</numerusform>
         </translation>
     </message>
     <message>
@@ -1140,17 +1140,17 @@
     <message>
         <location line="+25"/>
         <source>The way BrickStore uses LDraw to render 3D models for parts has changed: by default it will now download and maintain its own LDraw installation.&lt;br&gt;&lt;br&gt;Please check the LDraw page in Settings if you still want to use a custom LDraw installation.</source>
-        <translation>La façon dont BrickStore utilise LDraw pour rendre les modèles 3D des pièces a changé&#x202f;: par défaut, il téléchargera et maintiendra désormais sa propre installation LDraw.&lt;br&gt;&lt;br&gt;Vérifie la page LDraw dans Paramètres si tu souhaites toujours utiliser une installation LDraw personnalisée.</translation>
+        <translation>La façon dont BrickStore utilise LDraw pour le rendu des modèles 3D des pièces a changé&#x202f;: par défaut, il téléchargera et maintiendra désormais sa propre installation LDraw.&lt;br&gt;&lt;br&gt;Vérifie la page LDraw dans Paramètres si tu souhaites toujours utiliser une installation LDraw personnalisée.</translation>
     </message>
     <message>
         <location line="+14"/>
         <source>Started downloading an LDraw library update</source>
-        <translation>Commence à télécharger une mise à jour de la bibliothèque LDraw</translation>
+        <translation>Début du téléchargement d&apos;une mise à jour de la bibliothèque LDraw</translation>
     </message>
     <message>
         <location line="+5"/>
         <source>Finished downloading an LDraw library update</source>
-        <translation>Fini de télécharger une mise à jour de la bibliothèque LDraw</translation>
+        <translation>Fin du téléchargement d&apos;une mise à jour de la bibliothèque LDraw</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -1165,7 +1165,7 @@
     <message>
         <location line="+7"/>
         <source>No valid BrickLink login settings found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
-        <translation>N&apos;a pas trouvé de paramètres d&apos;authentification BrickLink valides.&lt;br /&gt;&lt;br /&gt;Voulez-vous changer ces paramètres maintenant?</translation>
+        <translation>Aucun paramètre d&apos;identification BrickLink valide n'est disponible.&lt;br /&gt;&lt;br /&gt;Voulez-vous changer ces paramètres maintenant ?</translation>
     </message>
     <message>
         <location line="+24"/>
@@ -1901,7 +1901,7 @@
     <message>
         <location filename="../src/desktop/desktopapplication.cpp" line="+169"/>
         <source>Enable anonymous crash reporting?&lt;br&gt;&lt;br&gt;Please consider enabling this feature when available.&lt;br&gt;If you have any doubts about what information is being submitted and how it is used, please &lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;see here&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash reporting can be enabled or disabled at any time in the Settings dialog.</source>
-        <translation>Activer le signalement anonyme des collisions?&lt;br&gt;&lt;br&gt;Veuillez envisager d&apos;activer cette fonction lorsqu&apos;elle est disponible.&lt;br&gt;Si vous avez des doutes sur les informations soumises et la façon dont elles sont utilisées, veuillez &lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;voir ici&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Le signalement des collisions peut être activé ou désactivé à tout moment dans la boîte de dialogue Paramètres.</translation>
+        <translation>Activer le signalement anonyme des crashs ?&lt;br&gt;&lt;br&gt;Veuillez envisager d&apos;activer cette fonction lorsqu&apos;elle est disponible.&lt;br&gt;Si vous avez des doutes sur les informations soumises et la façon dont elles sont utilisées, veuillez &lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;voir ici&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Le signalement des crashs peut être activé ou désactivé à tout moment dans la boîte de dialogue Paramètres.</translation>
     </message>
     <message>
         <location line="+179"/>
@@ -1983,7 +1983,7 @@
     <message>
         <location line="+10"/>
         <source>Set sale in percent for the selected items (this will &lt;u&gt;not&lt;/u&gt; change any prices).&lt;br /&gt;Negative values are also allowed.</source>
-        <translation>Fixez la remise en pourcents pour les articles sélectionnés (ceci ne va &lt;u&gt;pas&lt;/u&gt; changer les prix).&lt;br /&gt;Les valeurs négatives sont aussi autorisées.</translation>
+        <translation>Fixer la remise en pourcents pour les articles sélectionnés (ceci ne va &lt;u&gt;pas&lt;/u&gt; changer les prix).&lt;br /&gt;Les valeurs négatives sont aussi autorisées.</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -2033,7 +2033,7 @@
     <message>
         <location line="+8"/>
         <source>Enter the new marker text for all selected items:</source>
-        <translation>Saisis le nouveau texte de marquage pour tous les éléments sélectionnés&#x202f;:</translation>
+        <translation>Saisir le nouveau texte de marquage pour tous les éléments sélectionnés&#x202f;:</translation>
     </message>
     <message numerus="yes">
         <location line="+84"/>
@@ -2147,7 +2147,7 @@
     <message>
         <location line="+28"/>
         <source>There are problems: %1Do you really want to export this list?</source>
-        <translation>Il y a des erreurs non résolues: %1Voulez-vous vraiment exporter cette liste?</translation>
+        <translation>Il y a des erreurs non résolues: %1Voulez-vous vraiment exporter cette liste ?</translation>
     </message>
     <message>
         <location line="+34"/>
@@ -3468,7 +3468,7 @@
     <message>
         <location filename="../src/desktop/importwantedlistdialog.ui"/>
         <source>Import BrickLink Wanted List</source>
-        <translation>Importer la liste des personnes recherchées de BrickLink</translation>
+        <translation>Importer les Wanted List de BrickLink</translation>
     </message>
     <message>
         <location/>
@@ -5879,7 +5879,7 @@ Clic droit Menu</translation>
     <message>
         <location line="-532"/>
         <source>Which items should be subtracted from the current document:</source>
-        <translation>Quels articles doivent être soustraits du document courant:</translation>
+        <translation>Quels articles doivent être soustraits du document courant :</translation>
     </message>
     <message>
         <location line="+220"/>
@@ -5912,12 +5912,12 @@ Clic droit Menu</translation>
     <message>
         <location line="+5"/>
         <source>Additionally sort ascending by %1</source>
-        <translation>En outre, trier en ordre croissant par %1</translation>
+        <translation>Trier en plus en ordre croissant par %1</translation>
     </message>
     <message>
         <location line="+4"/>
         <source>Additionally sort descending by %1</source>
-        <translation>Additionnellement, trier en ordre décroissant par %1</translation>
+        <translation>Trier en plus en ordre décroissant par %1</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -5960,7 +5960,7 @@ Clic droit Menu</translation>
     <message>
         <location line="+1"/>
         <source>Currency:</source>
-        <translation>Monnaie:</translation>
+        <translation>Monnaie :</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -5970,7 +5970,7 @@ Clic droit Menu</translation>
     <message>
         <location line="+1"/>
         <source>Split horizontally</source>
-        <translation>Diviser horizontalement</translation>
+        <translation>Séparer horizontalement</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5980,7 +5980,7 @@ Clic droit Menu</translation>
     <message>
         <location line="+1"/>
         <source>Remove split</source>
-        <translation>Enlever la fente</translation>
+        <translation>Enlever la séparation</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5993,12 +5993,12 @@ Clic droit Menu</translation>
     <message>
         <location filename="../src/desktop/welcomewidget.cpp" line="+110"/>
         <source>Unpin</source>
-        <translation>Épingle</translation>
+        <translation>Détacher</translation>
     </message>
     <message>
         <location line="+0"/>
         <source>Pin</source>
-        <translation>Épingle</translation>
+        <translation>Épingler</translation>
     </message>
     <message>
         <location line="+55"/>
