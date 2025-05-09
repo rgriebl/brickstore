@@ -7,7 +7,7 @@
         <location filename="../src/desktop/aboutdialog.ui"/>
         <location filename="../src/mobile/AboutDialog.qml" line="+10"/>
         <source>About</source>
-        <translation>Über</translation>
+        <translation>Überr</translation>
     </message>
 </context>
 <context>
