@@ -16,6 +16,7 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQueryModel>
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QJsonValue>
 
 #include "bricklink/core.h"
 #include "bricklink/io.h"
