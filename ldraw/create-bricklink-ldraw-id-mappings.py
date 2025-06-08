@@ -95,7 +95,7 @@ def scanStudioUnOfficial(dir):
 
 def downloadAndUnpack(tempDir):
     ldrawUrl = 'https://library.ldraw.org/library/updates/complete.zip'
-    studioUrl = 'https://dzncyaxjqx7p3.cloudfront.net/Studio2.0/Studio+2.0.pkg'
+    studioUrl = 'https://studio.download.bricklink.info/Studio2.0/Studio+2.0.pkg'
 
     ldrawFile = "ldraw.zip"
     studioFile = "studio.pkg"
