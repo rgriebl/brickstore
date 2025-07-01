@@ -1090,7 +1090,7 @@ void Orders::importOldCache(const QString &userId)
     d->m_db.commit();
 
     QFile importedFile(imported.absoluteFilePath());
-    importedFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    (void) importedFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
     importedFile.close();
 }
 

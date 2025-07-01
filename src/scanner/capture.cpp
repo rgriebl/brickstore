@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QGuiApplication>
 #include <QPointer>
+#include <QElapsedTimer>
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0) && QT_CONFIG(permissions)
 #  include <QCoreApplication>
 #  include <QPermissions>

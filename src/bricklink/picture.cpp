@@ -8,6 +8,7 @@
 #include <QtCore/QBuffer>
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QCoreApplication>
+#include <QtCore/QElapsedTimer>
 #include <QtNetwork/QNetworkInformation>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>

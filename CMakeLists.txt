@@ -14,7 +14,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(SENTRY_VERSION 0.7.10)
-set(QCORO_VERSION  0.10.0)
+set(QCORO_VERSION  0.12.0)
 
 # for QtCreator
 set(QML_IMPORT_PATH ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/imports CACHE STRING "" FORCE)
@@ -170,10 +170,18 @@ if (ANDROID OR IOS OR FORCE_MOBILE)
     set(QUICK_CONTROLS "QtQuick.Controls.Material")
     find_package(Qt6 CONFIG QUIET REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 QuickDialogs2Utils Svg Multimedia MultimediaQuickPrivate)
 
+    if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.10.0")
+        find_package(Qt6 CONFIG QUIET REQUIRED QmlPrivate QuickPrivate QuickTemplates2Private QuickDialogs2Private QuickControls2ImplPrivate QuickDialogs2UtilsPrivate)
+    endif()
+
 elseif (BACKEND_ONLY)
     set(BS_BACKEND ON)
     set(BS_TYPE "Backend")
     add_compile_definitions(BS_BACKEND)
+
+    if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.10.0")
+        find_package(Qt6 CONFIG QUIET REQUIRED GuiPrivate)
+    endif()
 
 else()
     set(BS_DESKTOP ON)
@@ -181,6 +189,9 @@ else()
     add_compile_definitions(BS_DESKTOP)
     find_package(Qt6 CONFIG QUIET REQUIRED Widgets PrintSupport Qml Quick Quick3D Multimedia QuickWidgets Svg)
 
+    if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.10.0")
+        find_package(Qt6 CONFIG QUIET REQUIRED GuiPrivate WidgetsPrivate QmlPrivate QuickPrivate)
+    endif()
 endif()
 
 if (${Qt6_VERSION} VERSION_LESS "${MIN_QT_VERSION}")
