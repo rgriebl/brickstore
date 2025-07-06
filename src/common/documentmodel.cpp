@@ -1530,7 +1530,7 @@ void DocumentModel::setCurrencyCode(const QString &ccode, double crate)
         m_undo->push(new CurrencyCmd(this, ccode, crate));
 }
 
-void DocumentModel::adjustLotCurrencyToModel(BrickLink::LotList &lots, const QString &fromCurrency)
+void DocumentModel::adjustLotCurrencyToModel(BrickLink::LotList &lots, const QString &fromCurrency) const
 {
     if (currencyCode() != fromCurrency) {
         double r = Currency::inst()->crossRate(fromCurrency, currencyCode());

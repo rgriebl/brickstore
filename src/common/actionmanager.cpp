@@ -381,6 +381,7 @@ void ActionManager::initialize()
     A("edit_mergeitems",                QT_TR_NOOP("Consolidate Items..."), QT_TR_NOOP("Ctrl+L", "Edit|Consolidate Items"),  NeedSelection(2));
     A("edit_partoutitems",              QT_TR_NOOP("Part out Item..."),                                                      NeedInventory | NeedSelection(1) | NeedQuantity);
     A("edit_copy_fields",               QT_TR_NOOP("Copy Values from Document..."),                                          NeedDocument | NeedLots);
+    A("edit_additems_from_documents",   QT_TR_NOOP("Add Items from Documents..."),                                           NeedDocument);
     A("edit_select_all",                QT_TR_NOOP("Select All"),           QKeySequence::SelectAll,                         NeedDocument | NeedLots);
     A("edit_select_none",               QT_TR_NOOP("Select None"),          QT_TR_NOOP("Ctrl+Shift+A", "Edit|Select None"),  NeedDocument | NeedLots);
     // ^^ QKeySequence::Deselect is only mapped on Linux
