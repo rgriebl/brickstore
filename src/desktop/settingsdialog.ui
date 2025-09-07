@@ -20,7 +20,7 @@
    <item>
     <widget class="QTabWidget" name="w_tabs">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="usesScrollButtons">
       <bool>false</bool>
@@ -31,10 +31,10 @@
       </attribute>
       <layout class="QFormLayout" name="formLayout_3">
        <property name="fieldGrowthPolicy">
-        <enum>QFormLayout::ExpandingFieldsGrow</enum>
+        <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
        </property>
        <property name="formAlignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
        </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_8">
@@ -75,7 +75,7 @@
          <item>
           <spacer name="horizontalSpacer_2">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -112,7 +112,7 @@
             <string notr="true">Status</string>
            </property>
            <property name="textFormat">
-            <enum>Qt::AutoText</enum>
+            <enum>Qt::TextFormat::AutoText</enum>
            </property>
           </widget>
          </item>
@@ -239,7 +239,7 @@
             <string>When selected, the document is marked as modified just by sorting, filtering or changing the column layout.</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
            </property>
            <property name="wordWrap">
             <bool>true</bool>
@@ -286,7 +286,7 @@
             <string>&lt;a href='https://www.brickstore.dev/crash-reporting'&gt;See here&lt;/a&gt; for more information.</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
            </property>
            <property name="wordWrap">
             <bool>true</bool>
@@ -295,7 +295,7 @@
             <bool>true</bool>
            </property>
            <property name="textInteractionFlags">
-            <set>Qt::TextBrowserInteraction</set>
+            <set>Qt::TextInteractionFlag::TextBrowserInteraction</set>
            </property>
           </widget>
          </item>
@@ -325,10 +325,10 @@
          </property>
          <layout class="QFormLayout" name="formLayout_4">
           <property name="fieldGrowthPolicy">
-           <enum>QFormLayout::ExpandingFieldsGrow</enum>
+           <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
           </property>
           <property name="formAlignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
           </property>
           <item row="0" column="0">
            <widget class="QLabel" name="label_23">
@@ -388,14 +388,14 @@
              <string>Icon size</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
            <layout class="QGridLayout" name="gridLayouti">
             <property name="sizeConstraint">
-             <enum>QLayout::SetMaximumSize</enum>
+             <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
             </property>
             <property name="horizontalSpacing">
              <number>11</number>
@@ -427,10 +427,10 @@
                <number>10</number>
               </property>
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="tickPosition">
-               <enum>QSlider::TicksBelow</enum>
+               <enum>QSlider::TickPosition::TicksBelow</enum>
               </property>
               <property name="tickInterval">
                <number>1</number>
@@ -449,7 +449,7 @@
                <string notr="true">1000%</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -459,7 +459,7 @@
                <string notr="true">&lt;small&gt;50%&lt;/small&gt;</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+               <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
               </property>
              </widget>
             </item>
@@ -476,7 +476,7 @@
                <string notr="true">&lt;small&gt;200%&lt;/small&gt;</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop|Qt::AlignmentFlag::AlignTrailing</set>
               </property>
              </widget>
             </item>
@@ -488,14 +488,14 @@
              <string>Font size</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
            <layout class="QGridLayout" name="gridLayoutf">
             <property name="sizeConstraint">
-             <enum>QLayout::SetMaximumSize</enum>
+             <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
             </property>
             <property name="horizontalSpacing">
              <number>11</number>
@@ -527,10 +527,10 @@
                <number>10</number>
               </property>
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="tickPosition">
-               <enum>QSlider::TicksBelow</enum>
+               <enum>QSlider::TickPosition::TicksBelow</enum>
               </property>
               <property name="tickInterval">
                <number>1</number>
@@ -549,7 +549,7 @@
                <string notr="true">1000%</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -559,7 +559,7 @@
                <string notr="true">&lt;small&gt;50%&lt;/small&gt;</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+               <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
               </property>
              </widget>
             </item>
@@ -576,7 +576,7 @@
                <string notr="true">&lt;small&gt;200%&lt;/small&gt;</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
+               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTop|Qt::AlignmentFlag::AlignTrailing</set>
               </property>
              </widget>
             </item>
@@ -591,10 +591,10 @@
              </sizepolicy>
             </property>
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::Shape::StyledPanel</enum>
             </property>
             <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
+             <enum>QFrame::Shadow::Raised</enum>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayoutfi">
              <item>
@@ -633,7 +633,7 @@
                 <string>The quick brown fox jumps over the lazy dog.</string>
                </property>
                <property name="alignment">
-                <set>Qt::AlignCenter</set>
+                <set>Qt::AlignmentFlag::AlignCenter</set>
                </property>
                <property name="wordWrap">
                 <bool>true</bool>
@@ -653,10 +653,10 @@
          </property>
          <layout class="QFormLayout" name="formLayout_5">
           <property name="fieldGrowthPolicy">
-           <enum>QFormLayout::ExpandingFieldsGrow</enum>
+           <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
           </property>
           <property name="formAlignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
           </property>
           <item row="0" column="0">
            <widget class="QLabel" name="label_19">
@@ -704,10 +704,10 @@
        <item>
         <spacer name="verticalSpacer_6">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
+          <enum>QSizePolicy::Policy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -731,42 +731,38 @@
          </property>
          <layout class="QFormLayout" name="formLayout_9">
           <property name="fieldGrowthPolicy">
-           <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+           <enum>QFormLayout::FieldGrowthPolicy::FieldsStayAtSizeHint</enum>
           </property>
           <property name="formAlignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
           </property>
           <item row="0" column="0">
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Username</string>
+             <string>Access Token</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="w_bl_username">
+           <widget class="QLineEdit" name="w_bl_accesstoken">
             <property name="maxLength">
-             <number>30</number>
+             <number>172</number>
+            </property>
+            <property name="clearButtonEnabled">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="1" column="0" colspan="2">
            <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Password</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;You can get your Token from &lt;a href=&quot;https://bricklink.com/v3/brickstore-access-management.page&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#8ab4f8;&quot;&gt;https://bricklink.com/v3/brickstore-access-management.page&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="w_bl_password">
-            <property name="toolTip">
-             <string>If you set a password, it is saved in your system: it is just scrambled, but &lt;b&gt;not&lt;/b&gt; encrypted, because BrickStore needs to send this password to the BrickLink server when downloading data on your behalf.&lt;br&gt;&lt;br&gt;If you do not want to save your password, then just leave this field empty and you will be asked to enter your password the first time BrickStore is downloading data on your behalf from BrickLink after starting.</string>
+            <property name="openExternalLinks">
+             <bool>true</bool>
             </property>
-            <property name="maxLength">
-             <number>30</number>
-            </property>
-            <property name="echoMode">
-             <enum>QLineEdit::PasswordEchoOnEdit</enum>
+            <property name="textInteractionFlags">
+             <set>Qt::TextInteractionFlag::TextBrowserInteraction</set>
             </property>
            </widget>
           </item>
@@ -780,10 +776,10 @@
          </property>
          <layout class="QFormLayout" name="formLayout">
           <property name="fieldGrowthPolicy">
-           <enum>QFormLayout::ExpandingFieldsGrow</enum>
+           <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
           </property>
           <property name="formAlignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
           </property>
           <item row="1" column="0">
            <widget class="QLabel" name="label_29">
@@ -821,10 +817,10 @@
           <item>
            <layout class="QFormLayout" name="formLayout_6">
             <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::ExpandingFieldsGrow</enum>
+             <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
             </property>
             <property name="formAlignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
             </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label_13">
@@ -900,10 +896,10 @@
           <item>
            <spacer name="verticalSpacer_5">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
+             <enum>QSizePolicy::Policy::Fixed</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -916,12 +912,12 @@
           <item>
            <layout class="QFormLayout" name="formLayout_8">
             <property name="formAlignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
             </property>
             <item row="0" column="0">
              <spacer name="horizontalSpacer">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -955,10 +951,10 @@
        <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
+          <enum>QSizePolicy::Policy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -976,7 +972,7 @@
       </attribute>
       <layout class="QFormLayout" name="formLayout_2">
        <property name="fieldGrowthPolicy">
-        <enum>QFormLayout::ExpandingFieldsGrow</enum>
+        <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
        </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_26">
@@ -1025,10 +1021,10 @@
          <item row="2" column="0">
           <spacer name="verticalSpacer_7">
            <property name="orientation">
-            <enum>Qt::Vertical</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
+            <enum>QSizePolicy::Policy::Fixed</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1168,13 +1164,13 @@
             <string>Updates are downloaded and applied automatically in the background. Please only start a manual update, if the automatic one fails.</string>
            </property>
            <property name="textFormat">
-            <enum>Qt::RichText</enum>
+            <enum>Qt::TextFormat::RichText</enum>
            </property>
            <property name="wordWrap">
             <bool>true</bool>
            </property>
            <property name="textInteractionFlags">
-            <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+            <set>Qt::TextInteractionFlag::LinksAccessibleByMouse|Qt::TextInteractionFlag::TextSelectableByMouse</set>
            </property>
           </widget>
          </item>
@@ -1207,7 +1203,7 @@
        <item row="2" column="0">
         <widget class="QTreeView" name="w_tb_actions">
          <property name="editTriggers">
-          <set>QAbstractItemView::NoEditTriggers</set>
+          <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
          </property>
          <property name="showDropIndicator" stdset="0">
           <bool>false</bool>
@@ -1216,10 +1212,10 @@
           <bool>true</bool>
          </property>
          <property name="dragDropMode">
-          <enum>QAbstractItemView::DragOnly</enum>
+          <enum>QAbstractItemView::DragDropMode::DragOnly</enum>
          </property>
          <property name="defaultDropAction">
-          <enum>Qt::CopyAction</enum>
+          <enum>Qt::DropAction::CopyAction</enum>
          </property>
          <property name="alternatingRowColors">
           <bool>true</bool>
@@ -1259,10 +1255,10 @@
           <bool>true</bool>
          </property>
          <property name="dragDropMode">
-          <enum>QAbstractItemView::DragDrop</enum>
+          <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
          </property>
          <property name="defaultDropAction">
-          <enum>Qt::MoveAction</enum>
+          <enum>Qt::DropAction::MoveAction</enum>
          </property>
          <property name="alternatingRowColors">
           <bool>true</bool>
@@ -1287,7 +1283,7 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1" alignment="Qt::AlignRight">
+       <item row="1" column="1" alignment="Qt::AlignmentFlag::AlignRight">
         <widget class="QPushButton" name="w_tb_reset">
          <property name="text">
           <string>Reset all</string>
@@ -1321,7 +1317,7 @@
        <item>
         <widget class="QTreeView" name="w_sc_list">
          <property name="editTriggers">
-          <set>QAbstractItemView::NoEditTriggers</set>
+          <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
          </property>
          <property name="showDropIndicator" stdset="0">
           <bool>false</bool>
@@ -1396,10 +1392,10 @@
    <item>
     <widget class="QDialogButtonBox" name="w_buttons">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
      </property>
     </widget>
    </item>

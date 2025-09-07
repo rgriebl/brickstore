@@ -59,7 +59,7 @@ public:
                         const Color *color = nullptr) const;
     QSaveFile *dataSaveFile(QStringView fileName, const Item *item,
                             const Color *color = nullptr) const;
-    void setCredentials(const QPair<QString, QString> &credentials);
+    void setAccessToken(const QString &accessToken);
     QString userId() const;
 
     bool isAuthenticated() const;
@@ -138,7 +138,7 @@ signals:
     void authenticatedTransferFinished(TransferJob *job);
 
     void authenticationChanged(bool auth);
-    void authenticationFinished(const QString &userName, const QString &error);
+    void authenticationFinished(const QString &accessToken, const QString &error);
 
     void userIdChanged(const QString &userId);
 
@@ -165,7 +165,8 @@ private:
     Transfer *                 m_authenticatedTransfer = nullptr;
     bool                       m_authenticated = false;
     QTimer *                   m_authenticatedRefresh = nullptr;
-    QPair<QString, QString>    m_credentials;
+    QString                    m_accessToken;
+    QByteArray                 m_sessionToken;
     TransferJob *              m_loginJob = nullptr;
     QList<TransferJob *>       m_refreshJobs;
     QVector<TransferJob *>     m_jobsWaitingForAuthentication;
@@ -181,6 +182,7 @@ private:
     std::unique_ptr<PictureCache> m_pictureCache;
 #endif
 
+private:
     friend class QmlBrickLink;
 };
 

@@ -249,15 +249,14 @@ QSaveFile *Core::dataSaveFile(QStringView fileName, const Item *item, const Colo
     return f;
 }
 
-void Core::setCredentials(const QPair<QString, QString> &credentials)
+void Core::setAccessToken(const QString &accessToken)
 {
-    if (m_credentials != credentials) {
+    if (m_accessToken != accessToken) {
         bool wasAuthenticated = m_authenticated;
         m_authenticated = false;
         if (m_authenticatedTransfer)
             m_authenticatedTransfer->abortAllJobs();
-        bool newUserId = (credentials.first != m_credentials.first);
-        m_credentials = credentials;
+        m_accessToken = accessToken;
         if (wasAuthenticated) {
             emit authenticationChanged(false);
 
@@ -265,14 +264,13 @@ void Core::setCredentials(const QPair<QString, QString> &credentials)
                                               { { u"do_logout"_qs, u"true"_qs } });
             m_authenticatedTransfer->retrieve(logoutJob, true);
         }
-        if (newUserId)
-            emit userIdChanged(m_credentials.first);
+        emit userIdChanged(m_accessToken); //TODO: we cache orders per user-id ... is the token stable enough to do that?
     }
 }
 
 QString Core::userId() const
 {
-    return m_credentials.first;
+    return m_accessToken; //TODO: this is not the user-id anymore!
 }
 
 bool Core::isAuthenticated() const
@@ -285,26 +283,31 @@ void Core::retrieveAuthenticated(TransferJob *job)
     if (job)
         job->setNoRedirects(true);
 
-    if (!m_authenticated) {
+    if (!m_authenticated || m_sessionToken.isEmpty() ) {
         if (!m_loginJob) {
-            if (m_credentials.first.isEmpty() || m_credentials.second.isEmpty()) {
-                QMetaObject::invokeMethod(this, [job]() { job->abort(); });
+            if (m_accessToken.isEmpty()) {
+                if (job)
+                    QMetaObject::invokeMethod(this, [job]() { job->abort(); });
                 qWarning() << "Aborting transfer due to missing credentials";
                 return;
             }
 
-            m_loginJob = TransferJob::post(u"https://www.bricklink.com/ajax/renovate/loginandout.ajax"_qs,
-                                           {
-                                               { u"userid"_qs,          Utility::urlQueryEscape(m_credentials.first) },
-                                               { u"password"_qs,        Utility::urlQueryEscape(m_credentials.second) },
-                                               { u"keepme_loggedin"_qs, u"1"_qs },
-                                            });
+            QJsonObject jsonObj;
+
+            jsonObj[u"clientId"] = TransferJob::brickLinkClientId();
+            jsonObj[u"clientToken"] = m_accessToken;
+
+            QJsonDocument jsonDoc(jsonObj);
+
+            static const QString targetHost = u"https://account.prod.member.bricklink.info/api/v1/actions/verify-and-create-session"_qs;
+            m_loginJob = TransferJob::post(targetHost, {}, u"application/json"_qs, jsonDoc.toJson());
             m_loginJob->setNoRedirects(true);
             m_authenticatedTransfer->retrieve(m_loginJob, true);
         }
         if (job)
             m_jobsWaitingForAuthentication << job;
-    } else {
+    } else if (job) {
+        job->setSessionToken(m_sessionToken);
         m_authenticatedTransfer->retrieve(job);
     }
 }
@@ -408,14 +411,21 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
                 auto json = QJsonDocument::fromJson(job->data());
                 if (!json.isNull()) {
                     bool wasAuthenticated = m_authenticated;
-                    m_authenticated = (json[u"returnCode"].toInt() == 0)
-                                      || ((json[u"returnCode"].toInt() == -4)
-                                          && (json[u"returnMessage"] == u"Already Logged-in!"_qs));
-                    if (!m_authenticated) {
-                        error = json[u"returnMessage"].toString();
-                        if (error.isEmpty())
-                            error = u"<unknown error>"_qs;
+                    m_authenticated = false;
+                    m_sessionToken.clear();
+
+                    QJsonValue sessionToken = json[u"sessionToken"];
+                    if (sessionToken.isString()) {
+                        m_sessionToken = sessionToken.toString().toLatin1();
+                        if (!m_sessionToken.isEmpty())
+                            m_authenticated = true;
+                        else
+                            error = u"empty session token"_qs;
+                    } else {
+                        error = u"<unknown error>"_qs;
                     }
+
+                    qCDebug(LogTransfer) << "Authenticated:" << m_sessionToken;
 
                     if (wasAuthenticated != m_authenticated)
                         emit authenticationChanged(m_authenticated);
@@ -423,10 +433,13 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
             } else {
                 error = job->errorString();
             }
-            emit authenticationFinished(m_credentials.first, error);
+            emit authenticationFinished(m_accessToken, error);
 
-            for (TransferJob *authJob : std::as_const(m_jobsWaitingForAuthentication))
+            for (TransferJob *authJob : std::as_const(m_jobsWaitingForAuthentication)) {
+                if (!m_sessionToken.isEmpty())
+                    authJob->setSessionToken(m_sessionToken);
                 m_authenticatedTransfer->retrieve(authJob);
+            }
             m_jobsWaitingForAuthentication.clear();
 
             if (!m_authenticated)
@@ -446,7 +459,8 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
         } else {
             if (job->responseCode() == 302) {
                 if (job->redirectUrl().toString().contains(u"v2/login.page")
-                        || job->redirectUrl().toString().contains(u"login.asp?")) {
+                        || job->redirectUrl().toString().contains(u"login.asp?")
+                        || job->redirectUrl().toString().contains(u"auth/sign-in?")) {
                     if (m_authenticated) {
                         m_authenticated = false;
                         emit authenticationChanged(m_authenticated);
@@ -459,7 +473,21 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
                 QMetaObject::invokeMethod(this, [=, this]() {
                         retrieveAuthenticated(job);
                     }, Qt::QueuedConnection);
-            } else {
+            } else if ((job->responseCode() == 401)
+                       && job->url().toString().contains(u"downloadXML.file")) {
+                //TODO: what is this special file URL?
+                if (m_authenticated) {
+                    m_authenticated = false;
+                    emit authenticationChanged(m_authenticated);
+                }
+
+                job->resetForReuse();
+
+                QMetaObject::invokeMethod(this, [=, this]() {
+                    retrieveAuthenticated(job);
+                }, Qt::QueuedConnection);
+            }
+            else {
                 emit authenticatedTransferFinished(job);
             }
         }
@@ -478,6 +506,8 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
         else
             m_authenticatedRefresh->stop();
     });
+
+    //TODO: REMOVE?
     m_authenticatedRefresh->setInterval(30min);
     connect(m_authenticatedRefresh, &QTimer::timeout,
             this, [this]() {
@@ -1119,7 +1149,7 @@ const QSet<ApiQuirk> Core::knownApiQuirks()
         ApiQuirk::OrderXmlHasUnescapedFields,
         ApiQuirk::InventoryCommentsAreDoubleEscaped,
         ApiQuirk::InventoryRemarksAreDoubleEscaped,
-        ApiQuirk::PasswordLimitedTo15Characters,
+//        ApiQuirk::PasswordLimitedTo15Characters,
         ApiQuirk::CatalogDownloadEntitiesAreDoubleEscaped,
     };
     return known;

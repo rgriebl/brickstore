@@ -755,8 +755,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     }
     w_bl_pg_retriever->setText(pgCache->retrieverName());
 
-    w_bl_username->setMinimumWidth(fontMetrics().averageCharWidth() * 30);
-    w_bl_password->setMinimumWidth(fontMetrics().averageCharWidth() * 30);
+    w_bl_accesstoken->setMinimumWidth(fontMetrics().averageCharWidth() * 60);
 
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
     w_docdir->insertSeparator(1);
@@ -793,41 +792,21 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     connect(Currency::inst(), &Currency::ratesChanged,
             this, &SettingsDialog::currenciesUpdated);
 
-    connect(w_bl_username, &QLineEdit::textChanged,
+    connect(w_bl_accesstoken, &QLineEdit::textChanged,
             this, [this](const QString &s) {
-        bool isWrong = s.contains(u'@');
-        bool wasWrong = w_bl_username->property("showInputError").toBool();
+        bool isWrong = s.isEmpty(); //TODO: check with RegExp for character set and length
+        bool wasWrong = w_bl_accesstoken->property("showInputError").toBool();
 
         if (isWrong != wasWrong) {
-            w_bl_username->setProperty("showInputError", isWrong);
+            w_bl_accesstoken->setProperty("showInputError", isWrong);
 
             if (isWrong) {
-                QString msg = tr("Your username is required here - not your email address.");
-                w_bl_username->setToolTip(msg);
-                QToolTip::showText(w_bl_username->mapToGlobal(w_bl_username->rect().bottomLeft()),
-                                   msg, w_bl_username, { }, 2000);
+                QString msg = tr("Your access token is malformed.");
+                w_bl_accesstoken->setToolTip(msg);
+                QToolTip::showText(w_bl_accesstoken->mapToGlobal(w_bl_accesstoken->rect().bottomLeft()),
+                                   msg, w_bl_accesstoken, { }, 2000);
             } else {
-                w_bl_username->setToolTip({ });
-                QToolTip::hideText();
-            }
-        }
-    });
-    connect(w_bl_password, &QLineEdit::textChanged,
-            this, [this](const QString &s) {
-        bool isTooLong = BrickLink::core()->isApiQuirkActive(BrickLink::ApiQuirk::PasswordLimitedTo15Characters)
-                         && (s.length() > 15);
-        bool wasTooLong = w_bl_password->property("showInputError").toBool();
-
-        if (isTooLong != wasTooLong) {
-            w_bl_password->setProperty("showInputError", isTooLong);
-
-            if (isTooLong) {
-                QString msg = tr("BrickLink's maximum password length is 15.");
-                w_bl_password->setToolTip(msg);
-                QToolTip::showText(w_bl_password->mapToGlobal(w_bl_password->rect().bottomLeft()),
-                                   msg, w_bl_password, { }, 2000);
-            } else {
-                w_bl_password->setToolTip({ });
+                w_bl_accesstoken->setToolTip({ });
                 QToolTip::hideText();
             }
         }
@@ -1121,8 +1100,7 @@ void SettingsDialog::load()
 
     // --[ BRICKLINK ]-------------------------------------------------
 
-    w_bl_username->setText(Config::inst()->brickLinkUsername());
-    w_bl_password->setText(Config::inst()->brickLinkPassword());
+    w_bl_accesstoken->setText(Config::inst()->brickLinkAccessToken());
 
     auto vatType = BrickLink::core()->priceGuideCache()->currentVatType();
     w_bl_pg_vat->setCurrentIndex(w_bl_pg_vat->findData(QVariant::fromValue(vatType)));
@@ -1199,8 +1177,7 @@ void SettingsDialog::save()
 
     // --[ BRICKLINK ]-----------------------------------------------------------------
 
-    Config::inst()->setBrickLinkUsername(w_bl_username->text());
-    Config::inst()->setBrickLinkPassword(w_bl_password->text());
+    Config::inst()->setBrickLinkAccessToken(w_bl_accesstoken->text());
 
     auto vatType = w_bl_pg_vat->currentData().value<BrickLink::VatType>();
     BrickLink::core()->priceGuideCache()->setCurrentVatType(vatType);

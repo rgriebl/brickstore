@@ -15,6 +15,9 @@
 
 Q_LOGGING_CATEGORY(LogTransfer, "bs.transfer", QtWarningMsg)
 
+static const char *BL_SESSION_TOKEN_HEADER = "x-bl-session-token";
+static const char *BL_CLIENT_ID_HEADER = "x-bl-tpa-client-id";
+static const char *BL_CLIENT_ID_VALUE = "ca629c09-4d8c-45dc-8a6f-bfb2b058f720";
 
 TransferJob::~TransferJob()
 {
@@ -23,10 +26,16 @@ TransferJob::~TransferJob()
     delete m_file;
 }
 
+QString TransferJob::brickLinkClientId()
+{
+    return QString::fromLatin1(BL_CLIENT_ID_VALUE);
+}
+
 TransferJob *TransferJob::get(const QString &url, const QUrlQuery &query)
 {
     return create(HttpGet, url, query, { }, { });
 }
+
 
 TransferJob *TransferJob::post(const QString &url, const QUrlQuery &query)
 {
@@ -346,6 +355,9 @@ void TransferRetriever::schedule()
             req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                              QNetworkRequest::ManualRedirectPolicy);
         }
+        req.setRawHeader(BL_CLIENT_ID_HEADER, BL_CLIENT_ID_VALUE);
+        if (!j->sessionToken().isEmpty())
+            req.setRawHeader(BL_SESSION_TOKEN_HEADER, j->sessionToken());
 
 #if QT_CONFIG(ssl)
         auto ssl = req.sslConfiguration();
@@ -360,7 +372,7 @@ void TransferRetriever::schedule()
             if (!j->m_only_if_different.isEmpty())
                 req.setHeader(QNetworkRequest::IfNoneMatchHeader, j->m_only_if_different);
             j->m_reply = m_nam->get(req);
-        } else {
+        } else { // POST Method
             req.setHeader(QNetworkRequest::ContentTypeHeader, j->m_postContentType);
             j->m_reply = m_nam->post(req, j->m_postContent);
         }

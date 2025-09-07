@@ -23,6 +23,8 @@ class TransferJob
 public:
     ~TransferJob();
 
+    static QString brickLinkClientId();
+
     static TransferJob *get(const QString &url, const QUrlQuery &query = { });
     static TransferJob *post(const QString &url, const QUrlQuery &query = { });
     static TransferJob *post(const QString &url, const QUrlQuery &query, const QString &contentType, const QByteArray &content);
@@ -50,8 +52,10 @@ public:
     void setOnlyIfDifferent(const QString &etag) { m_only_if_different = etag; }
     void setOutputDevice(QIODevice *output);
     void setUserData(const QByteArray &tag, const QVariant &v) { m_userTag = tag; m_userData = v; }
+    void setSessionToken(const QByteArray &token)              { m_sessionToken = token; }
     QVariant userData(const QByteArray &tag) const             { return m_userTag == tag ? m_userData : QVariant(); }
     QByteArray userTag() const                                 { return m_userTag; }
+    QByteArray sessionToken() const                            { return m_sessionToken; }
 
     Transfer *transfer() const       { return m_transfer; }
     void abort();
@@ -109,6 +113,7 @@ private:
     bool         m_no_redirects     : 1 = false;
     bool         m_high_priority    : 1 = false;
     bool         m_auto_delete      : 1 = true;
+    QByteArray   m_sessionToken;
 
     friend class Transfer;
     friend class TransferRetriever;
