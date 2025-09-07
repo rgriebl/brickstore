@@ -616,22 +616,6 @@ void Config::setBrickLinkPassword(const QString &pass, bool doNotSave)
     }
 }
 
-bool Config::onlineStatus() const
-{
-    return value(u"Internet/Online"_qs, true).toBool();
-}
-
-void Config::setOnlineStatus(bool b)
-{
-    bool ob = onlineStatus();
-
-    if (b != ob) {
-        setValue(u"Internet/Online"_qs, b);
-
-        emit onlineStatusChanged(b);
-    }
-}
-
 Config::PartOutMode Config::partOutMode() const
 {
     int v = value(u"General/PartOutMode"_qs).toInt();

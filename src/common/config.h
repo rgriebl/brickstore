@@ -76,8 +76,6 @@ public:
     void setShowInputErrors(bool b);
     bool showDifferenceIndicators() const;
     void setShowDifferenceIndicators(bool b);
-    bool onlineStatus() const;
-    void setOnlineStatus(bool b);
 
     enum class PartOutMode {
         Ask,
@@ -184,7 +182,6 @@ signals:
     void showDifferenceIndicatorsChanged(bool b);
     void visualChangesMarkModifiedChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
-    void onlineStatusChanged(bool b);
     void toolBarSizeChanged(Config::UISize iconSize);
     void iconSizePercentChanged(int p);
     void fontSizePercentChanged(int p);

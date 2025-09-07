@@ -34,7 +34,8 @@ OnlineState::OnlineState(QObject *parent)
 
         connect(qni, &QNetworkInformation::reachabilityChanged,
                 this, [this](QNetworkInformation::Reachability r) {
-            auto online = (r == QNetworkInformation::Reachability::Online);
+            auto online = (r == QNetworkInformation::Reachability::Online)
+                || (r == QNetworkInformation::Reachability::Unknown);
             if (online != m_online) {
                 m_online = online;
                 emit onlineStateChanged(m_online);
