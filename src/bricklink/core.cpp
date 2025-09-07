@@ -230,7 +230,7 @@ QString Core::dataFileName(QStringView fileName, const Item *item, const Color *
 QFile *Core::dataReadFile(QStringView fileName, const Item *item, const Color *color) const
 {
     auto f = new QFile(dataFileName(fileName, item, color));
-    f->open(QIODevice::ReadOnly);
+    (void) f->open(QIODevice::ReadOnly);
     return f;
 }
 

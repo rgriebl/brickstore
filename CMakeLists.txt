@@ -13,8 +13,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(SENTRY_VERSION 0.7.10)
+set(SENTRY_VERSION 0.10.1)
 set(QCORO_VERSION  0.12.0)
+
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
 
 # for QtCreator
 set(QML_IMPORT_PATH ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/imports CACHE STRING "" FORCE)
@@ -112,7 +114,7 @@ elseif (CLANG)
     list(APPEND cxxopts -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types)
 elseif (GCC)
     list(APPEND cxxopts -fcoroutines)
-    list(APPEND copts -Wall -Wextra -Wpedantic -Werror)
+    list(APPEND copts -Wall -Wextra -Wpedantic -Werror -Wno-expansion-to-defined)
 endif()
 add_compile_options("$<$<COMPILE_LANGUAGE:C>:${copts}>")
 add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${copts}$<SEMICOLON>${cxxopts}>")

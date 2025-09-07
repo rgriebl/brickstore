@@ -233,7 +233,9 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, bool re
         { "edit_copy", [this](bool) { copy(); } },
         { "edit_duplicate", [this](bool) { duplicate(); } },
         { "edit_paste", [this](bool) -> QCoro::Task<> {
-              auto [lots, currencyCode] = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
+              auto gcc15Bug = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
+              auto lots = std::get<0>(gcc15Bug);
+              auto currencyCode = std::get<1>(gcc15Bug);
               QModelIndex oldCurrentIdx;
 
               if (!lots.empty()) {
