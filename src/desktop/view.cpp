@@ -313,19 +313,27 @@ View::View(Document *document, QWidget *parent)
 
     m_actionTable = {
         { "edit_partoutitems", [this](bool) { partOutItems(); } },
+        { "edit_additems_from_documents", [this](bool) -> QCoro::Task<> {
+             SelectCopyMergeDialog dlg(model(),
+                                       tr("Select the documents whose items will be appended to the current document"),
+                                       QString(), true, this);
+             dlg.setWindowModality(Qt::ApplicationModal);
+             dlg.show();
+
+             if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
+                 m_model->addLots(dlg.lots(*m_model), DocumentModel::AddLotMode::AddAsNew);
+             }
+         } },
         { "edit_copy_fields", [this](bool) -> QCoro::Task<> {
               SelectCopyMergeDialog dlg(model(),
                                         tr("Select the document that should serve as a source to fill in the corresponding fields in the current document"),
-                                        tr("Choose how fields are getting copied or merged."), this);
+                                        tr("Choose how fields are getting copied or merged."), false, this);
               dlg.setWindowModality(Qt::ApplicationModal);
               dlg.show();
 
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
-                  LotList lots = dlg.lots();
-                  if (!lots.empty()) {
-                      m_model->adjustLotCurrencyToModel(lots, dlg.currencyCode());
-                      m_document->copyFields(lots, dlg.fieldMergeModes());
-                  }
+                  LotList lots = dlg.lots(*m_model);
+                  m_document->copyFields(lots, dlg.fieldMergeModes());
                   qDeleteAll(lots);
               }
           } },
