@@ -60,7 +60,7 @@ public:
     QSaveFile *dataSaveFile(QStringView fileName, const Item *item,
                             const Color *color = nullptr) const;
     void setAccessToken(const QString &accessToken);
-    QString userId() const;
+    bool hasAccessToken() const;
 
     bool isAuthenticated() const;
     void retrieveAuthenticated(TransferJob *job);
@@ -139,8 +139,6 @@ signals:
 
     void authenticationChanged(bool auth);
     void authenticationFinished(const QString &accessToken, const QString &error);
-
-    void userIdChanged(const QString &userId);
 
 private:
     Core(const QString &dataDir, const QString &updateUrl, quint64 physicalMem);

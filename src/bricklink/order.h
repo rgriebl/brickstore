@@ -236,7 +236,7 @@ signals:
 
 private:
     Orders(Core *core);
-    void reloadOrdersFromDatabase(const QString &userId);
+    void reloadOrdersFromDatabase();
     void importOldCache(const QString &userId);
     static QHash<Order *, QString> parseOrdersXML(const QByteArray &data_);
     void startUpdateInternal(const QDate &fromDate, const QDate &toDate, const QString &orderId);

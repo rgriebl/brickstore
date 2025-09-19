@@ -264,13 +264,12 @@ void Core::setAccessToken(const QString &accessToken)
                                               { { u"do_logout"_qs, u"true"_qs } });
             m_authenticatedTransfer->retrieve(logoutJob, true);
         }
-        emit userIdChanged(m_accessToken); //TODO: we cache orders per user-id ... is the token stable enough to do that?
     }
 }
 
-QString Core::userId() const
+bool Core::hasAccessToken() const
 {
-    return m_accessToken; //TODO: this is not the user-id anymore!
+    return !m_accessToken.isEmpty();
 }
 
 bool Core::isAuthenticated() const

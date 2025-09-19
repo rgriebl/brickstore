@@ -620,9 +620,7 @@ Orders::Orders(Core *core)
 {
     d->m_core = core;
 
-    connect(core, &Core::userIdChanged,
-            this, &Orders::reloadOrdersFromDatabase);
-    reloadOrdersFromDatabase(core->userId());
+    reloadOrdersFromDatabase();
 
     connect(core, &Core::authenticatedTransferStarted,
             this, [this](TransferJob *job) {
@@ -785,10 +783,18 @@ Orders::Orders(Core *core)
     });
 }
 
-void Orders::reloadOrdersFromDatabase(const QString &userId)
+void Orders::reloadOrdersFromDatabase()
 {
-    if (userId == d->m_userId)
-        return;
+    // dummy user id, because of the new access token system
+    QString dbName = d->m_core->dataPath() + u"order_cache__userid_.sqlite"_qs;
+
+    // try to locate an existing DB and use that instead to preserve old downloads
+    const auto allDBs = QDir(d->m_core->dataPath()).entryInfoList({ u"order_cache_*.sqlite"_qs },
+                                                                  QDir::Files, QDir::Time);
+    if (!allDBs.isEmpty()) {
+        dbName = allDBs.constFirst().absoluteFilePath();
+        qInfo() << "Found existing order cache database:" << allDBs.constFirst().fileName();
+    }
 
     beginResetModel();
     qDeleteAll(d->m_orders);
@@ -798,15 +804,9 @@ void Orders::reloadOrdersFromDatabase(const QString &userId)
 
     emit countChanged(0);
 
-    d->m_userId = userId;
-
     if (d->m_db.isOpen())
         d->m_db.close();
 
-    if (userId.isEmpty())
-        return;
-
-    QString dbName = d->m_core->dataPath() + u"order_cache_%1.sqlite"_qs.arg(userId);
     d->m_db = QSqlDatabase::addDatabase(u"QSQLITE"_qs, u"OrderCache"_qs);
     d->m_db.setDatabaseName(dbName);
 
@@ -945,7 +945,7 @@ void Orders::reloadOrdersFromDatabase(const QString &userId)
     setUpdateStatus(lastUpdated.isValid() ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
     setLastUpdated(lastUpdated);
 
-    importOldCache(userId);
+    //importOldCache(userId); no user-id, no import
 
     if (d->m_loadOrdersQuery.exec()) {
         stopwatch sw("Loading orders");
@@ -1402,7 +1402,7 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
 {
     if (updateStatus() == UpdateStatus::Updating)
         return;
-    if (d->m_core->userId().isEmpty())
+    if (!d->m_core->hasAccessToken())
         return;
     Q_ASSERT(d->m_jobs.isEmpty());
     setUpdateStatus(UpdateStatus::Updating);
