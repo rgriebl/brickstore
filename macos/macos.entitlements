@@ -4,5 +4,9 @@
   <dict>
     <key>com.apple.security.device.camera</key>
     <true/>
+    <key>com.apple.application-identifier</key>
+    <array>
+      <string>U3W9KT9G26.de.brickforge.brickstore</string>
+    </array>
   </dict>
 </plist>
