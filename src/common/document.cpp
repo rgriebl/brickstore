@@ -1638,7 +1638,7 @@ QCoro::Task<Document *> Document::load(QString fileName)
                            + DocumentIO::nameFiltersForBrickLinkXML()
                            + DocumentIO::nameFiltersForLDraw();
         QStringList allExtensions;
-        for (const auto &filter : nameFilters)
+        for (const auto &filter : std::as_const(nameFilters))
             allExtensions += filter.second;
         allExtensions.removeDuplicates();
         nameFilters.prepend({ tr("All Supported Files"), allExtensions });
@@ -2273,7 +2273,7 @@ QByteArray Document::saveColumnsState() const
        << qint32(m_columnData.size())
        << qint32(sortColumns.size());
 
-    for (const auto &[section, order] : sortColumns)
+    for (const auto &[section, order] : std::as_const(sortColumns))
        ds << qint32(section) << (order == Qt::AscendingOrder);
 
     for (const auto &cd : m_columnData) {

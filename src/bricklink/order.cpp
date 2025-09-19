@@ -1289,7 +1289,7 @@ void Orders::appendOrderToModel(std::unique_ptr<Order> order)
     d->m_orders.append(o);
 
     endInsertRows();
-    emit countChanged(rowCount());
+    emit countChanged(int(d->m_orders.size()));
 }
 
 void Orders::setLastUpdated(const QDateTime &lastUpdated)

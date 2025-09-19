@@ -969,7 +969,7 @@ void DocumentDelegate::setModelDataInternal(const QVariant &value, QAbstractItem
     }
 
     auto selection = m_table->selectionModel()->selectedRows();
-    for (const auto &s : selection) {
+    for (const auto &s : std::as_const(selection)) {
         QVariant newValue = value;
 
         if (intCalc || doubleCalc) {

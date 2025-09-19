@@ -48,7 +48,7 @@ public:
               const QByteArray &backendId = { });
 
 signals:
-    void scanFinished(uint id, const QVector<Core::Result> &itemsAndScores);
+    void scanFinished(uint id, const QVector<Scanner::Core::Result> &itemsAndScores);
     void scanFailed(uint id, const QString &error);
 
 private:

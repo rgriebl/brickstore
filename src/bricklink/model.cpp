@@ -960,7 +960,7 @@ InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<SimpleLo
                 indexes << index(row, InventoryModel::PictureColumn); // clazy:exclude=reserve-candidates
         }
 
-        for (const auto &idx : indexes)
+        for (const auto &idx : std::as_const(indexes))
             emit dataChanged(idx, idx);
     });
 }

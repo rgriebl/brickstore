@@ -29,7 +29,7 @@ RenderSettings *RenderSettings::create(QQmlEngine *qe, QJSEngine *)
 
 void RenderSettings::forEachProperty(const std::function<void(QMetaProperty &)> &callback)
 {
-    const QMetaObject *mo = metaObject();
+    const QMetaObject *mo = &staticMetaObject;
     for (int i = mo->propertyOffset(); i < mo->propertyCount(); ++i) {
         auto mp = mo->property(i);
         callback(mp);

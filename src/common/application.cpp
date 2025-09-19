@@ -587,7 +587,7 @@ QCoro::Task<bool> Application::updateDatabase()
                                                           &BrickLink::Database::updateFinished,
                                                           qOverload<>(&BrickLink::Database::startUpdate),
                                                           &BrickLink::Database::cancelUpdate);
-        for (const auto &file : files)
+        for (const auto &file : std::as_const(files))
             Document::load(file);
 
         co_return success;
@@ -903,7 +903,7 @@ void Application::setupLogging()
         bool restartTimer = !s_inst->m_loggingMessages.isEmpty();
         locker.unlock();
 
-        for (const auto &lm : messages)
+        for (const auto &lm : std::as_const(messages))
             s_inst->m_uiMessageHandler(lm);
 
         if (restartTimer)

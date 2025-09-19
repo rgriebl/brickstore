@@ -37,7 +37,7 @@ ManageColumnLayoutsDialog::ManageColumnLayoutsDialog(QWidget *parent)
     lay->addWidget(m_list);
     lay->addWidget(m_buttons);
 
-    auto ids = Config::inst()->columnLayoutIds();
+    const auto ids = Config::inst()->columnLayoutIds();
 
     QMap<int, QString> pos;
     for (const auto &id : ids)

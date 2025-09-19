@@ -169,7 +169,7 @@ public:
                         ->setData(Document::columnLayoutCommandId(cl));
             }
 
-            auto ids = Config::inst()->columnLayoutIds();
+            const auto ids = Config::inst()->columnLayoutIds();
             if (!ids.isEmpty()) {
                 m_menu->addSeparator();
 

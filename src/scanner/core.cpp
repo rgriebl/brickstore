@@ -64,7 +64,7 @@ QByteArrayList Core::availableBackendIds() const
 {
     QByteArrayList result;
     result.reserve(d->availableBackends.size());
-    for (const auto &b : d->availableBackends)
+    for (const auto &b : std::as_const(d->availableBackends))
         result << b.id;
     return result;
 }
@@ -82,7 +82,7 @@ QByteArray Core::defaultBackendId() const
 
 const Core::Backend *Core::backendFromId(const QByteArray &id) const
 {
-    for (const auto &b : d->availableBackends) {
+    for (const auto &b : std::as_const(d->availableBackends)) {
         if (b.id == id)
             return &b;
     }

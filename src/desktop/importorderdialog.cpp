@@ -272,7 +272,7 @@ void ImportOrderDialog::importOrders(const QModelIndexList &rows, bool combined)
             LotList orderLots = order->loadLots(); // we own the Lots now
             if (!orderLots.isEmpty()) {
                 QColor col = QColor::fromHsl(360 * orderCount / rows.size(), 128, 128);
-                for (auto orderLot : orderLots) {
+                for (auto orderLot : std::as_const(orderLots)) {
                     QString marker = orderLot->markerText();
 
                     orderLot->setMarkerText(order->id() + u' ' + order->otherParty()

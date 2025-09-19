@@ -54,7 +54,7 @@ public:
     {
         MODELTEST_ATTACH(this)
 
-        auto all = ActionManager::inst()->allActions();
+        const auto all = ActionManager::inst()->allActions();
         for (const auto &aa : all) {
             if (auto *qa = aa->qAction()) {
                 if (options.testFlag(RemoveGoHome) && (aa->name() == QByteArray("go_home")))
@@ -747,7 +747,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_modifications_label->setAttribute(Qt::WA_MacSmallSize);
 
     auto *pgCache = BrickLink::core()->priceGuideCache();
-    auto supportedVatTypes = pgCache->supportedVatTypes();
+    const auto supportedVatTypes = pgCache->supportedVatTypes();
     for (auto vatType : supportedVatTypes) {
         auto text = pgCache->descriptionForVatType(vatType);
         auto icon = pgCache->iconForVatType(vatType);
@@ -1044,7 +1044,7 @@ void SettingsDialog::load()
 {
     // --[ GENERAL ]---------------------------------------------------
 
-    QVector<Config::Translation> translations = Config::inst()->translations();
+    const QVector<Config::Translation> translations = Config::inst()->translations();
 
     if (translations.isEmpty()) {
         w_language->setEnabled(false);

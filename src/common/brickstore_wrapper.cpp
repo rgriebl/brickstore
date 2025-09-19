@@ -168,9 +168,9 @@ double QmlBrickStore::exchangeRate(const QString &fromCode, const QString &toCod
 QString QmlBrickStore::dim(const QString &str) const
 {
     auto d = BrickLink::Dimensions::parseString(str, 0, BrickLink::Dimensions::Relaxed);
-    QString result = u"X: " + QString::number(d.x())
-                     + u" | Y: " + QString::number(d.y())
-                     + u" | Z: " + QString::number(d.z())
+    QString result = u"X: " + QString::number(double(d.x()))
+                     + u" | Y: " + QString::number(double(d.y()))
+                     + u" | Z: " + QString::number(double(d.z()))
                      + u" | @: " + QString::number(d.offset()) + u", " + QString::number(d.length());
     return result;
 }
@@ -1050,9 +1050,8 @@ QVariant QmlDebugLogModel::data(const QModelIndex &index, int role) const
     case FileRole    : return log.file;
     case CategoryRole: return log.category;
     case MessageRole : return log.message;
+    default          : return { };
     }
-    return { };
-
 }
 
 QHash<int, QByteArray> QmlDebugLogModel::roleNames() const

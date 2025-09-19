@@ -386,7 +386,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             static const QString post = u"</p>"_qs;
             QString tips;
 
-            for (const auto &entry : m_addHistory)
+            for (const auto &entry : std::as_const(m_addHistory))
                 tips = tips + pre + addhistoryTextFor(entry.first, entry.second) + post;
 
             QToolTip::showText(he->globalPos(), tips, w_last_added, w_last_added->geometry());

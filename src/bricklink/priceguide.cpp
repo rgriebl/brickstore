@@ -645,7 +645,7 @@ PriceGuideCache::PriceGuideCache(Core *core)
         d->m_threads.append(t);
     }
 
-    for (auto *thread : d->m_threads)
+    for (auto *thread : std::as_const(d->m_threads))
         thread->start(QThread::LowPriority);
 }
 
@@ -658,7 +658,7 @@ PriceGuideCache::~PriceGuideCache()
     d->m_saveMutex.lock();
     d->m_saveTrigger.wakeAll();
     d->m_saveMutex.unlock();
-    for (auto *thread : d->m_threads) {
+    for (auto *thread : std::as_const(d->m_threads)) {
         thread->wait();
         delete thread;
     }
@@ -910,7 +910,7 @@ void PriceGuideCachePrivate::loadThread(QString dbName, int index)
             m_loadTrigger.wait(&m_loadMutex);
 
         if (m_stop) {
-            for (auto [pg, type] : m_loadQueue)
+            for (auto [pg, type] : std::as_const(m_loadQueue))
                 pg->release();
             continue;
         }

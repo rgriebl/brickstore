@@ -83,7 +83,7 @@ bool PersistentCookieJar::setCookiesFromUrl(const QList<QNetworkCookie> &cookieL
     bool result = QNetworkCookieJar::setCookiesFromUrl(cookieList, url);
 
     QByteArray data;
-    QList<QNetworkCookie> all = allCookies();
+    const QList<QNetworkCookie> all = allCookies();
     for (const auto &cookie : all) {
         if (!cookie.isSessionCookie() || m_persistSessionCookies.contains(cookie.name()))
             data = data + cookie.toRawForm() + '\n';

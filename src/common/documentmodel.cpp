@@ -789,7 +789,7 @@ QCoro::Task<int> DocumentModel::addLots(BrickLink::LotList &&lotsRef, AddLotMode
         Q_ASSERT(!newLotPtrs.isEmpty());
 
         if (consolidate.destinationIndex < 0) { // just add all the new lots
-            for (auto *newLotPtr : newLotPtrs)
+            for (auto *newLotPtr : std::as_const(newLotPtrs))
                 newLotPtr->setDateAdded(QDateTime::currentDateTimeUtc());
             lastAdded = newLotPtrs.constLast();
             appendLots(std::move(newLotPtrs));  // pass on ownership
@@ -804,7 +804,7 @@ QCoro::Task<int> DocumentModel::addLots(BrickLink::LotList &&lotsRef, AddLotMode
             if (consolidate.destinationIndex == 0) {
                 // merge all new lots into existing, delete all new
                 Lot consolidatedLot = *existingLotPtr;
-                for (auto *newLotPtr : newLotPtrs) {
+                for (auto *newLotPtr : std::as_const(newLotPtrs)) {
                     mergeLotFields(*newLotPtr, consolidatedLot, consolidate.fieldMergeModes);
                     consolidatedLot.setQuantity(consolidatedLot.quantity() + newLotPtr->quantity());
                 }
@@ -949,6 +949,8 @@ DocumentModel::FieldMergeModes DocumentModel::createFieldMergeModes(MergeMode me
             auto possibleModes = possibleMergeModesForField(field);
             if (possibleModes != MergeMode::Ignore) {
                 MergeMode mode = mergeMode;
+                // clang-tidy complains about the loop running until the enum overflows,
+                // but this cannot happen, as we made sure that possibleModes is not Ignore
                 while ((mode != MergeMode::Ignore) && !possibleModes.testFlag(mode))
                     mode = static_cast<MergeMode>(int(mode) >> 1);
 
