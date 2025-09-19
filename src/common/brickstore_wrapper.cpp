@@ -1108,7 +1108,7 @@ void QmlDebug::setSlowAnimations(bool newSlowAnimations)
 {
     if (m_slowAnimations != newSlowAnimations) {
         m_slowAnimations = newSlowAnimations;
-#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 11, 0)
         QUnifiedTimer::instance()->setSlowModeEnabled(m_slowAnimations);
 #else
         QUnifiedTimer::instance()->setSpeedModifier(m_slowAnimations ? .2f : 1.f);

@@ -1302,7 +1302,11 @@ template <class Key, class T>
 uint q5Hash(const Q5Hash<Key, T> &key, uint seed = 0)
     noexcept(noexcept(q5Hash(std::declval<Key&>())) && noexcept(q5Hash(std::declval<T&>())))
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     QtPrivate::QHashCombineCommutative hash;
+#else
+    QtPrivate::QHashCombineCommutative hash(seed);
+#endif
     for (auto it = key.begin(), end = key.end(); it != end; ++it) {
         const Key &k = it.key();
         const T   &v = it.value();

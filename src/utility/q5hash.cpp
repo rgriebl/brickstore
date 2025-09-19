@@ -43,6 +43,10 @@
  See q3cache.h on why we need this copy of Qt 5.15's Q5Hash.
 */
 
+#if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wexpansion-to-defined"
+#endif
 
 // for rand_s, _CRT_RAND_S must be #defined before #including stdlib.h.
 // put it at the beginning so some indirect inclusion doesn't break it
@@ -2756,3 +2760,7 @@ uint q5Hash(long double key, uint seed) noexcept
 */
 
 QT_END_NAMESPACE
+
+#if defined(__clang__)
+#  pragma clang diagnostic pop
+#endif
