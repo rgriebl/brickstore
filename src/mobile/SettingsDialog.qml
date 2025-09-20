@@ -202,48 +202,41 @@ FullscreenDialog {
                     Layout.rightMargin: root.spacing
 
                     Label {
-                        text: qsTr("Username")
-                        font.pixelSize: blUsername.font.pixelSize
+                        text: qsTr("Access Token")
+                        font.pixelSize: blAccessToken.font.pixelSize
                     }
-                    TextField {
-                        id: blUsername
-                        Layout.fillWidth: true
-                        text: BS.Config.brickLinkUsername
-                        inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
-                        onEditingFinished: BS.Config.brickLinkUsername = text
-                    }
-                    Label {
-                        Layout.columnSpan: 2
-                        Layout.fillWidth: true
-                        text: qsTr("Your username is required here - not your email address.")
-                        wrapMode: Text.Wrap
-                        leftPadding: 16
-                        rightPadding: 16
-                        font.bold: true
-                        color: Qt.rgba(1, .4, .4)
-                        visible: blUsername.text.indexOf('@') >= 0
-                    }
-                    Label {
-                        text: qsTr("Password")
-                        font.pixelSize: blPassword.font.pixelSize
-                    }
-                    TextField {
-                        id: blPassword
-                        Layout.fillWidth: true
-                        text: BS.Config.brickLinkPassword
-                        echoMode: TextInput.PasswordEchoOnEdit
-                        onEditingFinished: BS.Config.brickLinkPassword = text
+                    RowLayout {
+                        TextField {
+                            id: blAccessToken
+                            Layout.fillWidth: true
+                            text: BS.Config.brickLinkAccessToken
+                            onEditingFinished: BS.Config.brickLinkAccessToken = text
+                        }
+                        ToolButton {
+                            icon.name: "edit-clear"
+                            enabled: blAccessToken.text.length > 0
+                            onClicked: blAccessToken.text = ""
+                        }
+                        ToolButton {
+                            icon.name: "edit-paste"
+                            onClicked: {
+                                let t = BS.Clipboard.text()
+                                if (t !== '') {
+                                    blAccessToken.text = t
+                                    BS.Config.brickLinkAccessToken = t
+                                }
+                            }
+                        }
                     }
                     Label {
                         Layout.columnSpan: 2
                         Layout.fillWidth: true
-                        text: qsTr("BrickLink's maximum password length is 15.")
+                        textFormat: Text.RichText
+                        onLinkActivated: (link) => Qt.openUrlExternally(link)
+                        text: qsTr("You can get your Token from <a href=\"https://bricklink.com/v3/brickstore-access-management.page\">https://bricklink.com/v3/brickstore-access-management.page</a>")
                         wrapMode: Text.Wrap
                         leftPadding: 16
                         rightPadding: 16
-                        font.bold: true
-                        color: Qt.rgba(1, .4, .4)
-                        visible: blPassword.text.length > 15
                     }
 
                     Label {
