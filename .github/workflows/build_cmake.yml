@@ -176,10 +176,10 @@ jobs:
     # Get Qt
     #################################################
 
-    - name: Cache Qt from aqtinstall
-      id: cache-qt
+    - name: Restore cached Qt from aqtinstall
+      id: restore-cache-qt
       if: (matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap || matrix.config.flatpak
-      uses: actions/cache@v4
+      uses: actions/cache/restore@v4
       with:
         path: "${{ runner.workspace }}/Qt/"
         key: "Qt-${{ matrix.config.qt_version }}-${{ matrix.config.qt_host }}-${{ matrix.config.qt_arch }}"
@@ -262,6 +262,14 @@ jobs:
             ${{ !matrix.config.backend_only && '$BRICKSTORE_GUI_QT6_DEB_PACKAGES' || '' }} \
             debhelper lsb-release fakeroot build-essential
       shell: bash
+
+    - name: Save cached Qt from aqtinstall
+      id: save-cache-qt
+      if: (steps.restore-cache-qt.outputs.cache-hit != 'true') && ((matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap || matrix.config.flatpak)
+      uses: actions/cache/save@v4
+      with:
+        key: ${{ steps.restore-cache-qt.outputs.cache-primary-key }}
+        path: "${{ runner.workspace }}/Qt/"
 
     # Build for Windows
     #################################################
