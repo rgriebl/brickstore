@@ -316,7 +316,6 @@ signals:
 
 protected:
     bool event(QEvent *e) override;
-    virtual bool filterAcceptsLot(const Lot *lot) const;
 
 private:
     DocumentModel(int dummy);
@@ -324,6 +323,7 @@ private:
     void setFakeIndexes(const QVector<int> &fakeIndexes);
     void rebuildLotIndex();
     void rebuildFilteredLotIndex();
+    bool filterAcceptsLot(const Lot *lot) const;
 
     void setLotsDirect(const LotList &lots);
     void insertLotsDirect(const LotList &lots, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
