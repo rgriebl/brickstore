@@ -87,7 +87,7 @@ endif()
 include(BuildQCoro)
 
 set(BS_WAYLAND_DECORATIONS OFF)
-if (LINUX AND (${Qt6_VERSION} VERSION_LESS "6.8.0") AND (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.5.0"))
+if (LINUX AND (NOT BACKEND_ONLY) AND (${Qt6_VERSION} VERSION_LESS "6.8.0") AND (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.5.0"))
     # Qt < 6.8.0 draws very ugly window decorations on Gnome
     find_package(Wayland QUIET)
     if (Wayland_FOUND)
