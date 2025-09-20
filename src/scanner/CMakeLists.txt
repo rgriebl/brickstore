@@ -44,7 +44,7 @@ if (BS_DESKTOP)
 endif()
 
 if (IOS AND (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.8.0"))
-    qt_add_ios_ffmpeg_libraries(scanner_module)
+    qt_add_ios_ffmpeg_libraries(${PROJECT_NAME})
 endif()
 
 target_link_libraries(scanner_module PRIVATE

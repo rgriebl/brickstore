@@ -151,7 +151,7 @@ jobs:
 
         - name: "iOS"
           artifact: "iOS"
-          runs-on: macos-13
+          runs-on: macos-15
           os: ios
           qt_host: 'mac'
           qt_host_arch: 'clang_64'
@@ -159,7 +159,7 @@ jobs:
           qt_version: '6.7.3'
           qt_arch: 'ios'
           cmake_extra_config: ''
-          xcode: '15.2'
+          xcode: '16.4'
 
   # BUILD
   #################################################
@@ -193,26 +193,26 @@ jobs:
     - name: Install Qt via aqtinstall
       if: |
         ((matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap || matrix.config.flatpak)
-        && (steps.cache-qt.outputs.cache-hit != 'true')
+        && (steps.restore-cache-qt.outputs.cache-hit != 'true')
       shell: sh
       run: |
-        python3 -m pip install aqtinstall
+        pipx install aqtinstall
         # python3 -m pip install git+https://github.com/miurahr/aqtinstall@master
         if [ "${{ matrix.config.qt_host_arch }}" != "" ]; then
-          python3 -m aqt -c .github/aqt-settings.ini install-qt -O "${{ runner.workspace }}/Qt/" \
-                         ${{ matrix.config.qt_host }} desktop \
-                         ${{ matrix.config.qt_version }} ${{ matrix.config.qt_host_arch }} \
-                         -m $BRICKSTORE_GUI_QT6_INSTALLER_MODULES
+          aqt -c .github/aqt-settings.ini install-qt -O "${{ runner.workspace }}/Qt/" \
+              ${{ matrix.config.qt_host }} desktop \
+              ${{ matrix.config.qt_version }} ${{ matrix.config.qt_host_arch }} \
+              -m $BRICKSTORE_GUI_QT6_INSTALLER_MODULES
         fi
         for arch in ${{ matrix.config.qt_arch }} ${{ matrix.config.qt_extra_archs }}; do
-          python3 -m aqt -c .github/aqt-settings.ini install-qt -O "${{ runner.workspace }}/Qt/" \
-                         ${{ matrix.config.qt_host }} ${{ matrix.config.qt_target || 'desktop' }} \
-                         ${{ matrix.config.qt_version }} $arch \
-                         -m $BRICKSTORE_GUI_QT6_INSTALLER_MODULES
+          aqt -c .github/aqt-settings.ini install-qt -O "${{ runner.workspace }}/Qt/" \
+              ${{ matrix.config.qt_host }} ${{ matrix.config.qt_target || 'desktop' }} \
+              ${{ matrix.config.qt_version }} $arch \
+              -m $BRICKSTORE_GUI_QT6_INSTALLER_MODULES
           if [ "${{ matrix.config.qt_tools }}" != "" ]; then
-            python3 -m aqt -c .github/aqt-settings.ini install-tool -O "${{ runner.workspace }}/Qt/" \
-                           ${{ matrix.config.qt_host }} ${{ matrix.config.qt_target || 'desktop' }} \
-                           ${{ matrix.config.qt_tools }}
+            aqt -c .github/aqt-settings.ini install-tool -O "${{ runner.workspace }}/Qt/" \
+                ${{ matrix.config.qt_host }} ${{ matrix.config.qt_target || 'desktop' }} \
+                ${{ matrix.config.qt_tools }}
           fi
         done
 
@@ -265,7 +265,9 @@ jobs:
 
     - name: Save cached Qt from aqtinstall
       id: save-cache-qt
-      if: (steps.restore-cache-qt.outputs.cache-hit != 'true') && ((matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap || matrix.config.flatpak)
+      if: |
+        ((matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap || matrix.config.flatpak)
+        && (steps.restore-cache-qt.outputs.cache-hit != 'true')
       uses: actions/cache/save@v4
       with:
         key: ${{ steps.restore-cache-qt.outputs.cache-primary-key }}
@@ -602,7 +604,7 @@ jobs:
       if: (matrix.config.os == 'ios')
       env:
         PROVISIONING_PROFILE_DATA: ${{ secrets.IOS_PROVISIONING_PROFILE_DATA }}
-        PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.IOS_PROV_PROFILE }}
+        PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.IOS_PROVISIONING_PROFILE_SPECIFIER }}
       run: |
         exec .github/scripts/apple-import-profile.sh
 
@@ -626,7 +628,7 @@ jobs:
         ${Qt6_DIR}/bin/qt-cmake -G Xcode -DCMAKE_BUILD_TYPE=Release \
             -D "QT_HOST_PATH=$(readlink -f $Qt6_DIR/../macos)" \
             -D "CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=${{ secrets.IOS_DEV_TEAM }}" \
-            -D "CMAKE_XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER=${{ secrets.IOS_PROV_PROFILE }}" \
+            -D "CMAKE_XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER=${{ secrets.IOS_PROVISIONING_PROFILE_SPECIFIER }}" \
             -D "CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY=${{ secrets.IOS_CODE_SIGN_IDENTITY }}" \
             -D "CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_STYLE=Manual" \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
