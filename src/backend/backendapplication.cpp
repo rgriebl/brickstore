@@ -84,12 +84,11 @@ QCoro::Task<int> BackendApplication::rebuildDatabase()
             if (rebrickableApiKey.isEmpty())
                 throw Exception("Missing Rebrickable API key: please set $REBRICKABLE_APIKEY.");
 
-            const QString username = qEnvironmentVariable("BRICKLINK_USERNAME");
-            const QString password = qEnvironmentVariable("BRICKLINK_PASSWORD");
-            if (username.isEmpty() || password.isEmpty())
-                throw Exception("Missing BrickLink login credentials: please set $BRICKLINK_USERNAME and $BRICKLINK_PASSWORD.");
+            const QString accessToken = qEnvironmentVariable("BRICKLINK_ACCESS_TOKEN");
+            if (accessToken.isEmpty())
+                throw Exception("Missing BrickLink login credentials: please set $BRICKLINK_ACCESS_TOKEN.");
 
-            co_await blti.login(username, password, rebrickableApiKey);
+            co_await blti.login(accessToken, rebrickableApiKey);
         }
 
         co_await blti.importCatalog();

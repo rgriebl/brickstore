@@ -26,8 +26,7 @@ public:
 
 
     void initialize(bool skipDownload);
-    QCoro::Task<> login(const QString &username, const QString &password,
-                        const QString &rebrickableApiKey);
+    QCoro::Task<> login(const QString &accessToken, const QString &rebrickableApiKey);
     QCoro::Task<> importCatalog();
     QCoro::Task<> importInventories();
     void finalize();

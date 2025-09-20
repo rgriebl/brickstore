@@ -157,8 +157,7 @@ void TextImport::initialize(bool skipDownload)
     }
 }
 
-QCoro::Task<> TextImport::login(const QString &username, const QString &password,
-                                const QString &rebrickableApiKey)
+QCoro::Task<> TextImport::login(const QString &accessToken, const QString &rebrickableApiKey)
 {
     m_rebrickableApiKey = rebrickableApiKey;
 
@@ -167,12 +166,12 @@ QCoro::Task<> TextImport::login(const QString &username, const QString &password
 
     nextStep(u"Logging into BrickLink"_qs);
 
-    core()->setCredentials({ username, password });
+    core()->setAccessToken(accessToken);
     if (!core()->isAuthenticated()) {
         core()->authenticate();
 
-        auto [usernameAuth, error] = co_await qCoro(core(), &Core::authenticationFinished);
-        Q_ASSERT(usernameAuth == username);
+        auto [accessTokenAuth, error] = co_await qCoro(core(), &Core::authenticationFinished);
+        Q_ASSERT(accessTokenAuth == accessToken);
         if (!error.isEmpty())
             throw Exception("Failed to log into BrickLink:\n%1").arg(error);
     }
