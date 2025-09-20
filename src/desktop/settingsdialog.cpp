@@ -792,6 +792,9 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     connect(Currency::inst(), &Currency::ratesChanged,
             this, &SettingsDialog::currenciesUpdated);
 
+    auto *tokenPasteAction = w_bl_accesstoken->addAction(QIcon::fromTheme(u"edit-paste"_qs), QLineEdit::TrailingPosition);
+    connect(tokenPasteAction, &QAction::triggered,
+            w_bl_accesstoken, &QLineEdit::paste);
     connect(w_bl_accesstoken, &QLineEdit::textChanged,
             this, [this](const QString &s) {
         bool isWrong = s.isEmpty(); //TODO: check with RegExp for character set and length
