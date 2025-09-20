@@ -7,14 +7,13 @@ All notable changes to this project will be documented in this file.
 
 Adapted to the Bricklink account changes: instead of using your BrickLink username and password, you
 now have to generate an **access-token**. The *BrickLink* page in the settings dialog has a direct
-link to a special BrickLink web page where you can generate these tokens.
+link to a special BrickLink web page where you can generate this token.
 
-Please note that these tokens are only valid for 30 days at the moment. I do not control this page,
+Please note that this token is only valid for 30 days at the moment. I do not control this page,
 so please contact BrickLink's support if you run into problems.
 
 **NOTICE:** The order download is currently broken, as the BrickLink servers are sending BrickStore
 into an endless loop of repeated login requests.
-
 
 
 ## [2025.1.1] - 2025-01-09
