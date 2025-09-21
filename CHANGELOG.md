@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2025.9.2] - 2025-09-21
+
+This is a quick-fix for the non starting macOS apps.
+
+
 ## [2025.9.1] - 2025-09-20
 
 Adapted to the Bricklink account changes: instead of using your BrickLink username and password, you
@@ -743,7 +748,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2025.9.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2025.9.2...HEAD
+[2025.9.2]: https://github.com/rgriebl/brickstore/releases/tag/v2025.9.2
 [2025.9.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.9.1
 [2025.1.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.1.1
 [2024.12.3]: https://github.com/rgriebl/brickstore/releases/tag/v2024.12.3
