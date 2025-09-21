@@ -274,7 +274,7 @@ public:
     QString currencyCode() const;
     void setCurrencyCode(const QString &code, double crate = 1.);
 
-    void adjustLotCurrencyToModel(LotList &lots, const QString &fromCurrency);
+    void adjustLotCurrencyToModel(LotList &lots, const QString &fromCurrency) const;
 
     Filter::Parser *filterParser();
 
