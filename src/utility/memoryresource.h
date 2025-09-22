@@ -5,12 +5,17 @@
 
 #include <QDebug>
 
-#if __has_include(<memory_resource>)
+#if defined(Q_OS_MACOS) && (QT_VERSION == QT_VERSION_CHECK(6, 4, 3))
+// This is the macOS 10 legacy build. PMR is available at build time, but not at runtime.
+#  define BS_NO_STD_PMR_AVAILABLE
+#endif
+
+#if __has_include(<memory_resource>) && !defined(BS_NO_STD_PMR_AVAILABLE)
 #  include <memory_resource>
 #endif
 
 
-#ifdef __cpp_lib_memory_resource
+#if defined(__cpp_lib_memory_resource) && !defined(BS_NO_STD_PMR_AVAILABLE)
 
 using MemoryResource = std::pmr::memory_resource;
 using MonotonicMemoryResource = std::pmr::monotonic_buffer_resource;

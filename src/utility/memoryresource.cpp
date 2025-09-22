@@ -4,7 +4,7 @@
 #include "memoryresource.h"
 
 
-#if defined(__cpp_lib_memory_resource)
+#if defined(__cpp_lib_memory_resource) && !defined(BS_NO_STD_PMR_AVAILABLE)
 
 MemoryResource *defaultMemoryResource()
 {
