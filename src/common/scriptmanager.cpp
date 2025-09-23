@@ -297,20 +297,6 @@ bool ScriptManager::reload()
     if (!dataloc.isEmpty())
         spath.prepend(dataloc + u"/extensions"_qs);
 
-    // 2023.11.2 added an organization-name which messed up the standard paths
-    //TODO: remove this code block in 2024.11.x
-    //      instead add a rm -rf <CacheDir>/BrickStore
-    if (!dataloc.isEmpty()) {
-        QDir d(dataloc);
-        if (d.cd(u"BrickStore"_qs)
-            && (d.entryList(QDir::AllEntries | QDir::NoDotAndDotDot) == QStringList { u"extensions"_qs })
-            && d.cd(u"extensions"_qs)
-            && d.isEmpty()
-            && d.cdUp()) {
-            d.removeRecursively();
-        }
-    }
-
     for (const QString &path : std::as_const(spath)) {
         QDir dir(path);
         if (!path.startsWith(u':')) {
