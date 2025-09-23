@@ -1395,11 +1395,13 @@ void DocumentModel::emitDataChanged(const QModelIndex &tl, const QModelIndex &br
 
         connect(m_delayedEmitOfDataChanged, &QTimer::timeout,
                 this, [this]() {
-
-            emit dataChanged(index(m_nextDataChangedEmit.first.y(),
-                                   m_nextDataChangedEmit.first.x()),
-                             index(m_nextDataChangedEmit.second.y(),
-                                   m_nextDataChangedEmit.second.x()));
+            if ((m_nextDataChangedEmit.first != QPoint(-1, -1)) &&
+                (m_nextDataChangedEmit.second != QPoint(-1, -1))) {
+                emit dataChanged(index(m_nextDataChangedEmit.first.y(),
+                                       m_nextDataChangedEmit.first.x()),
+                                 index(m_nextDataChangedEmit.second.y(),
+                                       m_nextDataChangedEmit.second.x()));
+            }
 
             resetNext(m_nextDataChangedEmit);
         });
