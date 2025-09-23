@@ -2023,7 +2023,7 @@ void DocumentModel::initializeColumns()
           .title = QT_TR_NOOP("Item Id"),
           .dataFn = [&](const Lot *lot) { return lot->itemId(); },
           .setDataFn = [&](Lot *lot, const QVariant &v) {
-              char itid = lot->itemType() ? lot->itemType()->id() : 'P';
+              char itid = lot->itemTypeId() ? lot->itemTypeId() : 'P';
               if (auto newItem = BrickLink::core()->item(itid, v.toString().toLatin1()))
                   lot->setItem(newItem);
           },
