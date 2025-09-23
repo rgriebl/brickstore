@@ -18,6 +18,7 @@
 #include <QMessageBox>
 #include <QMenuBar>
 #include <QToolTip>
+#include <QClipboard>
 
 #if defined(MODELTEST)
 #  include <QAbstractItemModelTester>
@@ -755,8 +756,6 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     }
     w_bl_pg_retriever->setText(pgCache->retrieverName());
 
-    w_bl_accesstoken->setMinimumWidth(fontMetrics().averageCharWidth() * 60);
-
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
     w_docdir->insertSeparator(1);
     w_docdir->insertItem(2, QIcon(), tr("Other..."));
@@ -794,10 +793,17 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 
     auto *tokenPasteAction = w_bl_accesstoken->addAction(QIcon::fromTheme(u"edit-paste"_qs), QLineEdit::TrailingPosition);
     connect(tokenPasteAction, &QAction::triggered,
-            w_bl_accesstoken, &QLineEdit::paste);
+            w_bl_accesstoken, [this]() {
+        w_bl_accesstoken->setText(QGuiApplication::clipboard()->text());
+    });
+    auto *tokenClearAction = w_bl_accesstoken->addAction(QIcon::fromTheme(u"edit-clear"_qs), QLineEdit::TrailingPosition);
+    connect(tokenClearAction, &QAction::triggered,
+            w_bl_accesstoken, &QLineEdit::clear);
     connect(w_bl_accesstoken, &QLineEdit::textChanged,
             this, [this](const QString &s) {
-        bool isWrong = s.isEmpty(); //TODO: check with RegExp for character set and length
+        // base64url encoding, 171 characters:
+        static const QRegularExpression base64url171(uR"(^[A-Za-z0-9_-]{171}$)"_qs);
+        bool isWrong = !s.isEmpty() && !base64url171.match(s).hasMatch();
         bool wasWrong = w_bl_accesstoken->property("showInputError").toBool();
 
         if (isWrong != wasWrong) {
@@ -806,8 +812,8 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             if (isWrong) {
                 QString msg = tr("Your access token is malformed.");
                 w_bl_accesstoken->setToolTip(msg);
-                QToolTip::showText(w_bl_accesstoken->mapToGlobal(w_bl_accesstoken->rect().bottomLeft()),
-                                   msg, w_bl_accesstoken, { }, 2000);
+                QToolTip::showText(w_bl_accesstoken->mapToGlobal(QPoint()),
+                                   msg, w_bl_accesstoken, { }, 5000);
             } else {
                 w_bl_accesstoken->setToolTip({ });
                 QToolTip::hideText();

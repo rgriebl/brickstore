@@ -731,7 +731,7 @@
          </property>
          <layout class="QFormLayout" name="formLayout_9">
           <property name="fieldGrowthPolicy">
-           <enum>QFormLayout::FieldGrowthPolicy::FieldsStayAtSizeHint</enum>
+           <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
           </property>
           <property name="formAlignment">
            <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
@@ -745,10 +745,16 @@
           </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="w_bl_accesstoken">
-            <property name="maxLength">
-             <number>172</number>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="clearButtonEnabled">
+            <property name="maxLength">
+             <number>171</number>
+            </property>
+            <property name="readOnly">
              <bool>true</bool>
             </property>
            </widget>
