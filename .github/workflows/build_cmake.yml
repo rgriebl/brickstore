@@ -68,13 +68,13 @@ jobs:
 
         - name: "Ubuntu 24.04"
           artifact: "Ubuntu-24.04"
-          runs-on: ubuntu-22.04
+          runs-on: ubuntu-24.04
           os: linux
           debian_container: "buildpack-deps:24.04"
 
-        - name: "Debian 12 Backend"
-          artifact: "Debian-12-Backend"
-          runs-on: ubuntu-22.04
+        - name: "Debian 13 Backend"
+          artifact: "Debian-13-Backend"
+          runs-on: ubuntu-24.04
           os: linux
           debian_container: "buildpack-deps:trixie"
           backend_only: true
