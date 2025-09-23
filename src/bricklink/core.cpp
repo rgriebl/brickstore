@@ -362,8 +362,7 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
 #if defined(BS_BACKEND)
     Q_UNUSED(physicalMem)
 #endif
-    auto pcj = new PersistentCookieJar(datadir, u"BrickLink"_qs, { "BLNEWSESSIONID" });
-    m_authenticatedTransfer = new Transfer(std::move(pcj), this);
+    m_authenticatedTransfer = new Transfer(this);
 
     m_transferStatId = AppStatistics::inst()->addSource(u"HTTP requests"_qs);
 
