@@ -438,10 +438,11 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
                 m_authenticatedTransfer->abortAllJobs();
         } else {
             bool lostAuthentication = false;
+            bool normalRedirect = false;
 
             if (job->responseCode() == 302) {
                 if (!job->redirectUrl().toString().contains(u"auth/sign-in?"))
-                    job->resetForReuse(true /* applyRedirect*/);
+                    normalRedirect = true;
                 else
                     lostAuthentication = true;
             } else if (job->responseCode() == 401) {
@@ -456,8 +457,14 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
                 job->resetForReuse();
 
                 QMetaObject::invokeMethod(this, [=, this]() {
-                        retrieveAuthenticated(job);
-                    }, Qt::QueuedConnection);
+                    retrieveAuthenticated(job);
+                }, Qt::QueuedConnection);
+            } else if (normalRedirect) {
+                job->resetForReuse(true /* applyRedirect*/);
+
+                QMetaObject::invokeMethod(this, [=, this]() {
+                    retrieveAuthenticated(job);
+                }, Qt::QueuedConnection);
             } else {
                 emit authenticatedTransferFinished(job);
             }
