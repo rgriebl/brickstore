@@ -1218,7 +1218,8 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
             qsizetype endPos = listData.indexOf(u"</TABLE>"_qs, startPos);
 
             static const QRegularExpression rxMatch(uR"-(<TR BGCOLOR="#......"><TD COLSPAN="4">.*?<B>Match #(\d+)</B></FONT></TD></TR>)-"_qs);
-            static const QRegularExpression rxItem (uR"-(<TR BGCOLOR="#......"><TD ALIGN="CENTER" WIDTH="10%">.*?<A HREF="/v2/catalog/catalogitem\.page\?([A-Z])=([A-Za-z0-9._-]+)">([A-Za-z0-9._-]+)</A>.*</FONT></TD></TR>)-"_qs);
+            static const QRegularExpression rxItem (uR"-(<TR BGCOLOR="#......"><TD ALIGN="CENTER" WIDTH="10%">.*?<A HREF="/v2/catalog/catalogitem\.page\?([A-Z])=([A-Za-z0-9._-]+)">([A-Za-z0-9._-]+)</A>.*</FONT></TD></TR>)-"_qs,
+                                                   QRegularExpression::DotMatchesEverythingOption);
 
             uint currentMatchId = 0;
             int trCount = 0;
