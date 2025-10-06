@@ -448,6 +448,7 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
                 j->m_was_not_modified = true;
                 j->setStatus(TransferJob::Completed);
             } else {
+                j->m_error_string = u"Received HTTP 304 but this was not requested"_qs;
                 j->setStatus(TransferJob::Failed);
             }
             break;
@@ -473,6 +474,7 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
             break;
         }
         default:
+            j->m_error_string = u"Cannot handle HTTP response code %1"_qs.arg(j->m_respcode);
             j->setStatus(TransferJob::Failed);
             break;
         }

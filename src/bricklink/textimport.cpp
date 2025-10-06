@@ -394,9 +394,10 @@ QCoro::Task<QByteArray> TextImport::download(const QUrl &url, const QString &fil
     co_await qCoro(&atj, &AwaitableTransferJob::finished);
 
     if (!job->isCompleted()) {
-        throw Exception("Download failed for %1: %2")
-            .arg(job->effectiveUrl().toString())
-            .arg(job->errorString());
+        auto url = job->effectiveUrl();
+        if (url.isEmpty())
+            url = job->url();
+        throw Exception("Download failed for %1: %2").arg(url.toString()).arg(job->errorString());
     } else if (job->data().isEmpty()) {
         throw Exception("Download has no data for %1").arg(job->effectiveUrl().toString());
     } else {
