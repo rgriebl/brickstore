@@ -203,7 +203,7 @@ QCoro::Task<> TextImport::importCatalog()
     co_await download(catalogQuery(1), u"itemtypes.xml"_qs).then(
         [this](QByteArray data) { readItemTypes(data); });
 
-    m_db->m_items.reserve(200'000);
+    m_db->m_items.reserve(250'000);
 
     for (const ItemType &itt : std::as_const(m_db->m_itemTypes)) {
         co_await download(catalogItemQuery(itt.id(), true), u"items/%1.xml"_qs.arg(itt.id())).then(
