@@ -219,8 +219,12 @@ void Application::init()
     connect(BrickLink::core(), &BrickLink::Core::authenticationFinished,
             this, [](const QString &accessToken, const QString &error) {
         if (!error.isEmpty()) {
-            UIHelpers::warning(tr("Failed to authenticate with BrickLink using access token %1")
-                                   .arg(accessToken) + u"<br><b>" + error + u"</b>");
+            QString safeToken = accessToken.isEmpty()
+                                    ? tr("(empty)")
+                                    : QString(accessToken.left(5) + u"..." + accessToken.right(5));
+
+            UIHelpers::warning(tr("Failed to authenticate with BrickLink using access token <tt>%1</tt>")
+                                   .arg(safeToken) + u"<br><b>" + error + u"</b>");
         }
     });
 
