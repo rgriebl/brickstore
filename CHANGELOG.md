@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2025.10.1] - 2025-10-29
+
+A few small fixes:
+- The macOS legacy build should now work again.
+- The access token is shortened in error dialogs to prevent people from accidentally leaking their tokens via screenshots.
+- Adapted yet again to changes in access token handling on BrickLink's side.
+
+
 ## [2025.9.2] - 2025-09-21
 
 This is a quick-fix for the non starting macOS apps.
@@ -748,7 +756,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2025.9.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2025.10.1...HEAD
+[2025.10.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.10.1
 [2025.9.2]: https://github.com/rgriebl/brickstore/releases/tag/v2025.9.2
 [2025.9.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.9.1
 [2025.1.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.1.1
