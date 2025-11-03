@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2025.10.1] - 2025-10-29
+## [2025.11.1] - 2025-11-03
 
 A few small fixes:
 - The macOS legacy build should now work again.
@@ -756,8 +756,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2025.10.1...HEAD
-[2025.10.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.10.1
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2025.11.1...HEAD
+[2025.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.11.1
 [2025.9.2]: https://github.com/rgriebl/brickstore/releases/tag/v2025.9.2
 [2025.9.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.9.1
 [2025.1.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.1.1
