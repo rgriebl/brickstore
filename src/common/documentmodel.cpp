@@ -1,17 +1,17 @@
 // Copyright (C) 2004-2025 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <utility>
 #include <algorithm>
+#include <utility>
 
 #include <QCoreApplication>
 #include <QCursor>
-#include <QFileInfo>
 #include <QDir>
-#include <QTimer>
-#include <QtConcurrentFilter>
-#include <QtAlgorithms>
+#include <QFileInfo>
 #include <QStringListModel>
+#include <QTimer>
+#include <QtAlgorithms>
+#include <QtConcurrentFilter>
 
 #if defined(MODELTEST)
 #  include <QAbstractItemModelTester>
