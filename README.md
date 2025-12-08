@@ -13,6 +13,12 @@
 
 BrickStore is a BrickLink offline management tool. It is **multi-platform** (Windows, macOS and Linux as well as iOS and Android), **multilingual** (currently English, German, Spanish, Swedish and French), **fast** and **stable**.
 
+## Building
+
+There is an automated build script for Windows with documentation [here](/BUILD_WINDOWS.md).
+
+For other platforms see: [Compiling](https://www.brickstore.dev/compile).
+
 ## License
 
 BrickStore is copyrighted &copy;2004-2025 by Robert Griebl, licensed under the
