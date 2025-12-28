@@ -1,7 +1,6 @@
 // Copyright (C) 2004-2025 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <QAssociativeIterable>
 #include <QDir>
 #include <QFileInfo>
 #include <QJSValue>
@@ -13,9 +12,14 @@
 #include <QQmlEngine>
 #include <QQmlExpression>
 #include <QQmlInfo>
-#include <QSequentialIterable>
 #include <QStack>
 #include <QStandardPaths>
+#if QT_VERSION < QT_VERSION_CHECK(6, 11, 0)
+#  include <QAssociativeIterable>
+#  include <QSequentialIterable>
+#else
+#  include <qmetaassociation.h>
+#endif
 
 #include "utility/exception.h"
 
@@ -169,7 +173,11 @@ static QString stringify(const QVariant &value, int level, bool indentFirstLine,
         str.append(indent);
 
     if (value.canConvert<QVariantHash>()) {
-        QAssociativeIterable hash = value.value<QAssociativeIterable>();
+#if QT_VERSION < QT_VERSION_CHECK(6, 11, 0)
+        auto hash = value.value<QAssociativeIterable>();
+#else
+        auto hash = value.value<QMetaAssociation::Iterable>();
+#endif
         if (hash.size() == 0) {
             str.append(u"{}");
         } else if (level > 0) {
@@ -186,7 +194,11 @@ static QString stringify(const QVariant &value, int level, bool indentFirstLine,
             str = str + indent + u'}';
         }
     } else if (value.canConvert<QVariantList>() && (value.typeId() != QMetaType::QString)) {
-        QSequentialIterable list = value.value<QSequentialIterable>();
+#if QT_VERSION < QT_VERSION_CHECK(6, 11, 0)
+        auto list = value.value<QSequentialIterable>();
+#else
+        auto list = value.value<QMetaSequence::Iterable>();
+#endif
         if (list.size() == 0) {
             str.append(u"[]");
         } else if (level > 0) {
