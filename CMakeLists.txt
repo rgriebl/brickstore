@@ -105,7 +105,7 @@ if (MSVC)
     # need to disable C4702 due to 6.4.0 QAnyStringView
     list(APPEND copts /W4 /WX /wd4127 /wd4702)
 elseif (CLANG)
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17.0)
+    if (NOT APPLE AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17.0)
         list(APPEND cxxopts -fcoroutines-ts)
     endif()
     list(APPEND cxxopts -stdlib=libc++)

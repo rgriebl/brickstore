@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2026.1.1] - 2026-01-01
+
+Finally found a fixed the bug that made the order download hang for some people.
+
+
 ## [2025.11.1] - 2025-11-03
 
 A few small fixes:

@@ -56,15 +56,14 @@ jobs:
 
         - name: "Windows ARM 64bit"
           artifact: "Windows-ARM64"
-          runs-on: windows-2022
+          runs-on: windows-11-arm
           os: windows
-          qt_host: 'windows'
-          qt_host_arch: 'win64_msvc2022_64'
+          qt_host: 'windows_arm64'
           qt_version: '6.10.1'
-          qt_arch: 'win64_msvc2022_arm64_cross_compiled'
+          qt_arch: 'win64_msvc2022_arm64'
           qt_dir: "msvc2022_arm64"
           environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
-          cmake_extra_config: '-DCMAKE_TOOLCHAIN_FILE=%Qt6_DIR%/lib/cmake/Qt6/qt.toolchain.cmake -DQT_HOST_PATH=%Qt6_DIR%/../msvc2022_64'
+          cmake_extra_config: '-DSENTRY=ON'
 
         - name: "Ubuntu 24.04"
           artifact: "Ubuntu-24.04"
@@ -108,32 +107,42 @@ jobs:
           runs-on: ubuntu-22.04
           os: linux
           flatpak: true
-          qt_tools: tools_opensslv3_src
           qt_host: 'linux'
           qt_version: '6.10.1'
           qt_arch: 'linux_gcc_64'
           qt_dir: 'gcc_64'
 
+        # not possible ATM, because the QCQtDeployer project does not distribute native ARM64 builds
+        # - name: "Linux Flatpak ARM"
+        #   artifact: "Linux-Flatpak-ARM64"
+        #   runs-on: ubuntu-24.04-arm
+        #   os: linux
+        #   flatpak: true
+        #   qt_host: 'linux_arm64'
+        #   qt_version: '6.10.1'
+        #   qt_arch: 'linux_gcc_arm64'
+        #   qt_dir: 'gcc_arm64'
+
         - name: "macOS Universal"
           artifact: "macOS"
-          runs-on: macos-13
+          runs-on: macos-15
           os: macos
           qt_host: 'mac'
           qt_version: '6.10.1'
           qt_arch: 'clang_64'
           qt_dir: 'macos'
           cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DSENTRY=ON'
-          xcode: '15.1'   # https://developer.apple.com/forums/thread/740889
 
         - name: "macOS 10 Legacy"
           artifact: "macOS-10-Legacy"
-          runs-on: macos-13
+          runs-on: macos-15-intel
           os: macos
           qt_host: 'mac'
           qt_version: '6.4.3'
           qt_arch: 'clang_64'
           qt_dir: 'macos'
           cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64"'
+          xcode: '16.2'
 
         - name: "Android"
           artifact: "Android"
@@ -144,7 +153,7 @@ jobs:
           qt_host: 'linux'
           qt_host_arch: 'linux_gcc_64'
           qt_target: 'android'
-          qt_version: '6.10.1'
+          qt_version: '6.7.3' # Using 6.7.3 as 6.8+ broke QtMultimedia's webcam handling
           qt_arch: 'android_x86_64'
           qt_extra_archs: 'android_arm64_v8a android_armv7 android_x86'
           cmake_extra_config: '-DSENTRY=ON'
@@ -156,10 +165,9 @@ jobs:
           qt_host: 'mac'
           qt_host_arch: 'clang_64'
           qt_target: 'ios'
-          qt_version: '6.10.1'
+          qt_version: '6.7.3' # Using 6.7.3 as 6.8+ changed how the fullscreen API works
           qt_arch: 'ios'
           cmake_extra_config: ''
-          xcode: '16.4'
 
   # BUILD
   #################################################
@@ -182,13 +190,12 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: "${{ runner.workspace }}/Qt/"
-        key: "Qt-${{ matrix.config.qt_version }}-${{ matrix.config.qt_host }}-${{ matrix.config.qt_arch }}"
+        key: "Qt-${{ matrix.config.qt_version }}-${{ matrix.config.qt_host }}-${{ matrix.config.qt_arch }}-1"
 
     - name: "Fix Python version"
-      if: matrix.config.appimage
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
-        python-version: '3.12'
+        python-version: '3.13'
 
     - name: Install Qt via aqtinstall
       if: |
@@ -196,8 +203,8 @@ jobs:
         && (steps.restore-cache-qt.outputs.cache-hit != 'true')
       shell: sh
       run: |
-        pipx install aqtinstall
-        # python3 -m pip install git+https://github.com/miurahr/aqtinstall@master
+        # pipx install aqtinstall
+        pipx install git+https://github.com/miurahr/aqtinstall@c84e1470349e5bedbeee977bd62ec495d50d65b6
         if [ "${{ matrix.config.qt_host_arch }}" != "" ]; then
           aqt -c .github/aqt-settings.ini install-qt -O "${{ runner.workspace }}/Qt/" \
               ${{ matrix.config.qt_host }} desktop \
@@ -351,8 +358,8 @@ jobs:
         env DESTDIR=build/BrickStore-Install cmake --install build --config RelWithDebInfo --prefix /usr
       shell: bash
 
-    - name: OpenSSLv3 for Linux (AppImage / Snap / Flatpak)
-      if: matrix.config.appimage || matrix.config.snap || matrix.config.flatpak
+    - name: OpenSSLv3 for Linux (AppImage / Snap)
+      if: matrix.config.appimage || matrix.config.snap
       run: |
         cd ${Qt6_DIR}/../../Tools/OpenSSLv3/src
         ./Configure --prefix=/usr --libdir=lib --openssldir=/etc/ssl '-Wl,-rpath,\$$ORIGIN,--enable-new-dtags'
@@ -583,7 +590,7 @@ jobs:
       run: |
         brew install getsentry/tools/sentry-cli
         brew link getsentry/tools/sentry-cli
-        /usr/local/bin/sentry-cli --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif \
+        sentry-cli --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif \
             --org brickstore --project brickstore build/BrickStore.app.dSYM ${Qt6_DIR}/lib/
 
     # Build for iOS
