@@ -166,6 +166,7 @@ private:
     QByteArray                 m_sessionToken;
     TransferJob *              m_loginJob = nullptr;
     QVector<TransferJob *>     m_jobsWaitingForAuthentication;
+    QHash<TransferJob *, bool> m_authenticatedJobFollowRedirect;
     int                        m_transferStatId = -1;
 
     std::unique_ptr<Database> m_database;

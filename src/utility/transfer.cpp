@@ -351,7 +351,7 @@ void TransferRetriever::schedule()
         req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false); // QTBUG-105043
         req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
         req.setHeader(QNetworkRequest::UserAgentHeader, m_transfer->userAgent());
-        if (j->m_no_redirects) {
+        if (!j->m_follow_redirects) {
             req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                              QNetworkRequest::ManualRedirectPolicy);
         }

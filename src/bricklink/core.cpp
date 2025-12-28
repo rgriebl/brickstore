@@ -274,8 +274,10 @@ bool Core::isAuthenticated() const
 
 void Core::retrieveAuthenticated(TransferJob *job)
 {
-    if (job)
-        job->setNoRedirects(true);
+    if (job) {
+        m_authenticatedJobFollowRedirect.insert(job, job->followRedirects());
+        job->setFollowRedirects(false);
+    }
 
     if (!m_authenticated || m_sessionToken.isEmpty() ) {
         if (!m_loginJob) {
@@ -295,7 +297,7 @@ void Core::retrieveAuthenticated(TransferJob *job)
 
             static const QString targetHost = u"https://account.prod.member.bricklink.info/api/v1/actions/verify-and-create-session"_qs;
             m_loginJob = TransferJob::post(targetHost, {}, u"application/json"_qs, jsonDoc.toJson());
-            m_loginJob->setNoRedirects(true);
+            m_loginJob->setFollowRedirects(false);
             m_authenticatedTransfer->retrieve(m_loginJob, true);
         }
         if (job)
@@ -439,6 +441,7 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
         } else {
             bool lostAuthentication = false;
             bool normalRedirect = false;
+            bool followRedirect = m_authenticatedJobFollowRedirect.take(job);
 
             if (job->responseCode() == 302) {
                 if (!job->redirectUrl().toString().contains(u"auth/sign-in?"))
@@ -459,7 +462,7 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
                 QMetaObject::invokeMethod(this, [=, this]() {
                     retrieveAuthenticated(job);
                 }, Qt::QueuedConnection);
-            } else if (normalRedirect) {
+            } else if (normalRedirect && followRedirect) {
                 job->resetForReuse(true /* applyRedirect*/);
 
                 QMetaObject::invokeMethod(this, [=, this]() {

@@ -39,6 +39,7 @@ public:
     QString lastETag() const         { return m_last_etag; }
     bool wasNotModified() const      { return m_was_not_modified; }
     bool isHighPriority() const      { return m_high_priority; }
+    bool followRedirects() const     { return m_follow_redirects; }
 
     bool isInactive() const          { return m_status == Inactive; }
     bool isActive() const            { return m_status == Active; }
@@ -47,7 +48,7 @@ public:
     bool isFailed() const            { return m_status == Failed; }
     bool isAborted() const           { return m_status == Aborted; }
 
-    void setNoRedirects(bool noRedirects) { m_no_redirects = noRedirects; }
+    void setFollowRedirects(bool followRedirects) { m_follow_redirects = followRedirects; }
     void setMaximumRetries(uint count)    { m_retries_left = std::max(31u, count); }
     void setOnlyIfDifferent(const QString &etag) { m_only_if_different = etag; }
     void setOutputDevice(QIODevice *output);
@@ -110,7 +111,7 @@ private:
     bool         m_reset_for_reuse  : 1 = false;
     uint         m_retries_left     : 4 = 0;
     bool         m_was_not_modified : 1 = false;
-    bool         m_no_redirects     : 1 = false;
+    bool         m_follow_redirects : 1 = true;
     bool         m_high_priority    : 1 = false;
     bool         m_auto_delete      : 1 = true;
     QByteArray   m_sessionToken;
