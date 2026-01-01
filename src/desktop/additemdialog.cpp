@@ -1018,6 +1018,8 @@ void AddItemDialog::buildBrowseMenu(BrowseMenuType type)
                 QString s = item->name();
                 if (color && color->id())
                     s = color->name() + u' ' + s;
+                if (item->itemType() && (item->itemTypeId() != 'P'))
+                    s = s + u" [" + item->itemType()->name() + u']';
                 if (type == BrowseMenuType::History)
                     s = s + u"\t(" + HumanReadableTimeDelta::toString(now, bhe.m_lastVisited) + u')';
 
