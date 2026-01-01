@@ -19,11 +19,9 @@
 #include <QMetaEnum>
 
 #include "utility/appstatistics.h"
-#include "utility/q5hashfunctions.h"
 #include "utility/utility.h"
 #include "utility/exception.h"
 #include "utility/transfer.h"
-#include "utility/persistentcookiejar.h"
 
 #include "bricklink/category.h"
 #include "bricklink/color.h"
@@ -210,43 +208,6 @@ const QImage Core::noImage(const QSize &s) const
 QString Core::dataPath() const
 {
     return m_datadir;
-}
-
-QString Core::dataFileName(QStringView fileName, const Item *item, const Color *color) const
-{
-    // Avoid huge directories with 1000s of entries.
-    // sse4.2 is only used if a seed value is supplied
-    // please note: Qt6's qHash is incompatible
-    uchar hash = q5Hash(QString::fromLatin1(item->id()), 42) & 0xff;
-
-    QString p = m_datadir + QLatin1Char(item->itemTypeId()) + u'/' + (hash < 0x10 ? u"0" : u"")
-            + QString::number(hash, 16) + u'/' + QLatin1String(item->id()) + u'/'
-            + (color ? QString::number(color->id()) : QString()) + (color ? u"/" : u"")
-            + fileName;
-
-    return p;
-}
-
-QFile *Core::dataReadFile(QStringView fileName, const Item *item, const Color *color) const
-{
-    auto f = new QFile(dataFileName(fileName, item, color));
-    (void) f->open(QIODevice::ReadOnly);
-    return f;
-}
-
-QSaveFile *Core::dataSaveFile(QStringView fileName, const Item *item, const Color *color) const
-{
-    auto p = dataFileName(fileName, item, color);
-
-    if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath(u"."_qs))
-        return nullptr;
-
-    auto f = new QSaveFile(p);
-    if (!f->open(QIODevice::WriteOnly)) {
-        qCWarning(LogCache) << "BrickLink::Core::dataSaveFile failed to open" << f->fileName()
-                            << "for writing:" << f->errorString();
-    }
-    return f;
 }
 
 void Core::setAccessToken(const QString &accessToken)

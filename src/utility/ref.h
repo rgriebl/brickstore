@@ -20,13 +20,8 @@ public:
 
     virtual ~Ref() = default;
 
-    static void addZombieRef(Ref *ref);
-
 private:
     mutable QBasicAtomicInt ref;
-
-    static QVector<Ref *> s_zombieRefs;
-    static QTimer *s_zombieCleaner;
 };
 
 // tell Qt that Refs are shared and can't simply be deleted

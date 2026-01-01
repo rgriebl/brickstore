@@ -48,7 +48,7 @@
 #include <QtCore/qiterator.h>
 #include <QtCore/qlist.h>
 #include <QtCore/qrefcount.h>
-#include "q5hashfunctions.h"
+#include <QtCore/qhashfunctions.h>
 #include <QtCore/qcontainertools_impl.h>
 
 #include <algorithm>
@@ -883,7 +883,7 @@ Q_OUTOFLINE_TEMPLATE typename Q5Hash<Key, T>::Node **Q5Hash<Key, T>::findNode(co
     uint h = 0;
 
     if (d->numBuckets || ahp) {
-        h = q5Hash(akey, d->seed);
+        h = qHash(akey, d->seed);
         if (ahp)
             *ahp = h;
     }
@@ -1297,31 +1297,6 @@ public:
     }
 };
 #endif // !QT_NO_JAVA_STYLE_ITERATORS
-
-template <class Key, class T>
-uint q5Hash(const Q5Hash<Key, T> &key, uint seed = 0)
-    noexcept(noexcept(q5Hash(std::declval<Key&>())) && noexcept(q5Hash(std::declval<T&>())))
-{
-#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
-    QtPrivate::QHashCombineCommutative hash;
-#else
-    QtPrivate::QHashCombineCommutative hash(seed);
-#endif
-    for (auto it = key.begin(), end = key.end(); it != end; ++it) {
-        const Key &k = it.key();
-        const T   &v = it.value();
-        seed = hash(seed, std::pair<const Key&, const T&>(k, v));
-    }
-    return seed;
-}
-
-template <class Key, class T>
-inline uint q5Hash(const Q5MultiHash<Key, T> &key, uint seed = 0)
-    noexcept(noexcept(q5Hash(std::declval<Key&>())) && noexcept(q5Hash(std::declval<T&>())))
-{
-    const Q5Hash<Key, T> &key2 = key;
-    return q5Hash(key2, seed);
-}
 
 QT_END_NAMESPACE
 

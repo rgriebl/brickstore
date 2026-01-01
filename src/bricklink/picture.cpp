@@ -520,7 +520,6 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
             QDateTime lastUpdated;
             QImage img;
             bool highPriority = (loadType == LoadHighPriority);
-            bool convertedFromOldCache = false;
 
             if (db.isOpen()) {
                 loadQuery.bindValue(u":id"_qs, databaseTag(pic));
@@ -534,20 +533,6 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
                 }
                 loadQuery.finish();
             }
-            // try the old file-system based cache
-            if (!loaded) {
-                bool large = (!pic->color());
-                bool hasColors = pic->item()->itemType()->hasColors();
-                QFile *f = m_core->dataReadFile(large ? u"large.jpg" : u"normal.png", pic->item(),
-                                                (!large && hasColors) ? pic->color() : nullptr);
-                if (f && f->isOpen()) {
-                    lastUpdated = f->fileTime(QFile::FileModificationTime);
-                    if (f->size() > 0)
-                        convertedFromOldCache = loaded = imageFromData(img, f->readAll());
-                    f->remove();
-                }
-                delete f;
-            }
 
             pic->addRef(); // the release will happen on the main thread (see the invokeMethod below)
             QMetaObject::invokeMethod(m_core, [=, this, pic=pic]() { // clang bug: P1091R3
@@ -558,7 +543,7 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
                     // update the last accessed time stamp
                     pic->addRef();
                     m_saveMutex.lock();
-                    m_saveQueue.append({ pic, convertedFromOldCache ? SaveData : SaveAccessTimeOnly });
+                    m_saveQueue.append({ pic, SaveAccessTimeOnly });
                     m_saveTrigger.wakeOne();
                     m_saveMutex.unlock();
                 }

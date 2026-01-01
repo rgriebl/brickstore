@@ -242,16 +242,12 @@ inline void Q3Cache<Key,T>::setObjectCost(const Key &key, int cost)
     auto i = hash.find(key);
     if (i != hash.end()) {
         int d = cost - (*i).c;
-        /*if ((d > 0) && ((total + d) > mx)) {
-            qWarning() << "Q3Cache: adjusting cache object cost by" << d << "would overflow the cache";
-        } else*/ if (d != 0) {
+        if (d) {
             (*i).c = cost;
             total += d;
-            //qWarning() << "Adjusted cache object cost by" << d;
+            trim(mx);
         }
     }
 }
-
-
 
 QT_END_NAMESPACE

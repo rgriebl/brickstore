@@ -27,7 +27,6 @@ target_sources(${PROJECT_NAME} PUBLIC
     utility/q3cache.h
     utility/q5hash.cpp
     utility/q5hash.h
-    utility/q5hashfunctions.h
     utility/qparallelsort.h
     utility/ref.h
     utility/stopwatch.h

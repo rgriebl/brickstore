@@ -55,10 +55,6 @@ public:
     static QUrl urlForWantedList(uint wantedListId);
 
     QString dataPath() const;
-    QFile *dataReadFile(QStringView fileName, const Item *item,
-                        const Color *color = nullptr) const;
-    QSaveFile *dataSaveFile(QStringView fileName, const Item *item,
-                            const Color *color = nullptr) const;
     void setAccessToken(const QString &accessToken);
     bool hasAccessToken() const;
 
@@ -149,9 +145,6 @@ private:
 
     friend Core *core();
     friend Core *create(const QString &, const QString &, quint64);
-
-private:
-    QString dataFileName(QStringView fileName, const Item *item, const Color *color) const;
 
 private:
     QString  m_datadir;
