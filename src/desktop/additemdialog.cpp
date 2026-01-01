@@ -221,12 +221,12 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             w_select_color->setColorLock(false);
         }
     });
-    connect(w_select_item, &SelectItem::hasSubConditions,
-            w_ui_additem->w_subcondition, &QWidget::setEnabled);
     connect(w_select_item, &SelectItem::itemSelected,
             this, [this](const BrickLink::Item *item, bool confirmed) {
         updateItemAndColor();
         w_select_color->setCurrentColorAndItem(w_select_color->currentColor(), item);
+        w_ui_additem->w_subcondition->setEnabled(item && item->itemType() && item->itemType()->hasSubConditions());
+
         recordBrowseEntry();
         if (confirmed)
             w_add->animateClick();

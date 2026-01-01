@@ -426,7 +426,6 @@ void SelectItem::init()
         ensureSelectionVisible();
 
         emit hasColors(ittHasColors);
-        emit hasSubConditions(isAllItt ? true : (itemtype ? itemtype->hasSubConditions() : false));
     });
 
     connect(d->w_categories->selectionModel(), &QItemSelectionModel::selectionChanged,
