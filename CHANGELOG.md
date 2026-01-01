@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 
 ## [2026.1.1] - 2026-01-01
 
-Finally found a fixed the bug that made the order download hang for some people.
+- Finally found and fixed the bug that made the order updates hang for some people.
+- Fixed some glitches in the add-item dialog's history browsing code.
+- Machines running macOS 11 and 12 have to be manually reinstalled with BrickStore's *macOS-10-Legacy* version (why? https://endoflife.date/macos).
 
 
 ## [2025.11.1] - 2025-11-03
