@@ -1,4 +1,4 @@
-# Copyright (C) 2004-2025 Robert Griebl
+# Copyright (C) 2004-2026 Robert Griebl
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.19.0)
@@ -33,7 +33,7 @@ option(VERBOSE_FETCH "Verbose output for 3rd party FetchContent" OFF)
 
 set(NAME           "BrickStore")
 set(DESCRIPTION    "${NAME} - an offline BrickLink inventory management tool")
-set(COPYRIGHT      "2004-2025 Robert Griebl")
+set(COPYRIGHT      "2004-2026 Robert Griebl")
 set(BRICKSTORE_URL "www.brickstore.dev")
 set(GITHUB_URL     "github.com/rgriebl/brickstore")
 set(BUILD_NUMBER   "$ENV{BUILD_NUMBER}")
