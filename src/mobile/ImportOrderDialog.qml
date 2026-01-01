@@ -59,6 +59,15 @@ FullscreenDialog {
             ScrollIndicator.vertical: ScrollIndicator { }
             FlashScrollIndicators { id: flashScroller; target: table }
 
+            Label {
+                anchors.fill: parent
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                text: qsTr("No %1 orders").arg(receivedOrPlaced.currentIndex ? qsTr("placed")
+                                                                             : qsTr("received"))
+                visible: table.count === 0
+            }
+
             model: BS.SortFilterProxyModel {
                 id: sortFilterModel
                 sourceModel: BL.BrickLink.orders
