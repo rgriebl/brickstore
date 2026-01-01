@@ -26,21 +26,6 @@
 #include "capture.h"
 
 
-static struct SetQtMMBackend  // clazy:exclude=non-pod-global-static
-{
-    // QTBUG-120026: The default FFmpeg backend completely freezes the main thread for 1-3 sec
-    // when enumerating camera devices on Windows and macOS.
-    SetQtMMBackend()
-    {
-#if defined(Q_OS_WINDOWS)
-        qputenv("QT_MEDIA_BACKEND", "windows");
-#elif defined(Q_OS_MACOS)
-        qputenv("QT_MEDIA_BACKEND", "darwin");
-#endif
-    }
-} setQtMMBackend;
-
-
 using namespace std::chrono_literals;
 
 namespace Scanner {
