@@ -138,8 +138,3 @@ private:
 } // namespace BrickLink
 
 Q_DECLARE_METATYPE(BrickLink::PriceGuide *)
-
-// tell Qt that PriceGuides are shared and can't simply be deleted
-// (Q3Cache will use that function to determine what can really be purged from the cache)
-
-template<> inline bool q3IsDetached<BrickLink::PriceGuide>(BrickLink::PriceGuide &c) { return c.refCount() == 0; }

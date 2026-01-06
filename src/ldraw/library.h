@@ -20,7 +20,8 @@
 
 #include <QCoro/QCoroTask>
 
-#include "utility/q3cache.h"
+#include "utility/refcache.h"
+#include "part.h"
 
 Q_DECLARE_LOGGING_CATEGORY(LogLDraw)
 
@@ -31,7 +32,6 @@ class MiniZip;
 
 namespace LDraw {
 
-class Part;
 class PartElement;
 class PartLoaderJob;
 
@@ -110,7 +110,7 @@ private:
     std::unique_ptr<MiniZip> m_zip;
     QStringList m_searchpath;
     QHash<QString, QString> m_partIdMapping;
-    Q3Cache<QString, Part> m_cache;  // path -> part
+    RefCache<QString, Part> m_cache;  // path -> part
     // (filename, parentdir) -> (resolved filename, resolved parentdir, inZip)
     QHash<std::pair<QString, QString>, std::tuple<QString, QString, bool>> m_lookupCache;
 

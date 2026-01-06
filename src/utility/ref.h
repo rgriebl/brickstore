@@ -5,11 +5,6 @@
 
 #include <QtCore/qbasicatomic.h>
 
-#include "utility/q3cache.h"
-
-QT_FORWARD_DECLARE_CLASS(QTimer)
-
-
 class Ref
 {
 public:
@@ -23,8 +18,3 @@ public:
 private:
     mutable QBasicAtomicInt ref;
 };
-
-// tell Qt that Refs are shared and can't simply be deleted
-// (Q3Cache will use that function to determine what can really be purged from the cache)
-
-template<> inline bool q3IsDetached<Ref>(Ref &r) { return r.refCount() == 0; }

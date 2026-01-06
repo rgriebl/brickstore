@@ -116,9 +116,3 @@ private:
 } // namespace BrickLink
 
 Q_DECLARE_METATYPE(BrickLink::Picture *)
-
-
-// tell Qt that Pictures are shared and can't simply be deleted
-// (Q3Cache will use that function to determine what can really be purged from the cache)
-
-template<> inline bool q3IsDetached<BrickLink::Picture>(BrickLink::Picture &c) { return c.refCount() == 0; }

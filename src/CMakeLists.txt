@@ -24,11 +24,9 @@ target_sources(${PROJECT_NAME} PUBLIC
     utility/persistentcookiejar.cpp
     utility/persistentcookiejar.h
     utility/pooledarray.h
-    utility/q3cache.h
-    utility/q5hash.cpp
-    utility/q5hash.h
     utility/qparallelsort.h
     utility/ref.h
+    utility/refcache.h
     utility/stopwatch.h
     utility/transfer.cpp
     utility/transfer.h

@@ -259,8 +259,7 @@ void Library::shutdownPartLoaderThread()
 
     m_partLoaderJobs.clear();
 
-    // the parts in cache are referencing each other, so a plain clear will not work
-    m_cache.clearRecursive();
+    m_cache.clear();
     m_lookupCache.clear();
 
     AppStatistics::inst()->update(m_partsStatId, m_cache.count());
