@@ -38,6 +38,7 @@ class WantedList : public QObject
 public:
     WantedList();
     ~WantedList() override;
+    Q_DISABLE_COPY_MOVE(WantedList)
 
     int id() const;
     QString name() const;

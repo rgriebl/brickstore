@@ -25,7 +25,7 @@ namespace Scanner {
 class CorePrivate
 {
 public:
-    QNetworkAccessManager *nam;
+    QNetworkAccessManager *nam = nullptr;
     QByteArray defaultBackendId;
     QVector<Core::Backend> availableBackends;
 
@@ -100,7 +100,7 @@ uint Core::scan(const QImage &image, const BrickLink::ItemType *filter, const QB
         return 0;
     }
 
-    char itemTypeId = filter ? filter->id() : 0;
+    char itemTypeId = filter ? filter->id() : char(0);
     if (itemTypeId && !backend->itemTypeFilter.contains(itemTypeId)) {
         qCWarning(LogScanner) << "Backend can not filter on the request item-type" << itemTypeId;
         itemTypeId = 0;

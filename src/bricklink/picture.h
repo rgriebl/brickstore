@@ -46,6 +46,7 @@ public:
 
     Picture(std::nullptr_t) : Picture(nullptr, nullptr) { } // for scripting only!
     ~Picture() override;
+    Q_DISABLE_COPY_MOVE(Picture)
 
     Q_INVOKABLE void addRef() { Ref::addRef(); }
     Q_INVOKABLE void release() { Ref::release(); }

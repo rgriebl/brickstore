@@ -42,6 +42,9 @@ bool Dimensions::fuzzyCompare(const Dimensions &other) const
 class DimensionsPrivate
 {
 public:
+    DimensionsPrivate() = default;
+    Q_DISABLE_COPY_MOVE(DimensionsPrivate)
+
     const QString re_oneNumberFull = uR"((\d+)\s+(\d+)\s*\/\s*([1-9]\d*)|(\d+)\s*\/\s*([1-9]\d*)|(\d+\.\d+)|(\d+))"_qs;
     const QString re_oneNumberRelaxed = [this]() { return QString(re_oneNumberFull).remove(u'(').remove(u')'); }();
     const QString re_oneNumberStrict = [this]() { return QString(re_oneNumberRelaxed).replace(u"\\s+"_qs, u" "_qs).remove(u"\\s*"_qs); }();

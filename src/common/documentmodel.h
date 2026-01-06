@@ -62,15 +62,15 @@ private:
     DocumentStatistics(const DocumentModel *model, const LotList &list, bool ignoreExcluded,
                        bool ignorePriceAndQuantityErrors = false);
 
-    int m_lots;
-    int m_items;
-    double m_val;
-    double m_minval;
-    double m_cost;
-    double m_weight;
-    int m_errors;
-    int m_differences;
-    int m_incomplete;
+    int m_lots { };
+    int m_items { };
+    double m_val { };
+    double m_minval { };
+    double m_cost { };
+    double m_weight { };
+    int m_errors { };
+    int m_differences { };
+    int m_incomplete { };
     QString m_ccode;
 
     friend class DocumentModel;
@@ -409,6 +409,8 @@ private:
     QPair<QPoint, QPoint> m_nextDataChangedEmit;
 
     static std::function<ConsolidateFunction> s_consolidateFunction;
+
+    Q_DISABLE_COPY_MOVE(DocumentModel)
 };
 
 class DocumentLotsMimeData : public QMimeData

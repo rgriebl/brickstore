@@ -31,11 +31,11 @@ static QDateTime parseESTDateTimeString(const QString &v)
         int h = sl.at(3).toInt() % 12;
         if (sl.at(6) == u"PM")
             h += 12;
-        return QDateTime({ sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
-                         { h, sl.at(4).toInt(), sl.at(5).toInt() }, est);
+        return { { sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
+                { h, sl.at(4).toInt(), sl.at(5).toInt() }, est };
     } else if (sl.size() == 3) {
-        return QDateTime({ sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
-                         { 0, 0, 0 }, Qt::UTC);
+        return { { sl.at(2).toInt(), sl.at(0).toInt(), sl.at(1).toInt() },
+                { 0, 0, 0 }, Qt::UTC };
     } else {
         return { };
     }

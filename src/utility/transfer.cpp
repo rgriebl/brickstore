@@ -15,9 +15,9 @@
 
 Q_LOGGING_CATEGORY(LogTransfer, "bs.transfer", QtWarningMsg)
 
-static const char *BL_SESSION_TOKEN_HEADER = "x-bl-session-token";
-static const char *BL_CLIENT_ID_HEADER = "x-bl-tpa-client-id";
-static const char *BL_CLIENT_ID_VALUE = "ca629c09-4d8c-45dc-8a6f-bfb2b058f720";
+static const char * const BL_SESSION_TOKEN_HEADER = "x-bl-session-token";
+static const char * const BL_CLIENT_ID_HEADER = "x-bl-tpa-client-id";
+static const char * const BL_CLIENT_ID_VALUE = "ca629c09-4d8c-45dc-8a6f-bfb2b058f720";
 
 TransferJob::~TransferJob()
 {
@@ -318,7 +318,7 @@ void TransferRetriever::abortAllJobs()
         emit finished(j);
     }
 
-    m_progressDone += m_jobs.size();
+    m_progressDone += int(m_jobs.size());
     emit overallProgress(m_progressDone, m_progressTotal);
     if (m_progressDone == m_progressTotal)
         m_progressDone = m_progressTotal = 0;

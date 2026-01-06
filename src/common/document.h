@@ -342,4 +342,6 @@ private:
     friend class AutosaveJob;
     friend void ColumnCmd::redo();
     friend void ColumnLayoutCmd::redo();
+
+    Q_DISABLE_COPY_MOVE(Document)
 };

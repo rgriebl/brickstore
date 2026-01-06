@@ -27,7 +27,9 @@ namespace BrickLink {
 class WantedListPrivate
 {
 public:
+    WantedListPrivate() = default;
     ~WantedListPrivate() { qDeleteAll(m_lots); }
+    Q_DISABLE_COPY_MOVE(WantedListPrivate)
 
 private:
     int       m_id;

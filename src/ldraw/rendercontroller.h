@@ -116,6 +116,8 @@ private:
     float m_radius = 0;
     bool m_tumblingAnimationActive = false;
     QColor m_clearColor;
+
+    Q_DISABLE_COPY_MOVE(RenderController)
 };
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)

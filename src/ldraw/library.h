@@ -48,7 +48,7 @@ public:
     ~Library() override;
 
     QString path() const;
-    QCoro::Task<bool> setPath(const QString &path, bool forceReload = false);
+    QCoro::Task<bool> setPath(QString path, bool forceReload = false);
 
     bool isValid() const               { return m_valid; }
     QDateTime lastUpdated() const      { return m_lastUpdated; }
@@ -124,6 +124,7 @@ private:
     int m_partsStatId = -1;
 
     friend class PartElement;
+    Q_DISABLE_COPY_MOVE(Library)
 };
 
 inline Library *library() { return Library::inst(); }

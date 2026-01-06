@@ -33,8 +33,8 @@ namespace Scanner {
 class CapturePrivate
 {
 public:
-    QMediaCaptureSession *captureSession;
-    QImageCapture *imageCapture;
+    QMediaCaptureSession *captureSession = nullptr;
+    QImageCapture *imageCapture = nullptr;
     QByteArray currentCameraId;
     std::unique_ptr<QCamera> camera;
     std::optional<int> currentCaptureId;
@@ -182,9 +182,6 @@ Capture::Capture(QObject *parent)
         }
     });
 }
-
-Capture::~Capture()
-{ }
 
 QObject *Capture::videoOutput() const
 {
@@ -356,7 +353,7 @@ void Capture::setCurrentCameraId(const QByteArray &newCameraId)
     d->currentCameraId = newCameraId;
     emit currentCameraIdChanged(newCameraId);
 
-    d->camera.reset(new QCamera(newCameraDevice));
+    d->camera = std::make_unique<QCamera>(newCameraDevice);
     connect(d->camera.get(), &QCamera::activeChanged,
             this, &Capture::cameraActiveChanged);
 

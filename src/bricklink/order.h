@@ -62,6 +62,7 @@ public:
     Order();
     Order(const QString &id, OrderType type);
     ~Order() override;
+    Q_DISABLE_COPY_MOVE(Order)
 
     LotList loadLots() const; // ownership is transferred to the caller
 
@@ -202,6 +203,7 @@ public:
     };
 
     ~Orders() override;
+    Q_DISABLE_COPY_MOVE(Orders)
 
     QDateTime lastUpdated() const;
     BrickLink::UpdateStatus updateStatus() const;

@@ -28,6 +28,7 @@ class Store : public QObject
 
 public:
     ~Store() override;
+    Q_DISABLE_COPY_MOVE(Store)
 
     bool isValid() const          { return m_valid; }
     QDateTime lastUpdated() const { return m_lastUpdated; }

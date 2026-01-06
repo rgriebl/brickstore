@@ -24,7 +24,6 @@ class RenderWidget : public QWidget
     Q_OBJECT
 public:
     RenderWidget(QQmlEngine *engine, QWidget *parent = nullptr);
-    ~RenderWidget() override;
 
     RenderController *controller();
 
@@ -58,7 +57,7 @@ private:
     void languageChange();
 
     RenderController *m_controller = nullptr;
-    QQuickWidget *m_widget = nullptr;
+    std::unique_ptr<QQuickWidget> m_widget;
     QSharedPointer<QQuickItemGrabResult> m_grabResult;
 };
 

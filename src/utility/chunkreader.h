@@ -4,6 +4,7 @@
 #ifndef CHUNKREADER_H
 #define CHUNKREADER_H
 
+#include <QtGlobal>
 #include <QDataStream>
 #include <QStack>
 

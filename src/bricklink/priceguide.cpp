@@ -542,7 +542,7 @@ QString BatchedAffiliateAPIPGRetriever::itemTypeApiId(const ItemType *itt)
         { 'P', u"PART"_qs },
         { 'S', u"SET"_qs },
     };
-    return mapping.value(itt ? itt->id() : 0);
+    return mapping.value(itt ? itt->id() : char(0));
 }
 
 
@@ -674,14 +674,14 @@ void PriceGuideCache::setUpdateInterval(int interval)
 
 void PriceGuideCache::clearCache()
 {
-    int lastLeftOver = 0;
+    qsizetype lastLeftOver = 0;
     QElapsedTimer timer;
     QElapsedTimer absoluteTimer;
     absoluteTimer.start();
 
     // the loader/saver threads might hold references, so we need to wait for their queues to drain
     while (true) {
-        int leftOver = d->m_cache.clearRecursive();
+        qsizetype leftOver = d->m_cache.clear();
 
         if (!leftOver) {
             break;
@@ -936,12 +936,12 @@ void PriceGuideCachePrivate::loadThread(QString dbName, int index)
                     lastUpdated = loadQuery.isNull(0) ? QDateTime()
                                                       : QDateTime::fromMSecsSinceEpoch(loadQuery.value(0).toLongLong());
                     data = loadQuery.value(1).toByteArray();
-                    loaded = data.isEmpty() || (data.size() == sizeof(PriceGuide::Data));
+                    loaded = data.isEmpty() || (data.size() == qsizetype(sizeof(PriceGuide::Data)));
                 }
                 loadQuery.finish();
             }
             pg->addRef(); // the release will happen on the main thread (see the invokeMethod below)
-            QMetaObject::invokeMethod(m_core, [=, this, pg=pg]() { // clang bug: P1091R3
+            QMetaObject::invokeMethod(m_core, [this, loaded, lastUpdated, data, highPriority, pg=pg]() { // clang bug: P1091R3
                 if (loaded) {
                     pg->setLastUpdated(lastUpdated);
                     std::memcpy(&pg->m_data, data, sizeof(PriceGuide::Data));

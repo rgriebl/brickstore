@@ -111,9 +111,6 @@ bool Lot::operator==(const Lot &cmp) const
             && (m_dateLastSold     == cmp.m_dateLastSold);
 }
 
-Lot::~Lot()
-{ }
-
 void Lot::save(QDataStream &ds) const
 {
     ds << QByteArray("II") << qint32(5)
@@ -136,7 +133,7 @@ Lot *Lot::restore(QDataStream &ds, uint startChangelogAt)
     std::unique_ptr<Lot> lot;
 
     QByteArray tag;
-    qint32 version;
+    qint32 version { };
     ds >> tag >> version;
     if ((ds.status() != QDataStream::Ok) || (tag != "II") || (version != 5))
         return nullptr;

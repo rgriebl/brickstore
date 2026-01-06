@@ -270,14 +270,14 @@ void PictureCache::setUpdateInterval(int interval)
 
 void PictureCache::clearCache()
 {
-    int lastLeftOver = 0;
+    qsizetype lastLeftOver = 0;
     QElapsedTimer timer;
     QElapsedTimer absoluteTimer;
     absoluteTimer.start();
 
     // the loader/saver threads might hold references, so we need to wait for their queues to drain
     while (true) {
-        int leftOver = d->m_cache.clearRecursive();
+        qsizetype leftOver = d->m_cache.clear();
 
         if (!leftOver) {
             break;
@@ -535,7 +535,7 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
             }
 
             pic->addRef(); // the release will happen on the main thread (see the invokeMethod below)
-            QMetaObject::invokeMethod(m_core, [=, this, pic=pic]() { // clang bug: P1091R3
+            QMetaObject::invokeMethod(m_core, [this, loaded, lastUpdated, img, highPriority, pic=pic]() { // clang bug: P1091R3
                 if (loaded) {
                     pic->setLastUpdated(lastUpdated);
                     pic->setImage(img);

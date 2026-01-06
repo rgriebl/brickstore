@@ -47,6 +47,7 @@ public:
 
     PriceGuide(std::nullptr_t) : PriceGuide(nullptr, nullptr, VatType::Excluded) { } // for scripting only!
     ~PriceGuide() override;
+    Q_DISABLE_COPY_MOVE(PriceGuide)
 
     Q_INVOKABLE void addRef()         { Ref::addRef(); }
     Q_INVOKABLE void release()        { Ref::release(); }

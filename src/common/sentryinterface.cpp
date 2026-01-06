@@ -21,7 +21,7 @@ union sentry_value_u {
     uint64_t _bits;
     double _double;
 };
-typedef union sentry_value_u sentry_value_t;
+using sentry_value_t = union sentry_value_u;
 #endif
 
 Q_LOGGING_CATEGORY(LogSentry, "sentry")
@@ -45,10 +45,10 @@ public:
     sentry_value_t (*m_sentry_value_new_string)(const char *) = nullptr;
     sentry_value_t (*m_sentry_value_new_int32)(int32_t) = nullptr;
     void (*m_sentry_add_breadcrumb)(sentry_value_t) = nullptr;
-    int (*m_sentry_close)(void) = nullptr;
-    void (*m_sentry_user_consent_reset)(void) = nullptr;
-    void (*m_sentry_user_consent_give)(void) = nullptr;
-    void (*m_sentry_user_consent_revoke)(void) = nullptr;
+    int (*m_sentry_close)() = nullptr;
+    void (*m_sentry_user_consent_reset)() = nullptr;
+    void (*m_sentry_user_consent_give)() = nullptr;
+    void (*m_sentry_user_consent_revoke)() = nullptr;
 };
 
 bool SentryInterface::isEnabled()
@@ -97,7 +97,7 @@ SentryInterface::SentryInterface(const char *dsn, const char *release)
 }
 
 SentryInterface::~SentryInterface()
-{ }
+{ /* needed to use std::unique_ptr on d */ }
 
 void SentryInterface::setDebug(bool on)
 {

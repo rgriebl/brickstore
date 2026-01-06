@@ -52,7 +52,8 @@ RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    m_widget = engine ? new QQuickWidget(engine, this) : new QQuickWidget(this);
+    m_widget = engine ? std::make_unique<QQuickWidget>(engine, this)
+                      : std::make_unique<QQuickWidget>(this);
 
     if (isGPUSupported()) {
         QSurfaceFormat fmt = QQuick3D::idealSurfaceFormat();
@@ -86,15 +87,8 @@ RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
         QCoreApplication::postEvent(this, he);
     });
 
-    layout->addWidget(m_widget, 10);
+    layout->addWidget(m_widget.get(), 10);
     languageChange();
-}
-
-RenderWidget::~RenderWidget()
-{
-    // we need to make sure the widget/window dies before the RenderController
-    delete m_widget;
-    m_widget = nullptr;
 }
 
 RenderController *RenderWidget::controller()

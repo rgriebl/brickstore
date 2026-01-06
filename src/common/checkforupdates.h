@@ -51,4 +51,6 @@ private:
     Mode m_mode = Mode::NotifyBeforeUpdate;
 
     static CheckForUpdates *s_inst;
+
+    Q_DISABLE_COPY_MOVE(CheckForUpdates)
 };

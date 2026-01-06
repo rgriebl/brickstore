@@ -36,7 +36,6 @@ public:
         Entry() = default;
         Entry(const QString &sectionTitle);
         Entry(const BrickLink::Item *item, const BrickLink::Color *color, int quantity);
-        ~Entry();
 
         bool isSection() const { return !m_item && !m_sectionTitle.isEmpty(); }
 

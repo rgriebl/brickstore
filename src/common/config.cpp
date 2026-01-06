@@ -33,18 +33,18 @@ static inline qint32 mkver(int a, int b, int c)
 } // namespace
 
 #if defined(Q_OS_MACOS)
-static const char *organization = "brickstore.org"; // this is wrong, but it can't be fixed easily
+static const char * const organization = "brickstore.org"; // this is wrong, but it can't be fixed easily
 #elif defined(Q_OS_IOS)
-static const char *organization = "brickforge.de";
+static const char * const organization = "brickforge.de";
 #else
-static const char *organization = "BrickStore";
+static const char * const organization = "BrickStore";
 #endif
 
 #if defined(BS_MOBILE) && !(defined(Q_OS_IOS) || defined(Q_OS_ANDROID))
 // use different mobile settings on the desktop, when running mobile builds
-static const char *application = "BrickStoreMobile";
+static const char * const application = "BrickStoreMobile";
 #else
-static const char *application = "BrickStore";
+static const char * const application = "BrickStore";
 #endif
 
 Config::Config()
@@ -58,7 +58,6 @@ Config::Config()
 
     m_measurement = (value(u"General/MeasurementSystem"_qs).toString() == u"imperial")
             ? QLocale::ImperialSystem : QLocale::MetricSystem;
-    m_translations_parsed = false;
 
     try {
         auto utf8at = CredentialsManager::load(u"BrickStore"_qs, u"BrickLink-Access-Token"_qs);

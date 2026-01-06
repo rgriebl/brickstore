@@ -45,5 +45,5 @@ private:
 
     QObject *m_rootObject = nullptr;
 
-    Q_DISABLE_COPY(ScriptManager)
+    Q_DISABLE_COPY_MOVE(ScriptManager)
 };

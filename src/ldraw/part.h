@@ -37,6 +37,8 @@ protected:
 
     QVector<Element *> m_elements;
     int m_cost = 0;
+
+    Q_DISABLE_COPY_MOVE(Part)
 };
 
 

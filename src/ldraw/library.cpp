@@ -271,7 +271,7 @@ QString Library::path() const
     return m_path;
 }
 
-QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
+QCoro::Task<bool> Library::setPath(QString path, bool forceReload)
 {
     if ((m_path == path) && !forceReload)
         co_return false;

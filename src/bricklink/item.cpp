@@ -135,7 +135,7 @@ bool Item::hasKnownColor(const Color *col) const
 {
     if (!col)
         return true;
-    int index = quint16(col - core()->colors().data());
+    auto index = quint16(col - core()->colors().data());
     for (const auto &colIdx : m_knownColorIndexes) {
         if (colIdx == index)
             return true;

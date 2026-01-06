@@ -99,13 +99,13 @@ public:
 
     private:
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-        quint32  m_pcc;
-        quint32  m_colorIndex : 12;
+        quint32  m_pcc = 0;
+        quint32  m_colorIndex : 12 = 0;
         quint32  m_reserved   : 20 = 0;
 #else
         quint32  m_reserved   : 20 = 0;
-        quint32  m_colorIndex : 12;
-        quint32  m_pcc;
+        quint32  m_colorIndex : 12 = 0;
+        quint32  m_pcc = 0;
 #endif
         friend class Item;
         friend class Core;

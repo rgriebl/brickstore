@@ -21,7 +21,7 @@ public:
 
 private:
     SystemInfo();
-    Q_DISABLE_COPY(SystemInfo)
+    Q_DISABLE_COPY_MOVE(SystemInfo)
 
     static SystemInfo *s_inst;
 

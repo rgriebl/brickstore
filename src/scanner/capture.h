@@ -20,7 +20,6 @@ class Capture : public QObject
 
 public:
     Capture(QObject *parent);
-    ~Capture() override;
 
     QObject *videoOutput() const;
     void setVideoOutput(QObject *videoOutput);

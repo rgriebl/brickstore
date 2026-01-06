@@ -43,10 +43,6 @@ CameraPreviewWidget::CameraPreviewWidget(QQmlEngine *engine, QWidget *parent)
     layout->addWidget(m_widget, 10);
 }
 
-CameraPreviewWidget::~CameraPreviewWidget()
-{
-}
-
 bool CameraPreviewWidget::isActive() const
 {
     return m_widget->rootObject() ? m_widget->rootObject()->property("active").toBool() : false;

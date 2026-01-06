@@ -716,10 +716,10 @@ void Document::setColumnLayoutDirect(QVector<ColumnData> &columnData)
 
     // we need to move the columns into their (visual) place from left to right
     for (int vi = 0; vi < DocumentModel::FieldCount; ++vi) {
-        int li;
         // make sure to only handle columns that we know about
         int liMax = std::min(int(columnData.count()), int(DocumentModel::FieldCount));
-        for (li = 0; li < liMax; ++li) {
+        int li = 0;
+        for (; li < liMax; ++li) {
             if (columnData.value(li).m_visualIndex == vi)
                 break;
         }
@@ -2319,8 +2319,8 @@ std::tuple<QVector<ColumnData>, QVector<QPair<int, Qt::SortOrder>>> Document::pa
     QVector<ColumnData> columnData;
 
     for (int i = 0; i < count; ++i) {
-        qint32 size, position;
-        bool isHidden;
+        qint32 size = 0, position = 0;
+        bool isHidden = false;
         ds >> size >> position >> isHidden;
 
         columnData.insert(i, ColumnData { size, position, isHidden });
@@ -2418,8 +2418,8 @@ void Document::cancelBlockingOperation()
 ///////////////////////////////////////////////////////////////////////
 
 
-static const char *autosaveMagic = "||BRICKSTORE AUTOSAVE MAGIC||";
-static const char *autosaveTemplate = "brickstore_%1.autosave";
+static const char * const autosaveMagic = "||BRICKSTORE AUTOSAVE MAGIC||";
+static const char * const autosaveTemplate = "brickstore_%1.autosave";
 
 bool Document::isRestoredFromAutosave() const
 {
@@ -2527,7 +2527,7 @@ int Document::processAutosaves(AutosaveAction action)
         QFile f(temp.filePath(filename));
         if ((action == AutosaveAction::Restore) && f.open(QIODevice::ReadOnly)) {
             QByteArray magic;
-            qint32 version;
+            qint32 version = 0;
             QString savedTitle;
             QString savedFileName;
             QString savedCurrencyCode;

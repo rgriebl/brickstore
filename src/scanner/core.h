@@ -18,9 +18,10 @@ class CorePrivate;
 class Core : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY_MOVE(Core)
+
 public:
     static Core *inst();
-    Core(const Core &) = delete;
     ~Core() override;
 
     struct Backend {

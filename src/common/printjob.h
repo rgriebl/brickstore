@@ -161,4 +161,6 @@ private:
     QVector<QmlPrintPage *> m_pages;
     QPaintDevice *m_pd;
     bool m_aborted = false;
+
+    Q_DISABLE_COPY_MOVE(QmlPrintJob)
 };

@@ -59,7 +59,7 @@ signals:
 
 private:
     Currency();
-    Currency(const Currency &);
+    Q_DISABLE_COPY_MOVE(Currency)
     static Currency *s_inst;
 
     QNetworkAccessManager *m_nam;

@@ -471,6 +471,8 @@ private:
     bool m_initialized = false;
     mutable QPointer<QSettings> m_settings = nullptr;
     QHash<const char *, QVariant> m_changedProperties = {};
+
+    Q_DISABLE_COPY_MOVE(QmlExtraConfig)
 };
 
 class QmlOnlineState

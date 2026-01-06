@@ -25,7 +25,7 @@ class QmlCore : public QObject
     Q_PROPERTY(QByteArray defaultBackendId READ defaultBackendId WRITE setDefaultBackendId NOTIFY defaultBackendIdChanged)
 
 public:
-    QmlCore();
+    QmlCore() = default;
 
     Q_INVOKABLE QVariantMap backendFromId(const QByteArray &id) const;
 

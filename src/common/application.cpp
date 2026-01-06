@@ -358,7 +358,7 @@ void Application::afterInit()
         delayedInit();
     } else {
         qInfo() << "Delaying initialization until online";
-        QMetaObject::invokeMethod(this, [=, this]() {
+        QMetaObject::invokeMethod(this, [this, delayedInit]() {
                 if (OnlineState::inst()->isOnline()) {
                     delayedInit();
                 } else {
@@ -661,7 +661,7 @@ void Application::setupTerminateHandler()
             if (auto type = abi::__cxa_current_exception_type()) {
                 typeName = type->name();
                 if (typeName) {
-                    int status;
+                    int status = 0;
                     demangleBuffer = abi::__cxa_demangle(typeName, demangleBuffer, &demangleBufferSize, &status);
                     if (status == 0 && *demangleBuffer)
                         typeName = demangleBuffer;

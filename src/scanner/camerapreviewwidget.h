@@ -15,7 +15,6 @@ class CameraPreviewWidget : public QWidget
     Q_OBJECT
 public:
     CameraPreviewWidget(QQmlEngine *engine, QWidget *parent = nullptr);
-    ~CameraPreviewWidget() override;
 
     bool isActive() const;
     void setActive(bool newActive);

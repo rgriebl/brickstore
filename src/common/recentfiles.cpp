@@ -33,7 +33,7 @@ RecentFiles::RecentFiles(QObject *parent)
             auto pos = path.indexOf(u'}');
             if (pos > 0) {
                 const QByteArray stdPathName = path.mid(2, pos - 2).toLatin1();
-                bool exists;
+                bool exists = false;
                 auto stdPathLocation = static_cast<QStandardPaths::StandardLocation>(
                     QMetaEnum::fromType<QStandardPaths::StandardLocation>().keyToValue(
                         stdPathName.constData(), &exists));

@@ -120,7 +120,7 @@ static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int lev
         if (smo->metaType().flags().testFlag(QMetaType::IsGadget))
             break;
     }
-    int propCount = 0;
+    qsizetype propCount = 0;
     for (const auto *smo : superMos)
         propCount += stringifyProperties(smo);
 
