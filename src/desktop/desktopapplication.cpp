@@ -200,7 +200,7 @@ void DesktopApplication::init()
 #if defined(Q_OS_MACOS)
     if (SystemInfo::inst()->value(u"build.qt.version"_qs).toString() == u"6.4.3") {
         const auto macos = QVersionNumber::fromString(QSysInfo::productVersion());
-        if (macos >= QVersionNumber(13))
+        if (macos >= QVersionNumber(13)) {
             QString text = tr("You are using the legacy version of BrickStore for old macOS 10, 11 "
                               "and 12 machines, but you are running macOS %1.")
                                .arg(QSysInfo::productVersion())

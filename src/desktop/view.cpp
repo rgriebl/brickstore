@@ -689,7 +689,8 @@ void View::contextMenu(const QPoint &pos)
         case DocumentModel::QuantityOrig:
         case DocumentModel::QuantityDiff:
         case DocumentModel::Quantity:
-            actionNames = { "edit_qty_set", "edit_qty_multiply", "edit_qty_divide" };
+            actionNames = { "edit_qty_set", "edit_qty_add", "edit_qty_subtract", "-",
+                            "edit_qty_multiply", "edit_qty_divide" };
             break;
         case DocumentModel::PriceOrig:
         case DocumentModel::PriceDiff:
