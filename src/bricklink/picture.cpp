@@ -296,7 +296,7 @@ void PictureCache::clearCache()
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents, 500);
     }
 
-    AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
+    AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.size());
 }
 
 QPair<int, int> PictureCache::cacheStats() const
@@ -327,7 +327,7 @@ Picture *PictureCache::picture(const Item *item, const Color *color, bool highPr
                       int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), int(cost), item->id().constData());
             return nullptr;
         }
-        AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
+        AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.size());
     }
 
     if (needToLoad) {

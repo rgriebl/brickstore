@@ -262,8 +262,8 @@ void Library::shutdownPartLoaderThread()
     m_cache.clear();
     m_lookupCache.clear();
 
-    AppStatistics::inst()->update(m_partsStatId, m_cache.count());
-    AppStatistics::inst()->update(m_lookupStatId, m_cache.count());
+    AppStatistics::inst()->update(m_partsStatId, m_cache.size());
+    AppStatistics::inst()->update(m_lookupStatId, m_cache.size());
 }
 
 QString Library::path() const
@@ -585,15 +585,14 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
             }
         }
         if (!data.isEmpty()) {
-            p = Part::parse(data, parentdir);
-            if (p) {
-                if (!m_cache.insert(filename, p, p->cost())) {
+            if (auto pParsed = Part::parse(data, parentdir)) {
+                uint cost = pParsed->cost();
+                p = m_cache.insert(filename, std::move(pParsed), cost);
+                if (!p)
                     qCWarning(LogLDraw) << "Unable to cache file" << filename;
-                    p = nullptr;
-                }
 
                 //qCInfo(LogLDraw) << "Cache at" << m_cache.totalCost() << "/" <<  m_cache.maxCost() << "with" << m_cache.size() << "parts";
-                AppStatistics::inst()->update(m_partsStatId, m_cache.count());
+                AppStatistics::inst()->update(m_partsStatId, m_cache.size());
             }
         }
     }

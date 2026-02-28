@@ -700,7 +700,7 @@ void PriceGuideCache::clearCache()
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents, 500);
     }
 
-    AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
+    AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.size());
 }
 
 QPair<int, int> PriceGuideCache::cacheStats() const
@@ -731,7 +731,7 @@ PriceGuide *PriceGuideCache::priceGuide(const Item *item, const Color *color, Va
                       int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), 1);
             return nullptr;
         }
-        AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
+        AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.size());
     }
 
     if (needToLoad) {
