@@ -170,7 +170,8 @@ QCoro::Task<> TextImport::login(const QString &accessToken, const QString &rebri
     if (!core()->isAuthenticated()) {
         core()->authenticate();
 
-        auto [accessTokenAuth, error] = co_await qCoro(core(), &Core::authenticationFinished);
+        auto task = co_await qCoro(core(), &Core::authenticationFinished);
+        const auto [accessTokenAuth, error] = task; // because of bogus gcc "uninitialized" warning
         Q_ASSERT(accessTokenAuth == accessToken);
         if (!error.isEmpty())
             throw Exception("Failed to log into BrickLink:\n%1").arg(error);
