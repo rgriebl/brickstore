@@ -3,11 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2026.1.1] - 2026-01-01
+## [2026.3.1] - 2026-03-01
 
 - Finally found and fixed the bug that made the order updates hang for some people.
 - Fixed some glitches in the add-item dialog's history browsing code.
-- Machines running macOS 11 and 12 have to be manually reinstalled with BrickStore's *macOS-10-Legacy* version (why? https://endoflife.date/macos).
+- Machines running macOS 11 and 12 have to be manually reinstalled with BrickStore's *macOS-10-Legacy* version (see https://endoflife.date/macos).
 
 
 ## [2025.11.1] - 2025-11-03
@@ -763,7 +763,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2025.11.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2026.3.1...HEAD
+[2026.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2026.3.1
 [2025.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.11.1
 [2025.9.2]: https://github.com/rgriebl/brickstore/releases/tag/v2025.9.2
 [2025.9.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.9.1
