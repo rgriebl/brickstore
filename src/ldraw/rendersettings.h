@@ -45,11 +45,11 @@ public:
     static RenderSettings *inst();
     static RenderSettings *create(QQmlEngine *qe, QJSEngine *je); // QML_SINGLETON
 
-    enum AntiAliasing {
-        NoAA,
-        MediumAA,
-        HighAA,
-        VeryHighAA,
+    enum class AntiAliasing {
+        No,
+        Medium,
+        High,
+        VeryHigh,
     };
     Q_ENUM(AntiAliasing)
 
