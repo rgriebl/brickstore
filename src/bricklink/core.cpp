@@ -419,12 +419,14 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
                     emit authenticationChanged(m_authenticated);
                 }
                 job->resetForReuse();
+                job->setFollowRedirects(followRedirect);
 
                 QMetaObject::invokeMethod(this, [=, this]() {
                     retrieveAuthenticated(job);
                 }, Qt::QueuedConnection);
             } else if (normalRedirect && followRedirect) {
                 job->resetForReuse(true /* applyRedirect*/);
+                job->setFollowRedirects(true);
 
                 QMetaObject::invokeMethod(this, [=, this]() {
                     retrieveAuthenticated(job);
