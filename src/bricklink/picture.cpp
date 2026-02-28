@@ -28,7 +28,7 @@ namespace BrickLink {
 
 PictureCache *Picture::s_cache = nullptr;
 
-Picture::Picture(const Item *item, const Color *color)
+Picture::Picture(Private, const Item *item, const Color *color)
     : m_item(item)
     , m_color(color)
 { }
@@ -320,11 +320,11 @@ Picture *PictureCache::picture(const Item *item, const Color *color, bool highPr
     bool needToLoad = !pic || (!pic->isValid() && (pic->updateStatus() == UpdateStatus::UpdateFailed));
 
     if (!pic) {
-        pic = new Picture(item, color);
-        int cost = pic->cost();
-        if (!d->m_cache.insert(key, pic, cost)) {
-            qCWarning(LogCache, "Can not add picture to cache (cache max/cur: %d/%d, item cost/id: %d/%s)",
-                      int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), int(cost), item->id().constData());
+        auto newPic = std::make_unique<Picture>(Picture::Private { }, item, color);
+        pic = d->m_cache.insert(key, std::move(newPic), 1 /* start with roughly 1KB cost */);
+        if (!pic) {
+            qCWarning(LogCache, "Can not add picture to cache (cache max/cur: %d/%d, item id: %s)",
+                      int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), item->id().constData());
             return nullptr;
         }
         AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.size());

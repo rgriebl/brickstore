@@ -32,7 +32,7 @@ RenderController::RenderController(QObject *parent)
     , m_lines(new QmlRenderLineInstancing())
     , m_clearColor(Qt::white)
 {
-    static const float lineGeo[] = {
+    static const std::array<float, 6 * 3> lineGeo = {
         0, -0.5, 0,
         0, -0.5, 1,
         0, 0.5, 1,
@@ -44,7 +44,8 @@ RenderController::RenderController(QObject *parent)
     m_lineGeo->setPrimitiveType(QQuick3DGeometry::PrimitiveType::Triangles);
     m_lineGeo->setStride(3 * sizeof(float));
     m_lineGeo->addAttribute(QQuick3DGeometry::Attribute::PositionSemantic, 0, QQuick3DGeometry::Attribute::F32Type);
-    m_lineGeo->setVertexData(QByteArray::fromRawData(reinterpret_cast<const char *>(lineGeo), sizeof(lineGeo)));
+    m_lineGeo->setVertexData(QByteArray::fromRawData(reinterpret_cast<const char *>(lineGeo.data()),
+                                                     qsizetype(lineGeo.size() * sizeof(decltype(lineGeo)::value_type))));
 }
 
 RenderController::~RenderController()
@@ -205,9 +206,9 @@ RenderController::RenderData RenderController::calculateRenderData(Part *part, c
         const BrickLink::Color *surfaceColor = it.key();
         const bool isTextured = surfaceColor->hasParticles() || (surfaceColor->id() == 0);
 
-        const int stride = (3 + 3 + (isTextured ? 2 : 0)) * sizeof(float);
+        const int stride = (3 + 3 + (isTextured ? 2 : 0)) * int(sizeof(float));
 
-        auto geo = new QmlRenderGeometry(surfaceColor);
+        auto geo = std::make_unique<QmlRenderGeometry>(surfaceColor);
 
         // calculate bounding box
         static constexpr auto fmin = std::numeric_limits<float>::min();
@@ -239,17 +240,17 @@ RenderController::RenderData RenderController::calculateRenderData(Part *part, c
         if (isTextured) {
             geo->addAttribute(QQuick3DGeometry::Attribute::TexCoord0Semantic, 6 * sizeof(float), QQuick3DGeometry::Attribute::F32Type);
 
-            QQuick3DTextureData *texData = generateMaterialTextureData(surfaceColor);
-            texData->setParentItem(geo);  // 3D scene parent
-            texData->setParent(geo);      // owning parent
-            geo->setTextureData(texData);
+            auto texData = generateMaterialTextureData(surfaceColor);
+            texData->setParentItem(geo.get());  // 3D scene parent
+            texData->setParent(geo.get());      // owning parent
+            geo->setTextureData(texData.release());
         }
         geo->setBounds(vmin, vmax);
         geo->setCenter(surfaceCenter);
         geo->setRadius(surfaceRadius);
         geo->setVertexData(data);
 
-        geos.append(geo);
+        geos.append(geo.release());
     }
 
     for (auto *geo : std::as_const(geos)) {
@@ -378,7 +379,7 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
         return Qt::black;
     };
 
-    const auto &elements = part->elements();
+    const auto elements = part->elements();
     for (const Element *e : elements) {
         bool isBFCCommand = false;
         bool isBFCInvertNext = false;
@@ -428,9 +429,9 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
             const auto color = mapColor(qe->color());
             const auto p = qe->points();
             const auto p0m = matrix.map(p[0]);
-            const auto p1m = matrix.map(p[ccw ? 3 : 1]);
+            const auto p1m = matrix.map(ccw ? p[3] : p[1]);
             const auto p2m = matrix.map(p[2]);
-            const auto p3m = matrix.map(p[ccw ? 1 : 3]);
+            const auto p3m = matrix.map(ccw ? p[1] : p[3]);
             const auto n = QVector3D::normal(p0m, p1m, p2m);
 
             if (color->hasParticles() || (color->id() == 0)) {
@@ -491,7 +492,7 @@ void RenderController::fillVertexBuffers(Part *part, const BrickLink::Color *mod
     }
 }
 
-QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLink::Color *color)
+std::unique_ptr<QQuick3DTextureData> RenderController::generateMaterialTextureData(const BrickLink::Color *color)
 {
     static constexpr int GeneratorVersion = 1;
 
@@ -611,7 +612,7 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
             s_materialTextureDatas.insert(color, texImage);
         }
 
-        auto texData = new QQuick3DTextureData();
+        auto texData = std::make_unique<QQuick3DTextureData>();
         texData->setFormat(QQuick3DTextureData::RGBA8);
         texData->setSize(texImage.size());
         texData->setHasTransparency(color->ldrawColor().alpha() < 255);
@@ -619,7 +620,7 @@ QQuick3DTextureData *RenderController::generateMaterialTextureData(const BrickLi
                                              texImage.sizeInBytes() });
         return texData;
     }
-    return nullptr;
+    return { };
 }
 
 void RenderController::resetCamera()

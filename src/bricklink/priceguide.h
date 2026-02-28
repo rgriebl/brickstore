@@ -29,6 +29,8 @@ class PriceGuide : public QObject, public Ref
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged FINAL)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
 
+    struct Private { };
+
 public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
@@ -45,7 +47,7 @@ public:
     Q_INVOKABLE int lots(BrickLink::Time t, BrickLink::Condition c) const               { return m_data.lots[int(t)][int(c)]; }
     Q_INVOKABLE double price(BrickLink::Time t, BrickLink::Condition c, BrickLink::Price p) const  { return m_data.prices[int(t)][int(c)][int(p)]; }
 
-    PriceGuide(std::nullptr_t) : PriceGuide(nullptr, nullptr, VatType::Excluded) { } // for scripting only!
+    PriceGuide(Private, const Item *item, const Color *color, VatType vatType);
     ~PriceGuide() override;
     Q_DISABLE_COPY_MOVE(PriceGuide)
 
@@ -84,8 +86,6 @@ private:
     static PriceGuideCache *s_cache;
 
 private:
-    PriceGuide(const Item *item, const Color *color, VatType vatType);
-
     void setIsValid(bool valid);
     void setUpdateStatus(UpdateStatus status);
     void setLastUpdated(const QDateTime &dt);

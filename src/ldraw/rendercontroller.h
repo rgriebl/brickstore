@@ -98,7 +98,7 @@ private:
                                   const BrickLink::Color *baseColor, const QMatrix4x4 &matrix,
                                   bool inverted, QHash<const BrickLink::Color *, QByteArray> &surfaceBuffers,
                                   QByteArray &lineBuffer);
-    static QQuick3DTextureData *generateMaterialTextureData(const BrickLink::Color *color);
+    static std::unique_ptr<QQuick3DTextureData> generateMaterialTextureData(const BrickLink::Color *color);
     static std::vector<std::pair<float, float> > uvMapToNearestPlane(const QVector3D &normal,
                                                                      std::initializer_list<const QVector3D> vectors);
 

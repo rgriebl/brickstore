@@ -29,6 +29,8 @@ class Picture : public QObject, protected Ref
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
     Q_PROPERTY(QImage image READ image NOTIFY imageChanged FINAL)
 
+    struct Private { };
+
 public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
@@ -44,7 +46,7 @@ public:
 
     int cost() const;
 
-    Picture(std::nullptr_t) : Picture(nullptr, nullptr) { } // for scripting only!
+    Picture(Private, const Item *item, const Color *color);
     ~Picture() override;
     Q_DISABLE_COPY_MOVE(Picture)
 
@@ -76,8 +78,6 @@ private:
     static PictureCache *s_cache;
 
 private:
-    Picture(const Item *item, const Color *color);
-
     void setIsValid(bool valid);
     void setUpdateStatus(UpdateStatus status);
     void setLastUpdated(const QDateTime &dt);

@@ -35,7 +35,7 @@ namespace BrickLink {
 
 PriceGuideCache *PriceGuide::s_cache = nullptr;
 
-PriceGuide::PriceGuide(const Item *item, const Color *color, VatType vatType)
+PriceGuide::PriceGuide(Private, const Item *item, const Color *color, VatType vatType)
     : m_item(item)
     , m_color(color)
     , m_vatType(vatType)
@@ -725,10 +725,11 @@ PriceGuide *PriceGuideCache::priceGuide(const Item *item, const Color *color, Va
     bool needToLoad = !pg || (!pg->isValid() && (pg->updateStatus() == UpdateStatus::UpdateFailed));
 
     if (!pg) {
-        pg = new PriceGuide(item, color, vatType);
-        if (!d->m_cache.insert(key, pg)) {
-            qCWarning(LogCache, "Can not add price guide to cache (cache max/cur: %d/%d, cost: %d)",
-                      int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), 1);
+        auto newPg = std::make_unique<PriceGuide>(PriceGuide::Private { }, item, color, vatType);
+        pg = d->m_cache.insert(key, std::move(newPg));
+        if (!pg) {
+            qCWarning(LogCache, "Can not add price guide to cache (cache max/cur: %d/%d, item id: %s)",
+                      int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), item->id().constData());
             return nullptr;
         }
         AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.size());
