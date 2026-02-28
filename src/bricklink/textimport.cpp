@@ -1618,10 +1618,10 @@ void TextImport::xmlParse(const QByteArray &xml, QStringView rootName, QStringVi
                 callback(hash);
             } catch (const Exception &e) {
                 qint64 end = xsr.characterOffset();
-                QByteArray context = "\n\n"_qba + fixedXml.mid(start, end - start);
+                auto context = QString::fromUtf8(fixedXml.mid(start, end - start));
 
-                throw Exception("Error processing XML element '%1' (index %2) at line %3: %4%5")
-                    .arg(elementName).arg(count).arg(line).arg(e.errorString()).arg(context.constData());
+                throw Exception("Error processing XML element '%1' (index %2) at line %3: %4\n\n%5")
+                    .arg(elementName).arg(count).arg(line).arg(e.errorString()).arg(context);
             }
         }
     }

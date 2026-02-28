@@ -242,7 +242,10 @@ QCoro::Task<std::optional<QString>> MobileUIHelpers::getFileName(bool doSave, QS
         co_return { };
     }
 #endif
-
+#if defined(Q_OS_ANDROID)
+    Q_UNUSED(title)
+    Q_UNUSED(filters)
+#endif
     auto fileDialog = createDialog<QQuickFileDialog>(s_engine, {
                                                          { u"fileMode"_qs, doSave ? QQuickFileDialog::SaveFile : QQuickFileDialog::OpenFile },
 #if defined(Q_OS_ANDROID)

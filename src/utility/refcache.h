@@ -96,7 +96,7 @@ qsizetype RefCache<KEY, REF>::clear()
     qsizetype s = size();
     while (s) {
         trim(0);
-        int sAfterTrim = size();
+        qsizetype sAfterTrim = size();
         if (sAfterTrim == s)
             break;
         s = sAfterTrim;
