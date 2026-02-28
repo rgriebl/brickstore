@@ -224,7 +224,14 @@ void Application::init()
                                     : QString(accessToken.left(5) + u"..." + accessToken.right(5));
 
             UIHelpers::warning(tr("Failed to authenticate with BrickLink using access token <tt>%1</tt>")
-                                   .arg(safeToken) + u"<br><b>" + error + u"</b>");
+                                   .arg(safeToken) + u"<br><b>" + error + u"</b><br><br>" +
+                               tr("Most likely your token has expired: click <i>Retry</i> to open Settings and renew your token."),
+                               UIHelpers::StandardButton::Ok | UIHelpers::StandardButton::Retry,
+                               UIHelpers::StandardButton::Ok)
+                .then([](UIHelpers::StandardButton btn) {
+                    if (btn == UIHelpers::StandardButton::Retry)
+                        emit Application::inst()->showSettings(u"bricklink"_qs);
+                });
         }
     });
 
