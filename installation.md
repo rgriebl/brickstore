@@ -29,8 +29,8 @@ and eject the BrickStore image again, as you would on any other software
 installation.  Then start BrickStore from your computer's `Applications`
 folder.
 
-Please note: the standard version will only install on macOS 11 or newer.
-Both 10.14 and 10.15 are still supported by the *legacy* build though, but
+**Please note:** the standard version will only install on macOS 13 or newer.
+10.14, 10.15, 11 and 12 are still supported by the *legacy* build though, but
 this might have problems with some web cams not working correctly.
 
 ***
