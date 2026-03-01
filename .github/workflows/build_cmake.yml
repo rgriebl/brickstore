@@ -590,7 +590,6 @@ jobs:
       if: (matrix.config.os == 'macos')
       run: |
         brew install getsentry/tools/sentry-cli
-        brew link getsentry/tools/sentry-cli
         sentry-cli --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif \
             --org brickstore --project brickstore build/BrickStore.app.dSYM ${Qt6_DIR}/lib/
 
