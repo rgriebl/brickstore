@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QtCore/QHash>
+#include <QtCore/QDebug>
 #include "ref.h"
 
 template <typename KEY, typename REF>
@@ -14,7 +15,7 @@ class RefCache
 
 public:
     explicit RefCache(uint maxCost = 100) : m_maxCost(maxCost) { }
-    inline ~RefCache() { clear(); }
+    ~RefCache();
 
     inline qsizetype size() const { return m_hash.size(); }
     inline bool isEmpty() const { return m_hash.isEmpty(); }
@@ -91,6 +92,18 @@ private:
 };
 
 template <typename KEY, typename REF>
+RefCache<KEY, REF>::~RefCache()
+{
+    if (auto dangling = clear()) {
+        qCritical() << "RefCache:" << dangling << "active references on destruction.";
+
+        // Delete all remaining nodes to avoid leaks - this will likely cause crashes if there are
+        // still active references, but we can't do much about it at this point.
+        qDeleteAll(m_hash);
+    }
+}
+
+template <typename KEY, typename REF>
 qsizetype RefCache<KEY, REF>::clear()
 {
     qsizetype s = size();
@@ -140,8 +153,8 @@ REF *RefCache<KEY, REF>::insert(const KEY &key, std::unique_ptr<REF> refPtr, uin
 
     m_hash.insert(key, node);
     m_totalCost += cost;
-    bump(node);
     trim(m_maxCost);
+    bump(node);
     return node->m_refPtr.get();
 }
 
