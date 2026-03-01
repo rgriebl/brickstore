@@ -8,8 +8,9 @@ All notable changes to this project will be documented in this file.
 - Finally found and fixed the bug that made the order updates hang for some people.
 - Fixed some glitches in the add-item dialog's history browsing code.
 - Added a quick way to update your token when interactions with BrickLink's servers fail.
+- Linux: added a workaround for a glitch in libsecret (responsible for securely storing the access token). You probably need to reset your token in the Settings dialog once after the update.
 
-**For macOS users:** if you are still running macOS 11 or 12 you have to manually re-install BrickStore with the *macOS-10-Legacy* version (see https://endoflife.date/macos).
+**macOS users:** if you are still running macOS 11 or 12 you have to manually re-install BrickStore with the *macOS-10-Legacy* version (see https://endoflife.date/macos).
 
 
 ## [2025.11.1] - 2025-11-03

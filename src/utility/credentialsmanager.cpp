@@ -146,11 +146,11 @@ QByteArray CredentialsManager::load(const QString &service, const QString &id)
         const QByteArray contentType = ::secret_value_get_content_type(secret);
         gsize secretSize = 0;
         const auto secretPointer = ::secret_value_get(secret, &secretSize);
-        codedCredential = QByteArray(secretPointer, qsizetype(secretSize));
+        codedCredential = QByteArray::fromBase64(QByteArray(secretPointer, qsizetype(secretSize)));
 
         ::secret_value_unref(secret);
 
-        if (contentType != "application/octet-stream")
+        if (contentType != "text/plain")
             throw Exception("libsecret: unexpected content type: %1").arg(QString::fromUtf8(contentType));
     }
 
@@ -212,21 +212,25 @@ void CredentialsManager::save(const QString &service, const QString &id, const Q
     QByteArray idUtf8 = id.toUtf8();
     QByteArray serviceAndIdUtf8 = serviceUtf8 + '/' + idUtf8;
 
-    auto secret = ::secret_value_new(codedCredential.constData(), codedCredential.size(),
-                                     "application/octet-stream");
+    QByteArray codedCredentialB64 = codedCredential.toBase64();
 
-    ::secret_password_store_binary_sync(&brickstoreSchema, SECRET_COLLECTION_DEFAULT,
-                                        serviceAndIdUtf8.constData(), secret,
-                                        nullptr, &error,
-                                        "service", serviceUtf8.constData(),
-                                        "id", idUtf8.constData(),
-                                        nullptr);
+    auto secret = ::secret_value_new(codedCredentialB64.constData(), codedCredentialB64.size(),
+                                     "text/plain");
+
+    bool ok = ::secret_password_store_binary_sync(&brickstoreSchema, SECRET_COLLECTION_DEFAULT,
+                                                  serviceAndIdUtf8.constData(), secret,
+                                                  nullptr, &error,
+                                                  "service", serviceUtf8.constData(),
+                                                  "id", idUtf8.constData(),
+                                                  nullptr);
     ::secret_value_unref(secret);
 
     if (error) {
         QString msg = QString::fromUtf8(error->message);
         g_error_free(error);
         throw Exception("libsecret error: %1").arg(msg);
+    } else if (!ok) {
+        throw Exception("libsecret store failed without error message");
     }
 
 #else
