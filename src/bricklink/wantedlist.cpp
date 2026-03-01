@@ -32,7 +32,7 @@ public:
     Q_DISABLE_COPY_MOVE(WantedListPrivate)
 
 private:
-    int       m_id;
+    int       m_id = -1;
     QString   m_name;
     QString   m_description;
     int       m_itemCount = 0;
@@ -300,7 +300,7 @@ QVector<BrickLink::WantedList *> WantedLists::parseGlobalWantedList(const QByteA
         if (id >= 0 && !name.isEmpty() && lots && items) {
             auto wantedList = new WantedList;
 
-#if defined(__APPLE__) && defined(__clang__) && ((__clang_major__ - 0) == 15)
+#if defined(__APPLE__) && defined(__clang__) && ((__clang_major__ - 0) >= 15)
             // We would be running into a brk assembly instruction at this point. Most likely
             // a clang optimization gone wrong. Calling into QObject prevents the crash.
             QObject *macClang15CrashWorkaround = wantedList;
