@@ -225,7 +225,7 @@ void Application::init()
 
             UIHelpers::warning(tr("Failed to authenticate with BrickLink using access token <tt>%1</tt>")
                                    .arg(safeToken) + u"<br><b>" + error + u"</b><br><br>" +
-                               tr("Most likely your token has expired: click <i>Retry</i> to open Settings and renew your token."),
+                               tr("Most likely your token has expired: you can click <i>Retry</i> to open Settings and renew it."),
                                UIHelpers::StandardButton::Ok | UIHelpers::StandardButton::Retry,
                                UIHelpers::StandardButton::Ok)
                 .then([](UIHelpers::StandardButton btn) {
