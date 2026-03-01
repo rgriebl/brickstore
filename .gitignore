@@ -34,3 +34,6 @@ doc/html
 build/
 .cache/
 .qmlls.ini
+builds/
+CMakeUserPresets.json
+compile_commands.json
