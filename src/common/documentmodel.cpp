@@ -2476,7 +2476,10 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
                           [this, columnsPlusIndex](const auto *lot1, const auto *lot2) {
                 std::partial_ordering o = std::partial_ordering::equivalent;
                 for (const auto &[columnIndex, sortOrder] : columnsPlusIndex) {
-                    const auto &column = m_columns.value(columnIndex);
+                    const auto cit = m_columns.constFind(columnIndex);
+                    if (cit == m_columns.constEnd())
+                        continue;
+                    const auto &column = cit.value();
 
                     if (column.compareFn) {
                         o = column.compareFn(lot1, lot2);
