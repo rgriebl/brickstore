@@ -2458,37 +2458,38 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
         m_sortedLots = m_lots;
 
         if ((columns.size() != 1) || (columns.at(0).first != -1)) {
-            // make the sort deterministic
-            auto columnsPlusIndex = columns;
-            bool needIndex = true;
+            bool needIndex = true; // make the sort deterministic, by using index as a tie-breaker
+            QVector<QPair<const Column *, Qt::SortOrder>> columnsPlusIndex;
+
+            // pre-resolve column lookups once to avoid a hash lookup per comparator call
             for (const auto &[columnIndex, sortOrder] : columns) {
-                if (columnIndex == 0) {
+                if (columnIndex == 0)
                     needIndex = false;
-                    break;
-                }
+                if (auto cit = m_columns.constFind(columnIndex); cit != m_columns.constEnd())
+                    columnsPlusIndex.append({ &cit.value(), sortOrder });
             }
             if (needIndex) {
-                columnsPlusIndex.append(qMakePair(0, columns.isEmpty() ? Qt::AscendingOrder
-                                                                       : columns.constFirst().second));
+                if (auto cit = m_columns.constFind(0); cit != m_columns.constEnd()) {
+                    columnsPlusIndex.append({ &cit.value(), columns.isEmpty() ? Qt::AscendingOrder
+                                                                              : columns.constFirst().second });
+                }
             }
 
             qParallelSort(m_sortedLots.begin(), m_sortedLots.end(),
-                          [this, columnsPlusIndex](const auto *lot1, const auto *lot2) {
+                          [columnsPlusIndex](const auto *lot1, const auto *lot2) {
                 std::partial_ordering o = std::partial_ordering::equivalent;
-                for (const auto &[columnIndex, sortOrder] : columnsPlusIndex) {
-                    const auto cit = m_columns.constFind(columnIndex);
-                    if (cit == m_columns.constEnd())
-                        continue;
-                    const auto &column = cit.value();
+                for (const auto &[column, sortOrder] : columnsPlusIndex) {
+                    if (sortOrder == Qt::DescendingOrder)
+                        std::swap(lot1, lot2);
 
-                    if (column.compareFn) {
-                        o = column.compareFn(lot1, lot2);
-                    } else if (column.dataFn) {
-                        const auto v1 = column.dataFn(lot1);
-                        const auto v2 = column.dataFn(lot2);
+                    if (column->compareFn) {
+                        o = column->compareFn(lot1, lot2);
+                    } else if (column->dataFn) {
+                        const auto v1 = column->dataFn(lot1);
+                        const auto v2 = column->dataFn(lot2);
 
                         // Qt (as of 6.5.0) does not support operator<=> on QVariant yet
-                        switch (column.type) {
+                        switch (column->type) {
                         case Column::Type::String:
                             o = v1.toString().localeAwareCompare(v2.toString()) <=> 0; break;
                         case Column::Type::Integer:
@@ -2505,12 +2506,9 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
                             o = std::partial_ordering::equivalent; break;
                         }
                     }
-                    if ((o == std::partial_ordering::less) || (o == std::partial_ordering::greater)) {
-                        if (sortOrder == Qt::DescendingOrder) {
-                            o = (o == std::partial_ordering::less) ? std::partial_ordering::greater
-                                                                   : std::partial_ordering::less;
-                        }
-                    }
+                    Q_ASSERT(o != std::partial_ordering::unordered);
+                    if (o != std::partial_ordering::equivalent)
+                        break;
                 }
                 return o < 0;
             });
