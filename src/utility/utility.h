@@ -32,7 +32,12 @@ constexpr double fixFinite(double d)
 constexpr std::partial_ordering fuzzyCompare(double d1, double d2) // just like qFuzzyCompare, but also usable around 0
 {
     bool equal = qAbs(d1 - d2) <= 1e-12 * std::max({ 1.0, qAbs(d1), qAbs(d2) });
-    return equal ? std::partial_ordering::equivalent : (d1 <=> d2);
+    if (equal)
+        return std::partial_ordering::equivalent;
+    auto r = d1 <=> d2;
+    // NaN <=> x returns unordered, which violates strict weak ordering for std::sort.
+    // Treat unordered as equivalent so NaN values don't corrupt the sort.
+    return (r == std::partial_ordering::unordered) ? std::partial_ordering::equivalent : r;
 }
 
 std::strong_ordering naturalCompare(QAnyStringView s1, QAnyStringView s2);

@@ -2498,15 +2498,15 @@ void DocumentModel::sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns
                         case Column::Type::Date:
                             o = v1.toDateTime().toSecsSinceEpoch() <=> v2.toDateTime().toSecsSinceEpoch(); break;
                         case Column::Type::Special:
-                            o = std::partial_ordering::equivalent; break;
                         default:
-                            o = std::partial_ordering::unordered; break;
+                            o = std::partial_ordering::equivalent; break;
                         }
                     }
-                    if (o != 0) {
-                        if (sortOrder == Qt::DescendingOrder)
-                            o = (o < 0) ? std::partial_ordering::greater : std::partial_ordering::less;
-                        break;
+                    if ((o == std::partial_ordering::less) || (o == std::partial_ordering::greater)) {
+                        if (sortOrder == Qt::DescendingOrder) {
+                            o = (o == std::partial_ordering::less) ? std::partial_ordering::greater
+                                                                   : std::partial_ordering::less;
+                        }
                     }
                 }
                 return o < 0;
