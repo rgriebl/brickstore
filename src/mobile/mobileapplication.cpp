@@ -46,24 +46,6 @@ MobileApplication::MobileApplication(int &argc, char **argv)
 
     qputenv("QT_QUICK_CONTROLS_CONF", ":/Mobile/qtquickcontrols2.conf");
 
-#if defined(Q_OS_ANDROID) && (QT_VERSION < QT_VERSION_CHECK(6, 7, 0)) // QTBUG-118421
-    const auto inputDevices = QInputDevice::devices();
-    bool vkbdFound = false;
-    for (const auto *ip : inputDevices) {
-        if ((ip->type() == QInputDevice::DeviceType::Keyboard)
-            && (ip->name() == u"Virtual keyboard"_qs)
-            && (ip->seatName().isEmpty())) {
-            vkbdFound = true;
-            break;
-        }
-    }
-    if (!vkbdFound) {
-        qInfo() << "Qt is missing the virtual keyboard input device, registering it manually.";
-        QWindowSystemInterface::registerInputDevice(
-            new QInputDevice(u"Virtual keyboard"_qs, 0, QInputDevice::DeviceType::Keyboard,
-                             {}, qApp));
-    }
-#endif
 #if defined(Q_OS_IOS)
     // QML's TableView crashes when empty, if a11y features are enabled
     // (e.g. "Full Keyboard Access" in the simulator)

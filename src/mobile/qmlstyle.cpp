@@ -12,30 +12,6 @@
 #include "common/application.h"
 #include "qmlstyle.h"
 
-#if defined(Q_OS_ANDROID)
-#  include <jni.h>
-#  include <QJniObject>
-
-static QMargins staticScreenMargins;
-
-void androidSetScreenMargins(const QMargins &margins)
-{
-    if (QmlStyle::s_inst) {
-        QMetaObject::invokeMethod(QmlStyle::s_inst, [=]() {
-                QmlStyle::s_inst->setScreenMargins(margins);
-            }, Qt::QueuedConnection);
-    } else {
-        staticScreenMargins = margins;
-    }
-}
-
-extern "C" JNIEXPORT void JNICALL
-Java_de_brickforge_brickstore_ExtendedQtActivity_changeScreenMargins(JNIEnv *, jobject, jint left, jint top, jint right, jint bottom)
-{
-    androidSetScreenMargins({ left, top, right, bottom });
-}
-
-#endif
 
 QmlStyle *QmlStyle::s_inst = nullptr;
 
@@ -59,40 +35,12 @@ QmlStyle::QmlStyle(QObject *parent)
         }
     });
 
-#if defined(Q_OS_IOS)
-    static auto iosScreenMargins = []() -> QMargins {
-        auto screen = QGuiApplication::primaryScreen();
-        const auto available = screen->availableGeometry();
-        const auto full = screen->geometry();
-        return { available.left() - full.left(), available.top() - full.top(),
-                full.right() - available.right(), full.bottom() - available.bottom() };
-    };
-    m_screenMargins = iosScreenMargins();
-    connect(QGuiApplication::primaryScreen(), &QScreen::availableGeometryChanged,
-            this, [this]() {
-        setScreenMargins(iosScreenMargins());
-    });
-#elif defined(Q_OS_ANDROID)
-    m_screenDpr = QGuiApplication::primaryScreen()->devicePixelRatio();
-    m_screenMargins = staticScreenMargins;
-#endif
-    qInfo() << "Screen margins:" << m_screenMargins << "/ dpr:" << m_screenDpr;
-
     s_inst = this;
 }
 
 QmlStyle::~QmlStyle()
 {
     s_inst = nullptr;
-}
-
-void QmlStyle::setScreenMargins(const QMargins &newMargins)
-{
-    if (m_screenMargins != newMargins) {
-        m_screenMargins = newMargins;
-        qInfo() << "Screen margins changed:" << m_screenMargins;
-        emit screenMarginsChanged();
-    }
 }
 
 QSizeF QmlStyle::physicalScreenSize() const
@@ -174,26 +122,6 @@ bool QmlStyle::isAndroid() const
 #else
     return false;
 #endif
-}
-
-int QmlStyle::topScreenMargin() const
-{
-    return m_screenMargins.top() / m_screenDpr;
-}
-
-int QmlStyle::bottomScreenMargin() const
-{
-    return m_screenMargins.bottom() / m_screenDpr;
-}
-
-int QmlStyle::leftScreenMargin() const
-{
-    return m_screenMargins.left() / m_screenDpr;
-}
-
-int QmlStyle::rightScreenMargin() const
-{
-    return m_screenMargins.right() / m_screenDpr;
 }
 
 QObject *QmlStyle::rootWindow() const

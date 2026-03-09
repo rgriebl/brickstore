@@ -10,7 +10,6 @@ import BrickLink as BL
 ToolBar {
     id: root
 
-    topPadding: Style.topScreenMargin
     implicitHeight: topPadding + row.implicitHeight + bottomPadding
 
     property alias title: titleText.text

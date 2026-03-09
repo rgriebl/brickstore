@@ -39,11 +39,6 @@ class QmlStyle : public QObject
     Q_PROPERTY(bool isIOS READ isIOS CONSTANT)
     Q_PROPERTY(bool isAndroid READ isAndroid CONSTANT)
 
-    Q_PROPERTY(int topScreenMargin READ topScreenMargin NOTIFY screenMarginsChanged FINAL)
-    Q_PROPERTY(int bottomScreenMargin READ bottomScreenMargin NOTIFY screenMarginsChanged FINAL)
-    Q_PROPERTY(int leftScreenMargin READ leftScreenMargin NOTIFY screenMarginsChanged FINAL)
-    Q_PROPERTY(int rightScreenMargin READ rightScreenMargin NOTIFY screenMarginsChanged FINAL)
-
     // this is really a write-once only property, but QML does not like these
     Q_PROPERTY(QObject *rootWindow READ rootWindow WRITE setRootWindow NOTIFY rootWindowChanged FINAL)
 
@@ -66,10 +61,6 @@ public:
 
     bool isIOS() const;
     bool isAndroid() const;
-    int topScreenMargin() const;
-    int bottomScreenMargin() const;
-    int leftScreenMargin() const;
-    int rightScreenMargin() const;
 
     QObject *rootWindow() const;
     void setRootWindow(QObject *root);
@@ -78,12 +69,10 @@ signals:
     void smallSizeChanged(bool newSmallSize);
     void darkThemeChanged(bool newDarkTheme);
     void styleColorChanged();
-    void screenMarginsChanged();
     void rootWindowChanged(); // dummy, never emitted
 
 private:
     void updateTheme();
-    void setScreenMargins(const QMargins &newMargins);
     QColor colorProperty(const QQmlProperty &property, const char *fallbackColor) const;
 
     Application::Theme m_theme;
@@ -100,9 +89,5 @@ private:
     QQmlProperty m_accentColor;
     QQmlProperty m_materialTheme;
 
-    QMargins m_screenMargins;
-    qreal m_screenDpr = qreal(1);
-
     static QmlStyle *s_inst; // for Android
-    friend void androidSetScreenMargins(const QMargins &margins);
 };

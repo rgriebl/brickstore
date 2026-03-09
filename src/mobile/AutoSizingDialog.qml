@@ -36,8 +36,8 @@ Dialog {
         visible: root.header === this
         title: root.title
 
-        leftPadding: Style.leftScreenMargin
-        rightPadding: Style.rightScreenMargin
+        leftPadding: SafeArea.margins.left
+        rightPadding: SafeArea.margins.right
 
         leftItem: ToolButton {
             icon.name: "go-previous"
@@ -53,8 +53,8 @@ Dialog {
     }
 
     Connections {
-        target: Style
-        function onScreenMarginsChanged() {
+        target: root.SafeArea
+        function onMarginsChanged() {
             root.switchSmallStyle()
         }
     }
@@ -82,25 +82,25 @@ Dialog {
             header = smallHeader
             if (keepPaddingInSmallMode) {
                 topPadding = defaultTopPadding / 2
-                leftPadding = defaultLeftPadding / 2 + Style.leftScreenMargin
-                rightPadding = defaultRightPadding / 2 + Style.rightScreenMargin
+                leftPadding = defaultLeftPadding / 2 + SafeArea.margins.left
+                rightPadding = defaultRightPadding / 2 + SafeArea.margins.right
                 if (footer) {
-                    footer.leftPadding = Style.leftScreenMargin
-                    footer.rightPadding = Style.rightScreenMargin
-                    footer.bottomPadding = Style.bottomScreenMargin
+                    footer.leftPadding = SafeArea.margins.left
+                    footer.rightPadding = SafeArea.margins.right
+                    footer.bottomPadding = SafeArea.margins.bottom
                 } else {
                     bottomPadding = defaultBottomPadding / 2
                 }
             } else {
                 topPadding = 0
-                leftPadding = Style.leftScreenMargin
-                rightPadding = Style.rightScreenMargin
+                leftPadding = SafeArea.margins.left
+                rightPadding = SafeArea.margins.right
                 if (footer) {
-                    footer.leftPadding = Style.leftScreenMargin
-                    footer.rightPadding = Style.rightScreenMargin
-                    footer.bottomPadding = Style.bottomScreenMargin
+                    footer.leftPadding = SafeArea.margins.left
+                    footer.rightPadding = SafeArea.margins.right
+                    footer.bottomPadding = SafeArea.margins.bottom
                 } else {
-                    bottomPadding = Style.bottomScreenMargin
+                    bottomPadding = SafeArea.margins.bottom
                 }
             }
             if (defaultBackgroundRadius >= 0) {

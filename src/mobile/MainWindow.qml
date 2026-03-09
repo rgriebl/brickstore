@@ -21,36 +21,9 @@ Control {
         source: "DeveloperConsole.qml"
     }
 
-    Popup {
-        // show a black bar over the notch / camera cutout
-        modal: false
-        enabled: false
-        closePolicy: Popup.NoAutoClose
-        z: 1000
-        background: Rectangle { color: "black" }
-        visible: Style.leftScreenMargin
-        width: Style.leftScreenMargin
-        height: parent.height
-    }
-    Popup {
-        // show a black bar over the notch / camera cutout
-        modal: false
-        enabled: false
-        closePolicy: Popup.NoAutoClose
-        z: 1000
-        background: Rectangle { color: "black" }
-        visible: Style.rightScreenMargin
-        width: Style.rightScreenMargin
-        x: parent.width - width
-        height: parent.height
-    }
-
     StackView {
         id: homeStack
         anchors.fill: parent
-        anchors.bottomMargin: Style.bottomScreenMargin
-        anchors.leftMargin: Style.leftScreenMargin
-        anchors.rightMargin: Style.rightScreenMargin
 
         initialItem: Page {
             header: HeaderBar {

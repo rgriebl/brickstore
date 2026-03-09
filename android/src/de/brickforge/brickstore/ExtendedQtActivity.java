@@ -28,15 +28,6 @@ public class ExtendedQtActivity extends QtActivity
     {
         super.onCreate(savedInstanceState);
 
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        // ViewCompat.getWindowInsetsController(getWindow().getDecorView()).setAppearanceLightNavigationBars(false);
-        ViewCompat.setOnApplyWindowInsetsListener(getWindow().getDecorView(), (view, windowInsets) -> {
-            int insetsTypes = WindowInsetsCompat.Type.displayCutout() | WindowInsetsCompat.Type.systemBars();
-            Insets insets = windowInsets.getInsets(insetsTypes);
-            changeScreenMargins(insets.left, insets.top, insets.right, insets.bottom);
-            return WindowInsetsCompat.CONSUMED;
-        });
-
         Intent intent = getIntent();
         if ((intent != null) && (intent.getAction() == Intent.ACTION_VIEW))
             openUrl(intent.getData().toString());
