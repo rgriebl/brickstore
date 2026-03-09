@@ -2776,14 +2776,18 @@ bool DocumentModel::filterAcceptsLot(const Lot *lot) const
             lastcol = columnCount() - 1;
         }
 
+        const QString s1 = f.expression();
+
+        QVector<QPair<const Column *, Field>> columns;
+        for (int col = firstcol; col <= lastcol; ++col) {
+            if (auto cit = m_columns.constFind(col); cit != m_columns.constEnd()) {
+                if (cit->filterable)
+                    columns.append({ &cit.value(), static_cast<Field>(col) });
+            }
+        }
+
         bool rowResult = false;
-        for (int col = firstcol; col <= lastcol && !rowResult; ++col) {
-            const auto field = static_cast<Field>(col);
-            const auto &c = m_columns.value(field);
-
-            if (!c.filterable)
-                continue;
-
+        for (const auto &[c, field] : std::as_const(columns)) {
             bool displayTextMatch = true;
             switch (f.comparison()) {
             case Filter::Is:
@@ -2798,16 +2802,16 @@ bool DocumentModel::filterAcceptsLot(const Lot *lot) const
                 break;
             }
 
-            const QString s1 = f.expression();
+            // TODO: lazy lookup only when needed.
             QString s2 = dataForDisplayRole(lot, field, false);
 
             if (displayTextMatch) {
                 // display text based filters
 
-                if (c.type == Column::Type::Enum) {
+                if (c->type == Column::Type::Enum) {
                     // the display role for enums might be empty
                     qint64 e = dataForEditRole(lot, field).toLongLong();
-                    for (const auto &[value, tooltip, filter] : c.enumValues) {
+                    for (const auto &[value, tooltip, filter] : c->enumValues) {
                         if (e == value) {
                             s2 = filter;
                             break;
@@ -2852,9 +2856,9 @@ bool DocumentModel::filterAcceptsLot(const Lot *lot) const
                 bool isInt = false;
                 qint64 i1 = 0, i2 = 0;
 
-                if (c.type == Column::Type::Enum) {
+                if (c->type == Column::Type::Enum) {
                     i1 = -1;
-                    for (const auto &[value, tooltip, filter] : c.enumValues) {
+                    for (const auto &[value, tooltip, filter] : c->enumValues) {
                         if (s1 == filter) {
                             i1 = value;
                             break;
@@ -2921,6 +2925,8 @@ bool DocumentModel::filterAcceptsLot(const Lot *lot) const
                     break;
                 }
             }
+            if (rowResult)
+                break;
         }
         if (nextcomb == Filter::And)
             filterResult = filterResult && rowResult;
