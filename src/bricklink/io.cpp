@@ -567,7 +567,8 @@ static void fromPartInventoryInternal(IO::ParseResult &pr, const Item *item, con
         if (!found) {
             Lot *lot = new Lot(partItem, partColor);
             lot->setQuantity(part.quantity() * quantity);
-            lot->setCondition(condition);
+            bool isStickered = part.isCounterPart() && partItem->name().contains(u"(Sticker");
+            lot->setCondition(isStickered ? Condition::Used : condition);
             if (addAsExtra)
                 lot->setStatus(Status::Extra);
             else
