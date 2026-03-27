@@ -726,6 +726,8 @@ void MainWindow::setupMenuBar()
                   "edit_reserved",
                   "edit_marker",
                   "-",
+                  "edit_additems_from_documents",
+                  "-",
                   "edit_copy_fields",
                   "-",
                   "bricklink_catalog",
