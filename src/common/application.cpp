@@ -30,6 +30,10 @@
 #if defined(BS_MOBILE)
 #  include <QtQuickControls2Impl/private/qquickiconimage_p.h>
 #endif
+#if defined(BS_MCP_SERVER)
+#  include "mcp-server/mcpserver.h"
+#  include "bricklink/mcp.h"
+#endif
 
 #include <QCoro/QCoroSignal>
 #include <memory>
@@ -359,6 +363,15 @@ void Application::afterInit()
 
         Currency::inst()->updateRates();
         setupLDraw();
+
+#if defined(BS_MCP_SERVER)
+        auto *mcp = new McpServer(this);
+        mcp->addTool(new BrickLink::CatalogQueryMcpTool());
+        mcp->addTool(new BrickLink::CatalogSchemaMcpTool());
+        mcp->listen(QHostAddress::LocalHost, 12345);
+
+        qInfo() << "Started MCP server on port" << mcp->serverPort();
+#endif
     };
 
     if (OnlineState::inst()->isOnline()) {

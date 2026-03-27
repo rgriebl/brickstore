@@ -97,6 +97,14 @@ if (BS_DESKTOP)
     )
 endif()
 
+if (BS_MCP_SERVER)
+    target_sources(bricklink_module PRIVATE
+        mcp.h
+        mcp.cpp
+    )
+    target_link_libraries(bricklink_module PRIVATE mcp_server_module)
+endif()
+
 if (MODELTEST)
     target_link_libraries(bricklink_module PRIVATE Qt6::Test)
 endif()
