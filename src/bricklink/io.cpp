@@ -567,7 +567,13 @@ static void fromPartInventoryInternal(IO::ParseResult &pr, const Item *item, con
         if (!found) {
             Lot *lot = new Lot(partItem, partColor);
             lot->setQuantity(part.quantity() * quantity);
-            lot->setCondition(part.isCounterPart() ? Condition::Used : condition);
+            // Physical stickered parts (counterparts not in the "Stickers" category, i.e. not
+            // sticker sheets) must always be listed as Used per BrickLink policy, since they have
+            // stickers physically applied to them.
+            const Category *partCat = partItem->category();
+            const bool isStickeredPart = part.isCounterPart()
+                && !(partCat && partCat->name().contains(u"sticker", Qt::CaseInsensitive));
+            lot->setCondition(isStickeredPart ? Condition::Used : condition);
             if (addAsExtra)
                 lot->setStatus(Status::Extra);
             else
