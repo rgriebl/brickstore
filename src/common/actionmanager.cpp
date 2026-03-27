@@ -447,6 +447,10 @@ void ActionManager::initialize()
     a->m_iconName = "color_management";
     A("edit_qty",                 QT_TR_NOOP("Quantity"),                        NeedSelection(1), FlagMenu);
     A("edit_qty_set",             QT_TR_NOOP("Set quantity..."));
+    A("edit_qty_add",             QT_TR_NOOP("Add to quantity..."),              NeedSelection(1));
+    a->m_iconName = "list-add";
+    A("edit_qty_subtract",        QT_TR_NOOP("Subtract from quantity..."),       NeedSelection(1));
+    a->m_iconName = "list-remove";
     A("edit_qty_multiply",        QT_TR_NOOP("Multiply quantity..."),            QT_TR_NOOP("Ctrl+*", "Edit|Quantity|Multiply"),       NeedSelection(1));
     A("edit_qty_divide",          QT_TR_NOOP("Divide quantity..."),              QT_TR_NOOP("Ctrl+/", "Edit|Quantity|Divide"),         NeedSelection(1));
     A("edit_price",               QT_TR_NOOP("Price"),                           NeedSelection(1), FlagMenu);

@@ -175,6 +175,7 @@ public:
     void costAdjust(bool isFixed, double value);
     void divideQuantity(int divisor);
     void multiplyQuantity(int factor);
+    void addQuantity(int delta);
     void setSale(int sale);
     void setBulkQuantity(int qty);
     void setQuantity(int quantity);

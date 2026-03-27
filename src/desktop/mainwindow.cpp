@@ -611,6 +611,8 @@ void MainWindow::setupMenuBar()
 
     setupMenu("edit_qty", {
                   "edit_qty_set",
+                  "edit_qty_add",
+                  "edit_qty_subtract",
                   "edit_qty_multiply",
                   "edit_qty_divide",
               });
@@ -1082,6 +1084,8 @@ QStringList MainWindow::defaultToolBarActionNames() const
         u"-"_qs,
         u"edit_additems"_qs,
         u"edit_subtractitems"_qs,
+        u"edit_qty_add"_qs,
+        u"edit_qty_subtract"_qs,
         u"edit_mergeitems"_qs,
         u"edit_partoutitems"_qs,
         u"-"_qs,

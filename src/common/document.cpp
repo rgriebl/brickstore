@@ -341,6 +341,18 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, bool re
                   multiplyQuantity(*i);
               }
           } },
+        { "edit_qty_add", [this](bool) -> QCoro::Task<> {
+              if (auto i = co_await UIHelpers::getInteger(tr("Add this quantity to all selected items:"),
+                                                          tr("+"), 1, 1, DocumentModel::maxQuantity)) {
+                  addQuantity(*i);
+              }
+          } },
+        { "edit_qty_subtract", [this](bool) -> QCoro::Task<> {
+              if (auto i = co_await UIHelpers::getInteger(tr("Subtract this quantity from all selected items:"),
+                                                          tr("-"), 1, 1, DocumentModel::maxQuantity)) {
+                  addQuantity(-*i);
+              }
+          } },
         { "edit_bulk", [this](bool) -> QCoro::Task<> {
               if (selectedLots().isEmpty())
                   co_return;
@@ -1335,7 +1347,35 @@ void Document::multiplyQuantity(int factor)
     });
 }
 
+void Document::addQuantity(int delta)
+{
+    if (delta == 0)
+        return;
 
+    int lotsOutOfRange = 0;
+
+    for (const Lot *item : std::as_const(m_selectedLots)) {
+        qint64 newQty = qint64(item->quantity()) + delta;
+        if (newQty > DocumentModel::maxQuantity || newQty < -DocumentModel::maxQuantity)
+            lotsOutOfRange++;
+    }
+
+    if (lotsOutOfRange) {
+        UIHelpers::information(tr("The quantities of %n lot(s) would exceed the allowed quantity range (%1 to %2) when %3 by %4.<br><br>Nothing has been modified.",
+                                  nullptr, lotsOutOfRange)
+                               .arg(-DocumentModel::maxQuantity)
+                               .arg(DocumentModel::maxQuantity)
+                               .arg(delta > 0 ? tr("increased") : tr("decreased"))
+                               .arg(qAbs(delta)));
+        return;
+    }
+
+    const char *actionName = delta > 0 ? "edit_qty_add" : "edit_qty_subtract";
+    applyTo(selectedLots(), actionName, [=](const auto &from, auto &to) {
+        (to = from).setQuantity(from.quantity() + delta);
+        return DocumentModel::LotChanged;
+    });
+}
 
 void Document::setSale(int sale)
 {
