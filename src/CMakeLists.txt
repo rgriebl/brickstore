@@ -46,6 +46,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 )
 
 add_subdirectory(bricklink)
+add_subdirectory(lego)
 
 if (BS_DESKTOP OR BS_MOBILE)
     add_subdirectory(common)

@@ -199,6 +199,14 @@ public:
     QCoro::Task<> exportBrickLinkInventoryRequestToClipboard();
     QCoro::Task<> exportBrickLinkWantedListToClipboard();
 
+    QCoro::Task<> exportLegoPickABrickCSVToFile();
+    QCoro::Task<> exportLegoPickABrickJSONToFile();
+
+    QCoro::Task<> exportToFile(
+        const QList<QPair<QString, QStringList>>& nameFilters,
+        const QString extension,
+        QByteArray(*lotsToText)(const BrickLink::LotList&));
+
     void moveColumn(int logical, int oldVisual, int newVisual);
     void resizeColumn(int logical, int oldSize, int newSize);
     void hideColumn(int logical, bool oldHidden, int newHidden);

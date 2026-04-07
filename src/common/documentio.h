@@ -28,6 +28,8 @@ public:
     static QList<QPair<QString, QStringList>> nameFiltersForBrickLinkXML();
     static QList<QPair<QString, QStringList>> nameFiltersForBrickStoreXML();
     static QList<QPair<QString, QStringList>> nameFiltersForLDraw();
+    static QList<QPair<QString, QStringList>> nameFiltersForLegoPabCSV();
+    static QList<QPair<QString, QStringList>> nameFiltersForLegoPabJSON();
 
     class BsxContents : public BrickLink::IO::ParseResult
     {

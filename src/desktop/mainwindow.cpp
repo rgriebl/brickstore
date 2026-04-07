@@ -589,6 +589,9 @@ void MainWindow::setupMenuBar()
                   "document_export_bl_update_clip",
                   "document_export_bl_invreq_clip",
                   "document_export_bl_wantedlist_clip",
+                  "-",
+                  "document_export_pab_csv",
+                  "document_export_pab_json"
               });
 
     setupMenu("edit_status", {

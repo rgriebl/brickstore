@@ -360,11 +360,13 @@ void ActionManager::initialize()
     A("document_import_ldraw_model",    QT_TR_NOOP("LDraw or Studio Model..."),                   QT_TR_NOOP("Ctrl+I,Ctrl+L", "File|Import LDraw Model"));
     a->m_iconName = "bricklink-studio";
     A("document_export",                QT_TR_NOOP("Export"), NoNeed, FlagMenu);
-    A("document_export_bl_xml",         QT_TR_NOOP("BrickLink XML..."),                           QT_TR_NOOP("Ctrl+E,Ctrl+X", "File|Import BrickLink XML"),             NeedDocument | NeedLots);
-    A("document_export_bl_xml_clip",    QT_TR_NOOP("BrickLink Mass-Upload XML to Clipboard"),     QT_TR_NOOP("Ctrl+E,Ctrl+U", "File|Import BrickLink Mass-Upload"),     NeedDocument | NeedLots);
-    A("document_export_bl_update_clip", QT_TR_NOOP("BrickLink Mass-Update XML to Clipboard"),     QT_TR_NOOP("Ctrl+E,Ctrl+P", "File|Import BrickLink Mass-Update"),     NeedDocument | NeedLots);
-    A("document_export_bl_invreq_clip", QT_TR_NOOP("BrickLink Set Inventory XML to Clipboard"),   QT_TR_NOOP("Ctrl+E,Ctrl+I", "File|Import BrickLink Set Inventory"),   NeedDocument | NeedLots);
-    A("document_export_bl_wantedlist_clip", QT_TR_NOOP("BrickLink Wanted List XML to Clipboard"), QT_TR_NOOP("Ctrl+E,Ctrl+W", "File|Import BrickLink Wanted List"),     NeedDocument | NeedLots);
+    A("document_export_bl_xml",         QT_TR_NOOP("BrickLink XML..."),                           QT_TR_NOOP("Ctrl+E,Ctrl+X", "File|Export BrickLink XML"),             NeedDocument | NeedLots);
+    A("document_export_bl_xml_clip",    QT_TR_NOOP("BrickLink Mass-Upload XML to Clipboard"),     QT_TR_NOOP("Ctrl+E,Ctrl+U", "File|Export BrickLink Mass-Upload"),     NeedDocument | NeedLots);
+    A("document_export_bl_update_clip", QT_TR_NOOP("BrickLink Mass-Update XML to Clipboard"),     QT_TR_NOOP("Ctrl+E,Ctrl+P", "File|Export BrickLink Mass-Update"),     NeedDocument | NeedLots);
+    A("document_export_bl_invreq_clip", QT_TR_NOOP("BrickLink Set Inventory XML to Clipboard"),   QT_TR_NOOP("Ctrl+E,Ctrl+I", "File|Export BrickLink Set Inventory"),   NeedDocument | NeedLots);
+    A("document_export_bl_wantedlist_clip", QT_TR_NOOP("BrickLink Wanted List XML to Clipboard"), QT_TR_NOOP("Ctrl+E,Ctrl+W", "File|Export BrickLink Wanted List"),     NeedDocument | NeedLots);
+    A("document_export_pab_csv",        QT_TR_NOOP("LEGO Pick a Brick CSV..."),                   QT_TR_NOOP("Ctrl+E,Ctrl+C", "File|Export Lego Pick a Brick CSV"),     NeedDocument | NeedLots);
+    A("document_export_pab_json",       QT_TR_NOOP("LEGO Pick a Brick JSON..."),                  QT_TR_NOOP("Ctrl+E,Ctrl+J", "File|Export Lego Pick a Brick JSON"),    NeedDocument | NeedLots);
 
     A("menu_edit",                      QT_TR_NOOP("&Edit"),                                                                 NoNeed, FlagMenu);
     A("edit_undo",                      nullptr,                            QKeySequence::Undo,                              NoNeed, FlagUndo);

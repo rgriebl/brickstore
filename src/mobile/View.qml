@@ -62,6 +62,8 @@ Page {
                     ActionMenuItem { autoHide: false; actionName: "document_export_bl_xml_clip" }
                     ActionMenuItem { autoHide: false; actionName: "document_export_bl_update_clip" }
                     ActionMenuItem { autoHide: false; actionName: "document_export_bl_wantedlist_clip" }
+                    ActionMenuItem { autoHide: false; actionName: "document_export_pab_csv" }
+                    ActionMenuItem { autoHide: false; actionName: "document_export_pab_json" }
                 }
                 ActionMenuItem {
                     // workaround for Qt bug: the overlay doesn't get removed in Qt 6.6+

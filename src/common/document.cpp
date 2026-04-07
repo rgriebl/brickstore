@@ -22,6 +22,7 @@
 #include "bricklink/order.h"
 #include "bricklink/picture.h"
 #include "bricklink/priceguide.h"
+#include "lego/pickabrick.h"
 #include "common/application.h"
 #include "common/currency.h"
 #include "utility/exception.h"
@@ -448,6 +449,9 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, bool re
         { "document_export_bl_update_clip", [this](bool) { exportBrickLinkUpdateXMLToClipboard(); } },
         { "document_export_bl_invreq_clip", [this](bool) { exportBrickLinkInventoryRequestToClipboard(); } },
         { "document_export_bl_wantedlist_clip", [this](bool) { exportBrickLinkWantedListToClipboard(); } },
+
+        { "document_export_pab_csv", [this](bool) { exportLegoPickABrickCSVToFile(); } },
+        { "document_export_pab_json",[this](bool) {exportLegoPickABrickJSONToFile(); } },
 
         { "bricklink_catalog", [this](bool) {
               if (selectedLots().isEmpty())
@@ -1513,38 +1517,10 @@ void Document::copyAlternateId() const
 
 QCoro::Task<> Document::exportBrickLinkXMLToFile()
 {
-    LotList lots = co_await exportCheck(ExportToFile);
-    if (lots.isEmpty())
-        co_return;
-
-    QString fn;
-    if (auto f = co_await UIHelpers::getSaveFileName(fn, DocumentIO::nameFiltersForBrickLinkXML(),
-                                                     tr("Export File"))) {
-        fn = *f;
-    }
-    if (fn.isEmpty())
-        co_return;
-
-#if !defined(Q_OS_ANDROID)
-    if (fn.right(4) != u".xml")
-        fn = fn + u".xml";
-#endif
-
-    const QByteArray xml = BrickLink::IO::toBrickLinkXML(lots).toUtf8();
-
-    QSaveFile f(fn);
-    f.setDirectWriteFallback(true);
-    try {
-        if (!f.open(QIODevice::WriteOnly))
-            throw Exception(tr("Failed to open file %1 for writing."));
-        if (f.write(xml.data(), xml.size()) != qint64(xml.size()))
-            throw Exception(tr("Failed to save data to file %1."));
-        if (!f.commit())
-            throw Exception(tr("Failed to save data to file %1."));
-
-    } catch (const Exception &e) {
-        UIHelpers::warning(e.errorString().arg(f.fileName()) + u"<br><br>" + f.errorString());
-    }
+    return exportToFile(
+        DocumentIO::nameFiltersForBrickLinkXML(),
+        u".xml"_qs,
+        &BrickLink::IO::toBrickLinkXML);
 }
 
 QCoro::Task<> Document::exportBrickLinkXMLToClipboard()
@@ -1552,9 +1528,9 @@ QCoro::Task<> Document::exportBrickLinkXMLToClipboard()
     LotList lots = co_await exportCheck(ExportToClipboard);
 
     if (!lots.isEmpty()) {
-        QString xml = BrickLink::IO::toBrickLinkXML(lots);
+        QByteArray xml = BrickLink::IO::toBrickLinkXML(lots);
 
-        QGuiApplication::clipboard()->setText(xml, QClipboard::Clipboard);
+        QGuiApplication::clipboard()->setText(QString::fromUtf8(xml), QClipboard::Clipboard);
         if (Config::inst()->openBrowserOnExport())
             Application::openUrl(BrickLink::Core::urlForInventoryUpload());
     }
@@ -1611,6 +1587,64 @@ QCoro::Task<> Document::exportBrickLinkWantedListToClipboard()
         }
     }
 }
+
+QCoro::Task<> Document::exportLegoPickABrickCSVToFile() {
+    return exportToFile(
+        DocumentIO::nameFiltersForLegoPabCSV(),
+        u".csv"_qs,
+        &Lego::PickABrick::toLegoPickABrickCSV);
+}
+
+
+QCoro::Task<> Document::exportLegoPickABrickJSONToFile()
+{
+    return exportToFile(
+        DocumentIO::nameFiltersForLegoPabJSON(),
+        u".json"_qs, 
+        &Lego::PickABrick::toLegoPickABrickJSON);
+}
+
+
+QCoro::Task<> Document::exportToFile(
+    const QList<QPair<QString, QStringList>>& nameFilters,
+    const QString extension,
+    QByteArray (*lotsToText)(const BrickLink::LotList&))
+{
+    LotList lots = co_await exportCheck(ExportToFile);
+    if (lots.isEmpty())
+        co_return;
+
+    QString fn;
+    if (auto f = co_await UIHelpers::getSaveFileName(fn, nameFilters,
+        tr("Export File"))) {
+        fn = *f;
+    }
+    if (fn.isEmpty())
+        co_return;
+
+#if !defined(Q_OS_ANDROID)
+    if (fn.right(extension.length()) != extension)
+        fn = fn + extension;
+#endif
+
+    const QByteArray fileData = lotsToText(lots);
+
+    QSaveFile f(fn);
+    f.setDirectWriteFallback(true);
+    try {
+        if (!f.open(QIODevice::WriteOnly))
+            throw Exception(tr("Failed to open file %1 for writing."));
+        if (f.write(fileData.data(), fileData.size()) != qint64(fileData.size()))
+            throw Exception(tr("Failed to save data to file %1."));
+        if (!f.commit())
+            throw Exception(tr("Failed to save data to file %1."));
+
+    }
+    catch (const Exception& e) {
+        UIHelpers::warning(e.errorString().arg(f.fileName()) + u"<br><br>" + f.errorString());
+    }
+}
+
 
 void Document::moveColumn(int logical, int oldVisual, int newVisual)
 {

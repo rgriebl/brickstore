@@ -49,6 +49,16 @@ QList<QPair<QString, QStringList>> DocumentIO::nameFiltersForLDraw()
     };
 }
 
+QList<QPair<QString, QStringList>> DocumentIO::nameFiltersForLegoPabCSV()
+{
+    return { {u"Lego Pick a Brick CSV"_qs, {u"csv"_qs}}};
+}
+
+QList<QPair<QString, QStringList>> DocumentIO::nameFiltersForLegoPabJSON()
+{
+    return { {u"Lego Pick a Brick JSON"_qs, {u"json"_qs}} };
+}
+
 Document *DocumentIO::importBrickLinkStore(BrickLink::Store *store)
 {
     Q_ASSERT(store);
