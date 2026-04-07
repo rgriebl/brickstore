@@ -359,6 +359,9 @@ void ActionManager::initialize()
     a->m_iconName = "love-amarok";
     A("document_import_ldraw_model",    QT_TR_NOOP("LDraw or Studio Model..."),                   QT_TR_NOOP("Ctrl+I,Ctrl+L", "File|Import LDraw Model"));
     a->m_iconName = "bricklink-studio";
+    A("document_import_pab_csv",        QT_TR_NOOP("CSV file from Lego Pick a Brick..."),         QT_TR_NOOP("Ctrl+I,Ctrl+K", "File|Import Pick a Brick CSV file"));
+    A("document_import_pab_json",       QT_TR_NOOP("JSON file from Lego Pick a Brick..."),        QT_TR_NOOP("Ctrl+I,Ctrl+J", "File|Import Pick a Brick JSON file"));
+
     A("document_export",                QT_TR_NOOP("Export"), NoNeed, FlagMenu);
     A("document_export_bl_xml",         QT_TR_NOOP("BrickLink XML..."),                           QT_TR_NOOP("Ctrl+E,Ctrl+X", "File|Export BrickLink XML"),             NeedDocument | NeedLots);
     A("document_export_bl_xml_clip",    QT_TR_NOOP("BrickLink Mass-Upload XML to Clipboard"),     QT_TR_NOOP("Ctrl+E,Ctrl+U", "File|Export BrickLink Mass-Upload"),     NeedDocument | NeedLots);

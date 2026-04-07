@@ -50,6 +50,9 @@ public:
     static QCoro::Task<Document *> importBrickLinkXML(QString fileName = { });
     static QCoro::Task<Document *> importLDrawModel(QString fileName = { });
 
+    static QCoro::Task<Document*> importPickABrickCSV(QString fileName = { });
+    static QCoro::Task<Document*> importPickABrickJSON(QString fileName = { });
+
     static QString exportBrickLinkUpdateClipboard(const DocumentModel *doc,
                                                   const LotList &lots);
 

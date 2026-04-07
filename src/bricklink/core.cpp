@@ -848,6 +848,16 @@ std::tuple<const Item *, const Color *> Core::partColorCode(uint id) const
     return { nullptr, nullptr };
 }
 
+std::pair<const Item*, const Color*> Core::findItemAndColorFromPCC(uint pcc) const
+{
+    auto iter = database()->m_pccToItemAndColor.find(pcc);
+    if (iter == database()->m_pccToItemAndColor.end() ) {
+        return { nullptr, nullptr };
+    }
+
+    return iter->second;
+}
+
 const Relationship *Core::relationship(uint id) const
 {
     auto it = std::lower_bound(relationships().cbegin(), relationships().cend(), id);

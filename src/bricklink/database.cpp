@@ -131,6 +131,8 @@ void Database::clear()
     m_itemChangelog.clear();
     m_colorChangelog.clear();
     m_pool.reset();
+
+    m_pccToItemAndColor.clear();
 }
 
 bool Database::startUpdate()
@@ -427,6 +429,7 @@ void Database::read(const QString &fileName)
                 .arg(f.fileName());
         }
 
+
         m_colors = std::move(colors);
         m_ldrawExtraColors = std::move(ldrawExtraColors);
         m_categories = std::move(categories);
@@ -443,6 +446,8 @@ void Database::read(const QString &fileName)
                                    : Core::knownApiQuirks();
 
         m_pool.swap(pool);
+
+        m_pccToItemAndColor = buildPCCmapFromItems(m_items);
 
         Color::s_colorImageCache.clear();
 
@@ -901,6 +906,18 @@ void Database::writeApiKeyToDatabase(const QByteArray &id, const QString &key, Q
 
     dataStream << idScrambled << keyScrambled;
 }
+
+PCCmap Database::buildPCCmapFromItems( const std::vector<Item>& items) {
+    PCCmap map;
+    for ( const Item& item : items ) {
+        for ( const Item::PCC& pcc : item.pccs() ) {
+            map[pcc.pcc()] = {&item, pcc.color()};
+        }
+    }
+
+    return map;
+}
+
 
 } // namespace BrickLink
 

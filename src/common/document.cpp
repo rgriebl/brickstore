@@ -1606,7 +1606,7 @@ QCoro::Task<> Document::exportLegoPickABrickJSONToFile()
 
 
 QCoro::Task<> Document::exportToFile(
-    const QList<QPair<QString, QStringList>>& nameFilters,
+    const QList<QPair<QString, QStringList>> nameFilters,
     const QString extension,
     QByteArray (*lotsToText)(const BrickLink::LotList&))
 {

@@ -24,6 +24,8 @@
 #include "bricklink/store.h"
 #include "bricklink/wantedlist.h"
 
+#include "lego/pickabrick.h"
+
 #include "common/document.h"
 #include "common/documentmodel.h"
 #include "common/documentio.h"
@@ -213,6 +215,72 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
     } catch (const Exception &e) {
         UIHelpers::warning(tr("Failed to import the LDraw/Studio model %1")
                            .arg(QFileInfo(fn).fileName()) + u":<br><br>" + e.errorString());
+    }
+    co_return nullptr;
+}
+
+QCoro::Task<Document*> DocumentIO::importPickABrickCSV(QString fileName)
+{
+    QString fn = fileName;
+    if (fn.isEmpty()) {
+        if (auto f = co_await UIHelpers::getOpenFileName(DocumentIO::nameFiltersForLegoPabCSV(),
+            tr("Import File"))) {
+            fn = *f;
+        }
+    }
+    if (fn.isEmpty())
+        co_return nullptr;
+
+    QFile f(fn);
+    if (f.open(QIODevice::ReadOnly)) {
+        try {
+            auto result = Lego::PickABrick::fromPickABrickCSV(f.readAll(),
+                BrickLink::IO::Hint::PlainOrWanted,
+                f.fileTime(QFile::FileModificationTime));
+            auto* document = Document::create(new DocumentModel(std::move(result))); // Document owns the items now
+            document->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
+            co_return document;
+
+        }
+        catch (const Exception& e) {
+            UIHelpers::warning(tr("Could not parse the CSV data.") + u"<br><br>" + e.errorString());
+        }
+    }
+    else {
+        co_await UIHelpers::warning(tr("Could not open file %1 for reading.").arg(CMB_BOLD(fn)));
+    }
+    co_return nullptr;
+}
+
+QCoro::Task<Document*> DocumentIO::importPickABrickJSON(QString fileName)
+{
+    QString fn = fileName;
+    if (fn.isEmpty()) {
+        if (auto f = co_await UIHelpers::getOpenFileName(DocumentIO::nameFiltersForLegoPabJSON(),
+            tr("Import File"))) {
+            fn = *f;
+        }
+    }
+    if (fn.isEmpty())
+        co_return nullptr;
+
+    QFile f(fn);
+    if (f.open(QIODevice::ReadOnly)) {
+        try {
+            auto result = Lego::PickABrick::fromPickABrickJSON(f.readAll(),
+                BrickLink::IO::Hint::PlainOrWanted,
+                f.fileTime(QFile::FileModificationTime));
+            auto* document = Document::create(new DocumentModel(std::move(result))); // Document owns the items now
+            document->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
+            co_return document;
+
+        }
+        catch (const Exception& e) {
+            UIHelpers::warning(tr("Could not parse the JSON data.") + u"<br><br>" + e.errorString());
+        }
+    }
+    else {
+        co_await UIHelpers::warning(tr("Could not open file %1 for reading.").arg(CMB_BOLD(fn)));
     }
     co_return nullptr;
 }
