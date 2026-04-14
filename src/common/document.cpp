@@ -17,12 +17,14 @@
 #include <QtGui/QGuiApplication>
 #include <QAction>
 #include <QDebug>
+#include <QProgressDialog>
 
 #include "bricklink/core.h"
 #include "bricklink/order.h"
 #include "bricklink/picture.h"
 #include "bricklink/priceguide.h"
 #include "lego/pickabrick.h"
+#include "lego/pccfetcher.h"
 #include "common/application.h"
 #include "common/currency.h"
 #include "utility/exception.h"
@@ -1520,7 +1522,10 @@ QCoro::Task<> Document::exportBrickLinkXMLToFile()
     return exportToFile(
         DocumentIO::nameFiltersForBrickLinkXML(),
         u".xml"_qs,
-        &BrickLink::IO::toBrickLinkXML);
+        [](const BrickLink::LotList& lots) -> QCoro::Task<QByteArray> {
+            co_return BrickLink::IO::toBrickLinkXML(lots);
+        }
+    );
 }
 
 QCoro::Task<> Document::exportBrickLinkXMLToClipboard()
@@ -1588,28 +1593,61 @@ QCoro::Task<> Document::exportBrickLinkWantedListToClipboard()
     }
 }
 
+
+QCoro::Task<QByteArray> Document::buildLegoPickABrickFile(
+    const BrickLink::LotList& lots,
+    PabLotsSerializer legoLotsToFile
+) {
+    Lego::PickABrick::PCCfetcher fetcher(lots);
+    
+    bool success = co_await UIHelpers::progressDialog(
+        tr("Fetch PCCs from Pick a Brick"), 
+        tr("Fetching PCCs from Pick a Brick"), 
+        &fetcher, 
+        &Lego::PickABrick::PCCfetcher::updateProgress,
+        &Lego::PickABrick::PCCfetcher::updateFinished,
+        &Lego::PickABrick::PCCfetcher::start,
+        &Lego::PickABrick::PCCfetcher::stop
+    );
+
+    fetcher.waitForFinished();
+
+    if (!success) {
+        co_return QByteArray();
+    }
+
+    QList<Lego::PickABrick::Lot> results = fetcher.results();
+    co_return legoLotsToFile(results);
+}
+
+
 QCoro::Task<> Document::exportLegoPickABrickCSVToFile() {
     return exportToFile(
         DocumentIO::nameFiltersForLegoPabCSV(),
         u".csv"_qs,
-        &Lego::PickABrick::toLegoPickABrickCSV);
+        [this](const BrickLink::LotList& lots) {
+            return buildLegoPickABrickFile(lots, Lego::PickABrick::toLegoPickABrickCSV);
+        }
+    );
 }
 
 
-QCoro::Task<> Document::exportLegoPickABrickJSONToFile()
-{
+QCoro::Task<> Document::exportLegoPickABrickJSONToFile() {
     return exportToFile(
         DocumentIO::nameFiltersForLegoPabJSON(),
         u".json"_qs, 
-        &Lego::PickABrick::toLegoPickABrickJSON);
+        [this](const BrickLink::LotList& lots) {
+            return buildLegoPickABrickFile(lots, Lego::PickABrick::toLegoPickABrickJSON); 
+        }
+    );
 }
 
 
 QCoro::Task<> Document::exportToFile(
     const QList<QPair<QString, QStringList>> nameFilters,
     const QString extension,
-    QByteArray (*lotsToText)(const BrickLink::LotList&))
-{
+    BlLotsSerializer buildFileContent
+) {
     LotList lots = co_await exportCheck(ExportToFile);
     if (lots.isEmpty())
         co_return;
@@ -1627,7 +1665,7 @@ QCoro::Task<> Document::exportToFile(
         fn = fn + extension;
 #endif
 
-    const QByteArray fileData = lotsToText(lots);
+    const QByteArray fileData = co_await buildFileContent(lots);
 
     QSaveFile f(fn);
     f.setDirectWriteFallback(true);
