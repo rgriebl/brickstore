@@ -40,7 +40,7 @@ namespace Lego::PickABrick {
 
 
 	/// <summary>
-	/// Convert a lot from the Bricklink to the Pick a Brick format. Makes querries to the
+	/// Convert a lot from the Bricklink to the Pick a Brick format. Makes queries to the
 	/// Pick a Brick website to find the correct PCC.
 	/// </summary>
 	/// <param name="lot">a Bricklink lot</param>
@@ -90,13 +90,13 @@ namespace Lego::PickABrick {
 
 
 	/// <summary>
-	/// Makes querries to the Pick a Brick website to find the correct PCC for the given item and color combinaison.
+	/// Makes queries to the Pick a Brick website to find the correct PCC for the given item and color combinaison.
 	/// The PCC returned by guessPCC is tested first. If it is not correct, the other ones are then tested.
 	/// </summary>
 	/// <param name="item">a Bricklink item</param>
 	/// <param name="color">a Bricklink color</param>
 	/// <returns>A pointer to the correct PCC, availablel in Pick a Brick. nullptr if none was found.</returns>
-	const BrickLink::Item::PCC* querryPCC(
+	const BrickLink::Item::PCC* queryPCC(
 		const BrickLink::Item* item,
 		const BrickLink::Color* color
 	);
@@ -105,9 +105,9 @@ namespace Lego::PickABrick {
 	/// <summary>
 	/// Makes a request to the Pick a Brick website and return wether the html page contains results.
 	/// </summary>
-	/// <param name="querry">The item to search for</param>
+	/// <param name="query">The item to search for</param>
 	/// <returns>Whether the html page contains any results. False if an error occured.</returns>
-	bool checkIfQuerryHasResults(const QString querry);
+	bool checkIfQueryHasResults(const QString query);
 
 
 	/// <summary>

@@ -55,7 +55,7 @@ namespace Lego::PickABrick {
 
 	Lot bricklinkToLegoLot(const BrickLink::Lot& lot)
 	{
-		const BrickLink::Item::PCC* pcc = querryPCC(lot.item(), lot.color());
+		const BrickLink::Item::PCC* pcc = queryPCC(lot.item(), lot.color());
 		if (pcc == nullptr) {
 			return Lot(0, 0);
 		}
@@ -168,12 +168,12 @@ namespace Lego::PickABrick {
 	}
 
 
-	const BrickLink::Item::PCC* querryPCC(
+	const BrickLink::Item::PCC* queryPCC(
 		const BrickLink::Item* item,
 		const BrickLink::Color* color
 	) {
 		const BrickLink::Item::PCC* probablePCC = guessPCC(item, color);
-		if (checkIfQuerryHasResults(QString::number(probablePCC->pcc()))) {
+		if (checkIfQueryHasResults(QString::number(probablePCC->pcc()))) {
 			return probablePCC;
 		}
 
@@ -183,7 +183,7 @@ namespace Lego::PickABrick {
 				continue;
 			}
 
-			if (checkIfQuerryHasResults(QString::number(pcc.pcc()))) {
+			if (checkIfQueryHasResults(QString::number(pcc.pcc()))) {
 				return &pcc;
 			}
 		}
@@ -192,14 +192,14 @@ namespace Lego::PickABrick {
 	}
 
 
-	bool checkIfQuerryHasResults(const QString querry) {
+	bool checkIfQueryHasResults(const QString query) {
 		const QString elementContainerClassName = u"ElementsContainer_container__"_qs;
 
 		QNetworkAccessManager network;
 		network.setTransferTimeout();
 
-		const QString urlBase = u"https://www.lego.com/fr-fr/pick-and-build/pick-a-brick?query="_qs;
-		const QString url = urlBase + querry;
+		const QString urlBase = u"https://www.lego.com/pick-and-build/pick-a-brick?query="_qs;
+		const QString url = urlBase + query;
 		QNetworkRequest request(url);
 
 		QNetworkReply* reply = network.get(request);

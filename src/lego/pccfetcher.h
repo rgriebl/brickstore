@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QFuture>
+#include <QStack>
 
 #include "bricklink/lot.h"
 
@@ -80,7 +81,23 @@ namespace Lego::PickABrick {
 		int m_progress;
 		bool m_isRunning;
 
-		QFuture<Lot> m_future;
+		QFuture<QList<Lot>> m_future;
+
+
+		/// <summary>
+		/// ItemQueries represents a lot, with a set of pcc to check out
+		/// </summary>
+		struct ItemQueries {
+
+		public:
+			uint m_lotIndex;
+			QStack<uint> m_pccs;
+			const BrickLink::Lot& m_lot;
+
+			ItemQueries(const BrickLink::Lot& lot, uint lotIndex=0);
+		};
+
+		using QueryIterators = QList<std::list<ItemQueries>::iterator>;
 
 		/// <summary>
 		/// Convert an individual lot
@@ -88,6 +105,40 @@ namespace Lego::PickABrick {
 		/// <param name="lot">the Bricklink lot to convert</param>
 		/// <returns>the converted lot</returns>
 		Lot convertLot( const BrickLink::Lot* lot);
+
+
+		/// <summary>
+		/// Convert a set of lots, by batch. Emits updateProgress and updateFinished signals.
+		/// </summary>
+		/// <param name="lots">the lot lists to convert</param>
+		/// <returns>the converted lots</returns>
+		QList<Lot> convertLots(const BrickLink::LotList& lots );
+
+
+		/// <summary>
+		/// Helper function to query a given set of pcc. The function takes a list of
+		/// iterators from an std::list of ItemQueries. It makes one http request to
+		/// Lego Pick a Brick, that includes the first pcc of every query. The maximum amount
+		/// of queries is 100, the queries beyond that won't be included in the first web page.
+		/// </summary>
+		/// <exception cref="std::runtime_error">Thrown when an error occured during the request</exception>
+		/// <param name="queries">A list of queries</param>
+		/// <returns>The returned webpage</returns>
+		static QString queryPCCs(const QueryIterators& queries);
+
+
+		/// <summary>
+		/// Select queries from a given list to build a proper batch, 
+		/// that can be fed to queryPCCS. It ensures there are no more than
+		/// maxCount queries in the result, and every item appears only once, 
+		/// regardless of the colors.
+		/// </summary>
+		/// <param name="queries">A list of queries.</param>
+		/// <param name="maxCount">The maximum elements count of the result</param>
+		/// <returns>A list of iterators, pointings to the queries list.</returns>
+		static QueryIterators selectQueries(
+			std::list<ItemQueries>& queries, 
+			uint maxCount);
 	};
 
 
