@@ -17,6 +17,7 @@
 #include "bricklink/global.h"
 #include "bricklink/lot.h"
 #include "bricklink/order.h"
+#include "lego/pickabrick.h"
 #include "common/actionmanager.h"
 #include "common/documentmodel.h"
 
@@ -88,6 +89,9 @@ class Document : public QObject
     Q_OBJECT
 
 public:
+    using PabLotsSerializer = std::function<QByteArray(const QList<Lego::PickABrick::Lot>&)>;
+    using BlLotsSerializer = std::function<QCoro::Task<QByteArray>(const LotList&)>;
+
     static Document *create(QObject *parent = nullptr);
     static Document *create(DocumentModel *model, QObject *parent = nullptr);
     static Document *create(DocumentModel *model, const QByteArray &columnsState,
@@ -198,6 +202,18 @@ public:
     QCoro::Task<> exportBrickLinkUpdateXMLToClipboard();
     QCoro::Task<> exportBrickLinkInventoryRequestToClipboard();
     QCoro::Task<> exportBrickLinkWantedListToClipboard();
+
+    QCoro::Task<QByteArray> buildLegoPickABrickFile(
+        const BrickLink::LotList& lots, 
+        PabLotsSerializer legoLotsToFile);
+    QCoro::Task<> exportLegoPickABrickCSVToFile();
+    QCoro::Task<> exportLegoPickABrickJSONToFile();
+
+    QCoro::Task<> exportToFile(
+        const QList<QPair<QString, QStringList>> nameFilters,
+        const QString extension,
+        BlLotsSerializer buildFileContent
+    );
 
     void moveColumn(int logical, int oldVisual, int newVisual);
     void resizeColumn(int logical, int oldSize, int newSize);

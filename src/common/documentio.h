@@ -28,6 +28,8 @@ public:
     static QList<QPair<QString, QStringList>> nameFiltersForBrickLinkXML();
     static QList<QPair<QString, QStringList>> nameFiltersForBrickStoreXML();
     static QList<QPair<QString, QStringList>> nameFiltersForLDraw();
+    static QList<QPair<QString, QStringList>> nameFiltersForLegoPabCSV();
+    static QList<QPair<QString, QStringList>> nameFiltersForLegoPabJSON();
 
     class BsxContents : public BrickLink::IO::ParseResult
     {
@@ -47,6 +49,9 @@ public:
 
     static QCoro::Task<Document *> importBrickLinkXML(QString fileName = { });
     static QCoro::Task<Document *> importLDrawModel(QString fileName = { });
+
+    static QCoro::Task<Document*> importPickABrickCSV(QString fileName = { });
+    static QCoro::Task<Document*> importPickABrickJSON(QString fileName = { });
 
     static QString exportBrickLinkUpdateClipboard(const DocumentModel *doc,
                                                   const LotList &lots);

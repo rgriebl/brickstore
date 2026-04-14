@@ -296,6 +296,8 @@ void Application::afterInit()
               if (success && store->isValid())
                   DocumentIO::importBrickLinkStore(store);
           } },
+        { "document_import_pab_csv", [](bool) {DocumentIO::importPickABrickCSV(); }},
+        { "document_import_pab_json", [](bool) {DocumentIO::importPickABrickJSON(); }},
         { "view_show_input_errors", [](bool b) {
               Config::inst()->setShowInputErrors(b);
               ActionManager::inst()->qAction("view_goto_next_input_error")->setEnabled(b);

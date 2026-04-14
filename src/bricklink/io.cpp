@@ -60,7 +60,7 @@ static QString unescapeLtGt(const QString &str, bool enabled = true)
 
 namespace BrickLink {
 
-QString IO::toBrickLinkXML(const LotList &lots)
+QByteArray IO::toBrickLinkXML(const LotList &lots)
 {
     bool doubleEscapedComments = core()->isApiQuirkActive(ApiQuirk::InventoryCommentsAreDoubleEscaped);
     bool doubleEscapedRemarks = core()->isApiQuirkActive(ApiQuirk::InventoryRemarksAreDoubleEscaped);
@@ -127,7 +127,7 @@ QString IO::toBrickLinkXML(const LotList &lots)
         xml.writeEndElement();
     }
     xml.writeEndElement();
-    return out;
+    return out.toUtf8();
 }
 
 

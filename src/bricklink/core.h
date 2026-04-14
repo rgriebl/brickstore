@@ -98,6 +98,13 @@ public:
 
     std::tuple<const Item *, const Color *> partColorCode(uint id) const;
 
+    /// <summary>
+    /// Find a pair of item with a color in the dartabase, from a valid pcc.
+    /// </summary>
+    /// <param name="pcc">a pcc</param>
+    /// <returns>A pair with pointers to the item and color, or a pair of nullptr if pcc is invalid.</returns>
+    std::pair<const Item*, const Color*> findItemAndColorFromPCC(uint pcc) const;
+
     const Relationship *relationship(uint id) const;
     const RelationshipMatch *relationshipMatch(uint id) const;
 

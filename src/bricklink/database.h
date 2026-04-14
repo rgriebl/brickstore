@@ -23,6 +23,8 @@ class TransferJob;
 
 namespace BrickLink {
 
+using PCCmap = std::unordered_map < uint, std::pair<const Item*, const Color*>>;
+
 class Database : public QObject
 {
     Q_OBJECT
@@ -113,6 +115,9 @@ private:
     QHash<QByteArray, QString>       m_apiKeys;
     QSet<ApiQuirk>                   m_apiQuirks;
 
+    /// <value>m_pccToItemAndColor is a map that allows to quickly find an item and its color from a pcc</value>
+    PCCmap m_pccToItemAndColor;
+
     uint m_latestChangelogId = 0;
 
     friend class Core;
@@ -139,6 +144,8 @@ private:
     void writeRelationshipMatchToDatabase(const RelationshipMatch &e, QDataStream &dataStream, Version v) const;
     static void readApiKeyFromDatabase(QByteArray &id, QString &key, QDataStream &dataStream, MemoryResource *pool);
     void writeApiKeyToDatabase(const QByteArray &id, const QString &key, QDataStream &dataStream, Version v) const;
+
+    static PCCmap buildPCCmapFromItems(const std::vector<Item>& items);
 
 };
 
