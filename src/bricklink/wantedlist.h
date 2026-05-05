@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -38,6 +38,7 @@ class WantedList : public QObject
 public:
     WantedList();
     ~WantedList() override;
+    Q_DISABLE_COPY_MOVE(WantedList)
 
     int id() const;
     QString name() const;

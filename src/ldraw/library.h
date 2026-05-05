@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -20,7 +20,8 @@
 
 #include <QCoro/QCoroTask>
 
-#include "utility/q3cache.h"
+#include "utility/refcache.h"
+#include "part.h"
 
 Q_DECLARE_LOGGING_CATEGORY(LogLDraw)
 
@@ -31,7 +32,6 @@ class MiniZip;
 
 namespace LDraw {
 
-class Part;
 class PartElement;
 class PartLoaderJob;
 
@@ -48,7 +48,7 @@ public:
     ~Library() override;
 
     QString path() const;
-    QCoro::Task<bool> setPath(const QString &path, bool forceReload = false);
+    QCoro::Task<bool> setPath(QString path, bool forceReload = false);
 
     bool isValid() const               { return m_valid; }
     QDateTime lastUpdated() const      { return m_lastUpdated; }
@@ -110,7 +110,7 @@ private:
     std::unique_ptr<MiniZip> m_zip;
     QStringList m_searchpath;
     QHash<QString, QString> m_partIdMapping;
-    Q3Cache<QString, Part> m_cache;  // path -> part
+    RefCache<QString, Part> m_cache;  // path -> part
     // (filename, parentdir) -> (resolved filename, resolved parentdir, inZip)
     QHash<std::pair<QString, QString>, std::tuple<QString, QString, bool>> m_lookupCache;
 
@@ -124,6 +124,7 @@ private:
     int m_partsStatId = -1;
 
     friend class PartElement;
+    Q_DISABLE_COPY_MOVE(Library)
 };
 
 inline Library *library() { return Library::inst(); }

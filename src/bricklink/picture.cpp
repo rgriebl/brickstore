@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 
@@ -8,6 +8,7 @@
 #include <QtCore/QBuffer>
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QCoreApplication>
+#include <QtCore/QElapsedTimer>
 #include <QtNetwork/QNetworkInformation>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
@@ -27,7 +28,7 @@ namespace BrickLink {
 
 PictureCache *Picture::s_cache = nullptr;
 
-Picture::Picture(const Item *item, const Color *color)
+Picture::Picture(Private, const Item *item, const Color *color)
     : m_item(item)
     , m_color(color)
 { }
@@ -240,7 +241,7 @@ PictureCache::PictureCache(Core *core, quint64 physicalMem)
         d->m_threads.append(t);
     }
 
-    for (auto *thread : d->m_threads)
+    for (auto *thread : std::as_const(d->m_threads))
         thread->start(QThread::LowPriority);
 }
 
@@ -253,7 +254,7 @@ PictureCache::~PictureCache()
     d->m_saveMutex.lock();
     d->m_saveTrigger.wakeAll();
     d->m_saveMutex.unlock();
-    for (auto *thread : d->m_threads) {
+    for (auto *thread : std::as_const(d->m_threads)) {
         thread->wait();
         delete thread;
     }
@@ -269,14 +270,14 @@ void PictureCache::setUpdateInterval(int interval)
 
 void PictureCache::clearCache()
 {
-    int lastLeftOver = 0;
+    qsizetype lastLeftOver = 0;
     QElapsedTimer timer;
     QElapsedTimer absoluteTimer;
     absoluteTimer.start();
 
     // the loader/saver threads might hold references, so we need to wait for their queues to drain
     while (true) {
-        int leftOver = d->m_cache.clearRecursive();
+        qsizetype leftOver = d->m_cache.clear();
 
         if (!leftOver) {
             break;
@@ -295,7 +296,7 @@ void PictureCache::clearCache()
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents, 500);
     }
 
-    AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
+    AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.size());
 }
 
 QPair<int, int> PictureCache::cacheStats() const
@@ -319,14 +320,14 @@ Picture *PictureCache::picture(const Item *item, const Color *color, bool highPr
     bool needToLoad = !pic || (!pic->isValid() && (pic->updateStatus() == UpdateStatus::UpdateFailed));
 
     if (!pic) {
-        pic = new Picture(item, color);
-        int cost = pic->cost();
-        if (!d->m_cache.insert(key, pic, cost)) {
-            qCWarning(LogCache, "Can not add picture to cache (cache max/cur: %d/%d, item cost/id: %d/%s)",
-                      int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), int(cost), item->id().constData());
+        auto newPic = std::make_unique<Picture>(Picture::Private { }, item, color);
+        pic = d->m_cache.insert(key, std::move(newPic), 1 /* start with roughly 1KB cost */);
+        if (!pic) {
+            qCWarning(LogCache, "Can not add picture to cache (cache max/cur: %d/%d, item id: %s)",
+                      int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), item->id().constData());
             return nullptr;
         }
-        AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
+        AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.size());
     }
 
     if (needToLoad) {
@@ -503,7 +504,7 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
             m_loadTrigger.wait(&m_loadMutex);
 
         if (m_stop) {
-            for (auto [pic, type] : m_loadQueue)
+            for (auto [pic, type] : std::as_const(m_loadQueue))
                 pic->release();
             continue;
         }
@@ -519,7 +520,6 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
             QDateTime lastUpdated;
             QImage img;
             bool highPriority = (loadType == LoadHighPriority);
-            bool convertedFromOldCache = false;
 
             if (db.isOpen()) {
                 loadQuery.bindValue(u":id"_qs, databaseTag(pic));
@@ -533,23 +533,9 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
                 }
                 loadQuery.finish();
             }
-            // try the old file-system based cache
-            if (!loaded) {
-                bool large = (!pic->color());
-                bool hasColors = pic->item()->itemType()->hasColors();
-                QFile *f = m_core->dataReadFile(large ? u"large.jpg" : u"normal.png", pic->item(),
-                                                (!large && hasColors) ? pic->color() : nullptr);
-                if (f && f->isOpen()) {
-                    lastUpdated = f->fileTime(QFile::FileModificationTime);
-                    if (f->size() > 0)
-                        convertedFromOldCache = loaded = imageFromData(img, f->readAll());
-                    f->remove();
-                }
-                delete f;
-            }
 
             pic->addRef(); // the release will happen on the main thread (see the invokeMethod below)
-            QMetaObject::invokeMethod(m_core, [=, this, pic=pic]() { // clang bug: P1091R3
+            QMetaObject::invokeMethod(m_core, [this, loaded, lastUpdated, img, highPriority, pic=pic]() { // clang bug: P1091R3
                 if (loaded) {
                     pic->setLastUpdated(lastUpdated);
                     pic->setImage(img);
@@ -557,7 +543,7 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
                     // update the last accessed time stamp
                     pic->addRef();
                     m_saveMutex.lock();
-                    m_saveQueue.append({ pic, convertedFromOldCache ? SaveData : SaveAccessTimeOnly });
+                    m_saveQueue.append({ pic, SaveAccessTimeOnly });
                     m_saveTrigger.wakeOne();
                     m_saveMutex.unlock();
                 }

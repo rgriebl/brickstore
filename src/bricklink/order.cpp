@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <memory>
@@ -16,6 +16,7 @@
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQueryModel>
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QJsonValue>
 
 #include "bricklink/core.h"
 #include "bricklink/io.h"
@@ -619,9 +620,7 @@ Orders::Orders(Core *core)
 {
     d->m_core = core;
 
-    connect(core, &Core::userIdChanged,
-            this, &Orders::reloadOrdersFromDatabase);
-    reloadOrdersFromDatabase(core->userId());
+    reloadOrdersFromDatabase();
 
     connect(core, &Core::authenticatedTransferStarted,
             this, [this](TransferJob *job) {
@@ -784,10 +783,18 @@ Orders::Orders(Core *core)
     });
 }
 
-void Orders::reloadOrdersFromDatabase(const QString &userId)
+void Orders::reloadOrdersFromDatabase()
 {
-    if (userId == d->m_userId)
-        return;
+    // dummy user id, because of the new access token system
+    QString dbName = d->m_core->dataPath() + u"order_cache__userid_.sqlite"_qs;
+
+    // try to locate an existing DB and use that instead to preserve old downloads
+    const auto allDBs = QDir(d->m_core->dataPath()).entryInfoList({ u"order_cache_*.sqlite"_qs },
+                                                                  QDir::Files, QDir::Time);
+    if (!allDBs.isEmpty()) {
+        dbName = allDBs.constFirst().absoluteFilePath();
+        qInfo() << "Found existing order cache database:" << allDBs.constFirst().fileName();
+    }
 
     beginResetModel();
     qDeleteAll(d->m_orders);
@@ -797,15 +804,9 @@ void Orders::reloadOrdersFromDatabase(const QString &userId)
 
     emit countChanged(0);
 
-    d->m_userId = userId;
-
     if (d->m_db.isOpen())
         d->m_db.close();
 
-    if (userId.isEmpty())
-        return;
-
-    QString dbName = d->m_core->dataPath() + u"order_cache_%1.sqlite"_qs.arg(userId);
     d->m_db = QSqlDatabase::addDatabase(u"QSQLITE"_qs, u"OrderCache"_qs);
     d->m_db.setDatabaseName(dbName);
 
@@ -944,7 +945,7 @@ void Orders::reloadOrdersFromDatabase(const QString &userId)
     setUpdateStatus(lastUpdated.isValid() ? UpdateStatus::Ok : UpdateStatus::UpdateFailed);
     setLastUpdated(lastUpdated);
 
-    importOldCache(userId);
+    //importOldCache(userId); no user-id, no import
 
     if (d->m_loadOrdersQuery.exec()) {
         stopwatch sw("Loading orders");
@@ -1089,7 +1090,7 @@ void Orders::importOldCache(const QString &userId)
     d->m_db.commit();
 
     QFile importedFile(imported.absoluteFilePath());
-    importedFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    (void) importedFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
     importedFile.close();
 }
 
@@ -1288,7 +1289,7 @@ void Orders::appendOrderToModel(std::unique_ptr<Order> order)
     d->m_orders.append(o);
 
     endInsertRows();
-    emit countChanged(rowCount());
+    emit countChanged(int(d->m_orders.size()));
 }
 
 void Orders::setLastUpdated(const QDateTime &lastUpdated)
@@ -1401,7 +1402,7 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
 {
     if (updateStatus() == UpdateStatus::Updating)
         return;
-    if (d->m_core->userId().isEmpty())
+    if (!d->m_core->hasAccessToken())
         return;
     Q_ASSERT(d->m_jobs.isEmpty());
     setUpdateStatus(UpdateStatus::Updating);
@@ -1431,6 +1432,8 @@ void Orders::startUpdateInternal(const QDate &fromDate, const QDate &toDate,
         }
 
         auto job = TransferJob::post(u"https://www.bricklink.com/orderExcelFinal.asp"_qs, query);
+        // an empty list will redirect to an URL containing the query item "error=EOF"
+        job->setFollowRedirects(false);
         job->setUserData(type, true);
         d->m_jobs << job;
 

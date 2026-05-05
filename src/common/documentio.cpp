@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <memory>
@@ -676,8 +676,8 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
     xml.writeAttribute(u"Currency"_qs, doc->model()->currencyCode());
     xml.writeAttribute(u"BrickLinkChangelogId"_qs, QString::number(BrickLink::core()->latestChangelogId()));
 
-    const Lot *lot;
-    const Lot *base;
+    const Lot *lot = nullptr;
+    const Lot *base = nullptr;
     QXmlStreamAttributes baseValues;
 
     enum CreateFlags {

@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <chrono>
@@ -83,7 +83,7 @@ bool PersistentCookieJar::setCookiesFromUrl(const QList<QNetworkCookie> &cookieL
     bool result = QNetworkCookieJar::setCookiesFromUrl(cookieList, url);
 
     QByteArray data;
-    QList<QNetworkCookie> all = allCookies();
+    const QList<QNetworkCookie> all = allCookies();
     for (const auto &cookie : all) {
         if (!cookie.isSessionCookie() || m_persistSessionCookies.contains(cookie.name()))
             data = data + cookie.toRawForm() + '\n';

@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <QCamera>
@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QGuiApplication>
 #include <QPointer>
+#include <QElapsedTimer>
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0) && QT_CONFIG(permissions)
 #  include <QCoreApplication>
 #  include <QPermissions>
@@ -25,21 +26,6 @@
 #include "capture.h"
 
 
-static struct SetQtMMBackend  // clazy:exclude=non-pod-global-static
-{
-    // QTBUG-120026: The default FFmpeg backend completely freezes the main thread for 1-3 sec
-    // when enumerating camera devices on Windows and macOS.
-    SetQtMMBackend()
-    {
-#if defined(Q_OS_WINDOWS)
-        qputenv("QT_MEDIA_BACKEND", "windows");
-#elif defined(Q_OS_MACOS)
-        qputenv("QT_MEDIA_BACKEND", "darwin");
-#endif
-    }
-} setQtMMBackend;
-
-
 using namespace std::chrono_literals;
 
 namespace Scanner {
@@ -47,8 +33,8 @@ namespace Scanner {
 class CapturePrivate
 {
 public:
-    QMediaCaptureSession *captureSession;
-    QImageCapture *imageCapture;
+    QMediaCaptureSession *captureSession = nullptr;
+    QImageCapture *imageCapture = nullptr;
     QByteArray currentCameraId;
     std::unique_ptr<QCamera> camera;
     std::optional<int> currentCaptureId;
@@ -196,9 +182,6 @@ Capture::Capture(QObject *parent)
         }
     });
 }
-
-Capture::~Capture()
-{ }
 
 QObject *Capture::videoOutput() const
 {
@@ -370,7 +353,7 @@ void Capture::setCurrentCameraId(const QByteArray &newCameraId)
     d->currentCameraId = newCameraId;
     emit currentCameraIdChanged(newCameraId);
 
-    d->camera.reset(new QCamera(newCameraDevice));
+    d->camera = std::make_unique<QCamera>(newCameraDevice);
     connect(d->camera.get(), &QCamera::activeChanged,
             this, &Capture::cameraActiveChanged);
 

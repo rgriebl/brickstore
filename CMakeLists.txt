@@ -1,4 +1,4 @@
-# Copyright (C) 2004-2025 Robert Griebl
+# Copyright (C) 2004-2026 Robert Griebl
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.19.0)
@@ -13,8 +13,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(SENTRY_VERSION 0.7.10)
-set(QCORO_VERSION  0.10.0)
+set(SENTRY_VERSION 0.12.2)
+set(QCORO_VERSION  0.12.0)
+
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
 
 # for QtCreator
 set(QML_IMPORT_PATH ${CMAKE_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/imports CACHE STRING "" FORCE)
@@ -31,7 +33,7 @@ option(VERBOSE_FETCH "Verbose output for 3rd party FetchContent" OFF)
 
 set(NAME           "BrickStore")
 set(DESCRIPTION    "${NAME} - an offline BrickLink inventory management tool")
-set(COPYRIGHT      "2004-2025 Robert Griebl")
+set(COPYRIGHT      "2004-2026 Robert Griebl")
 set(BRICKSTORE_URL "www.brickstore.dev")
 set(GITHUB_URL     "github.com/rgriebl/brickstore")
 set(BUILD_NUMBER   "$ENV{BUILD_NUMBER}")
@@ -85,7 +87,7 @@ endif()
 include(BuildQCoro)
 
 set(BS_WAYLAND_DECORATIONS OFF)
-if (LINUX AND (${Qt6_VERSION} VERSION_LESS "6.8.0") AND (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.5.0"))
+if (LINUX AND (NOT BACKEND_ONLY) AND (${Qt6_VERSION} VERSION_LESS "6.8.0") AND (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.5.0"))
     # Qt < 6.8.0 draws very ugly window decorations on Gnome
     find_package(Wayland QUIET)
     if (Wayland_FOUND)
@@ -103,7 +105,7 @@ if (MSVC)
     # need to disable C4702 due to 6.4.0 QAnyStringView
     list(APPEND copts /W4 /WX /wd4127 /wd4702)
 elseif (CLANG)
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17.0)
+    if (NOT APPLE AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17.0)
         list(APPEND cxxopts -fcoroutines-ts)
     endif()
     list(APPEND cxxopts -stdlib=libc++)
@@ -112,7 +114,7 @@ elseif (CLANG)
     list(APPEND cxxopts -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types)
 elseif (GCC)
     list(APPEND cxxopts -fcoroutines)
-    list(APPEND copts -Wall -Wextra -Wpedantic -Werror)
+    list(APPEND copts -Wall -Wextra -Wpedantic -Werror -Wno-expansion-to-defined)
 endif()
 add_compile_options("$<$<COMPILE_LANGUAGE:C>:${copts}>")
 add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${copts}$<SEMICOLON>${cxxopts}>")
@@ -170,10 +172,18 @@ if (ANDROID OR IOS OR FORCE_MOBILE)
     set(QUICK_CONTROLS "QtQuick.Controls.Material")
     find_package(Qt6 CONFIG QUIET REQUIRED Qml Quick Quick3D QuickControls2Impl QuickDialogs2 QuickTemplates2 QuickDialogs2Utils Svg Multimedia MultimediaQuickPrivate)
 
+    if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.10.0")
+        find_package(Qt6 CONFIG QUIET REQUIRED QmlPrivate QuickPrivate QuickTemplates2Private QuickDialogs2Private QuickControls2ImplPrivate QuickDialogs2UtilsPrivate)
+    endif()
+
 elseif (BACKEND_ONLY)
     set(BS_BACKEND ON)
     set(BS_TYPE "Backend")
     add_compile_definitions(BS_BACKEND)
+
+    if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.10.0")
+        find_package(Qt6 CONFIG QUIET REQUIRED GuiPrivate)
+    endif()
 
 else()
     set(BS_DESKTOP ON)
@@ -181,6 +191,9 @@ else()
     add_compile_definitions(BS_DESKTOP)
     find_package(Qt6 CONFIG QUIET REQUIRED Widgets PrintSupport Qml Quick Quick3D Multimedia QuickWidgets Svg)
 
+    if (${Qt6_VERSION} VERSION_GREATER_EQUAL "6.10.0")
+        find_package(Qt6 CONFIG QUIET REQUIRED GuiPrivate WidgetsPrivate QmlPrivate QuickPrivate)
+    endif()
 endif()
 
 if (${Qt6_VERSION} VERSION_LESS "${MIN_QT_VERSION}")
@@ -284,7 +297,7 @@ qt_add_lrelease(${PROJECT_NAME}
 # let lupdate itself scan recursively
 add_custom_target(${PROJECT_NAME}_lupdate
     COMMAND ${QT_CMAKE_EXPORT_NAMESPACE}::lupdate "${CMAKE_SOURCE_DIR}"
-            -locations relative -no-ui-lines -ts ${TS_FILES}
+            -locations relative -ts ${TS_FILES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMAND_EXPAND_LISTS
     VERBATIM

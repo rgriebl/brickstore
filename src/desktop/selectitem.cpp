@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <cmath>
@@ -426,7 +426,6 @@ void SelectItem::init()
         ensureSelectionVisible();
 
         emit hasColors(ittHasColors);
-        emit hasSubConditions(isAllItt ? true : (itemtype ? itemtype->hasSubConditions() : false));
     });
 
     connect(d->w_categories->selectionModel(), &QItemSelectionModel::selectionChanged,
@@ -768,12 +767,12 @@ QByteArray SelectItem::saveState() const
 
     QByteArray ba;
     QDataStream ds(&ba, QIODevice::WriteOnly);
-    ds << QByteArray("SI") << qint32(5)
+    ds << QByteArray("SI") << qint32(6)
        << qint8(itt ? ((itt == BrickLink::ItemTypeModel::AllItemTypes) ? qint8(-2) : itt->id())
                     : BrickLink::ItemType::InvalidId)
        << (cat ? ((cat == BrickLink::CategoryModel::AllCategories) ? uint(-2) : cat->id())
                : BrickLink::Category::InvalidId)
-       << (item ? QString::fromLatin1(item->id()) : QString())
+       << (item ? item->itemTypeAndId() : QByteArray())
        << d->w_filter->text()
        << (color ? color->id() : BrickLink::Color::InvalidId)
        << zoomFactor()
@@ -792,12 +791,12 @@ bool SelectItem::restoreState(const QByteArray &ba)
     QByteArray tag;
     qint32 version;
     ds >> tag >> version;
-    if ((ds.status() != QDataStream::Ok) || (tag != "SI") || (version < 4) || (version > 5))
+    if ((ds.status() != QDataStream::Ok) || (tag != "SI") || (version < 6) || (version > 6))
         return false;
 
     qint8 itt;
     uint cat;
-    QString itemid;
+    QByteArray itemTypeAndId;
     QString filterText;
     uint colorFilterId = BrickLink::Color::InvalidId;
     double zoom;
@@ -807,7 +806,7 @@ bool SelectItem::restoreState(const QByteArray &ba)
     int itemSortColumn;
     QByteArray splitterState;
 
-    ds >> itt >> cat >> itemid >> filterText >> colorFilterId
+    ds >> itt >> cat >> itemTypeAndId >> filterText >> colorFilterId
        >> zoom >> viewMode >> catSortAsc >> itemSortAsc >> itemSortColumn;
 
     if (version >= 5)
@@ -843,8 +842,8 @@ bool SelectItem::restoreState(const QByteArray &ba)
             d->itemModel->invalidateFilterNow();
     }
 
-    if (!itemid.isEmpty())
-        setCurrentItem(BrickLink::core()->item(itt, itemid.toLatin1()), false);
+    if (!itemTypeAndId.isEmpty())
+        setCurrentItem(BrickLink::core()->item(itemTypeAndId.at(0), itemTypeAndId.mid(1)), false);
 
     if (!splitterState.isEmpty())
         d->w_splitter->restoreState(splitterState);

@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <QDebug>
@@ -25,7 +25,7 @@ namespace Scanner {
 class CorePrivate
 {
 public:
-    QNetworkAccessManager *nam;
+    QNetworkAccessManager *nam = nullptr;
     QByteArray defaultBackendId;
     QVector<Core::Backend> availableBackends;
 
@@ -64,7 +64,7 @@ QByteArrayList Core::availableBackendIds() const
 {
     QByteArrayList result;
     result.reserve(d->availableBackends.size());
-    for (const auto &b : d->availableBackends)
+    for (const auto &b : std::as_const(d->availableBackends))
         result << b.id;
     return result;
 }
@@ -82,7 +82,7 @@ QByteArray Core::defaultBackendId() const
 
 const Core::Backend *Core::backendFromId(const QByteArray &id) const
 {
-    for (const auto &b : d->availableBackends) {
+    for (const auto &b : std::as_const(d->availableBackends)) {
         if (b.id == id)
             return &b;
     }
@@ -100,7 +100,7 @@ uint Core::scan(const QImage &image, const BrickLink::ItemType *filter, const QB
         return 0;
     }
 
-    char itemTypeId = filter ? filter->id() : 0;
+    char itemTypeId = filter ? filter->id() : char(0);
     if (itemTypeId && !backend->itemTypeFilter.contains(itemTypeId)) {
         qCWarning(LogScanner) << "Backend can not filter on the request item-type" << itemTypeId;
         itemTypeId = 0;

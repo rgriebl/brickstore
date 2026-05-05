@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -24,8 +24,7 @@ class Config : public QSettings
     Q_PROPERTY(bool restoreLastSession READ restoreLastSession WRITE setRestoreLastSession NOTIFY restoreLastSessionChanged)
     Q_PROPERTY(bool showInputErrors READ showInputErrors WRITE setShowInputErrors NOTIFY showInputErrorsChanged)
     Q_PROPERTY(bool showDifferenceIndicators READ showDifferenceIndicators WRITE setShowDifferenceIndicators NOTIFY showDifferenceIndicatorsChanged)
-    Q_PROPERTY(QString brickLinkUsername READ brickLinkUsername WRITE setBrickLinkUsername NOTIFY brickLinkCredentialsChanged)
-    Q_PROPERTY(QString brickLinkPassword READ brickLinkPassword WRITE setBrickLinkPassword NOTIFY brickLinkCredentialsChanged)
+    Q_PROPERTY(QString brickLinkAccessToken READ brickLinkAccessToken WRITE setBrickLinkAccessToken NOTIFY brickLinkAccessTokenChanged)
     Q_PROPERTY(Config::UITheme uiTheme READ uiTheme WRITE setUITheme NOTIFY uiThemeChanged)
     Q_PROPERTY(Config::UISize mobileUISize READ mobileUISize WRITE setMobileUISize NOTIFY mobileUISizeChanged)
     Q_PROPERTY(int rowHeightPercent READ rowHeightPercent WRITE setRowHeightPercent NOTIFY rowHeightPercentChanged)
@@ -37,8 +36,6 @@ class Config : public QSettings
 private:
     Config();
     static Config *s_inst;
-
-    static QString legacyScramble(const QString &);
 
 public:
     ~Config() override;
@@ -76,8 +73,6 @@ public:
     void setShowInputErrors(bool b);
     bool showDifferenceIndicators() const;
     void setShowDifferenceIndicators(bool b);
-    bool onlineStatus() const;
-    void setOnlineStatus(bool b);
 
     enum class PartOutMode {
         Ask,
@@ -100,10 +95,8 @@ public:
 
     static constexpr int MaxFilterHistory = 20;
 
-    QString brickLinkUsername() const;
-    void setBrickLinkUsername(const QString &user);
-    QString brickLinkPassword() const;
-    void setBrickLinkPassword(const QString &pass, bool doNotSave = false);
+    QString brickLinkAccessToken() const;
+    void setBrickLinkAccessToken(const QString &accessToken);
     QMap<QByteArray, int> updateIntervals() const;
     QMap<QByteArray, int> updateIntervalsDefault() const;
     void setUpdateIntervals(const QMap<QByteArray, int> &intervals);
@@ -184,7 +177,6 @@ signals:
     void showDifferenceIndicatorsChanged(bool b);
     void visualChangesMarkModifiedChanged(bool b);
     void updateIntervalsChanged(const QMap<QByteArray, int> &intervals);
-    void onlineStatusChanged(bool b);
     void toolBarSizeChanged(Config::UISize iconSize);
     void iconSizePercentChanged(int p);
     void fontSizePercentChanged(int p);
@@ -198,7 +190,7 @@ signals:
     void toolBarActionsChanged(const QStringList &actions);
     void uiThemeChanged(Config::UITheme theme);
     void mobileUISizeChanged(Config::UISize size);
-    void brickLinkCredentialsChanged();
+    void brickLinkAccessTokenChanged();
     void columnSpacingChanged(int spacing);
     void liveEditRowHeightChanged(bool liveEdit);
     void pinnedColorIdsChanged();
@@ -218,8 +210,9 @@ private:
     mutable bool               m_translations_parsed = false;
     mutable QVector<Translation> m_translations;
     QString                    m_lastDirectory;
-    mutable QString            m_bricklinkUsername;
-    mutable QString            m_bricklinkPassword;
+    mutable QString            m_brickLinkAccessToken;
+
+    Q_DISABLE_COPY_MOVE(Config)
 };
 
 Q_DECLARE_METATYPE(Config *)

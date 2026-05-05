@@ -15,7 +15,7 @@ BrickStore is a BrickLink offline management tool. It is **multi-platform** (Win
 
 ## License
 
-BrickStore is copyrighted &copy;2004-2025 by Robert Griebl, licensed under the
+BrickStore is copyrighted &copy;2004-2026 by Robert Griebl, licensed under the
 [GNU General Public License (GPL) version 3](https://www.gnu.org/licenses/gpl-3.0.html).
 All data from [www.bricklink.com](https://www.bricklink.com) is owned by BrickLink. Both BrickLink
 and LEGO are trademarks of the LEGO group, which does not sponsor, authorize or endorse this

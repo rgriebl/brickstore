@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# Copyright (C) 2004-2025 Robert Griebl
+# Copyright (C) 2004-2026 Robert Griebl
 # SPDX-License-Identifier: GPL-3.0-only
 
 import os
@@ -95,7 +95,7 @@ def scanStudioUnOfficial(dir):
 
 def downloadAndUnpack(tempDir):
     ldrawUrl = 'https://library.ldraw.org/library/updates/complete.zip'
-    studioUrl = 'https://dzncyaxjqx7p3.cloudfront.net/Studio2.0/Studio+2.0.pkg'
+    studioUrl = 'https://studio.download.bricklink.info/Studio2.0/Studio+2.0.pkg'
 
     ldrawFile = "ldraw.zip"
     studioFile = "studio.pkg"

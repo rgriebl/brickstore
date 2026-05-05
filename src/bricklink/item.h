@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -99,13 +99,13 @@ public:
 
     private:
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-        quint32  m_pcc;
-        quint32  m_colorIndex : 12;
+        quint32  m_pcc = 0;
+        quint32  m_colorIndex : 12 = 0;
         quint32  m_reserved   : 20 = 0;
 #else
         quint32  m_reserved   : 20 = 0;
-        quint32  m_colorIndex : 12;
-        quint32  m_pcc;
+        quint32  m_colorIndex : 12 = 0;
+        quint32  m_pcc = 0;
 #endif
         friend class Item;
         friend class Core;

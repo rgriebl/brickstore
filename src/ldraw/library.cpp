@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <array>
@@ -259,12 +259,11 @@ void Library::shutdownPartLoaderThread()
 
     m_partLoaderJobs.clear();
 
-    // the parts in cache are referencing each other, so a plain clear will not work
-    m_cache.clearRecursive();
+    m_cache.clear();
     m_lookupCache.clear();
 
-    AppStatistics::inst()->update(m_partsStatId, m_cache.count());
-    AppStatistics::inst()->update(m_lookupStatId, m_cache.count());
+    AppStatistics::inst()->update(m_partsStatId, m_cache.size());
+    AppStatistics::inst()->update(m_lookupStatId, m_cache.size());
 }
 
 QString Library::path() const
@@ -272,7 +271,7 @@ QString Library::path() const
     return m_path;
 }
 
-QCoro::Task<bool> Library::setPath(const QString &path, bool forceReload)
+QCoro::Task<bool> Library::setPath(QString path, bool forceReload)
 {
     if ((m_path == path) && !forceReload)
         co_return false;
@@ -586,15 +585,14 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
             }
         }
         if (!data.isEmpty()) {
-            p = Part::parse(data, parentdir);
-            if (p) {
-                if (!m_cache.insert(filename, p, p->cost())) {
+            if (auto pParsed = Part::parse(data, parentdir)) {
+                uint cost = pParsed->cost();
+                p = m_cache.insert(filename, std::move(pParsed), cost);
+                if (!p)
                     qCWarning(LogLDraw) << "Unable to cache file" << filename;
-                    p = nullptr;
-                }
 
                 //qCInfo(LogLDraw) << "Cache at" << m_cache.totalCost() << "/" <<  m_cache.maxCost() << "with" << m_cache.size() << "parts";
-                AppStatistics::inst()->update(m_partsStatId, m_cache.count());
+                AppStatistics::inst()->update(m_partsStatId, m_cache.size());
             }
         }
     }

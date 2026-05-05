@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -29,6 +29,8 @@ class Picture : public QObject, protected Ref
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
     Q_PROPERTY(QImage image READ image NOTIFY imageChanged FINAL)
 
+    struct Private { };
+
 public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
@@ -44,8 +46,9 @@ public:
 
     int cost() const;
 
-    Picture(std::nullptr_t) : Picture(nullptr, nullptr) { } // for scripting only!
+    Picture(Private, const Item *item, const Color *color);
     ~Picture() override;
+    Q_DISABLE_COPY_MOVE(Picture)
 
     Q_INVOKABLE void addRef() { Ref::addRef(); }
     Q_INVOKABLE void release() { Ref::release(); }
@@ -75,8 +78,6 @@ private:
     static PictureCache *s_cache;
 
 private:
-    Picture(const Item *item, const Color *color);
-
     void setIsValid(bool valid);
     void setUpdateStatus(UpdateStatus status);
     void setLastUpdated(const QDateTime &dt);
@@ -116,9 +117,3 @@ private:
 } // namespace BrickLink
 
 Q_DECLARE_METATYPE(BrickLink::Picture *)
-
-
-// tell Qt that Pictures are shared and can't simply be deleted
-// (Q3Cache will use that function to determine what can really be purged from the cache)
-
-template<> inline bool q3IsDetached<BrickLink::Picture>(BrickLink::Picture &c) { return c.refCount() == 0; }

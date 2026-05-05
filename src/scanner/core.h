@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -18,9 +18,10 @@ class CorePrivate;
 class Core : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY_MOVE(Core)
+
 public:
     static Core *inst();
-    Core(const Core &) = delete;
     ~Core() override;
 
     struct Backend {
@@ -48,7 +49,7 @@ public:
               const QByteArray &backendId = { });
 
 signals:
-    void scanFinished(uint id, const QVector<Core::Result> &itemsAndScores);
+    void scanFinished(uint id, const QVector<Scanner::Core::Result> &itemsAndScores);
     void scanFailed(uint id, const QString &error);
 
 private:

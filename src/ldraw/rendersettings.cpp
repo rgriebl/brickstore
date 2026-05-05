@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <QDataStream>
@@ -29,7 +29,7 @@ RenderSettings *RenderSettings::create(QQmlEngine *qe, QJSEngine *)
 
 void RenderSettings::forEachProperty(const std::function<void(QMetaProperty &)> &callback)
 {
-    const QMetaObject *mo = metaObject();
+    const QMetaObject *mo = &staticMetaObject;
     for (int i = mo->propertyOffset(); i < mo->propertyCount(); ++i) {
         auto mp = mo->property(i);
         callback(mp);
@@ -75,7 +75,7 @@ QVariantMap RenderSettings::propertyDefaultValues() const
         { u"tumblingAnimationAngle"_qs, 0.1 },
         { u"tumblingAnimationAxis"_qs, QVariant::fromValue(QVector3D { 0.5, 0.375, 0.25 }) },
         { u"fieldOfView"_qs, 40. },
-        { u"antiAliasing"_qs, int(AntiAliasing::HighAA) },
+        { u"antiAliasing"_qs, int(AntiAliasing::High) },
 
         { u"aoStrength"_qs, 0.6 },
         { u"aoSoftness"_qs, 0.7 },

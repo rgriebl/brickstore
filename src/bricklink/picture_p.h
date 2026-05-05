@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -10,8 +10,9 @@
 #include <QtCore/QVector>
 #include <QtSql/QSqlDatabase>
 
-#include "utility/q3cache.h"
+#include "utility/refcache.h"
 #include "global.h"
+#include "picture.h"
 
 QT_FORWARD_DECLARE_CLASS(QThread)
 
@@ -46,7 +47,7 @@ public:
     QVector<QThread *> m_threads;
 
     int m_updateInterval = 0;
-    Q3Cache<quint32, Picture> m_cache;
+    RefCache<quint32, Picture> m_cache;
     Core *m_core;
     PictureCache *q;
     int m_cacheStatId = -1;

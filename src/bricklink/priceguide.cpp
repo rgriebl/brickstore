@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 
@@ -35,7 +35,7 @@ namespace BrickLink {
 
 PriceGuideCache *PriceGuide::s_cache = nullptr;
 
-PriceGuide::PriceGuide(const Item *item, const Color *color, VatType vatType)
+PriceGuide::PriceGuide(Private, const Item *item, const Color *color, VatType vatType)
     : m_item(item)
     , m_color(color)
     , m_vatType(vatType)
@@ -542,7 +542,7 @@ QString BatchedAffiliateAPIPGRetriever::itemTypeApiId(const ItemType *itt)
         { 'P', u"PART"_qs },
         { 'S', u"SET"_qs },
     };
-    return mapping.value(itt ? itt->id() : 0);
+    return mapping.value(itt ? itt->id() : char(0));
 }
 
 
@@ -645,7 +645,7 @@ PriceGuideCache::PriceGuideCache(Core *core)
         d->m_threads.append(t);
     }
 
-    for (auto *thread : d->m_threads)
+    for (auto *thread : std::as_const(d->m_threads))
         thread->start(QThread::LowPriority);
 }
 
@@ -658,7 +658,7 @@ PriceGuideCache::~PriceGuideCache()
     d->m_saveMutex.lock();
     d->m_saveTrigger.wakeAll();
     d->m_saveMutex.unlock();
-    for (auto *thread : d->m_threads) {
+    for (auto *thread : std::as_const(d->m_threads)) {
         thread->wait();
         delete thread;
     }
@@ -674,14 +674,14 @@ void PriceGuideCache::setUpdateInterval(int interval)
 
 void PriceGuideCache::clearCache()
 {
-    int lastLeftOver = 0;
+    qsizetype lastLeftOver = 0;
     QElapsedTimer timer;
     QElapsedTimer absoluteTimer;
     absoluteTimer.start();
 
     // the loader/saver threads might hold references, so we need to wait for their queues to drain
     while (true) {
-        int leftOver = d->m_cache.clearRecursive();
+        qsizetype leftOver = d->m_cache.clear();
 
         if (!leftOver) {
             break;
@@ -700,7 +700,7 @@ void PriceGuideCache::clearCache()
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents, 500);
     }
 
-    AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
+    AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.size());
 }
 
 QPair<int, int> PriceGuideCache::cacheStats() const
@@ -725,13 +725,14 @@ PriceGuide *PriceGuideCache::priceGuide(const Item *item, const Color *color, Va
     bool needToLoad = !pg || (!pg->isValid() && (pg->updateStatus() == UpdateStatus::UpdateFailed));
 
     if (!pg) {
-        pg = new PriceGuide(item, color, vatType);
-        if (!d->m_cache.insert(key, pg)) {
-            qCWarning(LogCache, "Can not add price guide to cache (cache max/cur: %d/%d, cost: %d)",
-                      int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), 1);
+        auto newPg = std::make_unique<PriceGuide>(PriceGuide::Private { }, item, color, vatType);
+        pg = d->m_cache.insert(key, std::move(newPg));
+        if (!pg) {
+            qCWarning(LogCache, "Can not add price guide to cache (cache max/cur: %d/%d, item id: %s)",
+                      int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), item->id().constData());
             return nullptr;
         }
-        AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.count());
+        AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.size());
     }
 
     if (needToLoad) {
@@ -910,7 +911,7 @@ void PriceGuideCachePrivate::loadThread(QString dbName, int index)
             m_loadTrigger.wait(&m_loadMutex);
 
         if (m_stop) {
-            for (auto [pg, type] : m_loadQueue)
+            for (auto [pg, type] : std::as_const(m_loadQueue))
                 pg->release();
             continue;
         }
@@ -936,12 +937,12 @@ void PriceGuideCachePrivate::loadThread(QString dbName, int index)
                     lastUpdated = loadQuery.isNull(0) ? QDateTime()
                                                       : QDateTime::fromMSecsSinceEpoch(loadQuery.value(0).toLongLong());
                     data = loadQuery.value(1).toByteArray();
-                    loaded = data.isEmpty() || (data.size() == sizeof(PriceGuide::Data));
+                    loaded = data.isEmpty() || (data.size() == qsizetype(sizeof(PriceGuide::Data)));
                 }
                 loadQuery.finish();
             }
             pg->addRef(); // the release will happen on the main thread (see the invokeMethod below)
-            QMetaObject::invokeMethod(m_core, [=, this, pg=pg]() { // clang bug: P1091R3
+            QMetaObject::invokeMethod(m_core, [this, loaded, lastUpdated, data, highPriority, pg=pg]() { // clang bug: P1091R3
                 if (loaded) {
                     pg->setLastUpdated(lastUpdated);
                     std::memcpy(&pg->m_data, data, sizeof(PriceGuide::Data));

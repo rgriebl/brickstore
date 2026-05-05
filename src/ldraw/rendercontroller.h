@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -98,7 +98,7 @@ private:
                                   const BrickLink::Color *baseColor, const QMatrix4x4 &matrix,
                                   bool inverted, QHash<const BrickLink::Color *, QByteArray> &surfaceBuffers,
                                   QByteArray &lineBuffer);
-    static QQuick3DTextureData *generateMaterialTextureData(const BrickLink::Color *color);
+    static std::unique_ptr<QQuick3DTextureData> generateMaterialTextureData(const BrickLink::Color *color);
     static std::vector<std::pair<float, float> > uvMapToNearestPlane(const QVector3D &normal,
                                                                      std::initializer_list<const QVector3D> vectors);
 
@@ -116,6 +116,8 @@ private:
     float m_radius = 0;
     bool m_tumblingAnimationActive = false;
     QColor m_clearColor;
+
+    Q_DISABLE_COPY_MOVE(RenderController)
 };
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)

@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -59,7 +59,7 @@ signals:
 
 private:
     Currency();
-    Currency(const Currency &);
+    Q_DISABLE_COPY_MOVE(Currency)
     static Currency *s_inst;
 
     QNetworkAccessManager *m_nam;

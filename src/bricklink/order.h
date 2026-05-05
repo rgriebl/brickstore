@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -62,6 +62,7 @@ public:
     Order();
     Order(const QString &id, OrderType type);
     ~Order() override;
+    Q_DISABLE_COPY_MOVE(Order)
 
     LotList loadLots() const; // ownership is transferred to the caller
 
@@ -202,6 +203,7 @@ public:
     };
 
     ~Orders() override;
+    Q_DISABLE_COPY_MOVE(Orders)
 
     QDateTime lastUpdated() const;
     BrickLink::UpdateStatus updateStatus() const;
@@ -236,7 +238,7 @@ signals:
 
 private:
     Orders(Core *core);
-    void reloadOrdersFromDatabase(const QString &userId);
+    void reloadOrdersFromDatabase();
     void importOldCache(const QString &userId);
     static QHash<Order *, QString> parseOrdersXML(const QByteArray &data_);
     void startUpdateInternal(const QDate &fromDate, const QDate &toDate, const QString &orderId);

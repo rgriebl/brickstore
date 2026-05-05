@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -32,6 +32,8 @@ private:
     QVector<int>       m_filteredPositions;
     LotList            m_lots;
     Type               m_type;
+
+    Q_DISABLE_COPY_MOVE(AddRemoveCmd)
 };
 
 class ChangeCmd : public QUndoCommand
@@ -54,6 +56,8 @@ private:
     std::vector<std::pair<Lot *, Lot>> m_changes;
 
     static QTimer *s_eventLoopCounter;
+
+    Q_DISABLE_COPY_MOVE(ChangeCmd)
 };
 
 class CurrencyCmd : public QUndoCommand
@@ -72,6 +76,8 @@ private:
     QString    m_ccode;
     double     m_crate;
     double *   m_prices; // m_items.count() * 5 (price, origPrice, tierPrice * 3)
+
+    Q_DISABLE_COPY_MOVE(CurrencyCmd)
 };
 
 class ResetDifferenceModeCmd : public QUndoCommand
@@ -86,6 +92,8 @@ public:
 private:
     DocumentModel *m_model;
     QHash<const Lot *, Lot> m_differenceBase;
+
+    Q_DISABLE_COPY_MOVE(ResetDifferenceModeCmd)
 };
 
 
@@ -106,6 +114,8 @@ private:
     bool m_isSorted = false;
 
     QVector<Lot *> m_unsorted;
+
+    Q_DISABLE_COPY_MOVE(SortCmd)
 };
 
 class FilterCmd : public QUndoCommand
@@ -125,4 +135,6 @@ private:
     bool m_isFiltered = false;
 
     QVector<Lot *> m_unfiltered;
+
+    Q_DISABLE_COPY_MOVE(FilterCmd)
 };

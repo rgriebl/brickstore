@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <QtCore/QRegularExpression>
@@ -91,7 +91,7 @@ QCoro::Task<> Announcements::check()
         bool conditionMatch = true;
 
         if (!allConds.isEmpty()) {
-            QStringList condList = allConds.split(u","_qs);
+            const QStringList condList = allConds.split(u","_qs);
             for (const QString &cond : condList) {
                 QString key = cond.section(u":"_qs, 0, 0).trimmed();
                 QString val = cond.section(u":"_qs, 1, -1).trimmed();

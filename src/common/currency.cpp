@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <QtCore/QLocale>
@@ -268,8 +268,9 @@ QCoro::Task<> Currency::updateRates(bool silent)
             newRates.insert(p.rateProvider, rates);
         } catch (const Exception &e) {
             if (OnlineState::inst()->isOnline() && !m_silent) {
-                emit updateRatesFailed(tr("Failed to download exchange rates. <a href='%2'>%1</a>:")
-                                           .arg(p.name, p.homepageUrl) + u"<br>" + e.errorString());
+                emit updateRatesFailed(tr("Failed to download exchange rates.")
+                                       + u"<a href='%2'>%1</a>:"_qs.arg(p.name, p.homepageUrl)
+                                       + u"<br>" + e.errorString());
             }
         }
     }

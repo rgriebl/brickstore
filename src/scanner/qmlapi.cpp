@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "core.h"
@@ -53,16 +53,13 @@ QVariantList QmlCapture::supportedItemTypeFilters() const
 
 BrickLink::QmlItemType QmlCapture::currentItemTypeFilter() const
 {
-    return BrickLink::QmlItemType(d->currentItemTypeFilter());
+    return { d->currentItemTypeFilter() };
 }
 
 void QmlCapture::setCurrentItemTypeFilter(const BrickLink::QmlItemType &newCurrentItemTypeFilter)
 {
     d->setCurrentItemTypeFilter(newCurrentItemTypeFilter.wrappedObject());
 }
-
-QmlCore::QmlCore()
-{ }
 
 QVariantMap QmlCore::backendFromId(const QByteArray &id) const
 {

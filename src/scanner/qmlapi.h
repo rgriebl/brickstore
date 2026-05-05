@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -25,7 +25,7 @@ class QmlCore : public QObject
     Q_PROPERTY(QByteArray defaultBackendId READ defaultBackendId WRITE setDefaultBackendId NOTIFY defaultBackendIdChanged)
 
 public:
-    QmlCore();
+    QmlCore() = default;
 
     Q_INVOKABLE QVariantMap backendFromId(const QByteArray &id) const;
 

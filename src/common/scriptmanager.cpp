@@ -1,7 +1,6 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <QAssociativeIterable>
 #include <QDir>
 #include <QFileInfo>
 #include <QJSValue>
@@ -13,9 +12,14 @@
 #include <QQmlEngine>
 #include <QQmlExpression>
 #include <QQmlInfo>
-#include <QSequentialIterable>
 #include <QStack>
 #include <QStandardPaths>
+#if QT_VERSION < QT_VERSION_CHECK(6, 11, 0)
+#  include <QAssociativeIterable>
+#  include <QSequentialIterable>
+#else
+#  include <qmetaassociation.h>
+#endif
 
 #include "utility/exception.h"
 
@@ -116,7 +120,7 @@ static QString stringifyQObject(const QObject *o, const QMetaObject *mo, int lev
         if (smo->metaType().flags().testFlag(QMetaType::IsGadget))
             break;
     }
-    int propCount = 0;
+    qsizetype propCount = 0;
     for (const auto *smo : superMos)
         propCount += stringifyProperties(smo);
 
@@ -169,7 +173,11 @@ static QString stringify(const QVariant &value, int level, bool indentFirstLine,
         str.append(indent);
 
     if (value.canConvert<QVariantHash>()) {
-        QAssociativeIterable hash = value.value<QAssociativeIterable>();
+#if QT_VERSION < QT_VERSION_CHECK(6, 11, 0)
+        auto hash = value.value<QAssociativeIterable>();
+#else
+        auto hash = value.value<QMetaAssociation::Iterable>();
+#endif
         if (hash.size() == 0) {
             str.append(u"{}");
         } else if (level > 0) {
@@ -186,7 +194,11 @@ static QString stringify(const QVariant &value, int level, bool indentFirstLine,
             str = str + indent + u'}';
         }
     } else if (value.canConvert<QVariantList>() && (value.typeId() != QMetaType::QString)) {
-        QSequentialIterable list = value.value<QSequentialIterable>();
+#if QT_VERSION < QT_VERSION_CHECK(6, 11, 0)
+        auto list = value.value<QSequentialIterable>();
+#else
+        auto list = value.value<QMetaSequence::Iterable>();
+#endif
         if (list.size() == 0) {
             str.append(u"[]");
         } else if (level > 0) {
@@ -296,20 +308,6 @@ bool ScriptManager::reload()
     QString dataloc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (!dataloc.isEmpty())
         spath.prepend(dataloc + u"/extensions"_qs);
-
-    // 2023.11.2 added an organization-name which messed up the standard paths
-    //TODO: remove this code block in 2024.11.x
-    //      instead add a rm -rf <CacheDir>/BrickStore
-    if (!dataloc.isEmpty()) {
-        QDir d(dataloc);
-        if (d.cd(u"BrickStore"_qs)
-            && (d.entryList(QDir::AllEntries | QDir::NoDotAndDotDot) == QStringList { u"extensions"_qs })
-            && d.cd(u"extensions"_qs)
-            && d.isEmpty()
-            && d.cdUp()) {
-            d.removeRecursively();
-        }
-    }
 
     for (const QString &path : std::as_const(spath)) {
         QDir dir(path);

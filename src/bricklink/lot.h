@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -20,7 +20,7 @@ class Lot
 public:
     explicit Lot(const Item *item = nullptr, const Color *color = nullptr);
     Lot(const Lot &copy);
-    ~Lot();
+    ~Lot() = default;
 
     Lot &operator=(const Lot &copy);
     bool operator==(const Lot &cmp) const;
@@ -52,7 +52,7 @@ public:
                                                                            : QString()); }
     char itemTypeId() const            { return itemType() ? itemType()->id()
                                                            : (m_incomplete ? m_incomplete->m_itemtype_id
-                                                                           : 0); }
+                                                                           : char(0)); }
     QString itemTypeName() const       { return itemType() ? itemType()->name()
                                                            : (m_incomplete ? m_incomplete->m_itemtype_name
                                                                            : QString()); }
@@ -144,8 +144,8 @@ public:
     static Lot *restore(QDataStream &ds, uint startChangelogAt);
 
 private:
-    const Item * m_item;
-    const Color *m_color;
+    const Item * m_item = nullptr;
+    const Color *m_color = nullptr;
 
     std::unique_ptr<Incomplete> m_incomplete;
 

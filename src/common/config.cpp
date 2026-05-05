@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <cstdlib>
@@ -33,18 +33,18 @@ static inline qint32 mkver(int a, int b, int c)
 } // namespace
 
 #if defined(Q_OS_MACOS)
-static const char *organization = "brickstore.org"; // this is wrong, but it can't be fixed easily
+static const char * const organization = "brickstore.org"; // this is wrong, but it can't be fixed easily
 #elif defined(Q_OS_IOS)
-static const char *organization = "brickforge.de";
+static const char * const organization = "brickforge.de";
 #else
-static const char *organization = "BrickStore";
+static const char * const organization = "BrickStore";
 #endif
 
 #if defined(BS_MOBILE) && !(defined(Q_OS_IOS) || defined(Q_OS_ANDROID))
 // use different mobile settings on the desktop, when running mobile builds
-static const char *application = "BrickStoreMobile";
+static const char * const application = "BrickStoreMobile";
 #else
-static const char *application = "BrickStore";
+static const char * const application = "BrickStore";
 #endif
 
 Config::Config()
@@ -58,34 +58,18 @@ Config::Config()
 
     m_measurement = (value(u"General/MeasurementSystem"_qs).toString() == u"imperial")
             ? QLocale::ImperialSystem : QLocale::MetricSystem;
-    m_translations_parsed = false;
 
-    m_bricklinkUsername = value(u"BrickLink/Login/Username"_qs).toString();
     try {
-        auto utf8pw = CredentialsManager::load(u"BrickStore"_qs, u"BrickLink-Password"_qs);
-        m_bricklinkPassword = QString::fromUtf8(utf8pw);
+        auto utf8at = CredentialsManager::load(u"BrickStore"_qs, u"BrickLink-Access-Token"_qs);
+        m_brickLinkAccessToken = QString::fromUtf8(utf8at);
     } catch (const Exception &e) {
-        qWarning() << "Failed to load BrickLink password:" << e.errorString();
+        qWarning() << "Failed to load BrickLink access token:" << e.errorString();
     }
 
     const auto passwordKey = u"BrickLink/Login/Password"_qs;
-    // always delete a legacy password, but convert it first, if we don't have an encrypted one
-    if (contains(passwordKey)) {
-        bool doRemove = true;
-
-        if (m_bricklinkPassword.isNull()) {
-            m_bricklinkPassword = legacyScramble(value(passwordKey).toString());
-            try {
-                CredentialsManager::save(u"BrickStore"_qs, u"BrickLink-Password"_qs,
-                                      m_bricklinkPassword.toUtf8());
-            } catch (const Exception &e) {
-                qWarning() << "Failed to save BrickLink password:" << e.errorString();
-                doRemove = false;
-            }
-        }
-        if (doRemove)
-            remove(passwordKey);
-    }
+    // always delete a legacy password
+    if (contains(passwordKey))
+        remove(passwordKey);
 
     qRegisterMetaType<QSet<uint>>();
 }
@@ -102,16 +86,6 @@ Config *Config::inst()
     if (!s_inst)
         s_inst = new Config();
     return s_inst;
-}
-
-QString Config::legacyScramble(const QString &str)
-{
-    QString result;
-    const QChar *unicode = str.unicode();
-    for (int i = 0; i < str.length(); i++)
-        result += (unicode [i].unicode() < 0x20) ? unicode [i] :
-                  QChar(0x1001F - unicode [i].unicode());
-    return result;
 }
 
 void Config::upgrade(int vmajor, int vminor, int vpatch)
@@ -581,54 +555,22 @@ void Config::setPinnedCategoryIds(const QSet<uint> &categories)
     }
 }
 
-QString Config::brickLinkUsername() const
+QString Config::brickLinkAccessToken() const
 {
-    return m_bricklinkUsername;
+    return m_brickLinkAccessToken;
 }
 
-QString Config::brickLinkPassword() const
+void Config::setBrickLinkAccessToken(const QString &accessToken)
 {
-    return m_bricklinkPassword;
-}
-
-void Config::setBrickLinkUsername(const QString &user)
-{
-    if (m_bricklinkUsername != user) {
-        m_bricklinkUsername = user;
-        setValue(u"BrickLink/Login/Username"_qs, user);
-        emit brickLinkCredentialsChanged();
-    }
-}
-
-void Config::setBrickLinkPassword(const QString &pass, bool doNotSave)
-{
-    if (m_bricklinkPassword != pass) {
-        m_bricklinkPassword = pass;
-
+    if (m_brickLinkAccessToken != accessToken) {
+        m_brickLinkAccessToken = accessToken;
         try {
-            CredentialsManager::save(u"BrickStore"_qs, u"BrickLink-Password"_qs,
-                                  doNotSave ? QByteArray { } : pass.toUtf8());
+            CredentialsManager::save(u"BrickStore"_qs, u"BrickLink-Access-Token"_qs,
+                                     accessToken.toUtf8());
         } catch (const Exception &e) {
-            qWarning() << "Failed to save BrickLink password:" << e.errorString();
-            setValue(u"BrickLink/Login/Password"_qs, doNotSave ? QString { } : legacyScramble(pass));
+            qWarning() << "Failed to save BrickLink access token:" << e.errorString();
         }
-        emit brickLinkCredentialsChanged();
-    }
-}
-
-bool Config::onlineStatus() const
-{
-    return value(u"Internet/Online"_qs, true).toBool();
-}
-
-void Config::setOnlineStatus(bool b)
-{
-    bool ob = onlineStatus();
-
-    if (b != ob) {
-        setValue(u"Internet/Online"_qs, b);
-
-        emit onlineStatusChanged(b);
+        emit brickLinkAccessTokenChanged();
     }
 }
 

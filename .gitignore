@@ -31,3 +31,9 @@ ui_*.h
 translations/*.qm
 CMakeLists.txt.user
 doc/html
+build/
+.cache/
+.qmlls.ini
+builds/
+CMakeUserPresets.json
+compile_commands.json

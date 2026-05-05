@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -26,8 +26,7 @@ public:
 
 
     void initialize(bool skipDownload);
-    QCoro::Task<> login(const QString &username, const QString &password,
-                        const QString &rebrickableApiKey);
+    QCoro::Task<> login(const QString &accessToken, const QString &rebrickableApiKey);
     QCoro::Task<> importCatalog();
     QCoro::Task<> importInventories();
     void finalize();

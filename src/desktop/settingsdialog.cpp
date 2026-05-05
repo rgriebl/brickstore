@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <array>
@@ -18,6 +18,7 @@
 #include <QMessageBox>
 #include <QMenuBar>
 #include <QToolTip>
+#include <QClipboard>
 
 #if defined(MODELTEST)
 #  include <QAbstractItemModelTester>
@@ -54,7 +55,7 @@ public:
     {
         MODELTEST_ATTACH(this)
 
-        auto all = ActionManager::inst()->allActions();
+        const auto all = ActionManager::inst()->allActions();
         for (const auto &aa : all) {
             if (auto *qa = aa->qAction()) {
                 if (options.testFlag(RemoveGoHome) && (aa->name() == QByteArray("go_home")))
@@ -747,16 +748,13 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     w_modifications_label->setAttribute(Qt::WA_MacSmallSize);
 
     auto *pgCache = BrickLink::core()->priceGuideCache();
-    auto supportedVatTypes = pgCache->supportedVatTypes();
+    const auto supportedVatTypes = pgCache->supportedVatTypes();
     for (auto vatType : supportedVatTypes) {
         auto text = pgCache->descriptionForVatType(vatType);
         auto icon = pgCache->iconForVatType(vatType);
         w_bl_pg_vat->addItem(icon, text, QVariant::fromValue(vatType));
     }
     w_bl_pg_retriever->setText(pgCache->retrieverName());
-
-    w_bl_username->setMinimumWidth(fontMetrics().averageCharWidth() * 30);
-    w_bl_password->setMinimumWidth(fontMetrics().averageCharWidth() * 30);
 
     w_docdir->insertItem(0, style()->standardIcon(QStyle::SP_DirIcon), QString());
     w_docdir->insertSeparator(1);
@@ -793,41 +791,31 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
     connect(Currency::inst(), &Currency::ratesChanged,
             this, &SettingsDialog::currenciesUpdated);
 
-    connect(w_bl_username, &QLineEdit::textChanged,
+    auto *tokenPasteAction = w_bl_accesstoken->addAction(QIcon::fromTheme(u"edit-paste"_qs), QLineEdit::TrailingPosition);
+    connect(tokenPasteAction, &QAction::triggered,
+            w_bl_accesstoken, [this]() {
+        w_bl_accesstoken->setText(QGuiApplication::clipboard()->text());
+    });
+    auto *tokenClearAction = w_bl_accesstoken->addAction(QIcon::fromTheme(u"edit-clear"_qs), QLineEdit::TrailingPosition);
+    connect(tokenClearAction, &QAction::triggered,
+            w_bl_accesstoken, &QLineEdit::clear);
+    connect(w_bl_accesstoken, &QLineEdit::textChanged,
             this, [this](const QString &s) {
-        bool isWrong = s.contains(u'@');
-        bool wasWrong = w_bl_username->property("showInputError").toBool();
+        // base64url encoding, 171 characters:
+        static const QRegularExpression base64url171(uR"(^[A-Za-z0-9_-]{171}$)"_qs);
+        bool isWrong = !s.isEmpty() && !base64url171.match(s).hasMatch();
+        bool wasWrong = w_bl_accesstoken->property("showInputError").toBool();
 
         if (isWrong != wasWrong) {
-            w_bl_username->setProperty("showInputError", isWrong);
+            w_bl_accesstoken->setProperty("showInputError", isWrong);
 
             if (isWrong) {
-                QString msg = tr("Your username is required here - not your email address.");
-                w_bl_username->setToolTip(msg);
-                QToolTip::showText(w_bl_username->mapToGlobal(w_bl_username->rect().bottomLeft()),
-                                   msg, w_bl_username, { }, 2000);
+                QString msg = tr("Your access token is malformed.");
+                w_bl_accesstoken->setToolTip(msg);
+                QToolTip::showText(w_bl_accesstoken->mapToGlobal(QPoint()),
+                                   msg, w_bl_accesstoken, { }, 5000);
             } else {
-                w_bl_username->setToolTip({ });
-                QToolTip::hideText();
-            }
-        }
-    });
-    connect(w_bl_password, &QLineEdit::textChanged,
-            this, [this](const QString &s) {
-        bool isTooLong = BrickLink::core()->isApiQuirkActive(BrickLink::ApiQuirk::PasswordLimitedTo15Characters)
-                         && (s.length() > 15);
-        bool wasTooLong = w_bl_password->property("showInputError").toBool();
-
-        if (isTooLong != wasTooLong) {
-            w_bl_password->setProperty("showInputError", isTooLong);
-
-            if (isTooLong) {
-                QString msg = tr("BrickLink's maximum password length is 15.");
-                w_bl_password->setToolTip(msg);
-                QToolTip::showText(w_bl_password->mapToGlobal(w_bl_password->rect().bottomLeft()),
-                                   msg, w_bl_password, { }, 2000);
-            } else {
-                w_bl_password->setToolTip({ });
+                w_bl_accesstoken->setToolTip({ });
                 QToolTip::hideText();
             }
         }
@@ -1065,7 +1053,7 @@ void SettingsDialog::load()
 {
     // --[ GENERAL ]---------------------------------------------------
 
-    QVector<Config::Translation> translations = Config::inst()->translations();
+    const QVector<Config::Translation> translations = Config::inst()->translations();
 
     if (translations.isEmpty()) {
         w_language->setEnabled(false);
@@ -1121,8 +1109,7 @@ void SettingsDialog::load()
 
     // --[ BRICKLINK ]-------------------------------------------------
 
-    w_bl_username->setText(Config::inst()->brickLinkUsername());
-    w_bl_password->setText(Config::inst()->brickLinkPassword());
+    w_bl_accesstoken->setText(Config::inst()->brickLinkAccessToken());
 
     auto vatType = BrickLink::core()->priceGuideCache()->currentVatType();
     w_bl_pg_vat->setCurrentIndex(w_bl_pg_vat->findData(QVariant::fromValue(vatType)));
@@ -1199,8 +1186,7 @@ void SettingsDialog::save()
 
     // --[ BRICKLINK ]-----------------------------------------------------------------
 
-    Config::inst()->setBrickLinkUsername(w_bl_username->text());
-    Config::inst()->setBrickLinkPassword(w_bl_password->text());
+    Config::inst()->setBrickLinkAccessToken(w_bl_accesstoken->text());
 
     auto vatType = w_bl_pg_vat->currentData().value<BrickLink::VatType>();
     BrickLink::core()->priceGuideCache()->setCurrentVatType(vatType);

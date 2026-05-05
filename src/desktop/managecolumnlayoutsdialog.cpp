@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 
@@ -37,7 +37,7 @@ ManageColumnLayoutsDialog::ManageColumnLayoutsDialog(QWidget *parent)
     lay->addWidget(m_list);
     lay->addWidget(m_buttons);
 
-    auto ids = Config::inst()->columnLayoutIds();
+    const auto ids = Config::inst()->columnLayoutIds();
 
     QMap<int, QString> pos;
     for (const auto &id : ids)

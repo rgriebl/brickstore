@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <QtCore/QBuffer>
@@ -227,7 +227,7 @@ bool ColorModel::lessThan(const void *p1, const void *p2, int /*column*/, Qt::So
         if (asc) {
             return (c1->name().localeAwareCompare(c2->name()) < 0);
         } else {
-            int lh, rh, ls, rs, lv, rv, d;
+            int lh = 0, rh = 0, ls = 0, rs = 0, lv = 0, rv = 0, d = 0;
 
             c1->color().getHsv(&lh, &ls, &lv);
             c2->color().getHsv(&rh, &rs, &rv);
@@ -960,7 +960,7 @@ InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<SimpleLo
                 indexes << index(row, InventoryModel::PictureColumn); // clazy:exclude=reserve-candidates
         }
 
-        for (const auto &idx : indexes)
+        for (const auto &idx : std::as_const(indexes))
             emit dataChanged(idx, idx);
     });
 }
@@ -1367,9 +1367,6 @@ InternalInventoryModel::Entry::Entry(const Item *item, const Color *color, int q
     : m_item(item)
     , m_color(color)
     , m_quantity(quantity)
-{ }
-
-InternalInventoryModel::Entry::~Entry()
 { }
 
 InternalInventoryModel::Entry::Entry(const QString &sectionTitle)

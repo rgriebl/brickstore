@@ -1,4 +1,4 @@
-# Copyright (C) 2004-2025 Robert Griebl
+# Copyright (C) 2004-2026 Robert Griebl
 # SPDX-License-Identifier: GPL-3.0-only
 
 configure_file(version.h.in generated/version.h @ONLY)
@@ -24,12 +24,9 @@ target_sources(${PROJECT_NAME} PUBLIC
     utility/persistentcookiejar.cpp
     utility/persistentcookiejar.h
     utility/pooledarray.h
-    utility/q3cache.h
-    utility/q5hash.cpp
-    utility/q5hash.h
-    utility/q5hashfunctions.h
     utility/qparallelsort.h
     utility/ref.h
+    utility/refcache.h
     utility/stopwatch.h
     utility/transfer.cpp
     utility/transfer.h

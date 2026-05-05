@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -55,12 +55,8 @@ public:
     static QUrl urlForWantedList(uint wantedListId);
 
     QString dataPath() const;
-    QFile *dataReadFile(QStringView fileName, const Item *item,
-                        const Color *color = nullptr) const;
-    QSaveFile *dataSaveFile(QStringView fileName, const Item *item,
-                            const Color *color = nullptr) const;
-    void setCredentials(const QPair<QString, QString> &credentials);
-    QString userId() const;
+    void setAccessToken(const QString &accessToken);
+    bool hasAccessToken() const;
 
     bool isAuthenticated() const;
     void retrieveAuthenticated(TransferJob *job);
@@ -138,9 +134,7 @@ signals:
     void authenticatedTransferFinished(TransferJob *job);
 
     void authenticationChanged(bool auth);
-    void authenticationFinished(const QString &userName, const QString &error);
-
-    void userIdChanged(const QString &userId);
+    void authenticationFinished(const QString &accessToken, const QString &error);
 
 private:
     Core(const QString &dataDir, const QString &updateUrl, quint64 physicalMem);
@@ -153,9 +147,6 @@ private:
     friend Core *create(const QString &, const QString &, quint64);
 
 private:
-    QString dataFileName(QStringView fileName, const Item *item, const Color *color) const;
-
-private:
     QString  m_datadir;
 
     QIcon                           m_noImageIcon;
@@ -164,11 +155,11 @@ private:
     Transfer *                 m_transfer = nullptr;
     Transfer *                 m_authenticatedTransfer = nullptr;
     bool                       m_authenticated = false;
-    QTimer *                   m_authenticatedRefresh = nullptr;
-    QPair<QString, QString>    m_credentials;
+    QString                    m_accessToken;
+    QByteArray                 m_sessionToken;
     TransferJob *              m_loginJob = nullptr;
-    QList<TransferJob *>       m_refreshJobs;
     QVector<TransferJob *>     m_jobsWaitingForAuthentication;
+    QHash<TransferJob *, bool> m_authenticatedJobFollowRedirect;
     int                        m_transferStatId = -1;
 
     std::unique_ptr<Database> m_database;
@@ -181,6 +172,7 @@ private:
     std::unique_ptr<PictureCache> m_pictureCache;
 #endif
 
+private:
     friend class QmlBrickLink;
 };
 

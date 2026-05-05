@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -62,15 +62,15 @@ private:
     DocumentStatistics(const DocumentModel *model, const LotList &list, bool ignoreExcluded,
                        bool ignorePriceAndQuantityErrors = false);
 
-    int m_lots;
-    int m_items;
-    double m_val;
-    double m_minval;
-    double m_cost;
-    double m_weight;
-    int m_errors;
-    int m_differences;
-    int m_incomplete;
+    int m_lots { };
+    int m_items { };
+    double m_val { };
+    double m_minval { };
+    double m_cost { };
+    double m_weight { };
+    int m_errors { };
+    int m_differences { };
+    int m_incomplete { };
     QString m_ccode;
 
     friend class DocumentModel;
@@ -316,7 +316,6 @@ signals:
 
 protected:
     bool event(QEvent *e) override;
-    virtual bool filterAcceptsLot(const Lot *lot) const;
 
 private:
     DocumentModel(int dummy);
@@ -324,6 +323,7 @@ private:
     void setFakeIndexes(const QVector<int> &fakeIndexes);
     void rebuildLotIndex();
     void rebuildFilteredLotIndex();
+    bool filterAcceptsLot(const Lot *lot) const;
 
     void setLotsDirect(const LotList &lots);
     void insertLotsDirect(const LotList &lots, QVector<int> &positions, QVector<int> &sortedPositions, QVector<int> &filteredPositions);
@@ -409,6 +409,8 @@ private:
     QPair<QPoint, QPoint> m_nextDataChangedEmit;
 
     static std::function<ConsolidateFunction> s_consolidateFunction;
+
+    Q_DISABLE_COPY_MOVE(DocumentModel)
 };
 
 class DocumentLotsMimeData : public QMimeData

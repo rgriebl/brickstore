@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -15,7 +15,6 @@ class CameraPreviewWidget : public QWidget
     Q_OBJECT
 public:
     CameraPreviewWidget(QQmlEngine *engine, QWidget *parent = nullptr);
-    ~CameraPreviewWidget() override;
 
     bool isActive() const;
     void setActive(bool newActive);

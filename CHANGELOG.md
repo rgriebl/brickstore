@@ -3,6 +3,46 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2026.3.2] - 2026-03-01
+
+Fixed a crash when loading more than 5000 price-guides.
+
+
+## [2026.3.1] - 2026-03-01
+
+- Finally found and fixed the bug that made the order updates hang for some people.
+- Fixed some glitches in the add-item dialog's history browsing code.
+- Added a quick way to update your token when interactions with BrickLink's servers fail.
+- Linux: added a workaround for a glitch in libsecret (responsible for securely storing the access token). You probably need to reset your token in the Settings dialog once after the update.
+
+**macOS users:** if you are still running macOS 11 or 12 you have to manually re-install BrickStore with the *macOS-10-Legacy* version (see https://endoflife.date/macos).
+
+
+## [2025.11.1] - 2025-11-03
+
+A few small fixes:
+- The macOS legacy build should now work again.
+- The access token is shortened in error dialogs to prevent people from accidentally leaking their tokens via screenshots.
+- Adapted yet again to changes in access token handling on BrickLink's side.
+
+
+## [2025.9.2] - 2025-09-21
+
+This is a quick-fix for the non starting macOS apps.
+
+
+## [2025.9.1] - 2025-09-20
+
+Adapted to the Bricklink account changes: instead of using your BrickLink username and password, you
+now have to generate an **access-token**. The *BrickLink* page in the settings dialog has a direct
+link to a special BrickLink web page where you can generate this token.
+
+Please note that this token is only valid for 30 days at the moment. I do not control this page,
+so please contact BrickLink's support if you run into problems.
+
+**NOTICE:** The order download as well as the database-update process are both currently broken, as
+the BrickLink servers are sending BrickStore into an endless loop of repeated login requests.
+
 
 ## [2025.1.1] - 2025-01-09
 
@@ -731,7 +771,12 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2025.1.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2026.3.2...HEAD
+[2026.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2026.3.2
+[2026.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2026.3.1
+[2025.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.11.1
+[2025.9.2]: https://github.com/rgriebl/brickstore/releases/tag/v2025.9.2
+[2025.9.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.9.1
 [2025.1.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.1.1
 [2024.12.3]: https://github.com/rgriebl/brickstore/releases/tag/v2024.12.3
 [2024.12.2]: https://github.com/rgriebl/brickstore/releases/tag/v2024.12.2

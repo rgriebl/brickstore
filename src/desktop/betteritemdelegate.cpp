@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <QPainter>
@@ -14,10 +14,8 @@ BetterItemDelegate::BetterItemDelegate(Options options, QAbstractItemView *paren
     : QStyledItemDelegate(parent)
     , m_options(options)
 {
-    if (m_options.testFlag(Pinnable)) {
-        Q_ASSERT(parent);
+    if (m_options.testFlag(Pinnable) && parent)
         parent->setProperty("pinnableItems", true);
-    }
 }
 
 void BetterItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,

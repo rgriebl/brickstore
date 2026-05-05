@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -122,7 +122,7 @@ protected:
 
     QPointer<Announcements> m_announcements;
 
-    UndoGroup *m_undoGroup;
+    UndoGroup *m_undoGroup = nullptr;
 
     std::unique_ptr<QMimeData> m_clipboardMimeData;
 
@@ -133,4 +133,6 @@ protected:
     static std::unique_ptr<SentryInterface> s_sentryInterface;
 
     static Application *s_inst;
+
+    Q_DISABLE_COPY_MOVE(Application)
 };

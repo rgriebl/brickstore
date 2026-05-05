@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <memory>
@@ -233,7 +233,9 @@ Document::Document(DocumentModel *model, const QByteArray &columnsState, bool re
         { "edit_copy", [this](bool) { copy(); } },
         { "edit_duplicate", [this](bool) { duplicate(); } },
         { "edit_paste", [this](bool) -> QCoro::Task<> {
-              auto [lots, currencyCode] = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
+              auto gcc15Bug = DocumentLotsMimeData::lots(Application::inst()->mimeClipboardGet());
+              auto lots = std::get<0>(gcc15Bug);
+              auto currencyCode = std::get<1>(gcc15Bug);
               QModelIndex oldCurrentIdx;
 
               if (!lots.empty()) {
@@ -714,10 +716,10 @@ void Document::setColumnLayoutDirect(QVector<ColumnData> &columnData)
 
     // we need to move the columns into their (visual) place from left to right
     for (int vi = 0; vi < DocumentModel::FieldCount; ++vi) {
-        int li;
         // make sure to only handle columns that we know about
         int liMax = std::min(int(columnData.count()), int(DocumentModel::FieldCount));
-        for (li = 0; li < liMax; ++li) {
+        int li = 0;
+        for (; li < liMax; ++li) {
             if (columnData.value(li).m_visualIndex == vi)
                 break;
         }
@@ -1636,7 +1638,7 @@ QCoro::Task<Document *> Document::load(QString fileName)
                            + DocumentIO::nameFiltersForBrickLinkXML()
                            + DocumentIO::nameFiltersForLDraw();
         QStringList allExtensions;
-        for (const auto &filter : nameFilters)
+        for (const auto &filter : std::as_const(nameFilters))
             allExtensions += filter.second;
         allExtensions.removeDuplicates();
         nameFilters.prepend({ tr("All Supported Files"), allExtensions });
@@ -2271,7 +2273,7 @@ QByteArray Document::saveColumnsState() const
        << qint32(m_columnData.size())
        << qint32(sortColumns.size());
 
-    for (const auto &[section, order] : sortColumns)
+    for (const auto &[section, order] : std::as_const(sortColumns))
        ds << qint32(section) << (order == Qt::AscendingOrder);
 
     for (const auto &cd : m_columnData) {
@@ -2317,8 +2319,8 @@ std::tuple<QVector<ColumnData>, QVector<QPair<int, Qt::SortOrder>>> Document::pa
     QVector<ColumnData> columnData;
 
     for (int i = 0; i < count; ++i) {
-        qint32 size, position;
-        bool isHidden;
+        qint32 size = 0, position = 0;
+        bool isHidden = false;
         ds >> size >> position >> isHidden;
 
         columnData.insert(i, ColumnData { size, position, isHidden });
@@ -2416,8 +2418,8 @@ void Document::cancelBlockingOperation()
 ///////////////////////////////////////////////////////////////////////
 
 
-static const char *autosaveMagic = "||BRICKSTORE AUTOSAVE MAGIC||";
-static const char *autosaveTemplate = "brickstore_%1.autosave";
+static const char * const autosaveMagic = "||BRICKSTORE AUTOSAVE MAGIC||";
+static const char * const autosaveTemplate = "brickstore_%1.autosave";
 
 bool Document::isRestoredFromAutosave() const
 {
@@ -2525,7 +2527,7 @@ int Document::processAutosaves(AutosaveAction action)
         QFile f(temp.filePath(filename));
         if ((action == AutosaveAction::Restore) && f.open(QIODevice::ReadOnly)) {
             QByteArray magic;
-            qint32 version;
+            qint32 version = 0;
             QString savedTitle;
             QString savedFileName;
             QString savedCurrencyCode;

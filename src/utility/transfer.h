@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -23,6 +23,8 @@ class TransferJob
 public:
     ~TransferJob();
 
+    static QString brickLinkClientId();
+
     static TransferJob *get(const QString &url, const QUrlQuery &query = { });
     static TransferJob *post(const QString &url, const QUrlQuery &query = { });
     static TransferJob *post(const QString &url, const QUrlQuery &query, const QString &contentType, const QByteArray &content);
@@ -37,6 +39,7 @@ public:
     QString lastETag() const         { return m_last_etag; }
     bool wasNotModified() const      { return m_was_not_modified; }
     bool isHighPriority() const      { return m_high_priority; }
+    bool followRedirects() const     { return m_follow_redirects; }
 
     bool isInactive() const          { return m_status == Inactive; }
     bool isActive() const            { return m_status == Active; }
@@ -45,13 +48,15 @@ public:
     bool isFailed() const            { return m_status == Failed; }
     bool isAborted() const           { return m_status == Aborted; }
 
-    void setNoRedirects(bool noRedirects) { m_no_redirects = noRedirects; }
+    void setFollowRedirects(bool followRedirects) { m_follow_redirects = followRedirects; }
     void setMaximumRetries(uint count)    { m_retries_left = std::max(31u, count); }
     void setOnlyIfDifferent(const QString &etag) { m_only_if_different = etag; }
     void setOutputDevice(QIODevice *output);
     void setUserData(const QByteArray &tag, const QVariant &v) { m_userTag = tag; m_userData = v; }
+    void setSessionToken(const QByteArray &token)              { m_sessionToken = token; }
     QVariant userData(const QByteArray &tag) const             { return m_userTag == tag ? m_userData : QVariant(); }
     QByteArray userTag() const                                 { return m_userTag; }
+    QByteArray sessionToken() const                            { return m_sessionToken; }
 
     Transfer *transfer() const       { return m_transfer; }
     void abort();
@@ -106,9 +111,10 @@ private:
     bool         m_reset_for_reuse  : 1 = false;
     uint         m_retries_left     : 4 = 0;
     bool         m_was_not_modified : 1 = false;
-    bool         m_no_redirects     : 1 = false;
+    bool         m_follow_redirects : 1 = true;
     bool         m_high_priority    : 1 = false;
     bool         m_auto_delete      : 1 = true;
+    QByteArray   m_sessionToken;
 
     friend class Transfer;
     friend class TransferRetriever;

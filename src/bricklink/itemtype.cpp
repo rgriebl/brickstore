@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 
@@ -28,7 +28,7 @@ QSize ItemType::pictureSize() const
 
 char ItemType::idFromFirstCharInString(const QString &str)
 {
-    return (str.size() == 1) ? str.at(0).toLatin1() : 0;
+    return (str.size() == 1) ? str.at(0).toLatin1() : char(0);
 }
 
 } // namespace BrickLink

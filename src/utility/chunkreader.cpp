@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <array>
@@ -117,7 +117,7 @@ bool ChunkReader::startChunk()
             throw ChunkException(dataStream(), "cannot read a nested chunk outside the parent chunk");
     }
 
-    read_chunk_info ci;
+    read_chunk_info ci { };
     m_stream >> ci.id >> ci.version >> ci.size;
 
     checkStream();
@@ -154,7 +154,7 @@ void ChunkReader::endChunk()
     if (ci.size % 16)
         m_stream.skipRawData(16 - ci.size % 16);
 
-    read_chunk_info ciend;
+    read_chunk_info ciend { };
     m_stream >> ciend.size >> ciend.version >> ciend.id;
 
     checkStream();
@@ -243,7 +243,7 @@ void ChunkWriter::startChunk(quint32 id, quint32 version)
     m_stream << id << version << quint64(0);
     checkStream();
 
-    write_chunk_info ci;
+    write_chunk_info ci { };
     ci.id = id;
     ci.version = version;
     ci.startpos = m_file->pos();

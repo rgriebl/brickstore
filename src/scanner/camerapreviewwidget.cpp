@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <QtCore/QCoreApplication>
@@ -41,10 +41,6 @@ CameraPreviewWidget::CameraPreviewWidget(QQmlEngine *engine, QWidget *parent)
     m_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     layout->addWidget(m_widget, 10);
-}
-
-CameraPreviewWidget::~CameraPreviewWidget()
-{
 }
 
 bool CameraPreviewWidget::isActive() const

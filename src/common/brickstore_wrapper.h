@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -471,6 +471,8 @@ private:
     bool m_initialized = false;
     mutable QPointer<QSettings> m_settings = nullptr;
     QHash<const char *, QVariant> m_changedProperties = {};
+
+    Q_DISABLE_COPY_MOVE(QmlExtraConfig)
 };
 
 class QmlOnlineState

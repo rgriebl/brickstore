@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <QtCore/QBitArray>
@@ -157,8 +157,7 @@ void TextImport::initialize(bool skipDownload)
     }
 }
 
-QCoro::Task<> TextImport::login(const QString &username, const QString &password,
-                                const QString &rebrickableApiKey)
+QCoro::Task<> TextImport::login(const QString &accessToken, const QString &rebrickableApiKey)
 {
     m_rebrickableApiKey = rebrickableApiKey;
 
@@ -167,12 +166,13 @@ QCoro::Task<> TextImport::login(const QString &username, const QString &password
 
     nextStep(u"Logging into BrickLink"_qs);
 
-    core()->setCredentials({ username, password });
+    core()->setAccessToken(accessToken);
     if (!core()->isAuthenticated()) {
         core()->authenticate();
 
-        auto [usernameAuth, error] = co_await qCoro(core(), &Core::authenticationFinished);
-        Q_ASSERT(usernameAuth == username);
+        auto task = co_await qCoro(core(), &Core::authenticationFinished);
+        const auto [accessTokenAuth, error] = task; // because of bogus gcc "uninitialized" warning
+        Q_ASSERT(accessTokenAuth == accessToken);
         if (!error.isEmpty())
             throw Exception("Failed to log into BrickLink:\n%1").arg(error);
     }
@@ -204,7 +204,7 @@ QCoro::Task<> TextImport::importCatalog()
     co_await download(catalogQuery(1), u"itemtypes.xml"_qs).then(
         [this](QByteArray data) { readItemTypes(data); });
 
-    m_db->m_items.reserve(200'000);
+    m_db->m_items.reserve(250'000);
 
     for (const ItemType &itt : std::as_const(m_db->m_itemTypes)) {
         co_await download(catalogItemQuery(itt.id(), true), u"items/%1.xml"_qs.arg(itt.id())).then(
@@ -387,6 +387,7 @@ QCoro::Task<QByteArray> TextImport::download(const QUrl &url, const QString &fil
     }
 
     TransferJob *job = TransferJob::get(url.toString(QUrl::RemoveQuery), QUrlQuery(url));
+    job->setFollowRedirects(true);
     core()->retrieveAuthenticated(job);
     AwaitableTransferJob atj(job);
 
@@ -395,9 +396,10 @@ QCoro::Task<QByteArray> TextImport::download(const QUrl &url, const QString &fil
     co_await qCoro(&atj, &AwaitableTransferJob::finished);
 
     if (!job->isCompleted()) {
-        throw Exception("Download failed for %1: %2")
-            .arg(job->effectiveUrl().toString())
-            .arg(job->errorString());
+        auto url = job->effectiveUrl();
+        if (url.isEmpty())
+            url = job->url();
+        throw Exception("Download failed for %1: %2").arg(url.toString()).arg(job->errorString());
     } else if (job->data().isEmpty()) {
         throw Exception("Download has no data for %1").arg(job->effectiveUrl().toString());
     } else {
@@ -548,6 +550,80 @@ void TextImport::readItems(const QByteArray &xml, const ItemType *itt)
     std::sort(m_db->m_items.begin(), m_db->m_items.end());
 }
 
+class CsvReader
+{
+public:
+    CsvReader(const QByteArray &csvData, const QString &fileName, qsizetype minFields, qsizetype maxFields = 0)
+        : m_ts(csvData)
+        , m_fileName(fileName)
+        , m_minFields(minFields)
+        , m_maxFields(maxFields)
+    {
+        Q_ASSERT(minFields > 0);
+        Q_ASSERT((maxFields == 0) || (maxFields >= minFields));
+    }
+
+    int lineNumber() const
+    {
+        return m_lineNumber;
+    }
+
+    QString fileName() const
+    {
+        return m_fileName;
+    }
+
+    void skipLine()
+    {
+        (void) m_ts.readLine();
+    }
+
+    QStringList readLine()
+    {
+        QStringList result;
+        QString record;
+        bool accumulate = false;
+
+        while (!m_ts.atEnd()) {
+            ++m_lineNumber;
+            QString line = m_ts.readLine();
+
+            if (accumulate) {
+                record = record + u' ' + line;
+            } else {
+                if (line.isEmpty()) // ignore empty lines
+                    continue;
+                record = line;
+            }
+
+            const QStringList strs = record.split(u'\t');
+
+            if (strs.count() < m_minFields) { // most likely there's a stray newline...
+                if (m_ts.atEnd()) {
+                    throw Exception("expected at least %1 fields in %2, line %3")
+                        .arg(m_minFields).arg(m_fileName).arg(m_lineNumber);
+                }
+                accumulate = true;
+                continue;
+            }
+            if ((m_maxFields > 0) && (result.size() > m_maxFields)) {
+                throw Exception("expected at most %1 fields in %2, line %3")
+                    .arg(m_maxFields).arg(m_fileName).arg(m_lineNumber);
+            }
+            return strs;
+        }
+        Q_ASSERT(record.isEmpty());
+        return { };
+    }
+private:
+    QTextStream m_ts;
+    QString m_fileName;
+    int m_lineNumber = 0;
+    qsizetype m_minFields = 0;
+    qsizetype m_maxFields = 0;
+};
+
+
 void TextImport::readAdditionalItemCategories(const QByteArray &csv, const ItemType *itt)
 {
     // static is not ideal, but we want to re-use this cache for all item types
@@ -558,40 +634,28 @@ void TextImport::readAdditionalItemCategories(const QByteArray &csv, const ItemT
     }
 
     const QString fname = u"items/%1.csv"_qs.arg(QChar::fromLatin1(itt->id()));
-    QTextStream ts(csv);
-    ts.readLine(); // skip header
-    int lineNumber = 1;
-    QByteArray lastItemId;
+    CsvReader reader(csv, fname, 3);
+    reader.skipLine(); // skip header
 
-    while (!ts.atEnd()) {
-        ++lineNumber;
-        QString line = ts.readLine();
-        if (line.isEmpty())
-            continue;
-        if (line.startsWith(u'\t')) {
-            message(2, u"Item name for %1 most likely ends with a new-line character: %2 in line %3"_qs
-                           .arg(QLatin1StringView { lastItemId }).arg(fname).arg(lineNumber -1));
-            continue;
-        }
-        QStringList strs = line.split(u'\t');
-
-        if (strs.count() < 3)
-            throw Exception("expected at least 3 fields in %1, line %2").arg(fname).arg(lineNumber);
+    while (true) {
+        QStringList strs = reader.readLine();
+        if (strs.isEmpty())
+            break;
 
         const QByteArray itemId = strs.at(2).toLatin1();
         auto item = const_cast<Item *>(core()->item(itt->m_id, itemId));
         if (!item)
-            throw Exception("expected a valid item-id field in %1, line %2").arg(fname).arg(lineNumber);
+            throw Exception("expected a valid item-id field in %1, line %2").arg(fname).arg(reader.lineNumber());
 
         QString catStr = strs.at(1).simplified();
         const Category &mainCat = m_db->m_categories.at(item->m_categoryIndexes[0]);
         if (!catStr.startsWith(mainCat.name())) {
-            throw Exception( "additional categories do not start with the main category in %1, line %2")
-                .arg(fname).arg(lineNumber);
+            throw Exception("additional categories do not start with the main category in %1, line %2")
+                .arg(fname).arg(reader.lineNumber());
         }
         if (strs.at(0).toUInt() != mainCat.m_id) {
             throw Exception("the main category id does not match the XML in %1, line %2")
-                .arg(fname).arg(lineNumber);
+                .arg(fname).arg(reader.lineNumber());
         }
 
         catStr = catStr.mid(mainCat.name().length() + 3);
@@ -616,7 +680,6 @@ void TextImport::readAdditionalItemCategories(const QByteArray &csv, const ItemT
             }
         }
         item->m_categoryIndexes.copyContainer(addCatIndexes.cbegin(), addCatIndexes.cend(), nullptr);
-        lastItemId = itemId;
     }
 }
 
@@ -1035,24 +1098,18 @@ void TextImport::readLDrawColors(const QByteArray &ldconfig, const QByteArray &r
 
 void TextImport::readInventoryList(const QByteArray &csv)
 {
-    QTextStream ts(csv);
-    int lineNumber = 0;
-    while (!ts.atEnd()) {
-        ++lineNumber;
-        QString line = ts.readLine();
-        if (line.isEmpty())
-            continue;
-        QStringList strs = line.split(u'\t');
-
-        if (strs.count() < 2)
-            throw Exception("expected at least 2 fields in btinvlist, line %1").arg(lineNumber);
+    CsvReader reader(csv, u"btinvlist"_qs, 2);
+    while (true) {
+        QStringList strs = reader.readLine();
+        if (strs.isEmpty())
+            break;
 
         char itemTypeId = ItemType::idFromFirstCharInString(strs.at(0));
         const QByteArray itemId = strs.at(1).toLatin1();
 
         if (!itemTypeId || itemId.isEmpty()) {
             throw Exception("expected a valid item-type and an item-id field in btinvlist, line %1")
-                .arg(lineNumber);
+                .arg(reader.lineNumber());
         }
 
         auto item = core()->item(itemTypeId, itemId);
@@ -1093,17 +1150,12 @@ void TextImport::readChangeLog(const QByteArray &csv)
 {
     m_db->m_latestChangelogId = 0;
 
-    QTextStream ts(csv);
-    int lineNumber = 0;
-    while (!ts.atEnd()) {
-        ++lineNumber;
-        QString line = ts.readLine();
-        if (line.isEmpty())
-            continue;
-        QStringList strs = line.split(u'\t');
+    CsvReader reader(csv, u"btchglog"_qs, 7);
 
-        if (strs.count() < 7)
-            throw Exception("expected at least 7 fields in btchglog, line %1").arg(lineNumber);
+    while (true) {
+        QStringList strs = reader.readLine();
+        if (strs.isEmpty())
+            break;
 
         uint id = strs.at(0).toUInt();
         QDate date = QDate::fromString(strs.at(1), u"M/d/yyyy"_qs);
@@ -1219,7 +1271,8 @@ QCoro::Task<> TextImport::readRelationships(const QByteArray &html)
             qsizetype endPos = listData.indexOf(u"</TABLE>"_qs, startPos);
 
             static const QRegularExpression rxMatch(uR"-(<TR BGCOLOR="#......"><TD COLSPAN="4">.*?<B>Match #(\d+)</B></FONT></TD></TR>)-"_qs);
-            static const QRegularExpression rxItem (uR"-(<TR BGCOLOR="#......"><TD ALIGN="CENTER" WIDTH="10%">.*?<A HREF="/v2/catalog/catalogitem\.page\?([A-Z])=([A-Za-z0-9._-]+)">([A-Za-z0-9._-]+)</A>.*</FONT></TD></TR>)-"_qs);
+            static const QRegularExpression rxItem (uR"-(<TR BGCOLOR="#......"><TD ALIGN="CENTER" WIDTH="10%">.*?<A HREF="/v2/catalog/catalogitem\.page\?([A-Z])=([A-Za-z0-9._-]+)">([A-Za-z0-9._-]+)</A>.*</FONT></TD></TR>)-"_qs,
+                                                   QRegularExpression::DotMatchesEverythingOption);
 
             uint currentMatchId = 0;
             int trCount = 0;
@@ -1549,14 +1602,27 @@ void TextImport::xmlParse(const QByteArray &xml, QStringView rootName, QStringVi
     if (xsr.readNextStartElement()) {
         if (xsr.name() != rootName)
             throw Exception("expected XML root node %1, but got %2").arg(rootName, xsr.name());
+        int count = 0;
         while (xsr.readNextStartElement()) {
+            ++count;
             if (xsr.name() != elementName)
                 throw Exception("expected XML element node %1, but got %2").arg(elementName, xsr.name());
+
+            qint64 start = xsr.characterOffset();
+            qint64 line = xsr.lineNumber();
 
             QHash<QString, QString> hash;
             while (xsr.readNextStartElement())
                 hash.insert(xsr.name().toString(), xsr.readElementText().trimmed());
-            callback(hash);
+            try {
+                callback(hash);
+            } catch (const Exception &e) {
+                qint64 end = xsr.characterOffset();
+                auto context = QString::fromUtf8(fixedXml.mid(start, end - start));
+
+                throw Exception("Error processing XML element '%1' (index %2) at line %3: %4\n\n%5")
+                    .arg(elementName).arg(count).arg(line).arg(e.errorString()).arg(context);
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 
@@ -41,9 +41,9 @@
 #include <QtConcurrentRun>
 
 //#define QPARALLELSORT_TESTING // benchmarking
+//#define QPARALLELSORT_INPLACE_MERGE
 
-
-static constexpr qsizetype MinParallelSpan = 1024;
+static constexpr qsizetype MinParallelSpan = 4096;
 
 template <typename RandomAccessIterator, typename T, typename LessThan>
 void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan,
@@ -58,32 +58,19 @@ void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, L
         return;
     } else {
         // divide & conquer
-        qsizetype a_span = (span + 1) / 2; // bigger half of array if array-size is uneven
-        qsizetype b_span = span - a_span;  // smaller half of array if array-size is uneven
+        const qsizetype middle = (span + 1) / 2; // bigger half of array if array-size is uneven
 
         QFuture<void> future = QtConcurrent::run(qParallelSortThread<RandomAccessIterator, T, LessThan>,
-                                                 begin + a_span, end, lessThan, tmp + a_span, threadCount / 2);
-        qParallelSortThread(begin, begin + a_span, lessThan, tmp, (threadCount + 1) / 2);
+                                                 begin + middle, end, lessThan, tmp + middle, threadCount / 2);
+        qParallelSortThread(begin, begin + middle, lessThan, tmp, (threadCount + 1) / 2);
         future.waitForFinished();
 
-        RandomAccessIterator a = begin;
-        RandomAccessIterator b = begin + a_span;
-
-        Q_ASSERT(span == (end - begin));
-        Q_ASSERT((b + b_span) == end);
-
-        for (qsizetype i = 0; i < span; ++i) {
-            // 'a' if no b left or a < b
-            // 'b' if no a left or a >= b
-            if (!b_span || (a_span && b_span && lessThan(*a, *b))) {
-                *(tmp + i) = *a++;
-                a_span--;
-            } else {
-                *(tmp + i) = *b++;
-                b_span--;
-            }
-        }
+#ifdef QPARALLELSORT_INPLACE_MERGE
+        std::inplace_merge(begin, begin + middle, end, lessThan);
+#else
+        std::merge(begin, begin + middle, begin + middle, end, tmp, lessThan);
         std::copy(tmp, tmp + span, begin);
+#endif
     }
 }
 
@@ -92,10 +79,15 @@ inline void qParallelSortImpl(RandomAccessIterator begin, RandomAccessIterator e
 {
     const qsizetype span = end - begin;
     if (span >= 2) {
-        int threadCount = QThread::idealThreadCount();
-        auto *tmp = new typename std::iterator_traits<RandomAccessIterator>::value_type[span];
+        static const int threadCount = QThread::idealThreadCount();
+#ifdef QPARALLELSORT_INPLACE_MERGE
+        typename std::iterator_traits<RandomAccessIterator>::value_type tmp[] = nullptr;
+#else
+        auto tmp = new typename std::iterator_traits<RandomAccessIterator>::value_type[span];
+#endif
         qParallelSortThread(begin, end, lessThan, tmp, threadCount);
-        delete [] tmp;
+        if (tmp)
+            delete [] tmp;
     }
 }
 
@@ -155,7 +147,7 @@ static struct test_par_sort
 
         static constexpr int maxloop = 24;
 
-        int *src = new int[1 << maxloop];
+        auto *src = new qint64[1 << maxloop];
         for (int j = 0; j < (1 << maxloop); ++j)
             src[j] = rand();
 
@@ -170,6 +162,12 @@ static struct test_par_sort
                 {
                     stopwatch sw(msg.constData());
                     test.fun(array, count);
+                }
+                for (size_t j = 1; j < count; ++j) {
+                    if (array[j - 1] > array[j]) {
+                        qWarning("Sort failed at index %zu", j);
+                        break;
+                    }
                 }
                 delete [] array;
             }

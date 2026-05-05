@@ -1,4 +1,4 @@
-# Copyright (C) 2004-2025 Robert Griebl
+# Copyright (C) 2004-2026 Robert Griebl
 # SPDX-License-Identifier: GPL-3.0-only
 
 target_sources(${PROJECT_NAME} PUBLIC

@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <array>
@@ -19,11 +19,9 @@
 #include <QMetaEnum>
 
 #include "utility/appstatistics.h"
-#include "utility/q5hashfunctions.h"
 #include "utility/utility.h"
 #include "utility/exception.h"
 #include "utility/transfer.h"
-#include "utility/persistentcookiejar.h"
 
 #include "bricklink/category.h"
 #include "bricklink/color.h"
@@ -212,67 +210,22 @@ QString Core::dataPath() const
     return m_datadir;
 }
 
-QString Core::dataFileName(QStringView fileName, const Item *item, const Color *color) const
+void Core::setAccessToken(const QString &accessToken)
 {
-    // Avoid huge directories with 1000s of entries.
-    // sse4.2 is only used if a seed value is supplied
-    // please note: Qt6's qHash is incompatible
-    uchar hash = q5Hash(QString::fromLatin1(item->id()), 42) & 0xff;
-
-    QString p = m_datadir + QLatin1Char(item->itemTypeId()) + u'/' + (hash < 0x10 ? u"0" : u"")
-            + QString::number(hash, 16) + u'/' + QLatin1String(item->id()) + u'/'
-            + (color ? QString::number(color->id()) : QString()) + (color ? u"/" : u"")
-            + fileName;
-
-    return p;
-}
-
-QFile *Core::dataReadFile(QStringView fileName, const Item *item, const Color *color) const
-{
-    auto f = new QFile(dataFileName(fileName, item, color));
-    f->open(QIODevice::ReadOnly);
-    return f;
-}
-
-QSaveFile *Core::dataSaveFile(QStringView fileName, const Item *item, const Color *color) const
-{
-    auto p = dataFileName(fileName, item, color);
-
-    if (!QDir(fileName.isEmpty() ? p : p.left(p.size() - int(fileName.size()))).mkpath(u"."_qs))
-        return nullptr;
-
-    auto f = new QSaveFile(p);
-    if (!f->open(QIODevice::WriteOnly)) {
-        qCWarning(LogCache) << "BrickLink::Core::dataSaveFile failed to open" << f->fileName()
-                            << "for writing:" << f->errorString();
-    }
-    return f;
-}
-
-void Core::setCredentials(const QPair<QString, QString> &credentials)
-{
-    if (m_credentials != credentials) {
+    if (m_accessToken != accessToken) {
         bool wasAuthenticated = m_authenticated;
         m_authenticated = false;
         if (m_authenticatedTransfer)
             m_authenticatedTransfer->abortAllJobs();
-        bool newUserId = (credentials.first != m_credentials.first);
-        m_credentials = credentials;
-        if (wasAuthenticated) {
+        m_accessToken = accessToken;
+        if (wasAuthenticated)
             emit authenticationChanged(false);
-
-            auto logoutJob = TransferJob::get(u"https://www.bricklink.com/ajax/renovate/loginandout.ajax"_qs,
-                                              { { u"do_logout"_qs, u"true"_qs } });
-            m_authenticatedTransfer->retrieve(logoutJob, true);
-        }
-        if (newUserId)
-            emit userIdChanged(m_credentials.first);
     }
 }
 
-QString Core::userId() const
+bool Core::hasAccessToken() const
 {
-    return m_credentials.first;
+    return !m_accessToken.isEmpty();
 }
 
 bool Core::isAuthenticated() const
@@ -282,29 +235,36 @@ bool Core::isAuthenticated() const
 
 void Core::retrieveAuthenticated(TransferJob *job)
 {
-    if (job)
-        job->setNoRedirects(true);
+    if (job) {
+        m_authenticatedJobFollowRedirect.insert(job, job->followRedirects());
+        job->setFollowRedirects(false);
+    }
 
-    if (!m_authenticated) {
+    if (!m_authenticated || m_sessionToken.isEmpty() ) {
         if (!m_loginJob) {
-            if (m_credentials.first.isEmpty() || m_credentials.second.isEmpty()) {
-                QMetaObject::invokeMethod(this, [job]() { job->abort(); });
+            if (m_accessToken.isEmpty()) {
+                if (job)
+                    QMetaObject::invokeMethod(this, [job]() { job->abort(); });
                 qWarning() << "Aborting transfer due to missing credentials";
                 return;
             }
 
-            m_loginJob = TransferJob::post(u"https://www.bricklink.com/ajax/renovate/loginandout.ajax"_qs,
-                                           {
-                                               { u"userid"_qs,          Utility::urlQueryEscape(m_credentials.first) },
-                                               { u"password"_qs,        Utility::urlQueryEscape(m_credentials.second) },
-                                               { u"keepme_loggedin"_qs, u"1"_qs },
-                                            });
-            m_loginJob->setNoRedirects(true);
+            QJsonObject jsonObj;
+
+            jsonObj[u"clientId"] = TransferJob::brickLinkClientId();
+            jsonObj[u"clientToken"] = m_accessToken;
+
+            QJsonDocument jsonDoc(jsonObj);
+
+            static const QString targetHost = u"https://account.prod.member.bricklink.info/api/v1/actions/verify-and-create-session"_qs;
+            m_loginJob = TransferJob::post(targetHost, {}, u"application/json"_qs, jsonDoc.toJson());
+            m_loginJob->setFollowRedirects(false);
             m_authenticatedTransfer->retrieve(m_loginJob, true);
         }
         if (job)
             m_jobsWaitingForAuthentication << job;
-    } else {
+    } else if (job) {
+        job->setSessionToken(m_sessionToken);
         m_authenticatedTransfer->retrieve(job);
     }
 }
@@ -352,7 +312,6 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
     : m_datadir(QDir::cleanPath(QDir(datadir).absolutePath()) + u'/')
     , m_noImageIcon(QIcon::fromTheme(u"image-missing-large"_qs))
     , m_transfer(new Transfer(this))
-    , m_authenticatedRefresh(new QTimer(this))
     , m_database(new Database(updateUrl, this))
 #if !defined(BS_BACKEND)
     , m_store(new Store(this))
@@ -366,8 +325,7 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
 #if defined(BS_BACKEND)
     Q_UNUSED(physicalMem)
 #endif
-    auto pcj = new PersistentCookieJar(datadir, u"BrickLink"_qs, { "BLNEWSESSIONID" });
-    m_authenticatedTransfer = new Transfer(std::move(pcj), this);
+    m_authenticatedTransfer = new Transfer(this);
 
     m_transferStatId = AppStatistics::inst()->addSource(u"HTTP requests"_qs);
 
@@ -408,14 +366,21 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
                 auto json = QJsonDocument::fromJson(job->data());
                 if (!json.isNull()) {
                     bool wasAuthenticated = m_authenticated;
-                    m_authenticated = (json[u"returnCode"].toInt() == 0)
-                                      || ((json[u"returnCode"].toInt() == -4)
-                                          && (json[u"returnMessage"] == u"Already Logged-in!"_qs));
-                    if (!m_authenticated) {
-                        error = json[u"returnMessage"].toString();
-                        if (error.isEmpty())
-                            error = u"<unknown error>"_qs;
+                    m_authenticated = false;
+                    m_sessionToken.clear();
+
+                    QJsonValue sessionToken = json[u"sessionToken"];
+                    if (sessionToken.isString()) {
+                        m_sessionToken = sessionToken.toString().toLatin1();
+                        if (!m_sessionToken.isEmpty())
+                            m_authenticated = true;
+                        else
+                            error = u"empty session token"_qs;
+                    } else {
+                        error = u"<unknown error>"_qs;
                     }
+
+                    qCDebug(LogTransfer) << "Authenticated:" << m_sessionToken;
 
                     if (wasAuthenticated != m_authenticated)
                         emit authenticationChanged(m_authenticated);
@@ -423,42 +388,49 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
             } else {
                 error = job->errorString();
             }
-            emit authenticationFinished(m_credentials.first, error);
+            emit authenticationFinished(m_accessToken, error);
 
-            for (TransferJob *authJob : std::as_const(m_jobsWaitingForAuthentication))
+            for (TransferJob *authJob : std::as_const(m_jobsWaitingForAuthentication)) {
+                if (!m_sessionToken.isEmpty())
+                    authJob->setSessionToken(m_sessionToken);
                 m_authenticatedTransfer->retrieve(authJob);
+            }
             m_jobsWaitingForAuthentication.clear();
 
             if (!m_authenticated)
                 m_authenticatedTransfer->abortAllJobs();
-        } else if (m_refreshJobs.contains(job)) {
-            if (!job->data().isEmpty()
-                    && job->data().startsWith("brickstore({")
-                    && job->data().endsWith("});")) {
-                qsizetype size = job->data().size();
-                QJsonDocument doc = QJsonDocument::fromJson(job->data().sliced(11, size - 11 - 2));
-                if (!doc[u"is_loggedin"].toBool() && m_authenticated) {
+        } else {
+            bool lostAuthentication = false;
+            bool normalRedirect = false;
+            bool followRedirect = m_authenticatedJobFollowRedirect.take(job);
+
+            if (job->responseCode() == 302) {
+                if (!job->redirectUrl().toString().contains(u"auth/sign-in?"))
+                    normalRedirect = true;
+                else
+                    lostAuthentication = true;
+            } else if (job->responseCode() == 401) {
+                lostAuthentication = true;
+            }
+
+            if (lostAuthentication) {
+                if (m_authenticated) {
                     m_authenticated = false;
                     emit authenticationChanged(m_authenticated);
                 }
-            }
-            m_refreshJobs.removeAll(job);
-        } else {
-            if (job->responseCode() == 302) {
-                if (job->redirectUrl().toString().contains(u"v2/login.page")
-                        || job->redirectUrl().toString().contains(u"login.asp?")) {
-                    if (m_authenticated) {
-                        m_authenticated = false;
-                        emit authenticationChanged(m_authenticated);
-                    }
-                    job->resetForReuse();
-                } else {
-                    job->resetForReuse(true /* applyRedirect*/);
-                }
+                job->resetForReuse();
+                job->setFollowRedirects(followRedirect);
 
                 QMetaObject::invokeMethod(this, [=, this]() {
-                        retrieveAuthenticated(job);
-                    }, Qt::QueuedConnection);
+                    retrieveAuthenticated(job);
+                }, Qt::QueuedConnection);
+            } else if (normalRedirect && followRedirect) {
+                job->resetForReuse(true /* applyRedirect*/);
+                job->setFollowRedirects(true);
+
+                QMetaObject::invokeMethod(this, [=, this]() {
+                    retrieveAuthenticated(job);
+                }, Qt::QueuedConnection);
             } else {
                 emit authenticatedTransferFinished(job);
             }
@@ -470,31 +442,6 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
             this, &Core::authenticatedTransferProgress);
     connect(m_authenticatedTransfer, &Transfer::started,
             this, &Core::authenticatedTransferStarted);
-
-    connect(this, &Core::authenticationChanged,
-            this, [this](bool authenticated) {
-        if (authenticated)
-            m_authenticatedRefresh->start();
-        else
-            m_authenticatedRefresh->stop();
-    });
-    m_authenticatedRefresh->setInterval(30min);
-    connect(m_authenticatedRefresh, &QTimer::timeout,
-            this, [this]() {
-        if (m_authenticated && m_refreshJobs.isEmpty()) {
-            static auto now = []() { return QString::number(QDateTime::currentMSecsSinceEpoch()); };
-
-            auto *job1 = TransferJob::get(u"https://www.bricklink.com/ajax/renovate/SessionInfoGet.ajax"_qs,
-                                          { { u"callback"_qs, u"brickstore"_qs },
-                                            { u"_"_qs, now() } });
-            retrieveAuthenticated(job1);
-            m_refreshJobs << job1;
-            auto *job2 = TransferJob::get(u"https://www.bricklink.com/refresh.asp"_qs,
-                                          { { u"_"_qs, now() } });
-            retrieveAuthenticated(job2);
-            m_refreshJobs << job2;
-        }
-    });
 }
 
 Core::~Core()
@@ -1119,7 +1066,7 @@ const QSet<ApiQuirk> Core::knownApiQuirks()
         ApiQuirk::OrderXmlHasUnescapedFields,
         ApiQuirk::InventoryCommentsAreDoubleEscaped,
         ApiQuirk::InventoryRemarksAreDoubleEscaped,
-        ApiQuirk::PasswordLimitedTo15Characters,
+//        ApiQuirk::PasswordLimitedTo15Characters,
         ApiQuirk::CatalogDownloadEntitiesAreDoubleEscaped,
     };
     return known;

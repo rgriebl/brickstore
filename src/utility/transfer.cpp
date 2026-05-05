@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <QThread>
@@ -15,6 +15,9 @@
 
 Q_LOGGING_CATEGORY(LogTransfer, "bs.transfer", QtWarningMsg)
 
+static const char * const BL_SESSION_TOKEN_HEADER = "x-bl-session-token";
+static const char * const BL_CLIENT_ID_HEADER = "x-bl-tpa-client-id";
+static const char * const BL_CLIENT_ID_VALUE = "ca629c09-4d8c-45dc-8a6f-bfb2b058f720";
 
 TransferJob::~TransferJob()
 {
@@ -23,10 +26,16 @@ TransferJob::~TransferJob()
     delete m_file;
 }
 
+QString TransferJob::brickLinkClientId()
+{
+    return QString::fromLatin1(BL_CLIENT_ID_VALUE);
+}
+
 TransferJob *TransferJob::get(const QString &url, const QUrlQuery &query)
 {
     return create(HttpGet, url, query, { }, { });
 }
+
 
 TransferJob *TransferJob::post(const QString &url, const QUrlQuery &query)
 {
@@ -309,7 +318,7 @@ void TransferRetriever::abortAllJobs()
         emit finished(j);
     }
 
-    m_progressDone += m_jobs.size();
+    m_progressDone += int(m_jobs.size());
     emit overallProgress(m_progressDone, m_progressTotal);
     if (m_progressDone == m_progressTotal)
         m_progressDone = m_progressTotal = 0;
@@ -342,10 +351,13 @@ void TransferRetriever::schedule()
         req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false); // QTBUG-105043
         req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
         req.setHeader(QNetworkRequest::UserAgentHeader, m_transfer->userAgent());
-        if (j->m_no_redirects) {
+        if (!j->m_follow_redirects) {
             req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                              QNetworkRequest::ManualRedirectPolicy);
         }
+        req.setRawHeader(BL_CLIENT_ID_HEADER, BL_CLIENT_ID_VALUE);
+        if (!j->sessionToken().isEmpty())
+            req.setRawHeader(BL_SESSION_TOKEN_HEADER, j->sessionToken());
 
 #if QT_CONFIG(ssl)
         auto ssl = req.sslConfiguration();
@@ -360,7 +372,7 @@ void TransferRetriever::schedule()
             if (!j->m_only_if_different.isEmpty())
                 req.setHeader(QNetworkRequest::IfNoneMatchHeader, j->m_only_if_different);
             j->m_reply = m_nam->get(req);
-        } else {
+        } else { // POST Method
             req.setHeader(QNetworkRequest::ContentTypeHeader, j->m_postContentType);
             j->m_reply = m_nam->post(req, j->m_postContent);
         }
@@ -436,6 +448,7 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
                 j->m_was_not_modified = true;
                 j->setStatus(TransferJob::Completed);
             } else {
+                j->m_error_string = u"Received HTTP 304 but this was not requested"_qs;
                 j->setStatus(TransferJob::Failed);
             }
             break;
@@ -461,6 +474,7 @@ void TransferRetriever::downloadFinished(QNetworkReply *reply)
             break;
         }
         default:
+            j->m_error_string = u"Cannot handle HTTP response code %1"_qs.arg(j->m_respcode);
             j->setStatus(TransferJob::Failed);
             break;
         }

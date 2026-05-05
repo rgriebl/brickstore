@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -45,5 +45,5 @@ private:
 
     QObject *m_rootObject = nullptr;
 
-    Q_DISABLE_COPY(ScriptManager)
+    Q_DISABLE_COPY_MOVE(ScriptManager)
 };

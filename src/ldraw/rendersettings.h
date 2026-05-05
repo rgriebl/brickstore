@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -45,11 +45,11 @@ public:
     static RenderSettings *inst();
     static RenderSettings *create(QQmlEngine *qe, QJSEngine *je); // QML_SINGLETON
 
-    enum AntiAliasing {
-        NoAA,
-        MediumAA,
-        HighAA,
-        VeryHighAA,
+    enum class AntiAliasing {
+        No,
+        Medium,
+        High,
+        VeryHigh,
     };
     Q_ENUM(AntiAliasing)
 
@@ -92,30 +92,30 @@ private:
     void setToDefault();
     void forEachProperty(const std::function<void (QMetaProperty &)> &callback);
 
-    QQuaternion m_defaultRotation;
-    bool m_orthographicCamera;
-    bool m_lighting;
-    bool m_renderLines;
-    float m_lineThickness;
-    bool m_showBoundingSpheres;
-    float m_tumblingAnimationAngle;
-    QVector3D m_tumblingAnimationAxis;
-    float m_fieldOfView;
-    int m_antiAliasing;
+    QQuaternion m_defaultRotation { };
+    bool m_orthographicCamera { };
+    bool m_lighting { };
+    bool m_renderLines { };
+    float m_lineThickness { };
+    bool m_showBoundingSpheres { };
+    float m_tumblingAnimationAngle { };
+    QVector3D m_tumblingAnimationAxis { };
+    float m_fieldOfView { };
+    int m_antiAliasing { };
 
-    float m_aoStrength;
-    float m_aoSoftness;
-    float m_aoDistance;
-    float m_additionalLight;
+    float m_aoStrength { };
+    float m_aoSoftness { };
+    float m_aoDistance { };
+    float m_additionalLight { };
 
-    float m_plainMetalness;
-    float m_plainRoughness;
-    float m_chromeMetalness;
-    float m_chromeRoughness;
-    float m_metallicMetalness;
-    float m_metallicRoughness;
-    float m_pearlMetalness;
-    float m_pearlRoughness;
+    float m_plainMetalness { };
+    float m_plainRoughness { };
+    float m_chromeMetalness { };
+    float m_chromeRoughness { };
+    float m_metallicMetalness { };
+    float m_metallicRoughness { };
+    float m_pearlMetalness { };
+    float m_pearlRoughness { };
 };
 
 } // namespace LDraw

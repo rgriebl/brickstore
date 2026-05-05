@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 pragma ComponentBehavior: Bound
@@ -33,6 +33,14 @@ FullscreenDialog {
 
             ScrollIndicator.vertical: ScrollIndicator { }
             FlashScrollIndicators { id: flashScroller; target: table }
+
+            Label {
+                anchors.fill: parent
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                text: qsTr("No wanted lists")
+                visible: table.count === 0
+            }
 
             model: BS.SortFilterProxyModel {
                 id: sortFilterModel

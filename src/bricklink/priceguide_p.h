@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -12,7 +12,7 @@
 #include <QtCore/QVector>
 #include <QtSql/QSqlDatabase>
 
-#include "utility/q3cache.h"
+#include "utility/refcache.h"
 #include "global.h"
 #include "priceguide.h"
 
@@ -29,7 +29,6 @@ class PriceGuideRetrieverInterface : public QObject
 
 public:
     PriceGuideRetrieverInterface(QObject *parent = nullptr);
-    ~PriceGuideRetrieverInterface() override = default;
 
     virtual QString name() const = 0;
     virtual QString id() const = 0;
@@ -137,7 +136,7 @@ public:
 
     int m_updateInterval = 0;
     QMap<QString, VatType> m_vatType;  // key: retriever->id()
-    Q3Cache<quint64, PriceGuide> m_cache;
+    RefCache<quint64, PriceGuide> m_cache;
     Core *m_core;
     PriceGuideCache *q;
     int m_cacheStatId = -1;

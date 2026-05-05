@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -43,10 +43,10 @@ public:
 private:
     char  m_id = InvalidId;
 
-    bool  m_has_inventories   : 1;
-    bool  m_has_colors        : 1;
-    bool  m_has_weight        : 1;
-    bool  m_has_subconditions : 1;
+    bool  m_has_inventories   : 1 = false;
+    bool  m_has_colors        : 1 = false;
+    bool  m_has_weight        : 1 = false;
+    bool  m_has_subconditions : 1 = false;
 
     // 6 bytes padding here
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <memory>
@@ -221,12 +221,12 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             w_select_color->setColorLock(false);
         }
     });
-    connect(w_select_item, &SelectItem::hasSubConditions,
-            w_ui_additem->w_subcondition, &QWidget::setEnabled);
     connect(w_select_item, &SelectItem::itemSelected,
             this, [this](const BrickLink::Item *item, bool confirmed) {
         updateItemAndColor();
         w_select_color->setCurrentColorAndItem(w_select_color->currentColor(), item);
+        w_ui_additem->w_subcondition->setEnabled(item && item->itemType() && item->itemType()->hasSubConditions());
+
         recordBrowseEntry();
         if (confirmed)
             w_add->animateClick();
@@ -386,7 +386,7 @@ AddItemDialog::AddItemDialog(QWidget *parent)
             static const QString post = u"</p>"_qs;
             QString tips;
 
-            for (const auto &entry : m_addHistory)
+            for (const auto &entry : std::as_const(m_addHistory))
                 tips = tips + pre + addhistoryTextFor(entry.first, entry.second) + post;
 
             QToolTip::showText(he->globalPos(), tips, w_last_added, w_last_added->geometry());
@@ -1018,6 +1018,8 @@ void AddItemDialog::buildBrowseMenu(BrowseMenuType type)
                 QString s = item->name();
                 if (color && color->id())
                     s = color->name() + u' ' + s;
+                if (item->itemType() && (item->itemTypeId() != 'P'))
+                    s = s + u" [" + item->itemType()->name() + u']';
                 if (type == BrowseMenuType::History)
                     s = s + u"\t(" + HumanReadableTimeDelta::toString(now, bhe.m_lastVisited) + u')';
 

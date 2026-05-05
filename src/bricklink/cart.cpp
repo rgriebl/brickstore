@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 
@@ -26,11 +26,12 @@ namespace BrickLink {
 class CartPrivate
 {
 public:
+    CartPrivate() = default;
     ~CartPrivate() { qDeleteAll(m_lots); }
 
 private:
     bool      m_domestic = false;
-    int       m_sellerId;
+    int       m_sellerId = 0;
     QString   m_sellerName;
     QString   m_storeName;
     QDateTime m_lastUpdated;
@@ -43,6 +44,7 @@ private:
     LotList   m_lots;
 
     friend class Cart;
+    Q_DISABLE_COPY_MOVE(CartPrivate)
 };
 
 
@@ -113,7 +115,7 @@ void Cart::setLots(LotList &&lots)
 {
     if (d->m_lots != lots) {
         qDeleteAll(d->m_lots);
-        d->m_lots = lots;
+        d->m_lots = std::move(lots);
         lots.clear();
         emit lotsChanged(d->m_lots);
     }

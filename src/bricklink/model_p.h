@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #pragma once
@@ -36,7 +36,6 @@ public:
         Entry() = default;
         Entry(const QString &sectionTitle);
         Entry(const BrickLink::Item *item, const BrickLink::Color *color, int quantity);
-        ~Entry();
 
         bool isSection() const { return !m_item && !m_sectionTitle.isEmpty(); }
 

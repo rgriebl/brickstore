@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2025 Robert Griebl
+// Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <QtCore/QFileInfo>
@@ -217,10 +217,21 @@ void Application::init()
     LDraw::create(ldrawUrl());
 
     connect(BrickLink::core(), &BrickLink::Core::authenticationFinished,
-            this, [](const QString &userName, const QString &error) {
+            this, [](const QString &accessToken, const QString &error) {
         if (!error.isEmpty()) {
-            UIHelpers::warning(tr("Failed to authenticate with BrickLink as user %1")
-                                   .arg(userName) + u"<br><b>" + error + u"</b>");
+            QString safeToken = accessToken.isEmpty()
+                                    ? tr("(empty)")
+                                    : QString(accessToken.left(5) + u"..." + accessToken.right(5));
+
+            UIHelpers::warning(tr("Failed to authenticate with BrickLink using access token <tt>%1</tt>")
+                                   .arg(safeToken) + u"<br><b>" + error + u"</b><br><br>" +
+                               tr("Most likely your token has expired: you can click <i>Retry</i> to open Settings and renew it."),
+                               UIHelpers::StandardButton::Ok | UIHelpers::StandardButton::Retry,
+                               UIHelpers::StandardButton::Ok)
+                .then([](UIHelpers::StandardButton btn) {
+                    if (btn == UIHelpers::StandardButton::Retry)
+                        emit Application::inst()->showSettings(u"bricklink"_qs);
+                });
         }
     });
 
@@ -354,7 +365,7 @@ void Application::afterInit()
         delayedInit();
     } else {
         qInfo() << "Delaying initialization until online";
-        QMetaObject::invokeMethod(this, [=, this]() {
+        QMetaObject::invokeMethod(this, [this, delayedInit]() {
                 if (OnlineState::inst()->isOnline()) {
                     delayedInit();
                 } else {
@@ -554,29 +565,12 @@ void Application::checkRestart()
 
 QCoro::Task<bool> Application::checkBrickLinkLogin()
 {
-    if (!Config::inst()->brickLinkUsername().isEmpty()) {
-        if (Config::inst()->brickLinkPassword().isEmpty()) {
-            if (auto pw = co_await UIHelpers::getPassword(tr("Please enter the password for the BrickLink account %1:")
-                                                          .arg(u"<b>" + Config::inst()->brickLinkUsername() + u"</b>"))) {
-                Config::inst()->setBrickLinkPassword(*pw, true /*do not save*/);
-            }
-        }
-        if (const auto pw = Config::inst()->brickLinkPassword(); !pw.isEmpty()) {
-            static bool shown = false;
+    if (!Config::inst()->brickLinkAccessToken().isEmpty())
+        co_return true;
 
-            if (BrickLink::core()->isApiQuirkActive(BrickLink::ApiQuirk::PasswordLimitedTo15Characters)
-                    && (pw.length() > 15) && !shown) {
-                co_await UIHelpers::warning(tr("You have entered a BrickLink password that is longer than 15 characters, which is not accepted by BrickLink. "
-                                               "BrickStore will use it anyway, but expect to get authentication errors."));
-                shown = true;
-            }
-            co_return true;
-        }
-    } else {
-        if (co_await UIHelpers::question(tr("No valid BrickLink login settings found.<br /><br />Do you want to change the settings now?")
-                                         ) == UIHelpers::Yes) {
-            emit showSettings(u"bricklink"_qs);
-        }
+    if (co_await UIHelpers::question(tr("No valid BrickLink access token found.<br /><br />Do you want to change the settings now?")
+                                     ) == UIHelpers::Yes) {
+        emit showSettings(u"bricklink"_qs);
     }
     co_return false;
 }
@@ -604,7 +598,7 @@ QCoro::Task<bool> Application::updateDatabase()
                                                           &BrickLink::Database::updateFinished,
                                                           qOverload<>(&BrickLink::Database::startUpdate),
                                                           &BrickLink::Database::cancelUpdate);
-        for (const auto &file : files)
+        for (const auto &file : std::as_const(files))
             Document::load(file);
 
         co_return success;
@@ -674,7 +668,7 @@ void Application::setupTerminateHandler()
             if (auto type = abi::__cxa_current_exception_type()) {
                 typeName = type->name();
                 if (typeName) {
-                    int status;
+                    int status = 0;
                     demangleBuffer = abi::__cxa_demangle(typeName, demangleBuffer, &demangleBufferSize, &status);
                     if (status == 0 && *demangleBuffer)
                         typeName = demangleBuffer;
@@ -920,7 +914,7 @@ void Application::setupLogging()
         bool restartTimer = !s_inst->m_loggingMessages.isEmpty();
         locker.unlock();
 
-        for (const auto &lm : messages)
+        for (const auto &lm : std::as_const(messages))
             s_inst->m_uiMessageHandler(lm);
 
         if (restartTimer)
@@ -990,12 +984,10 @@ bool Application::initBrickLink()
                                 "Settings dialog.");
     }
 
-    BrickLink::core()->setCredentials({ Config::inst()->brickLinkUsername(),
-                                        Config::inst()->brickLinkPassword() });
-    connect(Config::inst(), &Config::brickLinkCredentialsChanged,
+    BrickLink::core()->setAccessToken(Config::inst()->brickLinkAccessToken());
+    connect(Config::inst(), &Config::brickLinkAccessTokenChanged,
             this, []() {
-        BrickLink::core()->setCredentials({ Config::inst()->brickLinkUsername(),
-                                            Config::inst()->brickLinkPassword() });
+        BrickLink::core()->setAccessToken(Config::inst()->brickLinkAccessToken());
     });
 
     connect(BrickLink::core()->carts(), &BrickLink::Carts::fetchLotsFinished,
