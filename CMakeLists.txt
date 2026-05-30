@@ -32,7 +32,7 @@ option(SENTRY       "Build with sentry.io support" OFF)
 option(VERBOSE_FETCH "Verbose output for 3rd party FetchContent" OFF)
 
 set(NAME           "BrickStore")
-set(DESCRIPTION    "${NAME} - an offline BrickLink inventory management tool")
+set(DESCRIPTION    "An offline BrickLink inventory management tool")
 set(COPYRIGHT      "2004-2026 Robert Griebl")
 set(BRICKSTORE_URL "www.brickstore.dev")
 set(GITHUB_URL     "github.com/rgriebl/brickstore")
