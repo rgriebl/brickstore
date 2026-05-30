@@ -1,7 +1,6 @@
 # Copyright (C) 2004-2026 Robert Griebl
 # SPDX-License-Identifier: GPL-3.0-only
 
-include(FetchContent)
 
 set(QCORO_BUILD_EXAMPLES  OFF)
 set(QCORO_ENABLE_ASAN ${SANITIZE})
@@ -14,14 +13,21 @@ if (BACKEND_ONLY)
     set(QCORO_WITH_QML OFF)
 endif()
 
-FetchContent_Declare(
-    qcoro
-    GIT_REPOSITORY https://github.com/danvratil/qcoro.git
-    GIT_TAG        v${QCORO_VERSION}
-    SOURCE_SUBDIR  "NeedManualAddSubDir" # make it possible to add_subdirectory below
-)
+if(FLATHUB_NETWORK_OFF)
+  set(qcoro_SOURCE_DIR "${CMAKE_SOURCE_DIR}/_deps/qcoro-src")
+  set(qcoro_BINARY_DIR "${CMAKE_BINARY_DIR}/_deps/qcoro-build")
+else()
+  include(FetchContent)
 
-FetchContent_MakeAvailable(qcoro)
+  FetchContent_Declare(
+      qcoro
+      GIT_REPOSITORY https://github.com/danvratil/qcoro.gitls
+      GIT_TAG        v${QCORO_VERSION}
+      SOURCE_SUBDIR  "NeedManualAddSubDir" # make it possible to add_subdirectory below
+  )
+
+  FetchContent_MakeAvailable(qcoro)
+endif()
 
 set(mll ${CMAKE_MESSAGE_LOG_LEVEL})
 if (NOT VERBOSE_FETCH)

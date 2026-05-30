@@ -29,6 +29,7 @@ option(FORCE_MOBILE "Force a mobile build on desktop" OFF)
 option(SANITIZE     "Build with ASAN" OFF)
 option(MODELTEST    "Build with modeltest" OFF)
 option(SENTRY       "Build with sentry.io support" OFF)
+option(FLATHUB_NETWORK_OFF "Build for Flathub by disabling network fetch during build" OFF)
 option(VERBOSE_FETCH "Verbose output for 3rd party FetchContent" OFF)
 
 set(NAME           "BrickStore")
