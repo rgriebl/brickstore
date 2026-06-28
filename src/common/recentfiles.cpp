@@ -184,6 +184,9 @@ void RecentFiles::pin(int row, bool down)
 
 void RecentFiles::clearRecent()
 {
+    if (count() <= m_pinnedCount) // nothing unpinned to remove
+        return;
+
     beginRemoveRows({ }, int(m_pinnedCount), count() - 1);
     m_entries.remove(m_pinnedCount, count() - m_pinnedCount);
     endRemoveRows();
@@ -192,6 +195,9 @@ void RecentFiles::clearRecent()
 
 void RecentFiles::clearPinned()
 {
+    if (!m_pinnedCount)
+        return;
+
     beginRemoveRows({ }, 0, int(m_pinnedCount) - 1);
     m_entries.remove(0, m_pinnedCount);
     m_pinnedCount = 0;
