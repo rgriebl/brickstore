@@ -133,7 +133,7 @@ void ChunkReader::skipChunk()
 
     const read_chunk_info &ci = std::as_const(m_chunks).top();
 
-    m_stream.skipRawData(int(ci.size));
+    m_stream.skipRawData(ci.size);   // qint64 overload — no truncation on large chunks
 
     checkStream();
 }
