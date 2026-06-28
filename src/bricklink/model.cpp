@@ -38,6 +38,11 @@ ColorModel::ColorModel(QObject *parent)
     : StaticPointerModel(parent)
 {
     MODELTEST_ATTACH(this)
+
+    connect(core()->database(), &Database::databaseAboutToBeReset,
+            this, &StaticPointerModel::beginPointerReset);
+    connect(core()->database(), &Database::databaseReset,
+            this, &StaticPointerModel::endPointerReset);
 }
 
 int ColorModel::columnCount(const QModelIndex &parent) const
@@ -271,6 +276,11 @@ CategoryModel::CategoryModel(QObject *parent)
     : StaticPointerModel(parent)
 {
     MODELTEST_ATTACH(this)
+
+    connect(core()->database(), &Database::databaseAboutToBeReset,
+            this, &StaticPointerModel::beginPointerReset);
+    connect(core()->database(), &Database::databaseReset,
+            this, &StaticPointerModel::endPointerReset);
 }
 
 int CategoryModel::columnCount(const QModelIndex &parent) const
@@ -469,6 +479,11 @@ ItemTypeModel::ItemTypeModel(QObject *parent)
     : StaticPointerModel(parent)
 {
     MODELTEST_ATTACH(this)
+
+    connect(core()->database(), &Database::databaseAboutToBeReset,
+            this, &StaticPointerModel::beginPointerReset);
+    connect(core()->database(), &Database::databaseReset,
+            this, &StaticPointerModel::endPointerReset);
 }
 
 int ItemTypeModel::columnCount(const QModelIndex &parent) const
@@ -596,6 +611,11 @@ ItemModel::ItemModel(QObject *parent)
     : StaticPointerModel(parent)
 {
     MODELTEST_ATTACH(this)
+
+    connect(core()->database(), &Database::databaseAboutToBeReset,
+            this, &StaticPointerModel::beginPointerReset);
+    connect(core()->database(), &Database::databaseReset,
+            this, &StaticPointerModel::endPointerReset);
 
     connect(core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
             this, &ItemModel::pictureUpdated);

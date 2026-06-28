@@ -37,6 +37,13 @@ public slots:
     void invalidateFilter();
     void invalidateFilterNow();
 
+    // A subclass that wraps mutable backing data (e.g. a database that can be reloaded) has to
+    // bracket that change with these two: beginPointerReset() clears the cached row order and
+    // emits beginResetModel(), endPointerReset() emits endResetModel() (the order is rebuilt
+    // lazily on the next access).
+    void beginPointerReset();
+    void endPointerReset();
+
 signals:
     void isFilteredChanged();
 

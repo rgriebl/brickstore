@@ -148,6 +148,20 @@ void StaticPointerModel::invalidateFilterInternal()
     }
 }
 
+void StaticPointerModel::beginPointerReset()
+{
+    beginResetModel();
+    if (filterDelayTimer && filterDelayTimer->isActive())
+        filterDelayTimer->stop();
+    sorted.clear();   // forces init() to rebuild against the new pointerCount()
+    filtered.clear();
+}
+
+void StaticPointerModel::endPointerReset()
+{
+    endResetModel();
+}
+
 void StaticPointerModel::sort(int column, Qt::SortOrder order)
 {
     init();
