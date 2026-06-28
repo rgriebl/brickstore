@@ -706,9 +706,11 @@ QString Core::itemHtmlDescription(const Item *item, const Color *color, const QC
         QString pccStr;
         QString altIdStr;
 
-        typeStr = uR"(<i><font color=")" + Utility::textColor(highlight).name()
-                  + uR"(" style="background-color: )" + highlight.name() + uR"(;">&nbsp;)"
-                  + item->itemType()->name() + uR"(&nbsp;</font></i>&nbsp;&nbsp;)";
+        if (const ItemType *itt = item->itemType()) {
+            typeStr = uR"(<i><font color=")" + Utility::textColor(highlight).name()
+                      + uR"(" style="background-color: )" + highlight.name() + uR"(;">&nbsp;)"
+                      + itt->name() + uR"(&nbsp;</font></i>&nbsp;&nbsp;)";
+        }
 
         if (color && color->id()) {
             QColor c = color->color();
