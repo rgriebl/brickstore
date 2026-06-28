@@ -525,7 +525,9 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
                 if (xml.name() != u"Item")
                     throw Exception("Expected Item element, but got: %1").arg(xml.name());
 
-                auto lot = new Lot();
+                // owned here until handed over to bsx below, so a parse exception in between
+                // doesn't leak it
+                auto lot = std::make_unique<Lot>();
                 lot->setIncomplete(new BrickLink::Incomplete);
                 baseValues.clear();
 
@@ -535,7 +537,7 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
                     if (tag != u"DifferenceBaseValues") {
                         auto it = tagHash.find(tag);
                         if (it != tagHash.end())
-                            (*it)(lot, xml.readElementText());
+                            (*it)(lot.get(), xml.readElementText());
                         else
                             xml.skipCurrentElement();
                     } else {
@@ -547,7 +549,7 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
 
                 BrickLink::Incomplete lotIncomplete = *lot->isIncomplete();
 
-                switch (BrickLink::core()->resolveIncomplete(lot, startAtChangelogId, creationTime)) {
+                switch (BrickLink::core()->resolveIncomplete(lot.get(), startAtChangelogId, creationTime)) {
                 case BrickLink::Core::ResolveResult::Fail: bsx.incInvalidLotCount(); break;
                 case BrickLink::Core::ResolveResult::ChangeLog: bsx.incFixedLotCount(); break;
                 default: break;
@@ -579,9 +581,9 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
                         BrickLink::core()->resolveIncomplete(&base, startAtChangelogId, creationTime);
                     }
                 }
-                bsx.addToDifferenceModeBase(lot, base);
+                bsx.addToDifferenceModeBase(lot.get(), base);
 
-                bsx.addLot(std::move(lot));
+                bsx.addLot(lot.release());
             }
         };
 
