@@ -13,6 +13,7 @@
 #include <QDebug>
 #include <QtConcurrent>
 #include <QCborValue>
+#include <QScopeGuard>
 
 #include <QCoro/QCoroFuture>
 
@@ -564,6 +565,16 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
 
     Part *p = m_cache[filename];
     if (!p) {
+        // Break cyclic part references: a part being parsed resolves its sub-parts via
+        // findPart() before it is cached, so a self- or mutual reference would recurse
+        // forever. Bail out if we are already parsing this file further up the stack.
+        if (m_recursionGuard.contains(filename)) {
+            qCWarning(LogLDraw) << "Cyclic LDraw part reference detected for" << filename;
+            return nullptr;
+        }
+        m_recursionGuard.insert(filename);
+        auto removeInProgress = qScopeGuard([this, &filename]() { m_recursionGuard.remove(filename); });
+
         QByteArray data;
 
         if (inZip) {

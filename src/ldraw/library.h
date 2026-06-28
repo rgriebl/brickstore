@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QSet>
 #include <QDateTime>
 #include <QString>
 #include <QByteArray>
@@ -113,6 +114,8 @@ private:
     RefCache<QString, Part> m_cache;  // path -> part
     // (filename, parentdir) -> (resolved filename, resolved parentdir, inZip)
     QHash<std::pair<QString, QString>, std::tuple<QString, QString, bool>> m_lookupCache;
+    // resolved filenames currently being parsed, to break cyclic part references
+    QSet<QString> m_recursionGuard;
 
     QVector<PartLoaderJob *> m_partLoaderJobs;
     QMutex m_partLoaderMutex;
