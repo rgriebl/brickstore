@@ -170,13 +170,14 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
 
             f = std::make_unique<QTemporaryFile>();
 
-            if (f->open(QIODevice::ReadWrite)) {
-                try {
-                    MiniZip::unzip(fn, f.get(), "model2.ldr", "soho0909");
-                    f->close();
-                } catch (const Exception &e) {
-                    throw Exception(tr("Could not open the Studio ZIP container") + u": " + e.errorString());
-                }
+            if (!f->open(QIODevice::ReadWrite))
+                throw Exception(f.get(), tr("Could not create a temporary file to unpack the Studio model"));
+
+            try {
+                MiniZip::unzip(fn, f.get(), "model2.ldr", "soho0909");
+                f->close();
+            } catch (const Exception &e) {
+                throw Exception(tr("Could not open the Studio ZIP container") + u": " + e.errorString());
             }
         } else {
             f = std::make_unique<QFile>(fn);
