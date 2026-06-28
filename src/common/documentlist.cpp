@@ -96,9 +96,13 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
                 }
             });
             if (!clashes.isEmpty()) {
-                QString base = fi.absoluteFilePath();
+                // disambiguate by prepending the shortest parent-directory suffix (up to 10
+                // levels) that is unique among the clashing documents; fall back to the full
+                // path if even that isn't enough
+                const QString dir = fi.absolutePath();
+                bool disambiguated = false;
                 for (int i = 0; i < 10; ++i) {
-                    QString minBase = base.section(u'/', -1 - i, -1);
+                    const QString minBase = dir.section(u'/', -1 - i, -1);
                     bool noClash = true;
 
                     for (const auto &clash : std::as_const(clashes)) {
@@ -109,10 +113,12 @@ QVariant DocumentList::data(const QModelIndex &index, int role) const
                     }
                     if (noClash) {
                         s = minBase + u'/' + s;
+                        disambiguated = true;
                         break;
                     }
                 }
-                s = fi.absoluteFilePath();
+                if (!disambiguated)
+                    s = fi.absoluteFilePath();
             }
 #endif
         }
