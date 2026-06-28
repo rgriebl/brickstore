@@ -988,6 +988,10 @@ InventoryModel *QmlBrickLink::inventoryModel(InventoryModel::Mode mode, const QV
 
     auto *iim = new InventoryModel(mode, list, nullptr);
     iim->sort(0, Qt::DescendingOrder);
+    // QML owns this model: it is created fresh per call with no C++ owner, and the QML caller keeps
+    // it alive. Make that explicit so it is not "corrected" to CppOwnership.
+    // This is in contrast to priceGuide()/picture() above, which return cache-owned singletons.
+    QQmlEngine::setObjectOwnership(iim, QQmlEngine::JavaScriptOwnership);
     return iim;
 }
 
