@@ -1110,7 +1110,7 @@ QHash<Order *, QString> Orders::parseOrdersXML(const QByteArray &data_)
             pos = fixed.indexOf('&', pos);
             if (pos >= 0) {
                 bool doReplace = true;
-                for (qsizetype i = 0; i < 6; ++i) {
+                for (qsizetype i = 0; (i < 6) && ((pos + i + 1) < fixed.size()); ++i) {
                     const char c = fixed.at(pos + i + 1);
                     if (c == ';') {
                         doReplace = false;
