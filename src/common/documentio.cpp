@@ -308,7 +308,7 @@ bool DocumentIO::parseLDrawModelInternal(QFile *f, bool isStudio, const QString 
                 const auto split = QStringView{line}.split(u' ', Qt::SkipEmptyParts);
                 auto strPosition = [line](QStringView sv) { return sv.constData() - line.constData(); };
 
-                if ((split.count() >= 2) && (split.at(1) == u"FILE")) {
+                if ((split.count() >= 3) && (split.at(1) == u"FILE")) {
                     is_mpd = true;
                     current_mpd_model = line.mid(strPosition(split.at(2))).toLower();
                     current_mpd_index++;
