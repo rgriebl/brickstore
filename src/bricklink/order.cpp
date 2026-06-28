@@ -746,7 +746,10 @@ Orders::Orders(Core *core)
                     success = false;
                     message = tr("Could not parse the received order XML data") + u": " + e.errorString();
                 }
-                d->m_db.commit();
+                if (success)
+                    d->m_db.commit();
+                else
+                    d->m_db.rollback();
 
                 qDeleteAll(orders.keyBegin(), orders.keyEnd());
             }
