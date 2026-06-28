@@ -1782,6 +1782,8 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
             document->setThumbnail(thumbnail->image());
         } else if ((thumbnail->updateStatus() == BrickLink::UpdateStatus::Loading)
                    || (thumbnail->updateStatus() == BrickLink::UpdateStatus::Updating)) {
+            // Note: if the document is closed before the picture finishes loading, this connection
+            // never fires and we leak conn plus one reference on thumbnail. This is rare and minor.
             auto *conn = new QMetaObject::Connection;
             *conn = connect(BrickLink::core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
                             document, [=](BrickLink::Picture *pic) {
