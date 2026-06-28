@@ -137,6 +137,7 @@ Capture::Capture(QObject *parent)
         if (!d->currentCaptureId.has_value() || d->currentCaptureId.value() != id) {
             qCCritical(LogScanner) << "Ignoring errorOccurred(id:" << id << "), current:"
                                    << d->currentCaptureId.value_or(-1);
+            return;
         }
         d->currentCaptureId.reset();
         d->lastError = errorString;
@@ -154,6 +155,7 @@ Capture::Capture(QObject *parent)
         if (!d->currentCaptureId.has_value() || d->currentCaptureId.value() != id) {
             qCCritical(LogScanner) << "Ignoring imageCaptured(id:" << id << "), current:"
                                    << d->currentCaptureId.value_or(-1);
+            return;
         }
         d->currentCaptureId.reset();
         d->currentScanId = core()->scan(img, d->currentFilter, d->currentBackendId);
@@ -276,7 +278,7 @@ Capture::State Capture::state() const
 
 void Capture::setState(State newState)
 {
-    qWarning() << "NEW STATE" << newState << "[[ OLD STATE" << d->state << "]]";
+    qCDebug(LogScanner) << "New state:" << newState << "(was" << d->state << ')';
 
     switch (newState) {
     case State::Idle:
