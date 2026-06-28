@@ -984,7 +984,7 @@ Core::ResolveResult Core::resolveIncomplete(Lot *lot, uint startAtChangelogId, c
     const Item *item = nullptr;
     const Color *color = nullptr;
 
-    if (tryToResolveItem)
+    if (tryToResolveItem && (resolvedItemTypeAndId.size() > 1))
         item = core()->item(resolvedItemTypeAndId.at(0), resolvedItemTypeAndId.mid(1));
     if (tryToResolveColor)
         color = core()->color(resolvedColorId);
