@@ -427,6 +427,11 @@ void Database::read(const QString &fileName)
                 .arg(f.fileName());
         }
 
+        // The chunks above are validated for size, but the cross-reference indices that items and
+        // matches hold into the other collections are not
+        checkIndexConsistency(items, relationshipMatches, colors.size(), categories.size(),
+                              itemTypes.size(), f.fileName());
+
         m_colors = std::move(colors);
         m_ldrawExtraColors = std::move(ldrawExtraColors);
         m_categories = std::move(categories);
@@ -764,6 +769,68 @@ void Database::readItemFromDatabase(Item &item, QDataStream &dataStream, MemoryR
     dataStream >> item.m_dimensions.deserialize(pool);
     dataStream >> item.m_pccs.deserialize(pool);
     dataStream >> item.m_alternateIds.deserialize(pool);
+}
+
+/*! Validates that all the cross-reference indices the items and matches hold into the other
+    collections are within bounds. Throws an Exception on the first out-of-range index, so a
+    corrupt download is rejected instead of causing an out-of-bounds access later on.
+*/
+void Database::checkIndexConsistency(const std::vector<Item> &items,
+                                     const std::vector<RelationshipMatch> &relationshipMatches,
+                                     size_t colorCount, size_t categoryCount,
+                                     size_t itemTypeCount, const QString &fileName)
+{
+    // 0xf / 0xfff are the "none" sentinels for the item-type and default-color bitfields
+    // (see Item::itemType() / Item::defaultColor()); all other indices must be in range.
+    auto indexCheck = [&fileName](quint64 index, size_t count, const char *what) {
+        if (index >= count) {
+            throw Exception("invalid database (%1): %2 index %L3 is out of range (%L4)")
+                .arg(fileName).arg(QLatin1String(what)).arg(index).arg(count);
+        }
+    };
+
+    for (const Item &item : items) {
+        if (item.m_itemTypeIndex != 0xf)
+            indexCheck(item.m_itemTypeIndex, itemTypeCount, "item-type");
+        if (item.m_defaultColorIndex != 0xfff)
+            indexCheck(item.m_defaultColorIndex, colorCount, "default-color");
+
+        for (const quint16 ci : item.m_categoryIndexes)
+            indexCheck(ci, categoryCount, "category");
+        for (const quint16 ci : item.m_knownColorIndexes)
+            indexCheck(ci, colorCount, "known-color");
+
+        for (const Item::ConsistsOf &co : item.m_consists_of) {
+            indexCheck(co.m_itemIndex, items.size(), "consists-of item");
+            indexCheck(co.m_colorIndex, colorCount, "consists-of color");
+        }
+        for (const Item::PCC &pcc : item.m_pccs)
+            indexCheck(pcc.m_colorIndex, colorCount, "PCC color");
+
+        // m_appears_in is a two-level structure (see Item::appearsIn()): a color-header record
+        // (m_colorBits) followed by m_colorSize item records (m_itemBits). Validate the indices
+        // and that the nested sizes stay within the array.
+        const auto begin = item.m_appears_in.cbegin();
+        const auto end = item.m_appears_in.cend();
+        for (auto it = begin; it != end; ) {
+            indexCheck(it->m_colorBits.m_colorIndex, colorCount, "appears-in color");
+            const quint32 vectorSize = it->m_colorBits.m_colorSize;
+            ++it;
+            if (vectorSize > quint32(end - it)) {
+                throw Exception("invalid database (%1): appears-in record size %L2 exceeds the array")
+                    .arg(fileName).arg(vectorSize);
+            }
+            for (quint32 i = 0; i < vectorSize; ++i, ++it)
+                indexCheck(it->m_itemBits.m_itemIndex, items.size(), "appears-in item");
+        }
+    }
+
+    // m_relationshipMatchIds holds match ids (resolved via the bounds-safe Core::relationshipMatch()),
+    // not array indices - but a match's own m_itemIndexes do index into the items vector.
+    for (const RelationshipMatch &match : relationshipMatches) {
+        for (const uint idx : match.m_itemIndexes)
+            indexCheck(idx, items.size(), "relationship-match item");
+    }
 }
 
 void Database::writeItemToDatabase(const Item &item, QDataStream &dataStream, Version v) const

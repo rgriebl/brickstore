@@ -140,6 +140,11 @@ private:
     static void readApiKeyFromDatabase(QByteArray &id, QString &key, QDataStream &dataStream, MemoryResource *pool);
     void writeApiKeyToDatabase(const QByteArray &id, const QString &key, QDataStream &dataStream, Version v) const;
 
+    static void checkIndexConsistency(const std::vector<Item> &items,
+                                      const std::vector<RelationshipMatch> &relationshipMatches,
+                                      size_t colorCount, size_t categoryCount,
+                                      size_t itemTypeCount, const QString &fileName);
+
 };
 
 } // namespace BrickLink
