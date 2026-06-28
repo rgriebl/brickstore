@@ -111,13 +111,16 @@ SystemInfo::SystemInfo()
     p.waitForFinished(3000);
 
     auto json = QJsonDocument::fromJson(p.readAllStandardOutput());
-    auto o = json.object().value(u"SPDisplaysDataType"_qs).toArray().first().toObject();
-    gpuName = o.value(u"sppci_model"_qs).toString();
-    auto vendorIdString = o.value(u"spdisplays_vendor-id"_qs).toString();
-    if (!vendorIdString.isEmpty())
-        gpuVendorId = vendorIdString.toUInt(nullptr, 16);
-    else
-        gpuVendorName = o.value(u"spdisplays_vendor"_qs).toString();
+    const auto displays = json.object().value(u"SPDisplaysDataType"_qs).toArray();
+    if (!displays.isEmpty()) {
+        auto o = displays.first().toObject();
+        gpuName = o.value(u"sppci_model"_qs).toString();
+        auto vendorIdString = o.value(u"spdisplays_vendor-id"_qs).toString();
+        if (!vendorIdString.isEmpty())
+            gpuVendorId = vendorIdString.toUInt(nullptr, 16);
+        else
+            gpuVendorName = o.value(u"spdisplays_vendor"_qs).toString();
+    }
 #  endif
 #elif defined(Q_OS_WINDOWS)
     // memory
