@@ -228,6 +228,11 @@ void DesktopApplication::checkRestart()
 #endif
 }
 
+bool DesktopApplication::isWaitingForUserInput() const
+{
+    return QApplication::activeModalWidget() != nullptr;
+}
+
 DeveloperConsole *DesktopApplication::developerConsole()
 {
     if (!m_devConsole) {

@@ -9,6 +9,10 @@
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQuick/private/qquickflickable_p.h>
+#include <QtQuick/QQuickWindow>
+#include <QtQuickTemplates2/private/qquickpopup_p.h>
+#include <QtQuickTemplates2/private/qquickoverlay_p.h>
+#include <QtQuickTemplates2/private/qquickoverlay_p_p.h>
 
 #include "common/actionmanager.h"
 #include "common/document.h"
@@ -136,6 +140,26 @@ void MobileApplication::setupLogging()
 QCoro::Task<bool> MobileApplication::closeAllDocuments()
 {
     return Application::closeAllDocuments();
+}
+
+bool MobileApplication::isWaitingForUserInput() const
+{
+    // There is no public API for "a modal popup is open", so we mirror what Qt Quick
+    // Controls does internally (see QQuickOverlay): scan every window's overlay for a
+    // popup that is both visible and modal.
+    const auto windows = QGuiApplication::topLevelWindows();
+    for (QWindow *w : windows) {
+        if (auto *qw = qobject_cast<QQuickWindow *>(w)) {
+            if (auto *overlay = QQuickOverlay::overlay(qw)) {
+                const auto allPopups = QQuickOverlayPrivate::get(overlay)->allPopups;
+                for (const QQuickPopup *popup : allPopups) {
+                    if (popup->isVisible() && popup->isModal())
+                        return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 void MobileApplication::setupQml()

@@ -18,6 +18,8 @@ public:
 
     void init() override;
 
+    bool isWaitingForUserInput() const override;
+
 protected:
     QCoro::Task<bool> closeAllDocuments() override;
     void setupQml() override;

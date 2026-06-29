@@ -630,6 +630,8 @@ public:
 
     Q_INVOKABLE QString cacheStats() const;
 
+    Q_REVISION(1, 1) Q_INVOKABLE bool isWaitingForUserInput() const;
+
     Q_INVOKABLE void crash(bool useException) const;
 
 signals:

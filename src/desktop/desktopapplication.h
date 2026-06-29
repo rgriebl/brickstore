@@ -26,6 +26,8 @@ public:
     void checkRestart() override;
     DeveloperConsole *developerConsole();
 
+    bool isWaitingForUserInput() const override;
+
     QCoro::Task<> shutdown();
 
 protected:

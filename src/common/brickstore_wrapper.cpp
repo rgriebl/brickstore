@@ -299,6 +299,15 @@ QString QmlBrickStore::cacheStats() const
                   + u" / " + QString::number(ld.second) + u" lines";
 }
 
+/*! \qmlmethod bool BrickStore::isWaitingForUserInput()
+    \since 1.1
+    \brief Returns \c true if the application is waiting for user input, i.e. a modal popup is open.
+*/
+bool QmlBrickStore::isWaitingForUserInput() const
+{
+    return Application::inst()->isWaitingForUserInput();
+}
+
 void QmlBrickStore::crash(bool useException) const
 {
     if (useException)

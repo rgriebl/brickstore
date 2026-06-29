@@ -69,6 +69,8 @@ public:
 
     virtual QCoro::Task<bool> closeAllDocuments();
 
+    virtual bool isWaitingForUserInput() const = 0;
+
     enum Theme { LightTheme, DarkTheme };
     void setIconTheme(Theme theme);
 
