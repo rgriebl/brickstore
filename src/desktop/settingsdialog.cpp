@@ -41,7 +41,7 @@
 class ActionModel : public QAbstractItemModel
 {
     Q_OBJECT
-public:    
+public:
     enum Option {
         NoOptions = 0x00,
         AddSubMenus = 0x01,
@@ -711,6 +711,21 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 {
     setupUi(this);
 
+    connect(w_tab_list, &QTreeWidget::currentItemChanged,
+            w_tabs, [this](QTreeWidgetItem *current, QTreeWidgetItem *previous) {
+        Q_UNUSED(previous);
+        w_tabs->setCurrentIndex(w_tab_list->indexOfTopLevelItem(current));
+    });
+    connect(w_tabs, &QStackedWidget::currentChanged,
+            w_tab_list, [this](int index) {
+        w_tab_list->setCurrentItem(w_tab_list->topLevelItem(index));
+    });
+    int is = int(w_tab_list->fontMetrics().height() * 1.5);
+    w_tab_list->setIconSize({ is, is });
+    w_tab_list->setUniformRowHeights(true);
+    w_tab_list->resizeColumnToContents(0);
+    w_tab_list->setFixedWidth(w_tab_list->columnWidth(0) + is);
+
     w_font_size_percent->setFixedWidth(w_font_size_percent->width());
     w_icon_size_percent->setFixedWidth(w_icon_size_percent->width());
 
@@ -792,11 +807,13 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
             this, &SettingsDialog::currenciesUpdated);
 
     auto *tokenPasteAction = w_bl_accesstoken->addAction(QIcon::fromTheme(u"edit-paste"_qs), QLineEdit::TrailingPosition);
+    tokenPasteAction->setToolTip(tr("Paste"));
     connect(tokenPasteAction, &QAction::triggered,
             w_bl_accesstoken, [this]() {
         w_bl_accesstoken->setText(QGuiApplication::clipboard()->text());
     });
     auto *tokenClearAction = w_bl_accesstoken->addAction(QIcon::fromTheme(u"edit-clear"_qs), QLineEdit::TrailingPosition);
+    tokenClearAction->setToolTip(tr("Clear"));
     connect(tokenClearAction, &QAction::triggered,
             w_bl_accesstoken, &QLineEdit::clear);
     connect(w_bl_accesstoken, &QLineEdit::textChanged,

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>873</width>
-    <height>688</height>
+    <width>702</width>
+    <height>484</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,19 +16,23 @@
   <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
-   <item>
-    <widget class="QTabWidget" name="w_tabs">
-     <property name="currentIndex">
-      <number>2</number>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="1">
+    <widget class="QDialogButtonBox" name="w_buttons">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
-     <property name="usesScrollButtons">
-      <bool>false</bool>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QStackedWidget" name="w_tabs">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
      <widget class="QWidget" name="general">
-      <attribute name="title">
-       <string>General</string>
-      </attribute>
       <layout class="QFormLayout" name="formLayout_3">
        <property name="fieldGrowthPolicy">
         <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
@@ -180,7 +184,7 @@
        <item row="5" column="1">
         <widget class="QCheckBox" name="w_openbrowser">
          <property name="text">
-          <string>Open a Web-Browser window when exporting to the clipboard</string>
+          <string>Open a Web-Browser when exporting to the clipboard</string>
          </property>
         </widget>
        </item>
@@ -314,9 +318,6 @@
       </layout>
      </widget>
      <widget class="QWidget" name="iface">
-      <attribute name="title">
-       <string>Interface</string>
-      </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
         <widget class="QGroupBox" name="groupBox_2">
@@ -720,9 +721,6 @@
       </layout>
      </widget>
      <widget class="QWidget" name="bricklink">
-      <attribute name="title">
-       <string>BrickLink</string>
-      </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,10">
        <item>
         <widget class="QGroupBox" name="groupBox">
@@ -761,11 +759,20 @@
           </item>
           <item row="1" column="0" colspan="2">
            <widget class="QLabel" name="label_4">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
-             <string>You can get your Token from &lt;a href=&quot;https://bricklink.com/v3/brickstore-access-management.page&quot;&gt;https://bricklink.com/v3/brickstore-access-management.page&lt;/a&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Go to &lt;a href=&quot;https://bricklink.com/v3/brickstore-access-management.page&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#3daee9;&quot;&gt;https://bricklink.com/v3/brickstore-access-management.page&lt;/span&gt;&lt;/a&gt;, click &lt;span style=&quot; font-weight:700;&quot;&gt;Renew Token&lt;/span&gt;, then &lt;span style=&quot; font-weight:700;&quot;&gt;Copy to Clipboard&lt;/span&gt;. Finally 📋 &lt;span style=&quot; font-weight:700;&quot;&gt;Paste&lt;/span&gt; it here above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="textFormat">
              <enum>Qt::TextFormat::RichText</enum>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
             </property>
             <property name="openExternalLinks">
              <bool>true</bool>
@@ -976,9 +983,6 @@
       </layout>
      </widget>
      <widget class="QWidget" name="ldraw">
-      <attribute name="title">
-       <string>LDraw</string>
-      </attribute>
       <layout class="QFormLayout" name="formLayout_2">
        <property name="fieldGrowthPolicy">
         <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
@@ -1188,9 +1192,6 @@
       </layout>
      </widget>
      <widget class="QWidget" name="toolbar">
-      <attribute name="title">
-       <string>Toolbar</string>
-      </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0" colspan="2">
         <widget class="QLabel" name="label_12">
@@ -1302,9 +1303,6 @@
       </layout>
      </widget>
      <widget class="QWidget" name="shortcuts">
-      <attribute name="title">
-       <string>Keyboard</string>
-      </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QLabel" name="label_7">
@@ -1398,14 +1396,97 @@
      </widget>
     </widget>
    </item>
-   <item>
-    <widget class="QDialogButtonBox" name="w_buttons">
-     <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
+   <item row="0" column="0">
+    <widget class="QTreeWidget" name="w_tab_list">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
+     <property name="editTriggers">
+      <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
      </property>
+     <property name="showDropIndicator" stdset="0">
+      <bool>false</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+     </property>
+     <property name="rootIsDecorated">
+      <bool>false</bool>
+     </property>
+     <property name="itemsExpandable">
+      <bool>false</bool>
+     </property>
+     <property name="headerHidden">
+      <bool>true</bool>
+     </property>
+     <attribute name="headerVisible">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="headerMinimumSectionSize">
+      <number>10</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string notr="true">1</string>
+      </property>
+     </column>
+     <item>
+      <property name="text">
+       <string>General</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>:/assets/icons/preferences/desktop.svg</normaloff>:/assets/icons/preferences/desktop.svg</iconset>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Interface</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>:/assets/icons/preferences/desktop-font.svg</normaloff>:/assets/icons/preferences/desktop-font.svg</iconset>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>BrickLink</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>:/assets/icons/brickstore-breeze/generated/bricklink.png</normaloff>:/assets/icons/brickstore-breeze/generated/bricklink.png</iconset>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>LDraw</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>:/assets/icons/preferences/ldraw.png</normaloff>:/assets/icons/preferences/ldraw.png</iconset>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Toolbar</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>:/assets/icons/preferences/desktop-icons.svg</normaloff>:/assets/icons/preferences/desktop-icons.svg</iconset>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Shortcuts</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>:/assets/icons/preferences/desktop-keyboard-shortcut.svg</normaloff>:/assets/icons/preferences/desktop-keyboard-shortcut.svg</iconset>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>
@@ -1456,8 +1537,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>542</x>
-     <y>516</y>
+     <x>723</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -1472,8 +1553,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>602</x>
-     <y>516</y>
+     <x>731</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>567</x>
