@@ -59,6 +59,8 @@ Config::Config()
     m_measurement = (value(u"General/MeasurementSystem"_qs).toString() == u"imperial")
             ? QLocale::ImperialSystem : QLocale::MetricSystem;
 
+    m_mcpPermissions = McpPermissions::fromInt(value(u"MCP/Permissions"_qs, 0).toInt());
+
     try {
         auto utf8at = CredentialsManager::load(u"BrickStore"_qs, u"BrickLink-Access-Token"_qs);
         m_brickLinkAccessToken = QString::fromUtf8(utf8at);
@@ -793,6 +795,33 @@ void Config::setDefaultCurrencyCode(const QString &currencyCode)
 QString Config::defaultCurrencyCode() const
 {
     return value(u"Currency/Default"_qs, u"USD"_qs).toString();
+}
+
+Config::McpPermissions Config::mcpPermissions() const
+{
+    return m_mcpPermissions;
+}
+
+void Config::setMcpPermissions(McpPermissions permissions)
+{
+    if (m_mcpPermissions != permissions) {
+        m_mcpPermissions = permissions;
+        setValue(u"MCP/Permissions"_qs, int(permissions));
+        emit mcpPermissionsChanged(permissions);
+    }
+}
+
+int Config::mcpPort() const
+{
+    return value(u"MCP/Port"_qs, defaultMcpPort).toInt();
+}
+
+void Config::setMcpPort(int port)
+{
+    if (mcpPort() != port) {
+        setValue(u"MCP/Port"_qs, port);
+        emit mcpPortChanged(port);
+    }
 }
 
 #include "moc_config.cpp"

@@ -21,6 +21,9 @@ QT_FORWARD_DECLARE_CLASS(QWindow)
 class Announcements;
 class UndoGroup;
 class SentryInterface;
+#if defined(BS_MCP_SERVER)
+class McpServer;
+#endif
 
 
 class Application : public QObject
@@ -71,6 +74,12 @@ public:
 
     virtual bool isWaitingForUserInput() const = 0;
 
+#if defined(BS_MCP_SERVER)
+    // The port the MCP server is listening on, or 0 if it is not running.
+    quint16 mcpServerPort() const;
+    Q_SIGNAL void mcpServerStateChanged(quint16 port);
+#endif
+
     enum Theme { LightTheme, DarkTheme };
     void setIconTheme(Theme theme);
 
@@ -105,6 +114,12 @@ protected:
 
     QCoro::Task<> setupLDraw();
 
+#if defined(BS_MCP_SERVER)
+    // (Re-)creates the MCP server and registers the tools enabled by the user's
+    // Config::mcpPermissions(). Does nothing if no permission is granted.
+    void setupMcpServer();
+#endif
+
 protected:
     QStringList m_startupErrors;
     QStringList m_startupMessages;
@@ -131,6 +146,10 @@ protected:
     QQmlApplicationEngine *m_engine = nullptr;
     QGuiApplication *m_app = nullptr;
     QPointer<QWindow> m_mainWindow;
+
+#if defined(BS_MCP_SERVER)
+    std::unique_ptr<McpServer> m_mcpServer;
+#endif
 
     static std::unique_ptr<SentryInterface> s_sentryInterface;
 

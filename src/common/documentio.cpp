@@ -127,23 +127,33 @@ QCoro::Task<Document *> DocumentIO::importBrickLinkXML(QString fileName)
     if (fn.isEmpty())
         co_return nullptr;
 
-    QFile f(fn);
-    if (f.open(QIODevice::ReadOnly)) {
-        try {
-            auto result = BrickLink::IO::fromBrickLinkXML(f.readAll(),
-                                                          BrickLink::IO::Hint::PlainOrWanted,
-                                                          f.fileTime(QFile::FileModificationTime));
-            auto *document = Document::create(new DocumentModel(std::move(result))); // Document owns the items now
-            document->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
-            co_return document;
-
-        } catch (const Exception &e) {
-            UIHelpers::warning(tr("Could not parse the XML data.") + u"<br><br>" + e.errorString());
-        }
-    } else {
-        co_await UIHelpers::warning(tr("Could not open file %1 for reading.").arg(CMB_BOLD(fn)));
+    QString error;
+    try {
+        co_return loadBrickLinkXML(fn);
+    } catch (const Exception &e) {
+        error = e.errorString(); // co_await is not allowed inside a catch handler
     }
+    co_await UIHelpers::warning(error);
     co_return nullptr;
+}
+
+Document *DocumentIO::loadBrickLinkXML(const QString &fileName)
+{
+    QFile f(fileName);
+    if (!f.open(QIODevice::ReadOnly))
+        throw Exception(tr("Could not open file %1 for reading.").arg(CMB_BOLD(fileName)));
+
+    try {
+        auto result = BrickLink::IO::fromBrickLinkXML(f.readAll(),
+                                                      BrickLink::IO::Hint::PlainOrWanted,
+                                                      f.fileTime(QFile::FileModificationTime));
+        auto *document = Document::create(new DocumentModel(std::move(result))); // Document owns the items now
+        document->setTitle(tr("Import of %1").arg(QFileInfo(fileName).fileName()));
+        return document;
+
+    } catch (const Exception &e) {
+        throw Exception(tr("Could not parse the XML data.") + u"<br><br>" + e.errorString());
+    }
 }
 
 
@@ -159,53 +169,56 @@ QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
     if (fn.isEmpty())
         co_return nullptr;
 
+    QString error;
     try {
-        std::unique_ptr<QFile> f;
-        bool isStudio = fn.endsWith(u".io");
-
-        if (isStudio) {
-            stopwatch unpack("unpack/decrypt studio zip");
-
-            // this is a zip file - unpack the encrypted model2.ldr (pw: soho0909)
-
-            f = std::make_unique<QTemporaryFile>();
-
-            if (!f->open(QIODevice::ReadWrite))
-                throw Exception(f.get(), tr("Could not create a temporary file to unpack the Studio model"));
-
-            try {
-                MiniZip::unzip(fn, f.get(), "model2.ldr", "soho0909");
-                f->close();
-            } catch (const Exception &e) {
-                throw Exception(tr("Could not open the Studio ZIP container") + u": " + e.errorString());
-            }
-        } else {
-            f = std::make_unique<QFile>(fn);
-        }
-
-        if (!f->open(QIODevice::ReadOnly))
-            throw Exception(f.get(), tr("Could not open LDraw file for reading"));
-
-        auto restoreCursor = qScopeGuard(QGuiApplication::restoreOverrideCursor);
-        QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-        BrickLink::IO::ParseResult pr;
-
-        bool b = DocumentIO::parseLDrawModel(f.get(), isStudio, pr);
-        Document *document = nullptr;
-
-        if (!b || !pr.hasLots())
-            throw Exception(tr("Could not parse the LDraw data"));
-
-        document = Document::create(new DocumentModel(std::move(pr))); // Document owns the items now
-        document->setTitle(tr("Import of %1").arg(QFileInfo(fn).fileName()));
-        co_return document;
-
+        co_return loadLDrawModel(fn);
     } catch (const Exception &e) {
-        UIHelpers::warning(tr("Failed to import the LDraw/Studio model %1")
-                           .arg(QFileInfo(fn).fileName()) + u":<br><br>" + e.errorString());
+        error = e.errorString(); // co_await is not allowed inside a catch handler
     }
+    co_await UIHelpers::warning(tr("Failed to import the LDraw/Studio model %1")
+                                .arg(QFileInfo(fn).fileName()) + u":<br><br>" + error);
     co_return nullptr;
+}
+
+Document *DocumentIO::loadLDrawModel(const QString &fileName)
+{
+    std::unique_ptr<QFile> f;
+    bool isStudio = fileName.endsWith(u".io");
+
+    if (isStudio) {
+        stopwatch unpack("unpack/decrypt studio zip");
+
+        // this is a zip file - unpack the encrypted model2.ldr (pw: soho0909)
+
+        f = std::make_unique<QTemporaryFile>();
+
+        if (!f->open(QIODevice::ReadWrite))
+            throw Exception(f.get(), tr("Could not create a temporary file to unpack the Studio model"));
+
+        try {
+            MiniZip::unzip(fileName, f.get(), "model2.ldr", "soho0909");
+            f->close();
+        } catch (const Exception &e) {
+            throw Exception(tr("Could not open the Studio ZIP container") + u": " + e.errorString());
+        }
+    } else {
+        f = std::make_unique<QFile>(fileName);
+    }
+
+    if (!f->open(QIODevice::ReadOnly))
+        throw Exception(f.get(), tr("Could not open LDraw file for reading"));
+
+    auto restoreCursor = qScopeGuard(QGuiApplication::restoreOverrideCursor);
+    QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    BrickLink::IO::ParseResult pr;
+
+    if (!DocumentIO::parseLDrawModel(f.get(), isStudio, pr) || !pr.hasLots())
+        throw Exception(tr("Could not parse the LDraw data"));
+
+    auto *document = Document::create(new DocumentModel(std::move(pr))); // Document owns the items now
+    document->setTitle(tr("Import of %1").arg(QFileInfo(fileName).fileName()));
+    return document;
 }
 
 bool DocumentIO::parseLDrawModel(QFile *f, bool isStudio, BrickLink::IO::ParseResult &pr)

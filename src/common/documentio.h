@@ -48,6 +48,11 @@ public:
     static QCoro::Task<Document *> importBrickLinkXML(QString fileName = { });
     static QCoro::Task<Document *> importLDrawModel(QString fileName = { });
 
+    // The dialog-free cores of the importers above: these throw an Exception on
+    // failure instead of showing a warning dialog.
+    static Document *loadBrickLinkXML(const QString &fileName);
+    static Document *loadLDrawModel(const QString &fileName);
+
     static QString exportBrickLinkUpdateClipboard(const DocumentModel *doc,
                                                   const LotList &lots);
 

@@ -81,6 +81,14 @@ if (BS_MOBILE)
     )
 endif()
 
+if (BS_MCP_SERVER)
+    target_sources(common_module PRIVATE
+        mcpapi.h
+        mcpapi.cpp
+    )
+    target_link_libraries(common_module PRIVATE mcp_server_module)
+endif()
+
 if (MACOS)
     target_link_libraries(common_module PRIVATE "-framework SystemConfiguration")
     target_sources(common_module PRIVATE

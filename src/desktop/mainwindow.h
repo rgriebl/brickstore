@@ -121,6 +121,9 @@ private:
 
     ProgressCircle *m_progress;
     QWidgetAction *m_progressAction;
+#if defined(BS_MCP_SERVER)
+    QAction *m_mcpStatusAction = nullptr;
+#endif
     QToolBar *m_toolbar;
     QMenu *m_extrasMenu;
     LoadColumnLayoutMenuAdapter *m_loadColumnLayoutMenu;

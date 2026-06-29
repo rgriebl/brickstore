@@ -106,9 +106,11 @@ public:
     // Route handlers
     void onSseConnection(const QHttpServerRequest &request, QHttpServerResponder &responder);
     QHttpServerResponse onMessagePost(const QHttpServerRequest &request);
+    QHttpServerResponse onStreamableHttpPost(const QHttpServerRequest &request);
 
-    // JSON-RPC dispatch
-    void dispatchJsonRpc(McpSession *session, const QJsonObject &rpc);
+    // Computes the JSON-RPC response for a single request object. Returns an empty
+    // object for notifications (which must not be answered).
+    QJsonObject dispatchJsonRpc(const QJsonObject &rpc);
 
     // Method handlers – each returns the "result" value for jsonRpcSuccess
     QJsonObject handleInitialize(const QJsonObject &params) const;
@@ -193,10 +195,17 @@ void McpServerPrivate::setupRoutes()
             onSseConnection(request, responder);
         });
 
-    // Message endpoint: client POSTs JSON-RPC frames here.
+    // Message endpoint: client POSTs JSON-RPC frames here (legacy HTTP+SSE transport).
     httpServer->route(u"/message"_s, QHttpServerRequest::Method::Post,
         [this](const QHttpServerRequest &request) -> QHttpServerResponse {
             return onMessagePost(request);
+        });
+
+    // Streamable HTTP transport (MCP 2025-03-26): request and response share the
+    // root endpoint. This is what current clients default to.
+    httpServer->route(u"/"_s, QHttpServerRequest::Method::Post,
+        [this](const QHttpServerRequest &request) -> QHttpServerResponse {
+            return onStreamableHttpPost(request);
         });
 }
 
@@ -247,15 +256,40 @@ QHttpServerResponse McpServerPrivate::onMessagePost(const QHttpServerRequest &re
     if (!doc.isObject())
         return QHttpServerResponse(QHttpServerResponder::StatusCode::BadRequest);
 
-    dispatchJsonRpc(it->second.get(), doc.object());
+    const QJsonObject response = dispatchJsonRpc(doc.object());
+    if (!response.isEmpty())
+        it->second->sendMessage(response);
 
     return QHttpServerResponse(QHttpServerResponder::StatusCode::Accepted);
+}
+
+// Streamable HTTP transport (MCP 2025-03-26): a single endpoint where the client
+// POSTs a JSON-RPC message and gets the response back in the HTTP body. We do not
+// keep a server-initiated stream open, so GET is answered with 405 and the optional
+// session-id header is not used.
+QHttpServerResponse McpServerPrivate::onStreamableHttpPost(const QHttpServerRequest &request)
+{
+    if (!requestIsLocal(request))
+        return QHttpServerResponse(QHttpServerResponder::StatusCode::Forbidden);
+
+    const QJsonDocument doc = QJsonDocument::fromJson(request.body());
+    if (!doc.isObject())
+        return QHttpServerResponse(QHttpServerResponder::StatusCode::BadRequest);
+
+    const QJsonObject response = dispatchJsonRpc(doc.object());
+
+    // Notifications produce no response body: acknowledge with 202 and no content.
+    if (response.isEmpty())
+        return QHttpServerResponse(QHttpServerResponder::StatusCode::Accepted);
+
+    return QHttpServerResponse("application/json"_ba,
+                               QJsonDocument(response).toJson(QJsonDocument::Compact));
 }
 
 
 // ---- JSON-RPC dispatch -----------------------------------------------------
 
-void McpServerPrivate::dispatchJsonRpc(McpSession *session, const QJsonObject &rpc)
+QJsonObject McpServerPrivate::dispatchJsonRpc(const QJsonObject &rpc)
 {
     const QString method     = rpc[u"method"_s].toString();
     const QJsonValue id      = rpc[u"id"_s];
@@ -264,25 +298,20 @@ void McpServerPrivate::dispatchJsonRpc(McpSession *session, const QJsonObject &r
     // Notifications have no "id" field – they must not receive a response.
     const bool isNotification = !rpc.contains(u"id"_s);
 
-    QJsonObject response;
+    if (method == u"initialize"_s)
+        return jsonRpcSuccess(id, handleInitialize(params));
+    else if (method == u"initialized"_s)
+        return { }; // notification – no response
+    else if (method == u"ping"_s)
+        return jsonRpcSuccess(id, QJsonObject { });
+    else if (method == u"tools/list"_s)
+        return jsonRpcSuccess(id, handleToolsList(params));
+    else if (method == u"tools/call"_s)
+        return jsonRpcSuccess(id, handleToolsCall(params));
 
-    if (method == u"initialize"_s) {
-        response = jsonRpcSuccess(id, handleInitialize(params));
-    } else if (method == u"initialized"_s) {
-        return; // notification – no response
-    } else if (method == u"ping"_s) {
-        response = jsonRpcSuccess(id, QJsonObject { });
-    } else if (method == u"tools/list"_s) {
-        response = jsonRpcSuccess(id, handleToolsList(params));
-    } else if (method == u"tools/call"_s) {
-        response = jsonRpcSuccess(id, handleToolsCall(params));
-    } else {
-        if (isNotification)
-            return;
-        response = jsonRpcError(id, -32601, u"Method not found: "_s + method);
-    }
-
-    session->sendMessage(response);
+    if (isNotification)
+        return { };
+    return jsonRpcError(id, -32601, u"Method not found: "_s + method);
 }
 
 
@@ -290,9 +319,15 @@ void McpServerPrivate::dispatchJsonRpc(McpSession *session, const QJsonObject &r
 
 QJsonObject McpServerPrivate::handleInitialize(const QJsonObject &params) const
 {
-    Q_UNUSED(params)
+    // Echo the client's requested protocol version if it is one we understand,
+    // otherwise offer the newest we support. Both the legacy HTTP+SSE (2024-11-05)
+    // and the Streamable HTTP (2025-03-26) transports share this JSON-RPC layer.
+    static const QStringList supportedVersions { u"2025-03-26"_s, u"2024-11-05"_s };
+    const QString requested = params[u"protocolVersion"_s].toString();
+    const QString version = supportedVersions.contains(requested) ? requested
+                                                                   : supportedVersions.constFirst();
     return QJsonObject {
-        { u"protocolVersion"_s, u"2024-11-05"_s },
+        { u"protocolVersion"_s, version },
         { u"capabilities"_s, QJsonObject {
             { u"tools"_s, QJsonObject { } }
         }},

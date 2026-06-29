@@ -99,8 +99,8 @@ endif()
 
 if (BS_MCP_SERVER)
     target_sources(bricklink_module PRIVATE
-        mcp.h
-        mcp.cpp
+        mcpapi.h
+        mcpapi.cpp
     )
     target_link_libraries(bricklink_module PRIVATE mcp_server_module)
 endif()

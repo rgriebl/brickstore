@@ -23,6 +23,10 @@ public:
         // Convenience constructors
         static Result text(const QString &text);
         static Result error(const QString &message);
+
+        // Returns a PNG-encoded image as an MCP image content block, optionally
+        // preceded by a text caption block.
+        static Result image(const QImage &image, const QString &caption = { });
     };
 
     explicit McpTool(QObject *parent = nullptr);

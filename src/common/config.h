@@ -164,6 +164,25 @@ public:
     QSet<uint> pinnedCategoryIds() const;
     void setPinnedCategoryIds(const QSet<uint> &categories);
 
+    enum class McpPermission {
+        None         = 0x00,
+        CatalogRead  = 0x01,
+        DocumentRead = 0x02,
+        DocumentOpen = 0x04,
+        DocumentEdit = 0x08,
+        DocumentSave = 0x10,
+    };
+    Q_DECLARE_FLAGS(McpPermissions, McpPermission)
+    Q_FLAG(McpPermissions)
+
+    McpPermissions mcpPermissions() const;
+    void setMcpPermissions(McpPermissions permissions);
+
+    static constexpr int defaultMcpPort = 45111;
+
+    int mcpPort() const;
+    void setMcpPort(int port);
+
 signals:
     void languageChanged();
     void measurementSystemChanged(QLocale::MeasurementSystem ms);
@@ -196,6 +215,8 @@ signals:
     void pinnedColorIdsChanged();
     void pinnedCategoryIdsChanged();
     void pinnedRecentFilesChanged();
+    void mcpPermissionsChanged(Config::McpPermissions permissions);
+    void mcpPortChanged(int port);
 
 protected:
     bool parseTranslations() const;
@@ -211,8 +232,9 @@ private:
     mutable QVector<Translation> m_translations;
     QString                    m_lastDirectory;
     mutable QString            m_brickLinkAccessToken;
-
+    McpPermissions             m_mcpPermissions { };
     Q_DISABLE_COPY_MOVE(Config)
 };
 
 Q_DECLARE_METATYPE(Config *)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Config::McpPermissions)

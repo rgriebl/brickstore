@@ -813,7 +813,7 @@ bool MainWindow::setupToolBar()
         actionNames = defaultToolBarActionNames();
 
     actionNames = QStringList { u"go_home"_qs, u"-"_qs } + actionNames
-            + QStringList { u"<>"_qs, u"widget_progress"_qs, u"|"_qs };
+            + QStringList { u"<>"_qs, u"widget_mcp_status"_qs, u"widget_progress"_qs, u"|"_qs };
 
     for (const QString &an : std::as_const(actionNames)) {
         if (an == u"-") {
@@ -833,6 +833,10 @@ bool MainWindow::setupToolBar()
             m_toolbar->addWidget(spacer);
         } else if (an == u"edit_filter_focus") {
             // the old filter control - ignore
+        } else if (an == u"widget_mcp_status") {
+#if defined(BS_MCP_SERVER)
+            m_toolbar->addAction(m_mcpStatusAction);
+#endif
         } else if (an == u"widget_progress") {
             m_toolbar->addAction(m_progressAction);
         } else if (QAction *a = ActionManager::inst()->qAction(an.toLatin1().constData())) {
@@ -1014,6 +1018,22 @@ void MainWindow::createActions()
 
     m_progressAction = new QWidgetAction(this);
     m_progressAction->setDefaultWidget(m_progress);
+
+#if defined(BS_MCP_SERVER)
+    m_mcpStatusAction = new QAction(this);
+    m_mcpStatusAction->setIcon(QIcon(u":/assets/icons/preferences/ai.png"_qs));
+    m_mcpStatusAction->setText(tr("MCP Server"));
+    connect(m_mcpStatusAction, &QAction::triggered,
+            this, [this]() { showSettings(u"ai"_qs); });
+
+    auto updateMcpStatus = [this](quint16 port) {
+        m_mcpStatusAction->setVisible(port != 0);
+        m_mcpStatusAction->setToolTip(tr("The MCP server is listening on port %1").arg(port));
+    };
+    connect(Application::inst(), &Application::mcpServerStateChanged,
+            this, updateMcpStatus);
+    updateMcpStatus(Application::inst()->mcpServerPort());
+#endif
 }
 
 QList<QAction *> MainWindow::contextMenuActions() const

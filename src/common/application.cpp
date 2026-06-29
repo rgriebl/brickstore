@@ -32,7 +32,8 @@
 #endif
 #if defined(BS_MCP_SERVER)
 #  include "mcp-server/mcpserver.h"
-#  include "bricklink/mcp.h"
+#  include "bricklink/mcpapi.h"
+#  include "common/mcpapi.h"
 #endif
 
 #include <QCoro/QCoroSignal>
@@ -365,12 +366,11 @@ void Application::afterInit()
         setupLDraw();
 
 #if defined(BS_MCP_SERVER)
-        auto *mcp = new McpServer(this);
-        mcp->addTool(new BrickLink::CatalogQueryMcpTool());
-        mcp->addTool(new BrickLink::CatalogSchemaMcpTool());
-        mcp->listen(QHostAddress::LocalHost, 12345);
-
-        qInfo() << "Started MCP server on port" << mcp->serverPort();
+        connect(Config::inst(), &Config::mcpPermissionsChanged,
+                this, &Application::setupMcpServer);
+        connect(Config::inst(), &Config::mcpPortChanged,
+                this, &Application::setupMcpServer);
+        setupMcpServer();
 #endif
     };
 
@@ -417,6 +417,67 @@ QCoro::Task<> Application::restoreLastSession()
         }
     }
 }
+
+#if defined(BS_MCP_SERVER)
+
+void Application::setupMcpServer()
+{
+    const auto perms = Config::inst()->mcpPermissions();
+
+    // Start from scratch every time: the set of registered tools and the port
+    // depend on settings, which can change via the settings dialog.
+    m_mcpServer.reset();
+
+    if (perms == Config::McpPermissions()) {
+        emit mcpServerStateChanged(0);
+        return;
+    }
+
+    m_mcpServer = std::make_unique<McpServer>(this);
+
+    if (perms & Config::McpPermission::CatalogRead) {
+        m_mcpServer->addTool(new BrickLink::CatalogQueryMcpTool());
+        m_mcpServer->addTool(new BrickLink::CatalogSchemaMcpTool());
+        m_mcpServer->addTool(new BrickLink::CatalogPriceGuideMcpTool());
+        m_mcpServer->addTool(new BrickLink::CatalogPictureMcpTool());
+    }
+    if (perms & Config::McpPermission::DocumentRead) {
+        m_mcpServer->addTool(new DocumentListMcpTool());
+        m_mcpServer->addTool(new DocumentReadMcpTool());
+    }
+    if (perms & Config::McpPermission::DocumentOpen) {
+        m_mcpServer->addTool(new DocumentCreateMcpTool());
+        m_mcpServer->addTool(new DocumentOpenMcpTool());
+        m_mcpServer->addTool(new DocumentImportBrickLinkXmlMcpTool());
+        m_mcpServer->addTool(new DocumentImportLDrawMcpTool());
+        m_mcpServer->addTool(new DocumentImportPartInventoryMcpTool());
+    }
+    if (perms & Config::McpPermission::DocumentEdit) {
+        m_mcpServer->addTool(new DocumentAddLotsMcpTool());
+        m_mcpServer->addTool(new DocumentEditLotsMcpTool());
+        m_mcpServer->addTool(new DocumentRemoveLotsMcpTool());
+    }
+    if (perms & Config::McpPermission::DocumentSave) {
+        m_mcpServer->addTool(new DocumentSaveMcpTool());
+        m_mcpServer->addTool(new DocumentExportBrickLinkXmlMcpTool());
+    }
+
+    const auto port = quint16(Config::inst()->mcpPort());
+    if (m_mcpServer->listen(QHostAddress::LocalHost, port)) {
+        qInfo() << "Started MCP server on port" << m_mcpServer->serverPort();
+    } else {
+        qWarning() << "Could not start the MCP server on port" << port;
+        m_mcpServer.reset();
+    }
+    emit mcpServerStateChanged(mcpServerPort());
+}
+
+quint16 Application::mcpServerPort() const
+{
+    return m_mcpServer ? m_mcpServer->serverPort() : 0;
+}
+
+#endif // BS_MCP_SERVER
 
 QCoro::Task<> Application::setupLDraw()
 {

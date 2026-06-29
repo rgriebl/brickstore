@@ -30,6 +30,7 @@
 #include "bricklink/core.h"
 #include "bricklink/priceguide.h"
 #include "common/actionmanager.h"
+#include "common/application.h"
 #include "common/config.h"
 #include "common/currency.h"
 #include "ldraw/library.h"
@@ -1002,6 +1003,13 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
         w_sc_list->expandAll();
     });
 
+    w_mcpPort->setValidator(new QIntValidator(1025, 65535, w_mcpPort));
+    auto *mcpPortResetAction = w_mcpPort->addAction(QIcon::fromTheme(u"edit-undo"_qs),
+                                                    QLineEdit::TrailingPosition);
+    mcpPortResetAction->setToolTip(tr("Reset to default"));
+    connect(mcpPortResetAction, &QAction::triggered,
+            w_mcpPort, [this]() { w_mcpPort->setText(QString::number(Config::defaultMcpPort)); });
+
     load();
 
     QWidget *w = w_tabs->widget(0);
@@ -1150,6 +1158,23 @@ void SettingsDialog::load()
 
     // --[ SHORTCUTS ]-------------------------------------------------
 
+    // --[ AI ]--------------------------------------------------------
+
+    w_mcpServer->setChecked(Config::inst()->mcpPermissions() != Config::McpPermissions());
+    w_mcpRead->setChecked(Config::inst()->mcpPermissions() & Config::McpPermission::DocumentRead);
+    w_mcpOpen->setChecked(Config::inst()->mcpPermissions() & Config::McpPermission::DocumentOpen);
+    w_mcpEdit->setChecked(Config::inst()->mcpPermissions() & Config::McpPermission::DocumentEdit);
+    w_mcpSave->setChecked(Config::inst()->mcpPermissions() & Config::McpPermission::DocumentSave);
+    w_mcpPort->setText(QString::number(Config::inst()->mcpPort()));
+
+#if defined(BS_MCP_SERVER)
+    if (quint16 port = Application::inst()->mcpServerPort())
+        w_mcpStatus->setText(tr("The MCP server is running on port %1.").arg(port));
+    else
+        w_mcpStatus->setText(tr("The MCP server is not running."));
+#else
+    w_mcpStatus->setText(tr("This build does not support the MCP server."));
+#endif
 }
 
 
@@ -1220,6 +1245,25 @@ void SettingsDialog::save()
     // --[ SHORTCUTS ]-----------------------------------------------------------------
 
     m_sc_model->apply();
+
+    // --[ AI ]--------------------------------------------------------
+
+    Config::McpPermissions mcpPermissions { };
+
+    if (w_mcpServer->isChecked()) {
+        mcpPermissions |= Config::McpPermission::CatalogRead;
+        if (w_mcpRead->isChecked())
+            mcpPermissions |= Config::McpPermission::DocumentRead;
+        if (w_mcpOpen->isChecked())
+            mcpPermissions |= Config::McpPermission::DocumentOpen;
+        if (w_mcpEdit->isChecked())
+            mcpPermissions |= Config::McpPermission::DocumentEdit;
+        if (w_mcpSave->isChecked())
+            mcpPermissions |= Config::McpPermission::DocumentSave;
+    }
+    if (int port = w_mcpPort->text().toInt(); (port >= 1025) && (port <= 65535))
+        Config::inst()->setMcpPort(port);
+    Config::inst()->setMcpPermissions(mcpPermissions);
 }
 
 void SettingsDialog::checkLDrawDir()
