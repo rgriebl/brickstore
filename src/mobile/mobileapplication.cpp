@@ -21,7 +21,7 @@
 #include "mobileapplication.h"
 #include "mobileuihelpers.h"
 #include "mobilefileopenhandler.h"
-#include "common/brickstore_wrapper.h"
+#include "common/qmlapi.h"
 
 #if defined(Q_OS_ANDROID)
 #  include <android/api-level.h>

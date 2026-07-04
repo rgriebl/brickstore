@@ -33,9 +33,9 @@ qt_add_library(common_module STATIC
     uihelpers.cpp
     uihelpers.h
 
-    brickstore_wrapper.cpp
-    brickstore_wrapper_p.h
-    brickstore_wrapper.h
+    qmlapi.cpp
+    qmlapi_p.h
+    qmlapi.h
     printjob.cpp
     printjob.h
     script.cpp

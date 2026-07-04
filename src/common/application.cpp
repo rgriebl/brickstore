@@ -54,7 +54,7 @@
 #include "common/recentfiles.h"
 #include "common/uihelpers.h"
 #include "ldraw/library.h"
-#include "common/brickstore_wrapper.h"
+#include "common/qmlapi.h"
 #include "common/currency.h"
 #include "common/eventfilter.h"
 #include "utility/appstatistics.h"

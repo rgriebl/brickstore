@@ -25,8 +25,8 @@
 #include "common/documentmodel.h"
 #include "common/documentio.h"
 #include "common/recentfiles.h"
-#include "brickstore_wrapper.h"
-#include "brickstore_wrapper_p.h"
+#include "qmlapi.h"
+#include "qmlapi_p.h"
 #include "version.h"
 
 using namespace std::chrono_literals;
@@ -1536,5 +1536,5 @@ QVariant QmlExtraConfig::readProperty(const QMetaProperty &property) const
 }
 
 
-#include "moc_brickstore_wrapper.cpp"
-#include "moc_brickstore_wrapper_p.cpp"
+#include "moc_qmlapi.cpp"
+#include "moc_qmlapi_p.cpp"

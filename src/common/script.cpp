@@ -6,7 +6,7 @@
 #include <QQmlContext>
 
 #include "utility/exception.h"
-#include "brickstore_wrapper.h"
+#include "qmlapi.h"
 #include "printjob.h"
 #include "script.h"
 
