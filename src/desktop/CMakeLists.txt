@@ -24,6 +24,8 @@ qt_add_library(desktop_module STATIC
     consolidatedialog.cpp
     consolidatedialog.h
     consolidatedialog.ui
+    csvimportdialog.cpp
+    csvimportdialog.h
     desktopapplication.cpp
     desktopapplication.h
     desktopuihelpers.cpp

@@ -12,6 +12,8 @@ qt_add_library(common_module STATIC
     checkforupdates.h
     config.cpp
     config.h
+    csvimport.cpp
+    csvimport.h
     document.cpp
     document.h
     documentio.cpp

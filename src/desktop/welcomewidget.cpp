@@ -146,7 +146,8 @@ WelcomeWidget::WelcomeWidget(QWidget *parent)
          "document_import_bl_cart",
          "document_import_bl_wanted",
          "document_import_ldraw_model",
-         "document_import_bl_xml" }) {
+         "document_import_bl_xml",
+         "document_import_csv" }) {
         auto b = new BetterCommandButton(ActionManager::inst()->qAction(name));
         b->setFocusPolicy(Qt::NoFocus);
         import_layout->addWidget(b);

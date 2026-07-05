@@ -4,9 +4,12 @@
 #pragma once
 
 #include <QCoreApplication>
+#include <QStringConverter>
+#include <optional>
 #include "bricklink/global.h"
 #include "bricklink/io.h"
 #include "bricklink/lot.h"
+#include "common/csvimport.h"
 
 #include <QCoro/QCoroTask>
 
@@ -52,6 +55,10 @@ public:
     // failure instead of showing a warning dialog.
     static Document *loadBrickLinkXML(const QString &fileName);
     static Document *loadLDrawModel(const QString &fileName);
+    static Document *loadCSV(const QString &fileName, const QList<CsvImport::Field> &mapping,
+                            QChar delimiter = u',', QChar quote = u'"',
+                            std::optional<QStringConverter::Encoding> encoding = { },
+                            const CsvImport::Options &options = { });
 
     static QString exportBrickLinkUpdateClipboard(const DocumentModel *doc,
                                                   const LotList &lots);

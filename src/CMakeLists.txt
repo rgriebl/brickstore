@@ -17,6 +17,8 @@ target_sources(${PROJECT_NAME} PUBLIC
     utility/chunkwriter.h
     utility/credentialsmanager.cpp
     utility/credentialsmanager.h
+    utility/csvtokenizer.cpp
+    utility/csvtokenizer.h
     utility/exception.cpp
     utility/exception.h
     utility/memoryresource.cpp

@@ -67,6 +67,7 @@
 #include "settingsdialog.h"
 #include "systeminfodialog.h"
 #include "consolidatedialog.h"
+#include "csvimportdialog.h"
 
 
 using namespace std::chrono_literals;
@@ -575,16 +576,20 @@ void MainWindow::setupMenuBar()
 
     setupMenu("document_import", {
                   "document_import_bl_inv",
+                  "-",
                   "document_import_bl_store_inv",
                   "document_import_bl_order",
                   "document_import_bl_cart",
                   "document_import_bl_wanted",
+                  "-",
                   "document_import_ldraw_model",
                   "document_import_bl_xml",
+                  "document_import_csv",
               });
 
     setupMenu("document_export", {
                   "document_export_bl_xml",
+                  "-",
                   "document_export_bl_xml_clip",
                   "document_export_bl_update_clip",
                   "document_export_bl_invreq_clip",
@@ -957,6 +962,26 @@ void MainWindow::createActions()
               if (!m_importwanted_dialog)
                   m_importwanted_dialog = new ImportWantedListDialog(this);
               m_importwanted_dialog->show();
+          } },
+        { "document_import_csv", [this](bool) -> QCoro::Task<> {
+              auto fn = co_await UIHelpers::getOpenFileName(
+                  {{ tr("CSV / Text files"), { u"csv"_qs, u"tsv"_qs, u"txt"_qs } }}, tr("Import File"));
+              if (!fn)
+                  co_return;
+
+              CsvImportDialog dlg(*fn, this);
+              if (dlg.exec() != QDialog::Accepted)
+                  co_return;
+
+              QString error;
+              try {
+                  DocumentIO::loadCSV(dlg.fileName(), dlg.mapping(), dlg.delimiter(),
+                                      dlg.quote(), dlg.encoding(), dlg.options());
+              } catch (const Exception &e) {
+                  error = e.errorString(); // co_await is not allowed inside a catch handler
+              }
+              if (!error.isEmpty())
+                  co_await UIHelpers::warning(error);
           } },
         { "application_exit", [this](bool) { close(); } },
         { "edit_additems", [this](bool) {

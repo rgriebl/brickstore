@@ -359,6 +359,8 @@ void ActionManager::initialize()
     a->m_iconName = "love-amarok";
     A("document_import_ldraw_model",    QT_TR_NOOP("LDraw or Studio Model..."),                   QT_TR_NOOP("Ctrl+I,Ctrl+L", "File|Import LDraw Model"));
     a->m_iconName = "bricklink-studio";
+    A("document_import_csv",            QT_TR_NOOP("CSV File..."),                                QT_TR_NOOP("Ctrl+I,Ctrl+V", "File|Import CSV"));
+    a->m_iconName = "document-csv";
     A("document_export",                QT_TR_NOOP("Export"), NoNeed, FlagMenu);
     A("document_export_bl_xml",         QT_TR_NOOP("BrickLink XML..."),                           QT_TR_NOOP("Ctrl+E,Ctrl+X", "File|Import BrickLink XML"),             NeedDocument | NeedLots);
     A("document_export_bl_xml_clip",    QT_TR_NOOP("BrickLink Mass-Upload XML to Clipboard"),     QT_TR_NOOP("Ctrl+E,Ctrl+U", "File|Import BrickLink Mass-Upload"),     NeedDocument | NeedLots);
@@ -573,7 +575,7 @@ void ActionManager::retranslate()
                 a.m_defaultShortcuts = QKeySequence::listFromString(a.m_transShortcut);
 
                 if (a.m_customShortcut.isEmpty()) {
-                    a.m_shortcuts = a.m_defaultShortcuts;                    
+                    a.m_shortcuts = a.m_defaultShortcuts;
                     updateShortcuts(&a);
                 }
             }

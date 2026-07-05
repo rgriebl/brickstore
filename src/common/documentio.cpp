@@ -11,11 +11,13 @@
 #include <QTemporaryFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
+#include <QStringConverter>
 #include <QDebug>
 
 #include "utility/exception.h"
 #include "utility/utility.h"
 #include "utility/stopwatch.h"
+#include "utility/csvtokenizer.h"
 #include "minizip/minizip.h"
 #include "bricklink/cart.h"
 #include "bricklink/core.h"
@@ -156,6 +158,37 @@ Document *DocumentIO::loadBrickLinkXML(const QString &fileName)
     }
 }
 
+Document *DocumentIO::loadCSV(const QString &fileName, const QList<CsvImport::Field> &mapping,
+                              QChar delimiter, QChar quote,
+                              std::optional<QStringConverter::Encoding> encoding,
+                              const CsvImport::Options &options)
+{
+    QFile f(fileName);
+    if (!f.open(QIODevice::ReadOnly))
+        throw Exception(tr("Could not open file %1 for reading.").arg(CMB_BOLD(fileName)));
+
+    try {
+        const QByteArray bytes = f.readAll();
+        // "Automatic": honour a BOM, otherwise fall back to UTF-8 (Qt cannot reliably
+        // detect legacy 8-bit code pages, so let the caller override for those).
+        const auto enc = encoding.value_or(QStringConverter::encodingForData(bytes)
+                                               .value_or(QStringConverter::Utf8));
+        const QString text = QStringDecoder(enc).decode(bytes);
+
+        const CsvTokenizer::ParseResult tokens = CsvTokenizer::tokenize(text, delimiter, quote);
+
+        CsvImport::Options opts = options;
+        opts.creationTime = f.fileTime(QFile::FileModificationTime);
+        auto result = CsvImport::toLots(tokens.rows, mapping, opts);
+
+        auto *document = Document::create(new DocumentModel(std::move(result))); // Document owns the items now
+        document->setTitle(tr("Import of %1").arg(QFileInfo(fileName).fileName()));
+        return document;
+
+    } catch (const Exception &e) {
+        throw Exception(tr("Could not parse the CSV data.") + u"<br><br>" + e.errorString());
+    }
+}
 
 QCoro::Task<Document *> DocumentIO::importLDrawModel(QString fileName)
 {
