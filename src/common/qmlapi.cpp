@@ -6,6 +6,7 @@
 #include <QQmlContext>
 #include <QQmlInfo>
 #include <QFile>
+#include <QSaveFile>
 #include <QUrl>
 #include <QGuiApplication>
 #include <QPalette>
@@ -25,6 +26,7 @@
 #include "common/documentmodel.h"
 #include "common/documentio.h"
 #include "common/recentfiles.h"
+#include "common/uihelpers.h"
 #include "qmlapi.h"
 #include "qmlapi_p.h"
 #include "version.h"
@@ -306,6 +308,60 @@ QString QmlBrickStore::cacheStats() const
 bool QmlBrickStore::isWaitingForUserInput() const
 {
     return Application::inst()->isWaitingForUserInput();
+}
+
+/*! \qmlmethod var BrickStore::saveTextFileAs(string contents, string suggestedName, string filterName, list<string> extensions)
+    \since 1.1
+    \brief Asks the user for a file name and saves \a contents to it as UTF-8 encoded text.
+
+    The save dialog is seeded with \a suggestedName and offers a single filter named \a filterName
+    that matches the given \a extensions (e.g. \c{["csv"]}). The first extension is appended
+    automatically if the chosen name lacks one.
+
+    Returns a task that resolves to \c true on success, or to \c false if the user canceled the
+    dialog or the file could not be written.
+*/
+QCoro::QmlTask QmlBrickStore::saveTextFileAs(const QString &contents, const QString &suggestedName,
+                                             const QString &filterName, const QStringList &extensions)
+{
+    // QmlTask is not a coroutine type itself, so the co_await logic lives in a captureless
+    // coroutine lambda taking its arguments by value (copied into the coroutine frame).
+    return [](QString contents, QString suggestedName, QString filterName,
+              QStringList extensions) -> QCoro::Task<bool> {
+        const QList<QPair<QString, QStringList>> filters { { filterName, extensions } };
+
+        QString fn;
+        if (auto f = co_await UIHelpers::getSaveFileName(suggestedName, filters,
+                                                         tr("Save File"))) {
+            fn = *f;
+        }
+        if (fn.isEmpty())
+            co_return false;
+
+#if !defined(Q_OS_ANDROID)
+        if (!extensions.isEmpty()) {
+            const QString suffix = u"." + extensions.constFirst();
+            if (!fn.endsWith(suffix, Qt::CaseInsensitive))
+                fn = fn + suffix;
+        }
+#endif
+
+        const QByteArray data = contents.toUtf8();
+        QSaveFile f(fn);
+        f.setDirectWriteFallback(true);
+        try {
+            if (!f.open(QIODevice::WriteOnly))
+                throw Exception(tr("Failed to open file %1 for writing."));
+            if (f.write(data.data(), data.size()) != qint64(data.size()))
+                throw Exception(tr("Failed to save data to file %1."));
+            if (!f.commit())
+                throw Exception(tr("Failed to save data to file %1."));
+        } catch (const Exception &e) {
+            UIHelpers::warning(e.errorString().arg(f.fileName()) + u"<br><br>" + f.errorString());
+            co_return false;
+        }
+        co_return true;
+    }(contents, suggestedName, filterName, extensions);
 }
 
 void QmlBrickStore::crash(bool useException) const

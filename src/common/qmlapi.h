@@ -632,6 +632,11 @@ public:
 
     Q_REVISION(1, 1) Q_INVOKABLE bool isWaitingForUserInput() const;
 
+    Q_REVISION(1, 1) Q_INVOKABLE QCoro::QmlTask saveTextFileAs(const QString &contents,
+                                                               const QString &suggestedName,
+                                                               const QString &filterName,
+                                                               const QStringList &extensions);
+
     Q_INVOKABLE void crash(bool useException) const;
 
 signals:
