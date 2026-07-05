@@ -341,6 +341,8 @@ public:
     Q_INVOKABLE QVariantList consistsOf() const;
     Q_INVOKABLE BrickLink::PartOutTraits partOutTraits() const;
 
+    Q_REVISION(1, 1) Q_INVOKABLE QList<uint> pccsForColor(BrickLink::QmlColor color) const;
+
     // tough .. BrickLink::AppearsIn appearsIn(const Color *color = nullptr) const;
 
     friend class QmlBrickLink;

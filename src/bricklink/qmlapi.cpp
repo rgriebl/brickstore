@@ -312,6 +312,12 @@ QmlCategory::QmlCategory(const Category *cat)
     Returns \c true if this item is known to exist in the given \a color, or \c false otherwise.
     \sa knownColors
 */
+/*! \qmlmethod list<int> Item::pccsForColor(Color color)
+    \since 1.1
+    Returns the LEGO element ids - also known as part-color-codes (PCCs) - that are known for this
+    item in the given \a color. The list may be empty, or hold more than one id when the same part
+    and color combination has been produced under several element ids over time.
+*/
 /*! \qmlproperty list<string> Item::alternateIds
     Returns a list of all alternate BrickLink ids registered for this item.
 */
@@ -328,6 +334,17 @@ QString QmlItem::id() const
 bool QmlItem::hasKnownColor(QmlColor color) const
 {
     return wrapped->hasKnownColor(color.wrappedObject());
+}
+
+QList<uint> QmlItem::pccsForColor(QmlColor color) const
+{
+    const Color *col = color.wrappedObject();
+    QList<uint> result;
+    for (const auto &pcc : wrapped->pccs()) {
+        if (pcc.color() == col)
+            result.append(pcc.pcc());
+    }
+    return result;
 }
 
 QVariantList QmlItem::knownColors() const

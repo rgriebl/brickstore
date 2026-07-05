@@ -34,7 +34,7 @@ qt_add_library(bricklink_module STATIC
 if (NOT BS_BACKEND)
     qt_add_qml_module(bricklink_module
         URI BrickLink
-        VERSION 1.0
+        VERSION 1.1
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/imports/BrickLink
         IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
         NO_PLUGIN
