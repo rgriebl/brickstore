@@ -53,7 +53,6 @@ public:
 
     void setUILoggingHandler(UIMessageHandler callback);
 
-    virtual void checkRestart();
     QCoro::Task<bool> checkBrickLinkLogin();
     QCoro::Task<bool> updateDatabase();
 

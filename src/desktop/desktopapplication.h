@@ -23,7 +23,7 @@ public:
 
     void init() override;
 
-    void checkRestart() override;
+    static void checkRestart();
     DeveloperConsole *developerConsole();
 
     bool isWaitingForUserInput() const override;
@@ -42,7 +42,7 @@ private:
 
 private:
     double m_defaultFontSize = 0;
-    bool m_restart = false;
+    static bool s_restart;
     QCommandLineParser m_clp;
     QPointer<DeveloperConsole> m_devConsole;
 };

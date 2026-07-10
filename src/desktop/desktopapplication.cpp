@@ -43,6 +43,8 @@
 #  include <QtGui/private/qguiapplication_p.h>
 #  include <QtGui/private/qshortcutmap_p.h>
 #  include "common/systeminfo.h"
+#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+#  include <unistd.h>
 #endif
 
 #include "qtsingleapplication/qtlocalpeer.h"
@@ -56,6 +58,8 @@
 
 #include "desktopapplication.h"
 
+
+bool DesktopApplication::s_restart = false;
 
 DesktopApplication::DesktopApplication(int &argc, char **argv)
     : Application(argc, argv)
@@ -222,10 +226,20 @@ DesktopApplication::~DesktopApplication()
 
 void DesktopApplication::checkRestart()
 {
-#if QT_CONFIG(process)
-    if (m_restart)
-        QProcess::startDetached(qApp->applicationFilePath(), { });
+    if (s_restart) {
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+        // re-exec in place (same PID): a detached restart doesn't reliably work when
+        // BrickStore was launched from a terminal. execv() only returns on failure, so we
+        // then fall through to the startDetached() fallback below.
+        const QByteArray program = QFile::encodeName(QCoreApplication::applicationFilePath());
+        char *argv[] = { const_cast<char *>(program.constData()), nullptr };
+        ::execv(program.constData(), argv);
+        qErrnoWarning("Failed to restart via execv(), falling back to QProcess");
 #endif
+#if QT_CONFIG(process)
+        QProcess::startDetached(QCoreApplication::applicationFilePath(), { });
+#endif
+    }
 }
 
 bool DesktopApplication::isWaitingForUserInput() const
@@ -333,7 +347,7 @@ void DesktopApplication::setUITheme()
         mb.exec();
 
         if (mb.clickedButton() == restart) {
-            m_restart = true;
+            s_restart = true;
             QCoreApplication::quit();
         }
         return;

@@ -634,9 +634,6 @@ void Application::openUrl(const QUrl &url)
     QMetaObject::invokeMethod(qApp, [=]() { QDesktopServices::openUrl(url); }, Qt::QueuedConnection);
 }
 
-void Application::checkRestart()
-{ }
-
 QCoro::Task<bool> Application::checkBrickLinkLogin()
 {
     if (!Config::inst()->brickLinkAccessToken().isEmpty())

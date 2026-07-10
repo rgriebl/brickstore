@@ -17,6 +17,7 @@ public:
     ~MobileApplication() override;
 
     void init() override;
+    static void checkRestart() { }
 
     bool isWaitingForUserInput() const override;
 

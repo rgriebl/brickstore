@@ -18,7 +18,7 @@ public:
     void init();
     void afterInit() { }
     int exec();
-    void checkRestart() { }
+    static void checkRestart() { }
 
 private:
     QCoro::Task<int> rebuildDatabase();
