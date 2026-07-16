@@ -5,7 +5,9 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.3.2'
+        //noinspection AndroidGradlePluginVersion
+        classpath 'com.android.tools.build:gradle:9.0.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.0"
     }
 }
 
@@ -14,18 +16,14 @@ repositories {
     mavenCentral()
 }
 
-apply plugin: 'com.android.application'
+apply plugin: qtGradlePluginType
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-    implementation 'androidx.core:core:1.10.1'
+    //noinspection GradleDependency
+    implementation 'androidx.core:core:1.17.0'
     //TODO: make this dependent on a project property
     implementation 'io.sentry:sentry-android:7.6.0'
-}
-
-tasks.withType(JavaCompile) {
-    // uncomment to show deprecation warnings
-    //options.deprecation = true
 }
 
 android {
@@ -36,23 +34,23 @@ android {
      * - qtAndroidDir - holds the path to qt android files
      *                   needed to build any Qt application
      *                   on Android.
+     * - qtGradlePluginType - whether to build an app or a library
      *
      * are defined in gradle.properties file. This file is
      * updated by QtCreator and androiddeployqt tools.
      * Changing them manually might break the compilation!
      *******************************************************/
 
+    namespace = androidPackageName
     compileSdkVersion androidCompileSdkVersion
     buildToolsVersion androidBuildToolsVersion
-    ndkVersion androidNdkVersion
-
-    // Extract native libraries from the APK
-    packagingOptions.jniLibs.useLegacyPackaging true
+    ndkVersion = androidNdkVersion
 
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = [qtAndroidDir + '/src', 'src', 'java']
+            kotlin.srcDirs = [qtAndroidDir + '/src', 'src', 'kotlin']
             aidl.srcDirs = [qtAndroidDir + '/src', 'src', 'aidl']
             res.srcDirs = [qtAndroidDir + '/res', 'res']
             resources.srcDirs = ['resources']
@@ -64,6 +62,7 @@ android {
 
     tasks.withType(JavaCompile) {
         options.incremental = true
+        options.compilerArgs += ['-Xlint:all']
     }
 
     compileOptions {
@@ -72,12 +71,18 @@ android {
     }
 
     lintOptions {
-        abortOnError false
+        abortOnError = false
     }
 
-    // Do not compress Qt binary resources file
     aaptOptions {
+        // Do not compress Qt binary resources file
         noCompress 'rcc'
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = legacyPackaging
+        }
     }
 
     defaultConfig {
@@ -86,6 +91,4 @@ android {
         targetSdkVersion qtTargetSdkVersion
         ndk.abiFilters = qtTargetAbiList.split(",")
     }
-
-    namespace "de.brickforge.brickstore"
 }

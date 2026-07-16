@@ -6,6 +6,7 @@ package de.brickforge.brickstore;
 import org.qtproject.qt.android.bindings.QtActivity;
 import android.content.res.Configuration;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.database.Cursor;
@@ -85,10 +86,16 @@ public class ExtendedQtActivity extends QtActivity
         return true;
     }
 
+    @SuppressWarnings("deprecation") // getInstallerPackageName() fallback for API < 30
     public boolean isSideLoaded()
     {
         try {
-            return getPackageManager().getInstallerPackageName(getPackageName()) == null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                return getPackageManager().getInstallSourceInfo(getPackageName())
+                        .getInstallingPackageName() == null;
+            } else {
+                return getPackageManager().getInstallerPackageName(getPackageName()) == null;
+            }
         } catch (Throwable e) {
             return false;
         }

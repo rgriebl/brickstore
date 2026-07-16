@@ -442,6 +442,7 @@ if (ANDROID)
     endif()
     set_target_properties(${PROJECT_NAME} PROPERTIES
         QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/android"
+        QT_ANDROID_PACKAGE_NAME "de.brickforge.brickstore"
         QT_ANDROID_VERSION_CODE ${VERSION_CODE}
         QT_ANDROID_VERSION_NAME ${VERSION}
         QT_ANDROID_MIN_SDK_VERSION 28 # starting with 6.8 this shouldn't be needed anymore
@@ -458,6 +459,18 @@ if (ANDROID)
             QT_ANDROID_TARGET_SDK_VERSION "${QT_ANDROID_TARGET_SDK_VERSION}"
         )
     endif()
+
+    # androiddeployqt (Qt 6.11 / CMake >= 3.30) only deploys plugins listed in the
+    # target's QT_PLUGIN_TARGETS. Modules linked PRIVATE deep inside our static
+    # libraries never propagate their plugins here, and qt_import_plugins() can't
+    # help (it only toggles plugins already in the list) — so add them directly:
+    #   Qt6::Sql        -> QSQLiteDriverPlugin  (PRIVATE in bricklink_module)
+    #   Qt6::Multimedia -> QtMultimedia backend (PRIVATE in scanner_module);
+    #                      without a backend the camera scanner has no media I/O.
+    set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY QT_PLUGIN_TARGETS
+        Qt6::QSQLiteDriverPlugin
+        Qt6::QFFmpegMediaPlugin
+        Qt6::QAndroidMediaPlugin)
 
     include(FetchContent)
 
