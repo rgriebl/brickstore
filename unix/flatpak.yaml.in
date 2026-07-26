@@ -17,6 +17,8 @@ modules:
     buildsystem: cmake-ninja
     config-opts:
       - "-DTBB_TEST=OFF"
+      - "-DTBB_STRICT=OFF"
+      - "-DCMAKE_INSTALL_LIBDIR=lib" # the default 'lib64' does not work in a flatpak
     sources:
       - type: archive
         url: https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.12.0.tar.gz

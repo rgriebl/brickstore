@@ -104,7 +104,7 @@ jobs:
 
         - name: "Linux Flatpak"
           artifact: "Linux-Flatpak"
-          runs-on: ubuntu-22.04
+          runs-on: ubuntu-24.04
           os: linux
           flatpak: true
           qt_tools: tools_opensslv3_src # not needed, but the cache for this build is shared
@@ -421,7 +421,7 @@ jobs:
     - name: Create Linux Flatpak 2
       if: matrix.config.flatpak
       run: |
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install flatpak flatpak-builder
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install flatpak flatpak-builder appstream
         flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
         cd build
         flatpak-builder --user --verbose --install-deps-from flathub --force-clean --repo fp-repo \
