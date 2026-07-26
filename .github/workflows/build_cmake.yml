@@ -107,6 +107,7 @@ jobs:
           runs-on: ubuntu-22.04
           os: linux
           flatpak: true
+          qt_tools: tools_opensslv3_src # not needed, but the cache for this build is shared
           qt_host: 'linux'
           qt_version: '6.10.3'
           qt_arch: 'linux_gcc_64'
@@ -161,7 +162,7 @@ jobs:
 
         - name: "iOS"
           artifact: "iOS"
-          runs-on: macos-15
+          runs-on: macos-26
           os: ios
           qt_host: 'mac'
           qt_host_arch: 'clang_64'
@@ -178,7 +179,7 @@ jobs:
     # Checkout
     #################################################
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
@@ -188,7 +189,7 @@ jobs:
     - name: Restore cached Qt from aqtinstall
       id: restore-cache-qt
       if: (matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap || matrix.config.flatpak
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v6
       with:
         path: "${{ runner.workspace }}/Qt/"
         key: "Qt-${{ matrix.config.qt_version }}-${{ matrix.config.qt_host }}-${{ matrix.config.qt_arch }}-1"
@@ -276,7 +277,7 @@ jobs:
       if: |
         ((matrix.config.os != 'linux') || matrix.config.appimage || matrix.config.snap || matrix.config.flatpak)
         && (steps.restore-cache-qt.outputs.cache-hit != 'true')
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v6
       with:
         key: ${{ steps.restore-cache-qt.outputs.cache-primary-key }}
         path: "${{ runner.workspace }}/Qt/"
@@ -296,7 +297,7 @@ jobs:
 
     - name: Upload Windows Installer
       if: (matrix.config.os == 'windows')
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.config.artifact }}
         path: "build/*.exe"
@@ -324,7 +325,7 @@ jobs:
 
     - name: Upload Linux DEB
       if: (matrix.config.os == 'linux') && matrix.config.debian_container
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.config.artifact }}
         path: "build/*.deb"
@@ -397,7 +398,7 @@ jobs:
 
     - name: Upload Linux AppImage
       if: matrix.config.appimage
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.config.artifact }}
         path: "*.AppImage"
@@ -431,7 +432,7 @@ jobs:
 
     - name: Upload Linux Flatpak
       if: matrix.config.flatpak
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.config.artifact }}
         path: "build/*.flatpak"
@@ -445,7 +446,7 @@ jobs:
 
     - name: Upload Linux Snap
       if: matrix.config.snap
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.config.artifact }}
         path: ${{ steps.create-snap.outputs.snap }}
@@ -505,21 +506,21 @@ jobs:
 
     - name: Upload Android AAB
       if: (matrix.config.os == 'android')
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.config.artifact }}-PlayStore
         path: "build/*.aab"
 
     - name: Upload Android ARM64 APK
       if: (matrix.config.os == 'android')
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.config.artifact }}-ARM64
         path: "build/android_abi_builds/arm64-v8a/*.apk"
 
     - name: Upload Android ARM APK
       if: (matrix.config.os == 'android')
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.config.artifact }}-ARM
         path: "build/android_abi_builds/armeabi-v7a/*.apk"
@@ -532,7 +533,7 @@ jobs:
         packageName: de.brickforge.brickstore
         releaseFiles: build/*.aab
         status: completed
-        track: beta
+        tracks: beta
         releaseName: "${{ env.VERSION_NUMBER }} (build: ${{ env.BUILD_NUMBER }})"
 
     # Build for macOS
@@ -581,7 +582,7 @@ jobs:
 
     - name: Upload macOS DMG
       if: (matrix.config.os == 'macos')
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.config.artifact }}
         path: "build/*.dmg"
@@ -589,6 +590,7 @@ jobs:
     - name: Upload macOS debug info to sentry.io
       if: (matrix.config.os == 'macos')
       run: |
+        brew trust getsentry/tools
         brew install getsentry/tools/sentry-cli
         sentry-cli --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif \
             --org brickstore --project brickstore build/BrickStore.app.dSYM ${Qt6_DIR}/lib/
@@ -644,7 +646,7 @@ jobs:
 
     - name: Upload iOS IPA
       if: (matrix.config.os == 'ios')
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.config.artifact }}-AppStore
         path: "build/*.ipa"
@@ -697,7 +699,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Download Artifacts to Release
       uses: actions/download-artifact@v4
