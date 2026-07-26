@@ -3,6 +3,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2026.7.1] - 2026-07-27
+
+A bigger release this time, with a few new features and a lot of stability fixes:
+- Added a generic **CSV import** that lets you map the columns of any CSV (*Comma Separated Values*) file onto BrickStore's fields yourself (based on the idea of GitHub user *mgodineau*).
+- Added an export for LEGO's **Pick a Brick** service via the Tools menu (also based on the idea of GitHub user *mgodineau*).
+- Added an experimental way to connect AI assistants (like Claude) to BrickStore via the *MCP* protocol, so they can browse the BrickLink catalog and your open documents. This is off by default and can be activated in the Settings dialog.
+- When parting out a set, stickered parts now default to *used* condition.
+- Made filtering and sorting noticeably faster on very large documents.
+- Refreshed the icons and the Settings dialog.
+- Fixed a whole batch of crashes and glitches when opening damaged or unusual files or orders.
+- Fixed the tab labels when several open files share the same name.
+- Added a new scripting API for extension authors.
+
+
 ## [2026.3.2] - 2026-03-01
 
 Fixed a crash when loading more than 5000 price-guides.
@@ -74,7 +88,7 @@ A quick-fix release, mostly for Windows users:
 
 A lot of small fixes, notably:
 - Date based filters were not applied correctly as all 2-digit year values were incorrectly parsed as 19xx.
-- Added more currency exchange rates from [Float Rates](https://floatrates.com) in addition to the existing [ECB](https://ecb.eu) rates. 
+- Added more currency exchange rates from [Float Rates](https://floatrates.com) in addition to the existing [ECB](https://ecb.eu) rates.
 - Linux:
   - Added a **Flatpak** build.
   - Replaced the Ubuntu 22.04 package with a 24.04 one. Using the Ubuntu Snap or the Flatpak is the preferred way to install BrickStore though.
@@ -686,7 +700,7 @@ Fixed a crash when closing the settings dialog.
 
 
 ## [2021.1.5] - 2021-01-21
-A lot of bug-fixing all over the place, too much to mention all in here. 
+A lot of bug-fixing all over the place, too much to mention all in here.
 
 ### Added
 - Switched from using the classic 80x60 small images to BrickLink's newer *normal* format. This should make all item images nice to look at, even on Hi-Dpi screens.
@@ -771,7 +785,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2026.3.2...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2026.7.1...HEAD
+[2026.7.1]: https://github.com/rgriebl/brickstore/releases/tag/v2026.7.1
 [2026.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2026.3.2
 [2026.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2026.3.1
 [2025.11.1]: https://github.com/rgriebl/brickstore/releases/tag/v2025.11.1
