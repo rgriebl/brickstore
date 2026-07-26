@@ -48,7 +48,7 @@ jobs:
           runs-on: windows-2022
           os: windows
           qt_host: 'windows'
-          qt_version: '6.10.1'
+          qt_version: '6.10.3'
           qt_arch: 'win64_msvc2022_64'
           qt_dir: "msvc2022_64"
           environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
@@ -59,7 +59,7 @@ jobs:
           runs-on: windows-11-arm
           os: windows
           qt_host: 'windows_arm64'
-          qt_version: '6.10.1'
+          qt_version: '6.10.3'
           qt_arch: 'win64_msvc2022_arm64'
           qt_dir: "msvc2022_arm64"
           environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvarsamd64_arm64.bat"
@@ -87,7 +87,7 @@ jobs:
           appimage: true
           qt_tools: tools_opensslv3_src
           qt_host: 'linux'
-          qt_version: '6.10.1'
+          qt_version: '6.10.3'
           qt_arch: 'linux_gcc_64'
           qt_dir: 'gcc_64'
 
@@ -98,7 +98,7 @@ jobs:
           snap: true
           qt_tools: tools_opensslv3_src
           qt_host: 'linux'
-          qt_version: '6.10.1'
+          qt_version: '6.10.3'
           qt_arch: 'linux_gcc_64'
           qt_dir: 'gcc_64'
 
@@ -108,7 +108,7 @@ jobs:
           os: linux
           flatpak: true
           qt_host: 'linux'
-          qt_version: '6.10.1'
+          qt_version: '6.10.3'
           qt_arch: 'linux_gcc_64'
           qt_dir: 'gcc_64'
 
@@ -119,7 +119,7 @@ jobs:
         #   os: linux
         #   flatpak: true
         #   qt_host: 'linux_arm64'
-        #   qt_version: '6.10.1'
+        #   qt_version: '6.10.3'
         #   qt_arch: 'linux_gcc_arm64'
         #   qt_dir: 'gcc_arm64'
 
@@ -128,7 +128,7 @@ jobs:
           runs-on: macos-15
           os: macos
           qt_host: 'mac'
-          qt_version: '6.10.1'
+          qt_version: '6.10.3'
           qt_arch: 'clang_64'
           qt_dir: 'macos'
           cmake_extra_config: '-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 -DSENTRY=ON'
@@ -154,7 +154,7 @@ jobs:
           qt_host: 'linux'
           qt_host_arch: 'linux_gcc_64'
           qt_target: 'android'
-          qt_version: '6.7.3' # Using 6.7.3 as 6.8+ broke QtMultimedia's webcam handling
+          qt_version: '6.11.1'
           qt_arch: 'android_x86_64'
           qt_extra_archs: 'android_arm64_v8a android_armv7 android_x86'
           cmake_extra_config: '-DSENTRY=ON'
@@ -166,7 +166,7 @@ jobs:
           qt_host: 'mac'
           qt_host_arch: 'clang_64'
           qt_target: 'ios'
-          qt_version: '6.7.3' # Using 6.7.3 as 6.8+ changed how the fullscreen API works
+          qt_version: '6.11.1'
           qt_arch: 'ios'
           cmake_extra_config: ''
 
