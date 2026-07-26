@@ -964,8 +964,10 @@ void MainWindow::createActions()
               m_importwanted_dialog->show();
           } },
         { "document_import_csv", [this](bool) -> QCoro::Task<> {
-              auto fn = co_await UIHelpers::getOpenFileName(
-                  {{ tr("CSV / Text files"), { u"csv"_qs, u"tsv"_qs, u"txt"_qs } }}, tr("Import File"));
+              static const QList<QPair<QString, QStringList>> filters = {
+                  { tr("CSV / Text files"), { u"csv"_qs, u"tsv"_qs, u"txt"_qs } }
+              };
+              auto fn = co_await UIHelpers::getOpenFileName(filters, tr("Import File"));
               if (!fn)
                   co_return;
 
