@@ -73,6 +73,13 @@
                 <parameter type="string" name="fromCode" default=""/>
                 <parameter type="string" name="toCode" default=""/>
             </function>
+            <function name="isWaitingForUserInput" fullname="BrickStore.BrickStore.isWaitingForUserInput" href="qml-brickstore-brickstore.html#isWaitingForUserInput-method" status="active" access="public" documented="true" since="1.1" meta="qmlmethod" type="bool"/>
+            <function name="saveTextFileAs" fullname="BrickStore.BrickStore.saveTextFileAs" href="qml-brickstore-brickstore.html#saveTextFileAs-method" status="active" access="public" documented="true" since="1.1" meta="qmlmethod" type="var">
+                <parameter type="string" name="contents" default=""/>
+                <parameter type="string" name="suggestedName" default=""/>
+                <parameter type="string" name="filterName" default=""/>
+                <parameter type="list&lt;string&gt;" name="extensions" default=""/>
+            </function>
             <function name="symbolForCurrencyCode" fullname="BrickStore.BrickStore.symbolForCurrencyCode" href="qml-brickstore-brickstore.html#symbolForCurrencyCode-method" status="active" access="public" documented="true" meta="qmlmethod" type="string">
                 <parameter type="string" name="currencyCode" default=""/>
             </function>
@@ -158,6 +165,9 @@
         <qmlclass name="ExtensionScriptAction" qml-module-name="BrickStore" fullname="BrickStore.ExtensionScriptAction" href="qml-brickstore-extensionscriptaction.html" status="active" access="public" documented="true" groups="qml-extension" title="ExtensionScriptAction" fulltitle="ExtensionScriptAction" subtitle="" brief="Use this type to add an UI action to your extension"/>
         <qmlclass name="Item" qml-module-name="BrickLink" fullname="BrickLink.Item" href="qml-bricklink-item.html" status="active" access="public" documented="true" groups="qml-api" title="Item" fulltitle="Item" subtitle="" brief="This value type represents a BrickLink item">
             <function name="hasKnownColor" fullname="BrickLink.Item.hasKnownColor" href="qml-bricklink-item.html#hasKnownColor-method" status="active" access="public" documented="true" meta="qmlmethod" type="bool">
+                <parameter type="Color" name="color" default=""/>
+            </function>
+            <function name="pccsForColor" fullname="BrickLink.Item.pccsForColor" href="qml-bricklink-item.html#pccsForColor-method" status="active" access="public" documented="true" since="1.1" meta="qmlmethod" type="list&lt;int&gt;">
                 <parameter type="Color" name="color" default=""/>
             </function>
             <qmlproperty name="alternateIds" fullname="BrickLink.Item.alternateIds" href="qml-bricklink-item.html#alternateIds-prop" status="active" access="public" documented="true" type="list&lt;string&gt;" attached="false" writable="true"/>

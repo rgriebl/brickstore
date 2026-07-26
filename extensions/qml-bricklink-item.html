@@ -58,6 +58,7 @@
 <h2 id="methods">Methods</h2>
 <ul>
 <li class="fn" translate="no">bool <b><a href="qml-bricklink-item.html#hasKnownColor-method" translate="no">hasKnownColor</a></b>(Color <i>color</i>)</li>
+<li class="fn" translate="no">list&lt;int&gt; <b><a href="qml-bricklink-item.html#pccsForColor-method" translate="no">pccsForColor</a></b>(Color <i>color</i>) <code class="summary extra" translate="no">(since 1.1)</code></li>
 </ul>
 <!-- $$$Item-description -->
 <h2 id="details">Detailed Description</h2>
@@ -190,6 +191,17 @@
 <div class="qmldoc"><p>Returns <code translate="no">true</code> if this item is known to exist in the given <i translate="no">color</i>, or <code translate="no">false</code> otherwise.</p>
 <p><b>See also </b><a href="qml-bricklink-item.html#knownColors-prop" translate="no">knownColors</a>.</p>
 </div></div><!-- @@@hasKnownColor -->
+<br/>
+<!-- $$$pccsForColor[overload1]$$$pccsForColorColor -->
+<div class="qmlitem"><div class="qmlproto" translate="no">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="pccsForColor-method">
+<td class="tblQmlFuncNode"><p>
+<code class="details extra" translate="no">[since 1.1]</code> <span class="type">list</span>&lt;<span class="type">int</span>&gt; <span class="name">pccsForColor</span>(<span class="type"><a href="qml-bricklink-color.html" translate="no">Color</a></span> <i>color</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns the LEGO element ids - also known as part-color-codes (PCCs) - that are known for this item in the given <i translate="no">color</i>. The list may be empty, or hold more than one id when the same part and color combination has been produced under several element ids over time.</p>
+<p>This method was introduced in Qt 1.1.</p>
+</div></div><!-- @@@pccsForColor -->
 <br/>
 </div>
    <p class="copy-notice">

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-<!-- brickstore_wrapper.cpp -->
+<!-- qmlapi.cpp -->
   <meta name="description" content="This singleton represents global settings and state.">
   <title>BrickStore QML Type | BrickStore Extensions</title>
   <link rel="stylesheet" type="text/css" href="style/extensions.css" />
@@ -52,6 +52,8 @@
 <h2 id="methods">Methods</h2>
 <ul>
 <li class="fn" translate="no">string <b><a href="qml-brickstore-brickstore.html#exchangeRate-method" translate="no">exchangeRate</a></b>(string <i>fromCode</i>, string <i>toCode</i>)</li>
+<li class="fn" translate="no">bool <b><a href="qml-brickstore-brickstore.html#isWaitingForUserInput-method" translate="no">isWaitingForUserInput</a></b>() <code class="summary extra" translate="no">(since 1.1)</code></li>
+<li class="fn" translate="no">var <b><a href="qml-brickstore-brickstore.html#saveTextFileAs-method" translate="no">saveTextFileAs</a></b>(string <i>contents</i>, string <i>suggestedName</i>, string <i>filterName</i>, list&lt;string&gt; <i>extensions</i>) <code class="summary extra" translate="no">(since 1.1)</code></li>
 <li class="fn" translate="no">string <b><a href="qml-brickstore-brickstore.html#symbolForCurrencyCode-method" translate="no">symbolForCurrencyCode</a></b>(string <i>currencyCode</i>)</li>
 <li class="fn" translate="no">string <b><a href="qml-brickstore-brickstore.html#toCurrencyString-method" translate="no">toCurrencyString</a></b>(real <i>value</i>, string <i>symbol</i>, int <i>precision</i>)</li>
 <li class="fn" translate="no">string <b><a href="qml-brickstore-brickstore.html#toWeightString-method" translate="no">toWeightString</a></b>(real <i>value</i>, bool <i>showUnit</i>)</li>
@@ -122,6 +124,30 @@
 </table></div></div>
 <div class="qmldoc"><p>Returns the currency exchange cross-rate between the two given <i translate="no">fromCode</i> and <i translate="no">toCode</i> currencies, denoted as ISO currency code (e.g. <code translate="no">EUR</code>).</p>
 </div></div><!-- @@@exchangeRate -->
+<br/>
+<!-- $$$isWaitingForUserInput[overload1]$$$isWaitingForUserInput -->
+<div class="qmlitem"><div class="qmlproto" translate="no">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="isWaitingForUserInput-method">
+<td class="tblQmlFuncNode"><p>
+<code class="details extra" translate="no">[since 1.1]</code> <span class="type">bool</span> <span class="name">isWaitingForUserInput</span>()</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Returns <code translate="no">true</code> if the application is waiting for user input, i.e. a modal popup is open.</p>
+<p>This method was introduced in Qt 1.1.</p>
+</div></div><!-- @@@isWaitingForUserInput -->
+<br/>
+<!-- $$$saveTextFileAs[overload1]$$$saveTextFileAsstringstringstringlist<string> -->
+<div class="qmlitem"><div class="qmlproto" translate="no">
+<div class="table"><table class="qmlname">
+<tr valign="top" class="odd" id="saveTextFileAs-method">
+<td class="tblQmlFuncNode"><p>
+<code class="details extra" translate="no">[since 1.1]</code> <span class="type">var</span> <span class="name">saveTextFileAs</span>(<span class="type">string</span> <i>contents</i>, <span class="type">string</span> <i>suggestedName</i>, <span class="type">string</span> <i>filterName</i>, <span class="type">list</span>&lt;<span class="type">string</span>&gt; <i>extensions</i>)</p></td></tr>
+</table></div></div>
+<div class="qmldoc"><p>Asks the user for a file name and saves <i translate="no">contents</i> to it as UTF-8 encoded text.</p>
+<p>The save dialog is seeded with <i translate="no">suggestedName</i> and offers a single filter named <i translate="no">filterName</i> that matches the given <i translate="no">extensions</i> (e.g. <code translate="no">[&quot;csv&quot;]</code>). The first extension is appended automatically if the chosen name lacks one.</p>
+<p>Returns a task that resolves to <code translate="no">true</code> on success, or to <code translate="no">false</code> if the user canceled the dialog or the file could not be written.</p>
+<p>This method was introduced in Qt 1.1.</p>
+</div></div><!-- @@@saveTextFileAs -->
 <br/>
 <!-- $$$symbolForCurrencyCode[overload1]$$$symbolForCurrencyCodestring -->
 <div class="qmlitem"><div class="qmlproto" translate="no">
