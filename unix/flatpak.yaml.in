@@ -1,6 +1,6 @@
 app-id: dev.brickstore.BrickStore
 runtime: org.gnome.Platform
-runtime-version: '46'
+runtime-version: '50'
 sdk: org.gnome.Sdk
 command: brickstore
 modules:
@@ -36,3 +36,4 @@ finish-args:
   - --device=dri
   - --device=all # webcam
   - --filesystem=home
+  - --env=QT_QPA_PLATFORM=wayland;xcb

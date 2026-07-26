@@ -407,8 +407,8 @@ jobs:
       if: matrix.config.snap || matrix.config.flatpak
       run: |
         sudo DEBIAN_FRONTEND=noninteractive apt -y install libfuse2
-        wget  -P .cqtdeployer -N "https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2351/CQtDeployer_1.6.2351.ec4840f_Linux_x86_64.zip"
-        unzip -u .cqtdeployer/CQtDeployer_1.6.2351.ec4840f_Linux_x86_64.zip -d .cqtdeployer
+        wget  -P .cqtdeployer -N "https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2441.67ee1ef/CQtDeployer_1.6.2441.67ee1ef_Linux_x86_64.zip"
+        unzip -u .cqtdeployer/CQtDeployer_1.6.2441.67ee1ef_Linux_x86_64.zip -d .cqtdeployer
         chmod +x .cqtdeployer/bin/CQtDeployer
         chmod +x .cqtdeployer/CQtDeployer.sh
         cd build
