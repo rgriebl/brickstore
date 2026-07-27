@@ -21,7 +21,7 @@ env:
       qml6-module-qt5compat-graphicaleffects qml6-module-qtmultimedia
       qml6-module-qtqml-workerscript qml6-module-quick3d
   BRICKSTORE_GUI_QT6_INSTALLER_MODULES: >-
-      qtquick3d qtshadertools qtquicktimeline qt5compat qtimageformats qtmultimedia
+      qtquick3d qtshadertools qtquicktimeline qt5compat qtimageformats qtmultimedia qthttpserver qtwebsockets
 
 on:
   workflow_dispatch:
