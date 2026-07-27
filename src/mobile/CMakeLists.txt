@@ -69,6 +69,7 @@ qt_add_qml_module(mobile_module
         DeveloperConsole.qml
         FlashScrollIndicators.qml
         FullscreenDialog.qml
+        GatedConnections.qml
         GridCell.qml
         GridHeader.qml
         HeaderBar.qml

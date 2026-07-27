@@ -24,8 +24,8 @@ Control {
 
     signal showMenu(logicalColumn: int, visualColumn: int)
 
-    Connections {
-        target: root.document
+    GatedConnections {
+        realTarget: root.document
         function onSortColumnsChanged() { root.checkSortStatus() }
     }
     Component.onCompleted: { checkSortStatus() }

@@ -98,8 +98,8 @@ Control {
         PartRenderer {
             id: info3D
             renderController.clearColor: "transparent"
-            Connections {
-                target: info3D.renderController
+            GatedConnections {
+                realTarget: info3D.renderController
                 function onCanRenderChanged(canRender : bool) {
                     root.canRender3D = canRender
 

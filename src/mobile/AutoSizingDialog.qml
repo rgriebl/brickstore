@@ -45,15 +45,15 @@ Dialog {
         }
     }
 
-    Connections {
-        target: Style
+    GatedConnections {
+        realTarget: Style
         function onSmallSizeChanged() {
             root.switchSmallStyle()
         }
     }
 
-    Connections {
-        target: root.SafeArea
+    GatedConnections {
+        realTarget: root.SafeArea
         function onMarginsChanged() {
             root.switchSmallStyle()
         }

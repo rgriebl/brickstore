@@ -12,14 +12,18 @@ Item {
 
     property RenderController renderController: RenderController { }
 
+    // gated target: workaround for QTBUG-148459 (crash in connectSignalsToMethods
+    // during async incubation); bind the target only after incubation finished
     Connections {
-        target: root.renderController
+        property bool ready: false
+        target: ready ? root.renderController : null
         function onQmlResetCamera() {
             root.animateScaleToFit()
         }
         function onItemOrColorChanged() {
             root.scaleToFit()
         }
+        Component.onCompleted: ready = true
     }
 
     implicitWidth: 200

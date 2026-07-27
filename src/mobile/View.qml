@@ -209,8 +209,8 @@ Page {
                 }
             }
 
-            Connections {
-                target: root.document
+            GatedConnections {
+                realTarget: root.document
                 function onColumnLayoutChanged() { Qt.callLater(table.forceLayout) }
             }
 
@@ -421,8 +421,8 @@ Page {
             property: "cancelable"
             value: root.document?.blockingOperationCancelable
         }
-        Connections {
-            target: root.document
+        GatedConnections {
+            realTarget: root.document
             function onBlockingOperationProgress(done : int, total : int) {
                 blockDialog.item.total = total
                 blockDialog.item.done = done
@@ -432,8 +432,8 @@ Page {
                 blockDialog.active = blockingActive
             }
         }
-        Connections {
-            target: blockDialog.item
+        GatedConnections {
+            realTarget: blockDialog.item
             function onRequestCancel() { root.document.cancelBlockingOperation() }
         }
         onLoaded: { item.open() }

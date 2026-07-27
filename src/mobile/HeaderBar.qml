@@ -29,8 +29,8 @@ ToolBar {
 
         to: 0
         visible: to && (value < to)
-        Connections {
-            target: BL.BrickLink
+        GatedConnections {
+            realTarget: BL.BrickLink
             function onTransferProgress(progress, total) {
                 progressBar.to = total
                 progressBar.value = progress

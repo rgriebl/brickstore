@@ -266,8 +266,8 @@ Control {
         }
     }
 
-    Connections {
-        target: BS.BrickStore.documents
+    GatedConnections {
+        realTarget: BS.BrickStore.documents
         function onDocumentAdded(doc /*: BS.Document QTBUG-123341*/) { root.createViewForDocument(doc) }
     }
 
@@ -288,8 +288,8 @@ Control {
         }
     }
 
-    Connections {
-        target: BS.BrickStore
+    GatedConnections {
+        realTarget: BS.BrickStore
         function onShowSettings(page : string) {
             root.setActiveDocument(null)
             homeStack.push("SettingsDialog.qml", { "page": page, "goBackFunction": () => { homeStack.pop() } })
@@ -302,8 +302,8 @@ Control {
             checkForUpdatesDialog.openWithArgs(changeLog, releaseUrl)
         }
     }
-    Connections {
-        target: BS.Announcements
+    GatedConnections {
+        realTarget: BS.Announcements
         function onNewAnnouncements() { announcementsDialog.open() }
     }
 
