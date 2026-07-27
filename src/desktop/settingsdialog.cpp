@@ -1012,6 +1012,7 @@ SettingsDialog::SettingsDialog(const QString &start_on_page, QWidget *parent)
 
     load();
 
+    w_tab_list->setCurrentItem(w_tab_list->topLevelItem(0));
     QWidget *w = w_tabs->widget(0);
     if (!start_on_page.isEmpty())
         w = findChild<QWidget *>(start_on_page);
@@ -1174,6 +1175,7 @@ void SettingsDialog::load()
         w_mcpStatus->setText(tr("The MCP server is not running."));
 #else
     w_mcpStatus->setText(tr("This build does not support the MCP server."));
+    w_mcpServer->setEnabled(false);
 #endif
 }
 
