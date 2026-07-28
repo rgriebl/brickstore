@@ -302,7 +302,7 @@ qt_add_lrelease(${PROJECT_NAME}
 # qt_add_lupdate is not flexible enough to scan all the required sources, so we better
 # let lupdate itself scan recursively
 add_custom_target(${PROJECT_NAME}_lupdate
-    COMMAND ${QT_CMAKE_EXPORT_NAMESPACE}::lupdate "${CMAKE_SOURCE_DIR}"
+    COMMAND ${QT_CMAKE_EXPORT_NAMESPACE}::lupdate "${CMAKE_SOURCE_DIR}/src"
             -locations relative -ts ${TS_FILES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMAND_EXPAND_LISTS

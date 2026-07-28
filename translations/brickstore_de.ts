@@ -97,12 +97,12 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+13"/>
+        <location line="+15"/>
         <source>BrickLink XML...</source>
         <translation>BrickLink XML...</translation>
     </message>
     <message>
-        <location line="-13"/>
+        <location line="-15"/>
         <source>Ctrl+I,Ctrl+X</source>
         <comment>File|Import BrickLink XML</comment>
         <translation>Ctrl+I,Ctrl+X</translation>
@@ -161,6 +161,17 @@
         <source>Ctrl+I,Ctrl+L</source>
         <comment>File|Import LDraw Model</comment>
         <translation>Ctrl+I,Ctrl+L</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>CSV File...</source>
+        <translation>CSV Datei...</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Ctrl+I,Ctrl+V</source>
+        <comment>File|Import CSV</comment>
+        <translation>Ctrl+I,Ctrl+V</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -874,7 +885,7 @@
 <context>
     <name>ActionModel</name>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="+66"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="+67"/>
         <source>Other</source>
         <translation>Sonstige</translation>
     </message>
@@ -1094,7 +1105,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="+190"/>
+        <location filename="../src/common/application.cpp" line="+195"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Die Installation ist defekt: benötigte Bildformat Plugins sind nicht verfügbar!</translation>
     </message>
@@ -1123,7 +1134,7 @@
         <translation>Die BrickLink Datenbankdateien konnten nicht geladen werden.&lt;br /&gt;&lt;br /&gt;Ohne diese Dateien ist das Programm nicht funktionsfähig.</translation>
     </message>
     <message numerus="yes">
-        <location line="+37"/>
+        <location line="+45"/>
         <source>It seems like BrickStore crashed while %n document(s) had unsaved modifications.</source>
         <translation>
             <numerusform>Anscheinend ist BrickStore abgestürzt, während ein Dokument ungesicherte Änderungen hatte.</numerusform>
@@ -1141,7 +1152,7 @@
         <translation>Dokumente wiederherstellen</translation>
     </message>
     <message>
-        <location line="+25"/>
+        <location line="+86"/>
         <source>The way BrickStore uses LDraw to render 3D models for parts has changed: by default it will now download and maintain its own LDraw installation.&lt;br&gt;&lt;br&gt;Please check the LDraw page in Settings if you still want to use a custom LDraw installation.</source>
         <translation>Die Art, wie BrickStore LDraw für die Darstellung von 3D Modellen verwendet, hat sich geändert: standardmässig lädt es nun seine eigene LDraw Installation herunter und hält diese aktuell.&lt;br&gt;&lt;br&gt;Sollten Sie trotzdem eine andere LDraw Installation verwenden wollen, so können Sie dies auf der LDraw Seite in den Einstellungen umstellen.</translation>
     </message>
@@ -1169,7 +1180,7 @@
         <translation type="vanished">Keine gültigen BrickLink Logineinstellungen vorhanden.&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Einstellungen jetzt ändern?</translation>
     </message>
     <message>
-        <location line="-214"/>
+        <location line="-283"/>
         <source>(empty)</source>
         <translation>(Leer)</translation>
     </message>
@@ -1188,7 +1199,7 @@
         <translation>Höchstwahrscheinlich ist der Zugriffstoken abgelaufen: &lt;i&gt;Wiederholen&lt;/i&gt; öffnet die Einstellungen um ihn zu erneuern.</translation>
     </message>
     <message>
-        <location line="+343"/>
+        <location line="+409"/>
         <source>No valid BrickLink access token found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
         <translation>Kein gültiger BrickLink Zugriffstoken&quot; vorhanden.&lt;br /&gt;&lt;br /&gt;Wollen Sie diese Einstellungen jetzt ändern?</translation>
     </message>
@@ -1317,7 +1328,7 @@
 <context>
     <name>BrickLink::CategoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="+319"/>
+        <location filename="../src/bricklink/model.cpp" line="+329"/>
         <source>All Items</source>
         <translation>Alle Teile</translation>
     </message>
@@ -1330,7 +1341,7 @@
 <context>
     <name>BrickLink::ColorModel</name>
     <message>
-        <location line="-228"/>
+        <location line="-233"/>
         <source>Color by %1</source>
         <translation>Farbe nach: %1</translation>
     </message>
@@ -1384,7 +1395,7 @@
 <context>
     <name>BrickLink::InternalInventoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="+1151"/>
+        <location filename="../src/bricklink/model.cpp" line="+1166"/>
         <source>Qty.</source>
         <translation>Anz.</translation>
     </message>
@@ -1428,7 +1439,7 @@
 <context>
     <name>BrickLink::ItemTypeModel</name>
     <message>
-        <location line="-155"/>
+        <location line="-160"/>
         <source>Any</source>
         <translation>Beliebig</translation>
     </message>
@@ -1451,7 +1462,7 @@
         <translation>Konnte XML Daten nicht verarbeiten</translation>
     </message>
     <message>
-        <location line="+767"/>
+        <location line="+770"/>
         <source>Received</source>
         <translation>Erhalten</translation>
     </message>
@@ -1935,6 +1946,153 @@
     </message>
 </context>
 <context>
+    <name>CsvImport</name>
+    <message>
+        <location filename="../src/common/csvimport.cpp" line="+124"/>
+        <source>(ignore)</source>
+        <translation>(ignorieren)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Item Id</source>
+        <translation>Teile-Id</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Item Type</source>
+        <translation>Teiletyp</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Color Id</source>
+        <translation>Farb-Id</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Color Name</source>
+        <translation>Farbname</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>LEGO Element Id (PCC)</source>
+        <translation>LEGO Elementnummer (PCC)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Condition</source>
+        <translation>Zustand</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Quantity</source>
+        <translation>Anzahl</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Price</source>
+        <translation>Preis</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Cost</source>
+        <translation>Unkosten</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Bulk Quantity</source>
+        <translation>Gebindegrösse</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Sale Percent</source>
+        <translation>Ausverkauf Prozente</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Comments</source>
+        <translation>Kommentar</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Remarks</source>
+        <translation>Anmerkungen</translation>
+    </message>
+</context>
+<context>
+    <name>CsvImportDialog</name>
+    <message>
+        <location filename="../src/desktop/csvimportdialog.cpp" line="+131"/>
+        <source>Import CSV — %1</source>
+        <translation>Import CSV — %1</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Automatic</source>
+        <translation>Automatisch</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <location line="+18"/>
+        <source>System</source>
+        <translation>System</translation>
+    </message>
+    <message>
+        <location line="-6"/>
+        <source>Comma</source>
+        <translation>Komma</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Semicolon</source>
+        <translation>Strichpunkt</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Tab</source>
+        <translation>Tabulator</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>1,234.56 (point)</source>
+        <translation>1,234.56 (Punkt)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>1.234,56 (comma)</source>
+        <translation>1.234,56 (Komma)</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>First row contains column names</source>
+        <translation>Die Spaltennamen sind in der ersten Zeile</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Character set:</source>
+        <translation>Zeichenkodierung:</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Separator:</source>
+        <translation>Trennerzeichen:</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Number format:</source>
+        <translation>Zahlenformat:</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Import options</source>
+        <translation>Import Optionen</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Click a column header to choose which field it maps to:</source>
+        <translation>Klick auf einen Spaltenkopf, um auszuwählen, welchem Feld die Spalte zugeordnet ist:</translation>
+    </message>
+</context>
+<context>
     <name>Currency</name>
     <message>
         <source>There was an error downloading the exchange rates from the ECB server:</source>
@@ -1974,7 +2132,7 @@
 <context>
     <name>DesktopApplication</name>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="+185"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="+189"/>
         <source>Enable anonymous crash reporting?&lt;br&gt;&lt;br&gt;Please consider enabling this feature when available.&lt;br&gt;If you have any doubts about what information is being submitted and how it is used, please &lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;see here&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash reporting can be enabled or disabled at any time in the Settings dialog.</source>
         <translation>Anonyme Absturzberichte aktivieren?&lt;br&gt;&lt;br&gt;Erwägen Sie bitte, diese Funktionalität zu aktivieren.&lt;br&gt;Sollten Sie Bedenken haben, welche Informationen dabei übertragen werden und wie diese genutzt werden, lesen Sie bitte &lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;diese Seite&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Absturzberichte können jederzeit in den Einstellungen aktiviert oder deaktiviert werden.</translation>
     </message>
@@ -1989,7 +2147,7 @@
         <translation>Bitte laden Sie &lt;a href=&apos;https://%1/releases/latest&apos;&gt;die normale macOS-Version&lt;/a&gt; herunter und ersetzen Sie die aktuelle Installation, um Probleme zu vermeiden.</translation>
     </message>
     <message>
-        <location line="+98"/>
+        <location line="+113"/>
         <source>Your macOS version is too old to support theme changes.</source>
         <translation>Die verwendete macOS Version is zu alt, um Themenänderungen zu unterstützen.</translation>
     </message>
@@ -2275,7 +2433,7 @@
         <translation>Inventarliste von %1</translation>
     </message>
     <message>
-        <location line="+53"/>
+        <location line="+55"/>
         <source>You have selected more than 1,000 lots, but BrickLink&apos;s servers are unable to cope with this many lots at the same time.&lt;br&gt;You should better export multiple, smaller batches.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Sie haben mehr als 1.000 Posten selektiert, aber die BrickLink Server können diese Anzahl an Posten nicht auf einmal verarbeiten.&lt;br&gt;Es wäre besser den Export auf mehrere, kleinere Sätze aufzuteilen.&lt;br&gt;&lt;br&gt;Soll diese Liste trotzdem exportiert werden?</translation>
     </message>
@@ -2473,13 +2631,14 @@
 <context>
     <name>DocumentIO</name>
     <message>
-        <location filename="../src/common/documentio.cpp" line="+137"/>
-        <location line="+63"/>
+        <location filename="../src/common/documentio.cpp" line="+153"/>
+        <location line="+32"/>
+        <location line="+68"/>
         <source>Import of %1</source>
         <translation>Import von %1</translation>
     </message>
     <message>
-        <location line="-154"/>
+        <location line="-205"/>
         <source>All Models</source>
         <translation>Alle Modelle</translation>
     </message>
@@ -2520,37 +2679,48 @@
     </message>
     <message>
         <location line="+10"/>
-        <location line="+32"/>
+        <location line="+73"/>
         <source>Import File</source>
         <translation>Datei importieren</translation>
     </message>
     <message>
-        <location line="-14"/>
+        <location line="-41"/>
         <source>Could not parse the XML data.</source>
         <translation>Konnte XML Daten nicht verarbeiten.</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="-11"/>
+        <location line="+22"/>
         <source>Could not open file %1 for reading.</source>
         <translation>Konnte Datei %1 nicht zum Lesen öffnen.</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+21"/>
+        <source>Could not parse the CSV data.</source>
+        <translation>Konnte CSV Daten nicht verarbeiten.</translation>
+    </message>
+    <message>
+        <location line="+40"/>
+        <source>Could not create a temporary file to unpack the Studio model</source>
+        <translation>Konnte keine temporäre Datei erstellen, um das Studio Modell zu entpacken</translation>
+    </message>
+    <message>
+        <location line="+6"/>
         <source>Could not open the Studio ZIP container</source>
         <translation>Konnte die Studio ZIP Datei nicht öffnen</translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+7"/>
         <source>Could not open LDraw file for reading</source>
         <translation>Konnte die LDraw Datei nicht zum Lesen öffnen</translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+8"/>
         <source>Could not parse the LDraw data</source>
         <translation>Konnte die LDraw Daten nicht verarbeiten</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="-39"/>
         <source>Failed to import the LDraw/Studio model %1</source>
         <translation>Konnte das LDraw/Studio Modell %1 nicht importieren</translation>
     </message>
@@ -2909,7 +3079,7 @@
         <translation>Alternative Id</translation>
     </message>
     <message>
-        <location line="+347"/>
+        <location line="+348"/>
         <source>This document has no differences that could be exported.</source>
         <translation>Dieses Dokument hat keine Differenzen die exportiert werden könnenten.</translation>
     </message>
@@ -2924,7 +3094,7 @@
         <translation>Diese Liste enthält Teile mit doppelten BrickLink Posten Ids (Lot Id).</translation>
     </message>
     <message>
-        <location line="+229"/>
+        <location line="+235"/>
         <source>Any</source>
         <translation>Beliebig</translation>
     </message>
@@ -2932,7 +3102,7 @@
 <context>
     <name>DocumentStatistics</name>
     <message>
-        <location line="-2425"/>
+        <location line="-2432"/>
         <source>min.</source>
         <translation>min.</translation>
     </message>
@@ -3889,7 +4059,7 @@
 <context>
     <name>LDraw::Library</name>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="+120"/>
+        <location filename="../src/ldraw/library.cpp" line="+121"/>
         <source>download failed</source>
         <translation>Fehler beim Herunterladen</translation>
     </message>
@@ -3928,15 +4098,14 @@ Rechts-Click: Menü</translation>
 <context>
     <name>LZMA::DecompressFilter</name>
     <message>
-        <location filename="../3rdparty/lzma/bs_lzma.cpp" line="+110"/>
         <source>Error while decompressing stream</source>
-        <translation>Fehler beim Entpacken</translation>
+        <translation type="vanished">Fehler beim Entpacken</translation>
     </message>
 </context>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="+375"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="+376"/>
         <source>Toolbar</source>
         <translation>Werkzeugleiste</translation>
     </message>
@@ -3981,7 +4150,27 @@ Rechts-Click: Menü</translation>
         <translation>Download...&lt;br&gt;Zu &lt;b&gt;%p%&lt;/b&gt; fertig&lt;br&gt;(%v von %m)</translation>
     </message>
     <message>
-        <location line="+771"/>
+        <location line="+573"/>
+        <source>CSV / Text files</source>
+        <translation>CSV / Text Dateien</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Import File</source>
+        <translation>Datei importieren</translation>
+    </message>
+    <message>
+        <location line="+82"/>
+        <source>MCP Server</source>
+        <translation>MCP Server</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>The MCP server is listening on port %1</source>
+        <translation>Der MCP Server läuft auf Port %1</translation>
+    </message>
+    <message>
+        <location line="+154"/>
         <source>Customize Toolbar...</source>
         <translation>Werkzeugleiste anpassen...</translation>
     </message>
@@ -3991,7 +4180,7 @@ Rechts-Click: Menü</translation>
         <translation>Anordnung der Infoleisten zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../src/mobile/MainWindow.qml" line="+205"/>
+        <location filename="../src/mobile/MainWindow.qml" line="+178"/>
         <source>Unpin</source>
         <translation>Loslösen</translation>
     </message>
@@ -4010,6 +4199,18 @@ Rechts-Click: Menü</translation>
         <source>Clear recent files</source>
         <translation>Lösche Liste der zuletzt geöffneten Dateien</translation>
     </message>
+    <message>
+        <source>&amp;File</source>
+        <translation type="obsolete">&amp;Datei</translation>
+    </message>
+    <message>
+        <source>&amp;Edit</source>
+        <translation type="obsolete">&amp;Bearbeiten</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation type="obsolete">Fehler</translation>
+    </message>
 </context>
 <context>
     <name>ManageColumnLayoutsDialog</name>
@@ -4027,72 +4228,58 @@ Rechts-Click: Menü</translation>
 <context>
     <name>MiniZip</name>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="+217"/>
         <source>ZIP file %1 has not been opened for reading</source>
-        <translation>Die ZIP Datei %1 wurde nicht zum Lesen geöffnet</translation>
+        <translation type="vanished">Die ZIP Datei %1 wurde nicht zum Lesen geöffnet</translation>
     </message>
     <message>
-        <location line="+5"/>
-        <location line="+94"/>
         <source>Could not locate the file %1 within the ZIP file %2.</source>
-        <translation>Konnte die Datei %1 nicht in der ZIP Datei %2 finden.</translation>
+        <translation type="vanished">Konnte die Datei %1 nicht in der ZIP Datei %2 finden.</translation>
     </message>
     <message>
-        <location line="-90"/>
         <source>Could not seek to the file %1 within the ZIP file %2.</source>
-        <translation>Konnte die Datei %1 nicht in der ZIP Datei %2 erreichen.</translation>
+        <translation type="vanished">Konnte die Datei %1 nicht in der ZIP Datei %2 erreichen.</translation>
     </message>
     <message>
-        <location line="+4"/>
         <source>Could not get info for the file %1 within the ZIP file %2.</source>
-        <translation>Konnte keine Information über die Datei %1 nicht in der ZIP Datei %2 einholen.</translation>
+        <translation type="vanished">Konnte keine Information über die Datei %1 nicht in der ZIP Datei %2 einholen.</translation>
     </message>
     <message>
-        <location line="+3"/>
         <source>The file %1 within the ZIP file %3 is too big (%2 bytes).</source>
-        <translation>Die Datei %1 in der ZIP Datei %3 ist zu gross (%2 Bytes).</translation>
+        <translation type="vanished">Die Datei %1 in der ZIP Datei %3 ist zu gross (%2 Bytes).</translation>
     </message>
     <message>
-        <location line="+3"/>
         <source>Could not open the file %1 within the ZIP file %2 for reading.</source>
-        <translation>Konnte die Datei %1 in der ZIP Datei %2 nicht zum Lesen öffnen.</translation>
+        <translation type="vanished">Konnte die Datei %1 in der ZIP Datei %2 nicht zum Lesen öffnen.</translation>
     </message>
     <message>
-        <location line="+7"/>
-        <location line="+65"/>
         <source>Could not read the file %1 within the ZIP file %2.</source>
-        <translation>Konnte die Datei %1 in der ZIP Datei %2 nicht lesen.</translation>
+        <translation type="vanished">Konnte die Datei %1 in der ZIP Datei %2 nicht lesen.</translation>
     </message>
     <message>
-        <location line="-52"/>
         <source>ZIP file %1 has not been opened for writing</source>
-        <translation>Die ZIP Datei %1 wurde nicht zum Schreiben geöffnet</translation>
+        <translation type="vanished">Die ZIP Datei %1 wurde nicht zum Schreiben geöffnet</translation>
     </message>
     <message>
-        <location line="+12"/>
         <source>Could not create file %1 within the ZIP file %2.</source>
-        <translation>Konnte Datei %1 nicht in der ZIP Datei %2 anlegen.</translation>
+        <translation type="vanished">Konnte Datei %1 nicht in der ZIP Datei %2 anlegen.</translation>
     </message>
     <message>
-        <location line="+4"/>
         <source>Could not write to file %1 within the ZIP file %2.</source>
-        <translation>Konnte die Datei %1 in der ZIP Datei %2 nicht schreiben.</translation>
+        <translation type="vanished">Konnte die Datei %1 in der ZIP Datei %2 nicht schreiben.</translation>
     </message>
     <message>
-        <location line="+40"/>
         <source>Could not decrypt the file %1 within the ZIP file %2.</source>
-        <translation>Konnte die Datei %1 in der ZIP Datei %2 nicht entschlüsseln.</translation>
+        <translation type="vanished">Konnte die Datei %1 in der ZIP Datei %2 nicht entschlüsseln.</translation>
     </message>
     <message>
-        <location line="+9"/>
         <source>Could not open the ZIP file %1</source>
-        <translation>Konnte die ZIP Datei %1 nicht öffnen</translation>
+        <translation type="vanished">Konnte die ZIP Datei %1 nicht öffnen</translation>
     </message>
 </context>
 <context>
     <name>MobileApplication</name>
     <message>
-        <location filename="../src/mobile/mobileapplication.cpp" line="+123"/>
+        <location filename="../src/mobile/mobileapplication.cpp" line="+109"/>
         <source>Would you like to consolidate %L1 lots?</source>
         <translation>Sollen %L1 Posten zusammengeführt werden?</translation>
     </message>
@@ -4252,7 +4439,7 @@ Rechts-Click: Menü</translation>
 <context>
     <name>Orders</name>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="-1017"/>
+        <location filename="../src/bricklink/order.cpp" line="-1020"/>
         <source>Unknown</source>
         <translation>Unknown</translation>
     </message>
@@ -4794,6 +4981,25 @@ Rechts-Click: Menü</translation>
     </message>
 </context>
 <context>
+    <name>QmlBrickStore</name>
+    <message>
+        <location filename="../src/common/qmlapi.cpp" line="+335"/>
+        <source>Save File</source>
+        <translation>Datei speichern</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Failed to open file %1 for writing.</source>
+        <translation>Datei %1 konnte nicht zum Schreiben geöffnet werden.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <location line="+2"/>
+        <source>Failed to save data to file %1.</source>
+        <translation>Datenspeicherung in Datei %1 ist fehlgeschlagen.</translation>
+    </message>
+</context>
+<context>
     <name>RecentMenu</name>
     <message>
         <location filename="../src/desktop/mainwindow_p.h" line="+70"/>
@@ -5005,7 +5211,7 @@ Rechts-Click: Menü</translation>
 <context>
     <name>Scanner::Capture</name>
     <message>
-        <location filename="../src/scanner/capture.cpp" line="+162"/>
+        <location filename="../src/scanner/capture.cpp" line="+164"/>
         <source>Scanning failed</source>
         <translation>Der Scanvorgang ist fehlgeschlagen</translation>
     </message>
@@ -5477,7 +5683,7 @@ Rechts-Click: Menü</translation>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location line="+32"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+50"/>
         <source>Language</source>
         <translation>Sprache</translation>
@@ -5510,17 +5716,56 @@ Rechts-Click: Menü</translation>
         <translation>&lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;Siehe hier&lt;/a&gt; für mehr Infomationen.</translation>
     </message>
     <message>
-        <location line="+32"/>
+        <location line="+1112"/>
+        <source>Enable MCP server</source>
+        <translation>MCP Server anschalten</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Server port:</source>
+        <translation>Server Port:</translation>
+    </message>
+    <message>
+        <location line="+38"/>
+        <source>Has catalog access</source>
+        <translation>Hat Zugriff auf den Katalog</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Has read-only access to open documents</source>
+        <translation>Hat lesenden Zugriff auf geöffnete Dokumente</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Can open existing and create new documents</source>
+        <translation>Kann bestehende Dokumente öffnen und neue erstellen</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Can edit documents</source>
+        <translation>Kann Dokumente bearbeiten</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Can save and export documents</source>
+        <translation>Kann Dokumente speichern und exportieren</translation>
+    </message>
+    <message>
+        <location line="+82"/>
         <source>Interface</source>
         <translation>Benutzeroberfläche</translation>
     </message>
     <message>
-        <location line="-135"/>
-        <source>Open a Web-Browser window when exporting to the clipboard</source>
-        <translation>Web-Browser Fenster öffnen bei Export in die Zwischenablage</translation>
+        <location line="+45"/>
+        <source>AI</source>
+        <translation>KI</translation>
     </message>
     <message>
-        <location line="-43"/>
+        <source>Open a Web-Browser window when exporting to the clipboard</source>
+        <translation type="vanished">Web-Browser Fenster öffnen bei Export in die Zwischenablage</translation>
+    </message>
+    <message>
+        <location line="-1468"/>
         <source>Document Directory</source>
         <translation>Dokumenten Verzeichnis</translation>
     </message>
@@ -5539,7 +5784,7 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Wenn Sie hier ein Passwort setzen, dann wird es auf Ihrem System gespeichert: es wird allerdings nur verwürfelt und &lt;b&gt;nicht&lt;/b&gt; verschlüsselt, weil BrickStore dieses Passwort bei jeder Anfrage in Ihrem Namen an die BrickLink Server senden muss.&lt;br&gt;&lt;br&gt;Falls Sie Ihr Passwort nicht sichern wollen, dann lassen Sie einfach dieses Feld leer. BrickStore wird dann nach jedem Programmstart, bei der ersten Anfrage in Ihrem Namen, nach dem Passwort fragen.</translation>
     </message>
     <message>
-        <location line="+608"/>
+        <location line="+611"/>
         <source>Price guide</source>
         <translation>Richtpreise</translation>
     </message>
@@ -5559,13 +5804,13 @@ Rechts-Click: Menü</translation>
         <translation>BrickLink Datenbank, wenn älter als</translation>
     </message>
     <message>
-        <location line="-113"/>
+        <location line="+732"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="-61"/>
         <source>BrickLink</source>
         <translation>BrickLink</translation>
     </message>
     <message>
-        <location line="-60"/>
+        <location line="-911"/>
         <source>Row height</source>
         <translation>Zeilenhöhe</translation>
     </message>
@@ -5587,24 +5832,24 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">Bitte den Benutzernamen eingeben - nicht die E-Mail-Adresse.</translation>
     </message>
     <message>
-        <location line="+309"/>
+        <location line="+913"/>
         <source>LDraw</source>
         <translation>LDraw</translation>
     </message>
     <message>
-        <location line="-887"/>
+        <location line="-1488"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+69"/>
         <source>Default currency</source>
         <translation>Standard Währung</translation>
     </message>
     <message>
-        <location line="-63"/>
+        <location line="+1461"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="-71"/>
         <source>General</source>
         <translation>Allgemein</translation>
     </message>
     <message>
-        <location line="+120"/>
+        <location line="-1404"/>
         <source>Parting out items</source>
         <translation>Teile zerlegen</translation>
     </message>
@@ -5624,7 +5869,12 @@ Rechts-Click: Menü</translation>
         <translation>Immer in ein neues Dokument zerlegen</translation>
     </message>
     <message>
-        <location line="+36"/>
+        <location line="+15"/>
+        <source>Open a Web-Browser when exporting to the clipboard</source>
+        <translation>Web-Browser öffnen bei Export in die Zwischenablage</translation>
+    </message>
+    <message>
+        <location line="+21"/>
         <source>Modifications</source>
         <translation>Änderungen</translation>
     </message>
@@ -5654,7 +5904,7 @@ Rechts-Click: Menü</translation>
         <translation>Sende einen anonymen Absturzbericht</translation>
     </message>
     <message>
-        <location line="+127"/>
+        <location line="+124"/>
         <source>Icon size</source>
         <translation>Symbolgröße</translation>
     </message>
@@ -5736,7 +5986,7 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">The maximale Passwortlänge bei BrickLink ist 15 Zeichen.</translation>
     </message>
     <message>
-        <location line="+298"/>
+        <location line="+301"/>
         <source>Library</source>
         <translation>Bibliothek</translation>
     </message>
@@ -5761,7 +6011,12 @@ Rechts-Click: Menü</translation>
         <translation>Wählen Sie diese Option, falls Sie individuelle oder inoffzielle Teile benötigen</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="-314"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Go to &lt;a href=&quot;https://bricklink.com/v3/brickstore-access-management.page&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#3daee9;&quot;&gt;https://bricklink.com/v3/brickstore-access-management.page&lt;/span&gt;&lt;/a&gt;, click &lt;span style=&quot; font-weight:700;&quot;&gt;Renew Token&lt;/span&gt;, then &lt;span style=&quot; font-weight:700;&quot;&gt;Copy to Clipboard&lt;/span&gt;. Finally 📋 &lt;span style=&quot; font-weight:700;&quot;&gt;Paste&lt;/span&gt; it here above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gehe zu &lt;a href=&quot;https://bricklink.com/v3/brickstore-access-management.page&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#3daee9;&quot;&gt;https://bricklink.com/v3/brickstore-access-management.page&lt;/span&gt;&lt;/a&gt;, Klick auf &lt;span style=&quot; font-weight:700;&quot;&gt;Renew Token&lt;/span&gt;, dann &lt;span style=&quot; font-weight:700;&quot;&gt;Copy to Clipboard&lt;/span&gt;. Zum Schluss noch hier oben 📋 &lt;span style=&quot; font-weight:700;&quot;&gt;Einfügen&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location line="+348"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
@@ -5776,40 +6031,40 @@ Rechts-Click: Menü</translation>
         <translation>Jetzt</translation>
     </message>
     <message>
-        <location line="-791"/>
-        <location line="+830"/>
+        <location line="-794"/>
+        <location line="+1231"/>
         <source>Toolbar</source>
         <translation>Werkzeugleiste</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="-395"/>
         <source>Customize the main toolbar using drag-and-drop</source>
         <translation>Anpassen der Hauptwerkzeugleiste mittels Ziehen und Ablegen</translation>
     </message>
     <message>
-        <location line="+108"/>
+        <location line="+404"/>
         <source>Keyboard</source>
         <translation>Tastatur</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="-293"/>
         <source>Customize the global keyboard shortcuts</source>
         <translation>Anpassen der globalen Tastenkürzel</translation>
     </message>
     <message>
-        <location line="-107"/>
-        <location line="+114"/>
+        <location line="-104"/>
+        <location line="+111"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location line="-270"/>
+        <location line="-264"/>
         <source>Use an existing LDraw installation</source>
         <translation>Verwendung einer vorhandenen LDraw Teilebibliothek</translation>
     </message>
     <message>
-        <location line="+249"/>
-        <location line="+76"/>
+        <location line="+246"/>
+        <location line="+73"/>
         <source>Reset all</source>
         <translation>Alle zurücksetzen</translation>
     </message>
@@ -5824,7 +6079,7 @@ Rechts-Click: Menü</translation>
         <translation>Bildergröße Teile</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="-561"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="-552"/>
         <source>Automatically update cached data</source>
         <translation>Zwischengespeicherte BrickLink Daten automatisch aktualisieren</translation>
     </message>
@@ -5851,17 +6106,27 @@ Rechts-Click: Menü</translation>
         <translation>Auf Voreinstellungen zurücksetzen</translation>
     </message>
     <message>
-        <location line="-218"/>
+        <location line="-227"/>
         <source>BrickLink Login</source>
         <translation>BrickLink Anmeldung</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="+489"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="+504"/>
         <source>Other...</source>
         <translation>Ändern...</translation>
     </message>
     <message>
-        <location line="+52"/>
+        <location line="+34"/>
+        <source>Paste</source>
+        <translation>Einfügen</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Clear</source>
+        <translation>Löschen</translation>
+    </message>
+    <message>
+        <location line="+14"/>
         <source>Your access token is malformed.</source>
         <translation>Der Zugriffstoken ist fehlerhaft.</translation>
     </message>
@@ -5877,7 +6142,12 @@ Rechts-Click: Menü</translation>
         <translation>Diese Tastenkürzel wird schon von einer anderen Aktion benutzt.</translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location line="+17"/>
+        <source>Reset to default</source>
+        <translation>Auf Voreinstellung zurücksetzen</translation>
+    </message>
+    <message>
+        <location line="+19"/>
         <source>could not find a cross rate for %1</source>
         <translation>konnte keinen Wechselkurs für %1 finden</translation>
     </message>
@@ -5892,12 +6162,27 @@ Rechts-Click: Menü</translation>
         <translation>Verzeichnis für Dokumente</translation>
     </message>
     <message>
-        <location line="+145"/>
+        <location line="+133"/>
+        <source>The MCP server is running on port %1.</source>
+        <translation>Der MCP Server läuft auf Port %1.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The MCP server is not running.</source>
+        <translation>Der MCP Server läuft nicht.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>This build does not support the MCP server.</source>
+        <translation>Diese Version beinhaltet keinen MCP Server.</translation>
+    </message>
+    <message>
+        <location line="+26"/>
         <source>The specified document directory does not exist or is not read- and writable.&lt;br /&gt;The document directory setting will not be changed.</source>
         <translation>Das angegebene Dokumentenverzeichnis existiert nicht (oder es ist nicht les- und beschreibbar).&lt;br /&gt;Die Einstellung für das Dokumentenverzeichnis wird nicht geändert.</translation>
     </message>
     <message>
-        <location line="+60"/>
+        <location line="+79"/>
         <source>Not a valid LDraw installation</source>
         <translation>Keine gültige LDraw Installation</translation>
     </message>
@@ -5907,7 +6192,7 @@ Rechts-Click: Menü</translation>
         <translation>Gültige LDraw Installation</translation>
     </message>
     <message>
-        <location line="-383"/>
+        <location line="-428"/>
         <source>LDraw directory location</source>
         <translation>Verzeichnis der LDraw Installation</translation>
     </message>
@@ -5942,33 +6227,32 @@ Rechts-Click: Menü</translation>
         <translation>Richtpreise</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="-34"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="-31"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="-77"/>
         <source>Large</source>
         <translation>Gross</translation>
     </message>
     <message>
-        <location line="-574"/>
+        <location line="-571"/>
         <source>Reload exchange rates</source>
         <translation>Neue Wechselkurse laden</translation>
     </message>
     <message>
-        <location line="+620"/>
+        <location line="+614"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+39"/>
         <source>Access Token</source>
         <translation>Zugriffstoken</translation>
     </message>
     <message>
-        <location line="+23"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+31"/>
         <source>You can get your Token from &lt;a href=&quot;https://bricklink.com/v3/brickstore-access-management.page&quot;&gt;https://bricklink.com/v3/brickstore-access-management.page&lt;/a&gt;</source>
-        <translation>Sie können Ihren Zugriffstoken unter &lt;a href=&quot;https://bricklink.com/v3/brickstore-access-management.page&quot;&gt;https://bricklink.com/v3/brickstore-access-management.page&lt;/a&gt; erhalten.</translation>
+        <translation>Sie können Ihren Zugriffstoken unter &lt;a href=&quot;https://bricklink.com/v3/brickstore-access-management.page&quot;&gt;https://bricklink.com/v3/brickstore-access-management.page&lt;/a&gt; erhalten</translation>
     </message>
 </context>
 <context>
     <name>ShortcutModel</name>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="-315"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="-332"/>
         <source>Action name</source>
         <translation>Name der Aktion</translation>
     </message>
@@ -6302,7 +6586,7 @@ Rechts-Click: Menü</translation>
         <translation>Anheften</translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+56"/>
         <source>View tutorials</source>
         <translation>Tutorials ansehen</translation>
     </message>

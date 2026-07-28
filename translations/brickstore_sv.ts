@@ -97,12 +97,12 @@
     </message>
     <message>
         <location line="+2"/>
-        <location line="+13"/>
+        <location line="+15"/>
         <source>BrickLink XML...</source>
         <translation>BrickLink XML...</translation>
     </message>
     <message>
-        <location line="-13"/>
+        <location line="-15"/>
         <source>Ctrl+I,Ctrl+X</source>
         <comment>File|Import BrickLink XML</comment>
         <translation>Ctrl+I,Ctrl+X</translation>
@@ -161,6 +161,17 @@
         <source>Ctrl+I,Ctrl+L</source>
         <comment>File|Import LDraw Model</comment>
         <translation>Ctrl+I,Ctrl+L</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>CSV File...</source>
+        <translation>CSV Fil...</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Ctrl+I,Ctrl+V</source>
+        <comment>File|Import CSV</comment>
+        <translation>Ctrl+I,Ctrl+V</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -824,7 +835,7 @@
     <message>
         <location line="+1"/>
         <source>Copy alternate id</source>
-        <translation type="unfinished"></translation>
+        <translation>Kopiera alternativt id</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -874,7 +885,7 @@
 <context>
     <name>ActionModel</name>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="+66"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="+67"/>
         <source>Other</source>
         <translation>Andra</translation>
     </message>
@@ -1094,7 +1105,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="+190"/>
+        <location filename="../src/common/application.cpp" line="+195"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Din installation är trasig: Bildformatets plugin saknas!</translation>
     </message>
@@ -1123,7 +1134,7 @@
         <translation>Kunde inte ladda BrickLink&apos;s databasfiler.&lt;br /&gt;&lt;br /&gt;Programmet kan inte fungera utan dessa filer.</translation>
     </message>
     <message numerus="yes">
-        <location line="+37"/>
+        <location line="+45"/>
         <source>It seems like BrickStore crashed while %n document(s) had unsaved modifications.</source>
         <translation>
             <numerusform>Det verkar som BrickStore krashade medans %n dokumentet hade osparade förändringar.</numerusform>
@@ -1141,7 +1152,7 @@
         <translation>Återställ dokumenten</translation>
     </message>
     <message>
-        <location line="+25"/>
+        <location line="+86"/>
         <source>The way BrickStore uses LDraw to render 3D models for parts has changed: by default it will now download and maintain its own LDraw installation.&lt;br&gt;&lt;br&gt;Please check the LDraw page in Settings if you still want to use a custom LDraw installation.</source>
         <translation>Sättet BrickStore använder LDraw för att generera 3D modeller för legobitar har ändrats: som standard kommer nu den laddas ner och sköta sin egen LDraw installation.&lt;br&gt;&lt;br&gt;Var vänlig och kontrollera LDraw fliken under inställningar om du fortfarande vill använda en anpassad LDraw installation.</translation>
     </message>
@@ -1169,24 +1180,24 @@
         <translation type="vanished">Inga godkända BrickLink inloggnings inställningar hittades.&lt;br /&gt;&lt;br /&gt;Vill du ändra dessa inställningar nu?</translation>
     </message>
     <message>
-        <location line="-214"/>
+        <location line="-283"/>
         <source>(empty)</source>
-        <translation type="unfinished"></translation>
+        <translation>(tomt)</translation>
     </message>
     <message>
         <location line="+3"/>
         <source>Failed to authenticate with BrickLink using access token &lt;tt&gt;%1&lt;/tt&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Kunde inte autentisera mot BrickLink med åtkomsttoken &lt;tt&gt;%1&lt;/tt&gt;</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Most likely your token has expired: you can click &lt;i&gt;Retry&lt;/i&gt; to open Settings and renew it.</source>
-        <translation type="unfinished"></translation>
+        <translation>Troligtvis har din token gått ut: du kan klicka på &lt;i&gt;Försök igen&lt;/i&gt; för att öppna Inställningar och förnya den.</translation>
     </message>
     <message>
-        <location line="+343"/>
+        <location line="+409"/>
         <source>No valid BrickLink access token found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
-        <translation type="unfinished"></translation>
+        <translation>Ingen giltig BrickLink åtkomsttoken hittades.&lt;br /&gt;&lt;br /&gt;Vill du ändra dessa inställningar nu?</translation>
     </message>
     <message>
         <location line="+23"/>
@@ -1313,7 +1324,7 @@
 <context>
     <name>BrickLink::CategoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="+319"/>
+        <location filename="../src/bricklink/model.cpp" line="+329"/>
         <source>All Items</source>
         <translation>Alla Artiklar</translation>
     </message>
@@ -1326,7 +1337,7 @@
 <context>
     <name>BrickLink::ColorModel</name>
     <message>
-        <location line="-228"/>
+        <location line="-233"/>
         <source>Color by %1</source>
         <translation>Färg med %1</translation>
     </message>
@@ -1380,7 +1391,7 @@
 <context>
     <name>BrickLink::InternalInventoryModel</name>
     <message>
-        <location filename="../src/bricklink/model.cpp" line="+1151"/>
+        <location filename="../src/bricklink/model.cpp" line="+1166"/>
         <source>Qty.</source>
         <translation>Antal.</translation>
     </message>
@@ -1424,7 +1435,7 @@
 <context>
     <name>BrickLink::ItemTypeModel</name>
     <message>
-        <location line="-156"/>
+        <location line="-161"/>
         <source>Any</source>
         <translation>Någon</translation>
     </message>
@@ -1447,7 +1458,7 @@
         <translation>Kunde inte behandla den mottagna orderns XML data</translation>
     </message>
     <message>
-        <location line="+767"/>
+        <location line="+770"/>
         <source>Received</source>
         <translation>Mottagen</translation>
     </message>
@@ -1543,7 +1554,7 @@
     <message>
         <location filename="../src/bricklink/delegate.cpp" line="+12"/>
         <source>Alternate id</source>
-        <translation type="unfinished"></translation>
+        <translation>Alternativt id</translation>
     </message>
 </context>
 <context>
@@ -1678,7 +1689,7 @@
     <message>
         <location filename="../src/common/checkforupdates.cpp" line="+77"/>
         <source>BrickStore was updated:</source>
-        <translation type="unfinished"></translation>
+        <translation>BrickStore uppdaterades:</translation>
     </message>
     <message>
         <location line="+94"/>
@@ -1931,6 +1942,153 @@
     </message>
 </context>
 <context>
+    <name>CsvImport</name>
+    <message>
+        <location filename="../src/common/csvimport.cpp" line="+124"/>
+        <source>(ignore)</source>
+        <translation>(ignorera)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Item Id</source>
+        <translation>Artikel nummer</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Item Type</source>
+        <translation>Artikel typ</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Color Id</source>
+        <translation>Färg nummer</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Color Name</source>
+        <translation>Färg namn</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>LEGO Element Id (PCC)</source>
+        <translation>LEGO element nummer (PCC)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Condition</source>
+        <translation>Skick</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Quantity</source>
+        <translation>Antal</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Price</source>
+        <translation>Pris</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Cost</source>
+        <translation>Kostnad</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Bulk Quantity</source>
+        <translation>Säljs i antal</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Sale Percent</source>
+        <translation>Rea procent</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Comments</source>
+        <translation>Kommentar</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Remarks</source>
+        <translation>Anmärkning</translation>
+    </message>
+</context>
+<context>
+    <name>CsvImportDialog</name>
+    <message>
+        <location filename="../src/desktop/csvimportdialog.cpp" line="+131"/>
+        <source>Import CSV — %1</source>
+        <translation>Importera CSV — %1</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Automatic</source>
+        <translation>Automatisk</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <location line="+18"/>
+        <source>System</source>
+        <translation>System</translation>
+    </message>
+    <message>
+        <location line="-6"/>
+        <source>Comma</source>
+        <translation>Komma</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Semicolon</source>
+        <translation>Semikolon</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Tab</source>
+        <translation>Tabb</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>1,234.56 (point)</source>
+        <translation>1,234.56 (punkt)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>1.234,56 (comma)</source>
+        <translation>1.234,56 (komma)</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>First row contains column names</source>
+        <translation>Första raden innehåller kolumnnamn</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Character set:</source>
+        <translation>Teckenuppsättning:</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Separator:</source>
+        <translation>Avgränsare:</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Number format:</source>
+        <translation>Talformat:</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Import options</source>
+        <translation>Importalternativ</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Click a column header to choose which field it maps to:</source>
+        <translation>Klicka på en kolumnrubrik för att välja vilket fält den ska kopplas till:</translation>
+    </message>
+</context>
+<context>
     <name>Currency</name>
     <message>
         <source>There was an error downloading the exchange rates from the ECB server:</source>
@@ -1948,7 +2106,7 @@
     <message>
         <location line="+13"/>
         <source>Failed to download exchange rates.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kunde inte ladda ner växelkurser.</translation>
     </message>
     <message>
         <source>There was an error parsing the exchange rates from the ECB server:</source>
@@ -1966,22 +2124,22 @@
 <context>
     <name>DesktopApplication</name>
     <message>
-        <location filename="../src/desktop/desktopapplication.cpp" line="+185"/>
+        <location filename="../src/desktop/desktopapplication.cpp" line="+189"/>
         <source>Enable anonymous crash reporting?&lt;br&gt;&lt;br&gt;Please consider enabling this feature when available.&lt;br&gt;If you have any doubts about what information is being submitted and how it is used, please &lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;see here&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash reporting can be enabled or disabled at any time in the Settings dialog.</source>
         <translation>Aktivera anonym crash rapportering?&lt;br&gt;&lt;br&gt;Var vänlig överväg att aktivera denna funktion när den är tillgänglig.&lt;br&gt;Om du har något tvivel att information som sänds och på vilket sätt den används, var vänlig &lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;kolla här&lt;/a&gt;.&lt;br&gt;&lt;br&gt;Crash rapportering kan aktiveras eller avaktiveras när du vill via Inställnings dialogrutan.</translation>
     </message>
     <message>
         <location line="+19"/>
         <source>You are using the legacy version of BrickStore for old macOS 10, 11 and 12 machines, but you are running macOS %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du använder den äldre versionen (legacy) av BrickStore för gamla macOS 10-, 11- och 12-datorer, men du kör macOS %1.</translation>
     </message>
     <message>
         <location line="+4"/>
         <source>Please download &lt;a href=&apos;https://%1/releases/latest&apos;&gt;the normal macOS version&lt;/a&gt; and replace the current installation to avoid problems.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ladda ner &lt;a href=&apos;https://%1/releases/latest&apos;&gt;den vanliga macOS-versionen&lt;/a&gt; och ersätt den nuvarande installationen för att undvika problem.</translation>
     </message>
     <message>
-        <location line="+98"/>
+        <location line="+113"/>
         <source>Your macOS version is too old to support theme changes.</source>
         <translation>Versionen på dit macOS är för gammal för att stödja ändringingar av tema.</translation>
     </message>
@@ -2267,7 +2425,7 @@
         <translation>Lager för %1</translation>
     </message>
     <message>
-        <location line="+53"/>
+        <location line="+55"/>
         <source>You have selected more than 1,000 lots, but BrickLink&apos;s servers are unable to cope with this many lots at the same time.&lt;br&gt;You should better export multiple, smaller batches.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Du har valt mer än 1000 poster, men BrickLink&apos;s servrar klarar inte av så många poster samtidigt.&lt;br&gt;Du bör exportera flera mindre omgångar.&lt;br&gt;&lt;br&gt;Vill du exportera den här listan ändå?</translation>
     </message>
@@ -2466,7 +2624,7 @@
 <context>
     <name>DocumentIO</name>
     <message>
-        <location filename="../src/common/documentio.cpp" line="+40"/>
+        <location filename="../src/common/documentio.cpp" line="+42"/>
         <source>BrickStore Files</source>
         <translation>BrickStore filer</translation>
     </message>
@@ -2507,43 +2665,55 @@
     </message>
     <message>
         <location line="+10"/>
-        <location line="+32"/>
+        <location line="+73"/>
         <source>Import File</source>
         <translation>Importera Fil</translation>
     </message>
     <message>
-        <location line="-18"/>
-        <location line="+63"/>
+        <location line="-45"/>
+        <location line="+32"/>
+        <location line="+68"/>
         <source>Import of %1</source>
         <translation>Importerar %1</translation>
     </message>
     <message>
-        <location line="-59"/>
+        <location line="-96"/>
         <source>Could not parse the XML data.</source>
         <translation>Kunde inte analysera XML data.</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="-11"/>
+        <location line="+22"/>
         <source>Could not open file %1 for reading.</source>
         <translation>Kunde inte öppna filen %1 för läsning.</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+21"/>
+        <source>Could not parse the CSV data.</source>
+        <translation>Kunde inte analysera CSV data.</translation>
+    </message>
+    <message>
+        <location line="+40"/>
+        <source>Could not create a temporary file to unpack the Studio model</source>
+        <translation>Kunde inte skapa en temporär fil för att packa upp Studio modellen</translation>
+    </message>
+    <message>
+        <location line="+6"/>
         <source>Could not open the Studio ZIP container</source>
         <translation>Kunde inte öppna Studio ZIP filen</translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+7"/>
         <source>Could not open LDraw file for reading</source>
         <translation>Kunde inte öppna LDraw filen för läsning</translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+8"/>
         <source>Could not parse the LDraw data</source>
         <translation>Kunde inte analysera LDraw datan</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="-39"/>
         <source>Failed to import the LDraw/Studio model %1</source>
         <translation>Misslyckades att importera LDraw/Studio model %1</translation>
     </message>
@@ -2899,10 +3069,10 @@
     <message>
         <location line="+6"/>
         <source>Alternate Id</source>
-        <translation type="unfinished"></translation>
+        <translation>Alternativt Artikel nummer</translation>
     </message>
     <message>
-        <location line="+347"/>
+        <location line="+348"/>
         <source>This document has no differences that could be exported.</source>
         <translation>Detta dokument har inga förändringar som kan exporteras.</translation>
     </message>
@@ -2917,7 +3087,7 @@
         <translation>Denna lista innehåller dubeletter med BrickLink&apos;s post Id.</translation>
     </message>
     <message>
-        <location line="+229"/>
+        <location line="+235"/>
         <source>Any</source>
         <translation>Någon</translation>
     </message>
@@ -2925,7 +3095,7 @@
 <context>
     <name>DocumentStatistics</name>
     <message>
-        <location line="-2425"/>
+        <location line="-2432"/>
         <source>min.</source>
         <translation>min.</translation>
     </message>
@@ -3292,17 +3462,17 @@
     <message>
         <location line="+34"/>
         <source>No %1 carts</source>
-        <translation type="unfinished"></translation>
+        <translation>Inga %1 kundvagnar</translation>
     </message>
     <message>
         <location line="+0"/>
         <source>international</source>
-        <translation type="unfinished"></translation>
+        <translation>internationella</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>domestic</source>
-        <translation type="unfinished"></translation>
+        <translation>inrikes</translation>
     </message>
     <message>
         <location line="+73"/>
@@ -3525,17 +3695,17 @@
     <message>
         <location line="+52"/>
         <source>No %1 orders</source>
-        <translation type="unfinished"></translation>
+        <translation>Inga %1 ordrar</translation>
     </message>
     <message>
         <location line="+0"/>
         <source>placed</source>
-        <translation type="unfinished"></translation>
+        <translation>lagda</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>received</source>
-        <translation type="unfinished"></translation>
+        <translation>mottagna</translation>
     </message>
     <message>
         <location line="+85"/>
@@ -3678,7 +3848,7 @@
     <message>
         <location line="+28"/>
         <source>No wanted lists</source>
-        <translation type="unfinished"></translation>
+        <translation>Inga önskelistor</translation>
     </message>
     <message>
         <location line="+44"/>
@@ -3840,12 +4010,12 @@
     <message>
         <location line="+49"/>
         <source>Tap on the camera preview to capture an image.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tryck på kamerans förhandsgranskning för att ta en bild.</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>There is no camera connected.</source>
-        <translation type="unfinished"></translation>
+        <translation>Det finns ingen kamera ansluten.</translation>
     </message>
     <message>
         <location line="+6"/>
@@ -3861,7 +4031,7 @@
     <message>
         <location line="+14"/>
         <source>Retry</source>
-        <translation type="unfinished"></translation>
+        <translation>Försök igen</translation>
     </message>
     <message>
         <location filename="../src/desktop/itemscannerdialog.cpp" line="-6"/>
@@ -3882,7 +4052,7 @@
 <context>
     <name>LDraw::Library</name>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="+120"/>
+        <location filename="../src/ldraw/library.cpp" line="+121"/>
         <source>download failed</source>
         <translation>Nedladdning misslyckades</translation>
     </message>
@@ -3921,15 +4091,14 @@ Högerklicka: Meny</translation>
 <context>
     <name>LZMA::DecompressFilter</name>
     <message>
-        <location filename="../3rdparty/lzma/bs_lzma.cpp" line="+110"/>
         <source>Error while decompressing stream</source>
-        <translation>Fel vid uppackning av stream</translation>
+        <translation type="vanished">Fel vid uppackning av stream</translation>
     </message>
 </context>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="+375"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="+376"/>
         <source>Toolbar</source>
         <translation>Verktygsfält</translation>
     </message>
@@ -3974,7 +4143,27 @@ Högerklicka: Meny</translation>
         <translation>Laddar ner...&lt;br&gt;&lt;b&gt;%p%&lt;/b&gt; färdiga&lt;br&gt;(%v of %m)</translation>
     </message>
     <message>
-        <location line="+771"/>
+        <location line="+573"/>
+        <source>CSV / Text files</source>
+        <translation>CSV / Text filer</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Import File</source>
+        <translation>Importera Fil</translation>
+    </message>
+    <message>
+        <location line="+82"/>
+        <source>MCP Server</source>
+        <translation>MCP Server</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>The MCP server is listening on port %1</source>
+        <translation>MCP servern lyssnar på port %1</translation>
+    </message>
+    <message>
+        <location line="+154"/>
         <source>Customize Toolbar...</source>
         <translation>Anpassa Verktygsfältet...</translation>
     </message>
@@ -3984,7 +4173,7 @@ Högerklicka: Meny</translation>
         <translation>Återställ info rutans placering</translation>
     </message>
     <message>
-        <location filename="../src/mobile/MainWindow.qml" line="+205"/>
+        <location filename="../src/mobile/MainWindow.qml" line="+178"/>
         <source>Unpin</source>
         <translation>Ta bort stift</translation>
     </message>
@@ -4002,6 +4191,22 @@ Högerklicka: Meny</translation>
         <location line="+4"/>
         <source>Clear recent files</source>
         <translation>Rensa senaste filer</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation type="obsolete">&amp;Arkiv</translation>
+    </message>
+    <message>
+        <source>&amp;Edit</source>
+        <translation type="obsolete">&amp;Redigera</translation>
+    </message>
+    <message>
+        <source>Ctrl+L</source>
+        <translation type="obsolete">Ctrl+L</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation type="obsolete">Fel</translation>
     </message>
 </context>
 <context>
@@ -4021,72 +4226,46 @@ Högerklicka: Meny</translation>
 <context>
     <name>MiniZip</name>
     <message>
-        <location filename="../3rdparty/minizip/minizip.cpp" line="+217"/>
         <source>ZIP file %1 has not been opened for reading</source>
-        <translation>zip filen %1 är inte öppnad för läsning</translation>
+        <translation type="vanished">zip filen %1 är inte öppnad för läsning</translation>
     </message>
     <message>
-        <location line="+5"/>
-        <location line="+94"/>
         <source>Could not locate the file %1 within the ZIP file %2.</source>
-        <translation>Kunde inte hitta filen %1 i ZIP filen %2.</translation>
+        <translation type="vanished">Kunde inte hitta filen %1 i ZIP filen %2.</translation>
     </message>
     <message>
-        <location line="-90"/>
         <source>Could not seek to the file %1 within the ZIP file %2.</source>
-        <translation>Kunde inte söka filen %1 i ZIP filen %2.</translation>
+        <translation type="vanished">Kunde inte söka filen %1 i ZIP filen %2.</translation>
     </message>
     <message>
-        <location line="+4"/>
         <source>Could not get info for the file %1 within the ZIP file %2.</source>
-        <translation>Kunde inte hämta information om filen %1 i ZIP filen %2.</translation>
+        <translation type="vanished">Kunde inte hämta information om filen %1 i ZIP filen %2.</translation>
     </message>
     <message>
-        <location line="+3"/>
         <source>The file %1 within the ZIP file %3 is too big (%2 bytes).</source>
-        <translation>Filen %1 i ZIP filen %3 är för stor (%2 bytes).</translation>
+        <translation type="vanished">Filen %1 i ZIP filen %3 är för stor (%2 bytes).</translation>
     </message>
     <message>
-        <location line="+3"/>
         <source>Could not open the file %1 within the ZIP file %2 for reading.</source>
-        <translation>Kunde inte öppna filen %1 i ZIP filen %2 för läsning.</translation>
+        <translation type="vanished">Kunde inte öppna filen %1 i ZIP filen %2 för läsning.</translation>
     </message>
     <message>
-        <location line="+7"/>
-        <location line="+65"/>
         <source>Could not read the file %1 within the ZIP file %2.</source>
-        <translation>Kunde inte läsa filen %1 i ZIP filen %2.</translation>
+        <translation type="vanished">Kunde inte läsa filen %1 i ZIP filen %2.</translation>
     </message>
     <message>
-        <location line="-52"/>
-        <source>ZIP file %1 has not been opened for writing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+12"/>
-        <source>Could not create file %1 within the ZIP file %2.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+4"/>
-        <source>Could not write to file %1 within the ZIP file %2.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+40"/>
         <source>Could not decrypt the file %1 within the ZIP file %2.</source>
-        <translation>Kunde inte dekryptera filen %1 i ZIP filen %2.</translation>
+        <translation type="vanished">Kunde inte dekryptera filen %1 i ZIP filen %2.</translation>
     </message>
     <message>
-        <location line="+9"/>
         <source>Could not open the ZIP file %1</source>
-        <translation>Kunde inte öppna ZIP filen %1</translation>
+        <translation type="vanished">Kunde inte öppna ZIP filen %1</translation>
     </message>
 </context>
 <context>
     <name>MobileApplication</name>
     <message>
-        <location filename="../src/mobile/mobileapplication.cpp" line="+123"/>
+        <location filename="../src/mobile/mobileapplication.cpp" line="+109"/>
         <source>Would you like to consolidate %L1 lots?</source>
         <translation>Vill du slå ihop %L1 poster?</translation>
     </message>
@@ -4240,13 +4419,13 @@ Högerklicka: Meny</translation>
     <message>
         <location filename="../src/desktop/orderinformationdialog.ui" line="-920"/>
         <source>Simplify Latin characters</source>
-        <translation type="unfinished"></translation>
+        <translation>Förenkla latinska tecken</translation>
     </message>
 </context>
 <context>
     <name>Orders</name>
     <message>
-        <location filename="../src/bricklink/order.cpp" line="-1017"/>
+        <location filename="../src/bricklink/order.cpp" line="-1020"/>
         <source>Unknown</source>
         <translation>Okänd</translation>
     </message>
@@ -4788,6 +4967,25 @@ Högerklicka: Meny</translation>
     </message>
 </context>
 <context>
+    <name>QmlBrickStore</name>
+    <message>
+        <location filename="../src/common/qmlapi.cpp" line="+335"/>
+        <source>Save File</source>
+        <translation>Spara fil</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Failed to open file %1 for writing.</source>
+        <translation>Misslyckades öppna filen %1 för skrivning.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <location line="+2"/>
+        <source>Failed to save data to file %1.</source>
+        <translation>Misslyckades spara data till filen %1.</translation>
+    </message>
+</context>
+<context>
     <name>RecentMenu</name>
     <message>
         <location filename="../src/desktop/mainwindow_p.h" line="+70"/>
@@ -4999,7 +5197,7 @@ Högerklicka: Meny</translation>
 <context>
     <name>Scanner::Capture</name>
     <message>
-        <location filename="../src/scanner/capture.cpp" line="+162"/>
+        <location filename="../src/scanner/capture.cpp" line="+164"/>
         <source>Scanning failed</source>
         <translation>Skanning misslyckades</translation>
     </message>
@@ -5072,7 +5270,7 @@ Högerklicka: Meny</translation>
     <message>
         <location line="+1"/>
         <source>No color selected</source>
-        <translation type="unfinished"></translation>
+        <translation>Ingen färg vald</translation>
     </message>
 </context>
 <context>
@@ -5356,12 +5554,12 @@ Högerklicka: Meny</translation>
     <message>
         <location line="+1"/>
         <source>Consists Of</source>
-        <translation type="unfinished"></translation>
+        <translation>Består av</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Can Build</source>
-        <translation type="unfinished"></translation>
+        <translation>Kan bygga</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -5472,13 +5670,13 @@ Högerklicka: Meny</translation>
         <translation>Inställningar</translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location line="+1544"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+13"/>
         <source>General</source>
         <translation>Allmänt</translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="-1512"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+37"/>
         <source>Language</source>
         <translation>Språk</translation>
@@ -5542,12 +5740,11 @@ Högerklicka: Meny</translation>
         <translation>Vid export</translation>
     </message>
     <message>
-        <location line="+7"/>
         <source>Open a Web-Browser window when exporting to the clipboard</source>
-        <translation>Öppna en webbläsare när du exporterar till urklipp</translation>
+        <translation type="vanished">Öppna en webbläsare när du exporterar till urklipp</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+14"/>
         <source>On startup</source>
         <translation>Vid uppstart</translation>
     </message>
@@ -5582,12 +5779,52 @@ Högerklicka: Meny</translation>
         <translation>Skicka anonym crash rapport</translation>
     </message>
     <message>
-        <location line="+57"/>
+        <location line="+1137"/>
+        <source>Enable MCP server</source>
+        <translation>Aktivera MCP server</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Server port:</source>
+        <translation>Serverport:</translation>
+    </message>
+    <message>
+        <location line="+38"/>
+        <source>Has catalog access</source>
+        <translation>Har tillgång till katalogen</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Has read-only access to open documents</source>
+        <translation>Har skrivskyddad tillgång till öppna dokument</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Can open existing and create new documents</source>
+        <translation>Kan öppna befintliga och skapa nya dokument</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Can edit documents</source>
+        <translation>Kan redigera dokument</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Can save and export documents</source>
+        <translation>Kan spara och exportera dokument</translation>
+    </message>
+    <message>
+        <location line="+82"/>
         <source>Interface</source>
         <translation>Gränssnitt</translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location line="+45"/>
+        <source>AI</source>
+        <translation>AI</translation>
+    </message>
+    <message>
+        <location line="-1275"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+42"/>
         <source>Theme</source>
         <translation>Tema</translation>
@@ -5628,7 +5865,7 @@ Högerklicka: Meny</translation>
         <translation type="vanished">Om du anger ett lösenord, då sparas detta i ditt system: det är bara förvrängt, men &lt;b&gt;inte&lt;/b&gt; krypterat, BrickStore behöver detta för att kunna skicka ditt lösenord till BrickLink server vid nedladdning av din data.&lt;br&gt;&lt;br&gt;Om du inte vill spara ditt lösenord, lämna detta fältet tomt så kommer du få en fråga att ange ditt lösenord första gången BricStore ska ladda ner din data från BrickLink efter start av programmet.</translation>
     </message>
     <message>
-        <location line="+404"/>
+        <location line="+410"/>
         <source>Price guide</source>
         <translation>Pris Information</translation>
     </message>
@@ -5643,7 +5880,7 @@ Högerklicka: Meny</translation>
         <translation>Källa</translation>
     </message>
     <message>
-        <location line="-318"/>
+        <location line="-324"/>
         <source>Font size</source>
         <translation>Teckenstorlek</translation>
     </message>
@@ -5669,12 +5906,12 @@ Högerklicka: Meny</translation>
         <translation>Icon storlek</translation>
     </message>
     <message>
-        <location line="-102"/>
+        <location line="-99"/>
         <source>&lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;See here&lt;/a&gt; for more information.</source>
         <translation>&lt;a href=&apos;https://www.brickstore.dev/crash-reporting&apos;&gt;Se här&lt;/a&gt; för mer information.</translation>
     </message>
     <message>
-        <location line="+38"/>
+        <location line="+35"/>
         <source>Global</source>
         <translation>Global</translation>
     </message>
@@ -5710,13 +5947,13 @@ Högerklicka: Meny</translation>
         <translation>Stor</translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location line="+879"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="-138"/>
         <source>BrickLink</source>
         <translation>BrickLink</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="-848"/>
         <source>BrickLink Login</source>
         <translation>BrickLink inloggning</translation>
     </message>
@@ -5737,7 +5974,7 @@ Högerklicka: Meny</translation>
         <translation type="vanished">BrickLink&apos;s maximala lösenordslängd är 15 tecken.</translation>
     </message>
     <message>
-        <location line="+93"/>
+        <location line="+102"/>
         <source>Automatically update cached data</source>
         <translation>Uppdatera cached data automatiskt</translation>
     </message>
@@ -5769,17 +6006,27 @@ Högerklicka: Meny</translation>
         <translation>Återställ till standard</translation>
     </message>
     <message>
-        <location line="+32"/>
+        <location line="+630"/>
         <source>LDraw</source>
         <translation>LDraw</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="-592"/>
         <source>Library</source>
         <translation>Bibliotek</translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location line="-806"/>
+        <source>Open a Web-Browser when exporting to the clipboard</source>
+        <translation>Öppna en webbläsare när du exporterar till urklipp</translation>
+    </message>
+    <message>
+        <location line="+582"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Go to &lt;a href=&quot;https://bricklink.com/v3/brickstore-access-management.page&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#3daee9;&quot;&gt;https://bricklink.com/v3/brickstore-access-management.page&lt;/span&gt;&lt;/a&gt;, click &lt;span style=&quot; font-weight:700;&quot;&gt;Renew Token&lt;/span&gt;, then &lt;span style=&quot; font-weight:700;&quot;&gt;Copy to Clipboard&lt;/span&gt;. Finally 📋 &lt;span style=&quot; font-weight:700;&quot;&gt;Paste&lt;/span&gt; it here above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gå till &lt;a href=&quot;https://bricklink.com/v3/brickstore-access-management.page&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#3daee9;&quot;&gt;https://bricklink.com/v3/brickstore-access-management.page&lt;/span&gt;&lt;/a&gt;, klicka på &lt;span style=&quot; font-weight:700;&quot;&gt;Renew Token&lt;/span&gt;, sedan &lt;span style=&quot; font-weight:700;&quot;&gt;Copy to Clipboard&lt;/span&gt;. Slutligen, här ovanför 📋 &lt;span style=&quot; font-weight:700;&quot;&gt;Klistra in&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location line="+242"/>
         <source>Let BrickStore manage its own LDraw parts library</source>
         <translation>Låt BrickStore hantera sin egna LDraw artikelbibliotek</translation>
     </message>
@@ -5819,35 +6066,35 @@ Högerklicka: Meny</translation>
         <translation>Uppdateringar laddas ner och tillämpas automatiskt i bakgrunden. Starta bara en manuell uppdatering om den automatiska misslyckas.</translation>
     </message>
     <message>
-        <location line="-811"/>
-        <location line="+830"/>
+        <location line="-814"/>
+        <location line="+1231"/>
         <source>Toolbar</source>
         <translation>Verktygsfält</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="-395"/>
         <source>Customize the main toolbar using drag-and-drop</source>
         <translation>Ändra huvudverktygsfältet genom dra och släpp</translation>
     </message>
     <message>
         <location line="+7"/>
-        <location line="+114"/>
+        <location line="+111"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location line="-21"/>
-        <location line="+76"/>
+        <location line="-18"/>
+        <location line="+73"/>
         <source>Reset all</source>
         <translation>Återställ alla</translation>
     </message>
     <message>
-        <location line="-68"/>
+        <location line="+231"/>
         <source>Keyboard</source>
         <translation>Tangentbord</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="-293"/>
         <source>Customize the global keyboard shortcuts</source>
         <translation>Anpassa de globala kortkommandon</translation>
     </message>
@@ -5887,14 +6134,24 @@ Högerklicka: Meny</translation>
         <translation>Pris Information</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="+489"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="+504"/>
         <source>Other...</source>
         <translation>Andra...</translation>
     </message>
     <message>
-        <location line="+52"/>
+        <location line="+34"/>
+        <source>Paste</source>
+        <translation>Klistra in</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Clear</source>
+        <translation>Rensa</translation>
+    </message>
+    <message>
+        <location line="+14"/>
         <source>Your access token is malformed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Din åtkomsttoken har fel format.</translation>
     </message>
     <message>
         <location line="+24"/>
@@ -5913,7 +6170,12 @@ Högerklicka: Meny</translation>
         <translation>Detta kortkommando används redan för en annan åtgärd.</translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location line="+17"/>
+        <source>Reset to default</source>
+        <translation>Återställ till standard</translation>
+    </message>
+    <message>
+        <location line="+19"/>
         <source>could not find a cross rate for %1</source>
         <translation>kunde inte hitta en valutakurs för %1</translation>
     </message>
@@ -5928,12 +6190,27 @@ Högerklicka: Meny</translation>
         <translation>Dokumentkatalogens plats</translation>
     </message>
     <message>
-        <location line="+145"/>
+        <location line="+133"/>
+        <source>The MCP server is running on port %1.</source>
+        <translation>MCP servern körs på port %1.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The MCP server is not running.</source>
+        <translation>MCP servern körs inte.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>This build does not support the MCP server.</source>
+        <translation>Denna version stöder inte MCP servern.</translation>
+    </message>
+    <message>
+        <location line="+26"/>
         <source>The specified document directory does not exist or is not read- and writable.&lt;br /&gt;The document directory setting will not be changed.</source>
         <translation>Denna dokumentkatalog finns inte eller är inte läs- och skrivbar.&lt;br /&gt;Dokumentkatalogen kommer inte att ändras.</translation>
     </message>
     <message>
-        <location line="+60"/>
+        <location line="+79"/>
         <source>Not a valid LDraw installation</source>
         <translation>Detta är ine en godkänd LDraw installation</translation>
     </message>
@@ -5943,27 +6220,26 @@ Högerklicka: Meny</translation>
         <translation>Detta är en godkänd LDraw installation</translation>
     </message>
     <message>
-        <location filename="../src/desktop/settingsdialog.ui" line="-1262"/>
+        <location filename="../src/desktop/settingsdialog.ui" line="-1256"/>
         <source>Reload exchange rates</source>
         <translation>Ladda om växelkurser</translation>
     </message>
     <message>
-        <location line="+620"/>
+        <location line="+614"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="-38"/>
         <source>Access Token</source>
-        <translation type="unfinished"></translation>
+        <translation>Åtkomsttoken</translation>
     </message>
     <message>
-        <location line="+23"/>
         <location filename="../src/mobile/SettingsDialog.qml" line="+31"/>
         <source>You can get your Token from &lt;a href=&quot;https://bricklink.com/v3/brickstore-access-management.page&quot;&gt;https://bricklink.com/v3/brickstore-access-management.page&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Du kan hämta din token från &lt;a href=&quot;https://bricklink.com/v3/brickstore-access-management.page&quot;&gt;https://bricklink.com/v3/brickstore-access-management.page&lt;/a&gt;</translation>
     </message>
 </context>
 <context>
     <name>ShortcutModel</name>
     <message>
-        <location filename="../src/desktop/settingsdialog.cpp" line="-698"/>
+        <location filename="../src/desktop/settingsdialog.cpp" line="-760"/>
         <source>Action name</source>
         <translation>Åtgärdsnamn</translation>
     </message>
@@ -6158,7 +6434,7 @@ Högerklicka: Meny</translation>
     <message>
         <location line="+17"/>
         <source>Add Items</source>
-        <translation type="unfinished"></translation>
+        <translation>Lägg till artiklar</translation>
     </message>
     <message>
         <location filename="../src/desktop/view.cpp" line="+175"/>
@@ -6289,7 +6565,7 @@ Högerklicka: Meny</translation>
     <name>WelcomeWidget</name>
     <message>
         <location filename="../src/mobile/MainWindow.qml" line="-85"/>
-        <location filename="../src/desktop/welcomewidget.cpp" line="+257"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="+258"/>
         <source>Document</source>
         <translation>Dokument</translation>
     </message>
@@ -6317,7 +6593,7 @@ Högerklicka: Meny</translation>
         <translation>Inga senaste filer</translation>
     </message>
     <message>
-        <location filename="../src/desktop/welcomewidget.cpp" line="-157"/>
+        <location filename="../src/desktop/welcomewidget.cpp" line="-158"/>
         <source>Unpin</source>
         <translation>Ta bort stift</translation>
     </message>
@@ -6327,7 +6603,7 @@ Högerklicka: Meny</translation>
         <translation>Stift</translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+56"/>
         <source>View tutorials</source>
         <translation>Visa tutorials</translation>
     </message>
