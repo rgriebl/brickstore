@@ -52,6 +52,9 @@ const QImage Color::sampleImage(int w, int h) const
     if (w <= 0 || h <= 0)
         return QImage();
 
+    w = std::min(w, maxSampleImageSize);
+    h = std::min(h, maxSampleImageSize);
+
     uint key = uint(id() << 22) | uint(w << 11) | uint(h);
     QImage img = s_colorImageCache.value(key);
 

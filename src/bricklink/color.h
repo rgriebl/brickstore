@@ -65,6 +65,10 @@ public:
     constexpr std::strong_ordering operator<=>(const Color &other) const { return *this <=> other.m_id; }
     constexpr bool operator==(uint id) const { return (*this <=> id == 0); }
 
+    // sampleImage() clamps its arguments to this: the images are cached forever, and it is also
+    // the largest size its cache key can encode
+    static constexpr int maxSampleImageSize = 2047;
+
     const QImage sampleImage(int w, int h) const;
 
 private:
