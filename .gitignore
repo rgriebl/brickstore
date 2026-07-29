@@ -37,3 +37,5 @@ build/
 builds/
 CMakeUserPresets.json
 compile_commands.json
+.qtcreator/
+.vscode/
