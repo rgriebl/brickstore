@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2026.7.1] - 2026-07-27
+## [2026.7.1] - 2026-07-29
 
 A bigger release this time, with a few new features and a lot of stability fixes:
 - Added a generic **CSV import** that lets you map the columns of any CSV (*Comma Separated Values*) file onto BrickStore's fields yourself (based on the idea of GitHub user *mgodineau*).
@@ -15,6 +15,7 @@ A bigger release this time, with a few new features and a lot of stability fixes
 - Fixed a whole batch of crashes and glitches when opening damaged or unusual files or orders.
 - Fixed the tab labels when several open files share the same name.
 - Added a new scripting API for extension authors.
+- Updated all translations, especially some of the weird French ones that DeepL came up with.
 
 
 ## [2026.3.2] - 2026-03-01
