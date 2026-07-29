@@ -95,6 +95,8 @@ Page {
             id: header
             syncView: table
             clip: true
+            // GridHeader sets sortStatus from Component.onCompleted, which does not run again for a
+            // reused delegate. There is only one row of headers, so reuse would gain nothing anyway.
             reuseItems: false
             //interactive: false
 
@@ -149,7 +151,7 @@ Page {
             columnSpacing: 0
             rowSpacing: 0
             clip: true
-            reuseItems: false
+            reuseItems: true
 
             FontMetrics { id: fontMetrics; font: root.font }
             property int cellHeight: fontMetrics.height * 2 * BS.Config.rowHeightPercent / 100 + 8
