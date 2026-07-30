@@ -270,10 +270,14 @@ Page {
                 DelegateChoice { roleValue: BS.Document.Picture
                     GridCell {
                         id: picCell
-                        required property var edit
+                        required property var lot
+                        property BL.Lot bllot: BL.BrickLink.lot(picCell.lot)
+                        // a data role cannot carry a picture, so ask the cache for it directly
+                        property BL.Picture pic: BL.BrickLink.picture(picCell.bllot.item,
+                                                                     picCell.bllot.color)
                         background: QImageItem {
                             fillColor: "white"
-                            image: (picCell.edit as BL.Picture)?.image ?? BL.BrickLink.noImage(width, height)
+                            image: picCell.pic?.image ?? BL.BrickLink.noImage(width, height)
                         }
                     }
                 }

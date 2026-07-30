@@ -661,12 +661,9 @@ McpTool::Result CatalogPictureMcpTool::execute(const QJsonObject &arguments)
     if (QString error = resolveItemAndColor(arguments, &item, &color); !error.isEmpty())
         return Result::error(error);
 
-    Picture *pic = BrickLink::core()->pictureCache()->picture(item, color, true /*highPriority*/);
+    PictureRef pic = BrickLink::core()->pictureCache()->picture(item, color, true /*highPriority*/);
     if (!pic)
         return Result::error(u"Could not create a picture request"_s);
-
-    pic->addRef();
-    auto releaseGuard = qScopeGuard([pic]() { pic->release(); });
 
     if (!pic->isValid() && (pic->updateStatus() != UpdateStatus::UpdateFailed)) {
         pic->update(true);

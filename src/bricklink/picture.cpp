@@ -8,7 +8,7 @@
 #include <QtCore/QBuffer>
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QCoreApplication>
-#include <QtCore/QElapsedTimer>
+#include <QtCore/QThread>
 #include <QtNetwork/QNetworkInformation>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
@@ -36,6 +36,31 @@ Picture::Picture(Private, const Item *item, const Color *color)
 Picture::~Picture()
 {
     cancelUpdate();
+}
+
+// A picture can be handed out to a worker thread, which may end up dropping the last reference to
+// it. Destroying a QObject outside of its own thread is not allowed, so hop over if needed.
+static void deletePicture(Picture *pic)
+{
+    if (pic->thread() == QThread::currentThread())
+        delete pic;
+    else
+        pic->deleteLater();
+}
+
+void Picture::addRef()
+{
+    // weak_from_this(), because a stale QML pointer may well outlive the last reference
+    if (auto self = weak_from_this().lock()) {
+        if (!m_qmlPinCount++)
+            m_qmlPin = std::move(self);
+    }
+}
+
+void Picture::release()
+{
+    if (m_qmlPinCount && !--m_qmlPinCount)
+        m_qmlPin.reset(); // may well be the last reference, deleting this
 }
 
 const QImage Picture::image() const
@@ -129,7 +154,7 @@ PictureCache::PictureCache(Core *core, quint64 physicalMem)
     connect(core, &Core::transferFinished,
             this, [this](TransferJob *job) {
         if (job) {
-            if (auto *pic = job->userData("picture").value<Picture *>())
+            if (auto pic = job->userData("picture").value<PictureRef>())
                 d->transferJobFinished(job, pic);
         }
     });
@@ -270,31 +295,9 @@ void PictureCache::setUpdateInterval(int interval)
 
 void PictureCache::clearCache()
 {
-    qsizetype lastLeftOver = 0;
-    QElapsedTimer timer;
-    QElapsedTimer absoluteTimer;
-    absoluteTimer.start();
-
-    // the loader/saver threads might hold references, so we need to wait for their queues to drain
-    while (true) {
-        qsizetype leftOver = d->m_cache.clear();
-
-        if (!leftOver) {
-            break;
-        } else if ((leftOver == lastLeftOver) && (timer.elapsed() > 500)) {
-            qCCritical(LogCache) << "Pictures:" << leftOver << "active references after"
-                                 << absoluteTimer.elapsed() << "ms - giving up, expect a crash soon.";
-            break;
-        }
-
-        if (lastLeftOver != leftOver) {
-            qCWarning(LogCache) << "Pictures:" << leftOver << "active references after"
-                                << absoluteTimer.elapsed() << "ms - waiting.";
-            lastLeftOver = leftOver;
-            timer.start();
-        }
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents, 500);
-    }
+    // Pictures that are still in use - by a widget, by the loader/saver queues - simply outlive the
+    // cache entry now, so there is nothing to wait for anymore.
+    d->m_cache.clear();
 
     AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.size());
 }
@@ -304,10 +307,10 @@ QPair<int, int> PictureCache::cacheStats() const
     return qMakePair(d->m_cache.totalCost(), d->m_cache.maxCost());
 }
 
-Picture *PictureCache::picture(const Item *item, const Color *color, bool highPriority)
+PictureRef PictureCache::picture(const Item *item, const Color *color, bool highPriority)
 {
     if (!item)
-        return nullptr;
+        return { };
 
     if (!color)
         color = item->defaultColor();
@@ -315,18 +318,13 @@ Picture *PictureCache::picture(const Item *item, const Color *color, bool highPr
         color = d->m_core->color(0);
 
     auto key = PictureCachePrivate::cacheKey(item, color);
-    Picture *pic = d->m_cache[key];
+    PictureRef pic = d->m_cache[key];
 
     bool needToLoad = !pic || (!pic->isValid() && (pic->updateStatus() == UpdateStatus::UpdateFailed));
 
     if (!pic) {
-        auto newPic = std::make_unique<Picture>(Picture::Private { }, item, color);
+        PictureRef newPic { new Picture(Picture::Private { }, item, color), &deletePicture };
         pic = d->m_cache.insert(key, std::move(newPic), 1 /* start with roughly 1KB cost */);
-        if (!pic) {
-            qCWarning(LogCache, "Can not add picture to cache (cache max/cur: %d/%d, item id: %s)",
-                      int(d->m_cache.maxCost()), int(d->m_cache.totalCost()), item->id().constData());
-            return nullptr;
-        }
         AppStatistics::inst()->update(d->m_cacheStatId, d->m_cache.size());
     }
 
@@ -336,7 +334,7 @@ Picture *PictureCache::picture(const Item *item, const Color *color, bool highPr
     } else if (highPriority) {
         // try to re-prioritize
         if (pic->updateStatus() == UpdateStatus::Loading)
-            d->reprioritize(pic, true);
+            d->reprioritize(pic.get(), true);
         else if ((pic->updateStatus() == UpdateStatus::Updating) && pic->m_transferJob)
             pic->m_transferJob->reprioritize(true);
     }
@@ -346,7 +344,9 @@ Picture *PictureCache::picture(const Item *item, const Color *color, bool highPr
 
 void PictureCache::updatePicture(Picture *pic, bool highPriority)
 {
-    if (!pic || (pic->m_updateStatus == UpdateStatus::Updating))
+    // weak_from_this(), because a stale QML pointer may well outlive the last reference
+    auto picRef = pic ? pic->weak_from_this().lock() : PictureRef { };
+    if (!picRef || (pic->m_updateStatus == UpdateStatus::Updating))
         return;
 
     if (QNetworkInformation::instance()
@@ -364,14 +364,13 @@ void PictureCache::updatePicture(Picture *pic, bool highPriority)
 
     pic->setUpdateStatus(UpdateStatus::Updating);
 
-    pic->addRef();
-
     uint colorId = pic->color() ? pic->color()->id() : 0;
     QString url = u"https://img.bricklink.com/ItemImage/" + QChar::fromLatin1(pic->item()->itemTypeId())
                   + u"N/" + QString::number(colorId) + u'/' + QString::fromLatin1(pic->item()->id()) + u".png";
 
     pic->m_transferJob = TransferJob::get(url);
-    pic->m_transferJob->setUserData("picture", QVariant::fromValue(pic));
+    // the job owns a reference, so the picture cannot go away while it is being downloaded
+    pic->m_transferJob->setUserData("picture", QVariant::fromValue(picRef));
     d->m_core->retrieve(pic->m_transferJob, highPriority);
 }
 
@@ -385,7 +384,7 @@ void PictureCache::cancelAllPictureUpdates()
 {
     const auto keys = d->m_cache.keys();
     for (const auto &key : keys)
-        cancelPictureUpdate(d->m_cache.object(key));
+        cancelPictureUpdate(d->m_cache.object(key).get());
 }
 
 
@@ -442,15 +441,14 @@ bool PictureCachePrivate::isUpdateNeeded(Picture *pic) const
                 || (pic->lastUpdated().secsTo(QDateTime::currentDateTime()) > m_updateInterval));
 }
 
-void PictureCachePrivate::load(Picture *pic, bool highPriority)
+void PictureCachePrivate::load(PictureRef pic, bool highPriority)
 {
     if (!pic)
         return;
 
-    pic->addRef();
     m_loadMutex.lock();
     m_loadQueue.insert(highPriority ? 0 : m_loadQueue.size(),
-                       { pic, highPriority ? LoadHighPriority : LoadLowPriority });
+                       { std::move(pic), highPriority ? LoadHighPriority : LoadLowPriority });
     m_loadTrigger.wakeOne();
     auto queueSize = m_loadQueue.size();
     m_loadMutex.unlock();
@@ -458,7 +456,7 @@ void PictureCachePrivate::load(Picture *pic, bool highPriority)
     AppStatistics::inst()->update(m_loadsStatId, queueSize);
 }
 
-void PictureCachePrivate::reprioritize(Picture *pic, bool highPriority)
+void PictureCachePrivate::reprioritize(const Picture *pic, bool highPriority)
 {
     if (!pic)
         return;
@@ -466,7 +464,7 @@ void PictureCachePrivate::reprioritize(Picture *pic, bool highPriority)
     m_loadMutex.lock();
     for (auto i = 0; i < m_loadQueue.size(); ++i) {
         auto &lq = m_loadQueue[i];
-        if (lq.first == pic) {
+        if (lq.first.get() == pic) {
             lq.second = highPriority ? LoadHighPriority : LoadLowPriority;
             m_loadQueue.move(i, highPriority ? 0 : m_loadQueue.size());
             break;
@@ -475,14 +473,13 @@ void PictureCachePrivate::reprioritize(Picture *pic, bool highPriority)
     m_loadMutex.unlock();
 }
 
-void PictureCachePrivate::save(Picture *pic)
+void PictureCachePrivate::save(PictureRef pic)
 {
     if (!pic)
         return;
 
-    pic->addRef();
     m_saveMutex.lock();
-    m_saveQueue.append({ pic, SaveData });
+    m_saveQueue.append({ std::move(pic), SaveData });
     m_saveTrigger.wakeOne();
     auto queueSize = m_saveQueue.size();
     m_saveMutex.unlock();
@@ -504,8 +501,7 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
             m_loadTrigger.wait(&m_loadMutex);
 
         if (m_stop) {
-            for (auto [pic, type] : std::as_const(m_loadQueue))
-                pic->release();
+            m_loadQueue.clear();
             continue;
         }
 
@@ -522,7 +518,7 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
             bool highPriority = (loadType == LoadHighPriority);
 
             if (db.isOpen()) {
-                loadQuery.bindValue(u":id"_qs, databaseTag(pic));
+                loadQuery.bindValue(u":id"_qs, databaseTag(pic.get()));
 
                 loadQuery.exec();
                 if (loadQuery.next()) {
@@ -534,14 +530,14 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
                 loadQuery.finish();
             }
 
-            pic->addRef(); // the release will happen on the main thread (see the invokeMethod below)
+            // the captured reference keeps the picture alive until this has run - or until it is
+            // discarded, if the core object goes away first
             QMetaObject::invokeMethod(m_core, [this, loaded, lastUpdated, img, highPriority, pic=pic]() { // clang bug: P1091R3
                 if (loaded) {
                     pic->setLastUpdated(lastUpdated);
                     pic->setImage(img);
 
                     // update the last accessed time stamp
-                    pic->addRef();
                     m_saveMutex.lock();
                     m_saveQueue.append({ pic, SaveAccessTimeOnly });
                     m_saveTrigger.wakeOne();
@@ -550,20 +546,17 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
                 pic->setIsValid(loaded);
                 pic->setUpdateStatus(UpdateStatus::Ok);
 
-                if (pic->m_updateAfterLoad || isUpdateNeeded(pic))  {
+                if (pic->m_updateAfterLoad || isUpdateNeeded(pic.get()))  {
                     pic->m_updateAfterLoad = false;
-                    q->updatePicture(pic, highPriority);
+                    q->updatePicture(pic.get(), highPriority);
                 }
                 if (loaded && img.isNull())
                     pic->setIsValid(false);
 
                 m_cache.setObjectCost(cacheKey(pic->item(), pic->color()), pic->cost());
 
-                emit q->pictureUpdated(pic);
-                pic->release();
+                emit q->pictureUpdated(pic.get());
             }, Qt::QueuedConnection);
-
-            pic->release();
         }
     }
     db.close();
@@ -599,7 +592,7 @@ void PictureCachePrivate::saveThread(QString dbName, int index)
             QHash<Picture *, QByteArray> imageDataHash;
 
             // do all this before starting a DB transaction, to keep lock times to a minimum
-            for (auto [pic, saveType] : saveQueueCopy) {
+            for (const auto &[pic, saveType] : saveQueueCopy) {
                 if (saveType == SaveData) {
                     QByteArray data;
                     if (!pic->m_image.isNull()) {
@@ -612,7 +605,7 @@ void PictureCachePrivate::saveThread(QString dbName, int index)
                         //    qWarning() << "Saving image as WEBP compresses to" << (100 * webpData.size() / data.size()) << "%";
                         data = webpData;
                     }
-                    imageDataHash.insert(pic, data);
+                    imageDataHash.insert(pic.get(), data);
                 }
             }
 
@@ -621,8 +614,8 @@ void PictureCachePrivate::saveThread(QString dbName, int index)
 
                 qint64 now = QDateTime::currentMSecsSinceEpoch();
 
-                for (auto [pic, saveType] : saveQueueCopy) {
-                    auto dbTag = databaseTag(pic);
+                for (const auto &[pic, saveType] : saveQueueCopy) {
+                    auto dbTag = databaseTag(pic.get());
 
                     if (saveType == SaveAccessTimeOnly) {
                         accessQuery.bindValue(u":id"_qs, dbTag);
@@ -633,7 +626,7 @@ void PictureCachePrivate::saveThread(QString dbName, int index)
                         }
                         accessQuery.finish();
                     } else {
-                        const auto data = imageDataHash.value(pic);
+                        const auto data = imageDataHash.value(pic.get());
                         auto lastUpdated = QVariant(QMetaType::fromType<qint64>());
                         if (pic->lastUpdated().isValid())
                             lastUpdated = QVariant::fromValue(pic->lastUpdated().toMSecsSinceEpoch());
@@ -649,7 +642,6 @@ void PictureCachePrivate::saveThread(QString dbName, int index)
                         }
                         saveQuery.finish();
                     }
-                    pic->release();
                 }
                 db.commit();
             }
@@ -658,7 +650,7 @@ void PictureCachePrivate::saveThread(QString dbName, int index)
     db.close();
 }
 
-void PictureCachePrivate::transferJobFinished(TransferJob *j, Picture *pic)
+void PictureCachePrivate::transferJobFinished(TransferJob *j, const PictureRef &pic)
 {
     Q_ASSERT(pic && (j == pic->m_transferJob));
     pic->m_transferJob = nullptr;
@@ -681,8 +673,8 @@ void PictureCachePrivate::transferJobFinished(TransferJob *j, Picture *pic)
         pic->setUpdateStatus(UpdateStatus::UpdateFailed);
     }
 
-    emit q->pictureUpdated(pic);
-    pic->release();
+    emit q->pictureUpdated(pic.get());
+    // no release needed: the job's user data owned the reference
 }
 
 

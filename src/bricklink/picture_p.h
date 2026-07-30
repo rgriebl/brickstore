@@ -10,7 +10,7 @@
 #include <QtCore/QVector>
 #include <QtSql/QSqlDatabase>
 
-#include "utility/refcache.h"
+#include "utility/cache.h"
 #include "global.h"
 #include "picture.h"
 
@@ -40,14 +40,14 @@ public:
         SaveAccessTimeOnly,
     };
 
-    QVector<std::pair<Picture *, LoadType>> m_loadQueue;
-    QVector<std::pair<Picture *, SaveType>> m_saveQueue;
+    QVector<std::pair<PictureRef, LoadType>> m_loadQueue;
+    QVector<std::pair<PictureRef, SaveType>> m_saveQueue;
     QString m_dbName;
     QSqlDatabase m_db;
     QVector<QThread *> m_threads;
 
     int m_updateInterval = 0;
-    RefCache<quint32, Picture> m_cache;
+    Cache<quint32, Picture> m_cache;
     Core *m_core;
     PictureCache *q;
     int m_cacheStatId = -1;
@@ -59,12 +59,12 @@ public:
     static bool imageFromData(QImage &img, const QByteArray &data);
     bool isUpdateNeeded(Picture *pic) const;
 
-    void load(Picture *pic, bool highPriority);
-    void reprioritize(Picture *pic, bool highPriority);
-    void save(Picture *pic);
+    void load(PictureRef pic, bool highPriority);
+    void reprioritize(const Picture *pic, bool highPriority);
+    void save(PictureRef pic);
     void loadThread(QString dbName, int index);
     void saveThread(QString dbName, int index);
-    void transferJobFinished(TransferJob *j, Picture *pic);
+    void transferJobFinished(TransferJob *j, const PictureRef &pic);
 };
 
 } // namespace BrickLink

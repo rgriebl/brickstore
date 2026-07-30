@@ -50,7 +50,7 @@ private:
 
     const BrickLink::Item * m_item = nullptr;
     const BrickLink::Color *m_color = nullptr;
-    BrickLink::Picture *m_pic = nullptr;
+    BrickLink::PictureRef m_pic;
     QLabel *w_text = nullptr;
     QLabel *w_image = nullptr;
     QImage m_image;

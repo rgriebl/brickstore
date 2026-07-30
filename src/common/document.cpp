@@ -1809,17 +1809,16 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
             document->setThumbnail(thumbnail->image());
         } else if ((thumbnail->updateStatus() == BrickLink::UpdateStatus::Loading)
                    || (thumbnail->updateStatus() == BrickLink::UpdateStatus::Updating)) {
-            // Note: if the document is closed before the picture finishes loading, this connection
-            // never fires and we leak conn plus one reference on thumbnail. This is rare and minor.
-            auto *conn = new QMetaObject::Connection;
+            // The captured handle keeps the picture alive until it has been loaded. If the document
+            // is closed before that happens, the connection - and with it both captures - is
+            // destroyed, so nothing is leaked either.
+            auto conn = std::make_shared<QMetaObject::Connection>();
             *conn = connect(BrickLink::core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
-                            document, [=](BrickLink::Picture *pic) {
-                if (pic == thumbnail) {
+                            document, [document, thumbnail, conn](BrickLink::Picture *pic) {
+                if (pic == thumbnail.get()) {
                     if (thumbnail->isValid())
                         document->setThumbnail(thumbnail->image());
-                    thumbnail->release();
                     QObject::disconnect(*conn);
-                    delete conn;
                 }
             });
         }

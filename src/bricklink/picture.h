@@ -3,12 +3,13 @@
 
 #pragma once
 
+#include <memory>
+
 #include <QtCore/QDateTime>
 #include <QtGui/QImage>
 #include <QtQml/qqmlregistration.h>
 
 #include "global.h"
-#include "utility/ref.h"
 
 class TransferJob;
 
@@ -16,8 +17,14 @@ class TransferJob;
 namespace BrickLink {
 
 class PictureCache;
+class Picture;
 
-class Picture : public QObject, protected Ref
+// Pictures live in the PictureCache, but they are shared: whoever displays one keeps it alive for as
+// long as it is needed, whether it is still cached or not. Always hold on to a picture via a
+// PictureRef, never via a raw pointer.
+using PictureRef = std::shared_ptr<Picture>;
+
+class Picture : public QObject, public std::enable_shared_from_this<Picture>
 {
     Q_OBJECT
     QML_ELEMENT
@@ -50,9 +57,10 @@ public:
     ~Picture() override;
     Q_DISABLE_COPY_MOVE(Picture)
 
-    Q_INVOKABLE void addRef() { Ref::addRef(); }
-    Q_INVOKABLE void release() { Ref::release(); }
-    Q_INVOKABLE int refCount() const { return Ref::refCount(); }
+    // The QML API cannot hold a PictureRef, so it still has to pin its pictures by hand. Both of
+    // these go away once QML gets a handle owning element of its own.
+    Q_INVOKABLE void addRef();
+    Q_INVOKABLE void release();
 
 signals:
     void isValidChanged(bool newIsValid);
@@ -69,11 +77,12 @@ private:
     bool         m_valid           : 1 = false;
     bool         m_updateAfterLoad : 1 = false;
     UpdateStatus m_updateStatus    : 3 = UpdateStatus::Ok;
-    uint         m_reserved        : 27 = 0;
+    uint         m_qmlPinCount     : 27 = 0;
 
     TransferJob *m_transferJob = nullptr;
 
     QImage       m_image;
+    PictureRef   m_qmlPin; // see addRef() - a deliberate self reference, owned by the QML API
 
     static PictureCache *s_cache;
 
@@ -101,7 +110,7 @@ public:
     void clearCache();
     QPair<int, int> cacheStats() const;
 
-    Picture *picture(const Item *item, const Color *color, bool highPriority = false);
+    PictureRef picture(const Item *item, const Color *color, bool highPriority = false);
 
     void updatePicture(Picture *pic, bool highPriority = false);
     void cancelPictureUpdate(Picture *pic);
@@ -117,3 +126,6 @@ private:
 } // namespace BrickLink
 
 Q_DECLARE_METATYPE(BrickLink::Picture *)
+// std::shared_ptr, unlike QSharedPointer, has no automatic metatype: needed for TransferJob's
+// user data, which is what keeps a picture alive while it is being downloaded.
+Q_DECLARE_METATYPE(BrickLink::PictureRef)

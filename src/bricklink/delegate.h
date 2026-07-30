@@ -59,14 +59,14 @@ private slots:
     void pictureUpdated(BrickLink::Picture *pic);
 
 private:
-    QString createItemToolTip(const Item *item, Picture *pic) const;
+    QString createItemToolTip(const Item *item, const Picture *pic) const;
     QString createColorToolTip(const Color *color) const;
     QString createCategoryToolTip(const Category *category) const;
 
     static QString yearSpan(int from, int to);
 
     static ToolTip *s_inst;
-    Picture *m_tooltip_pic = nullptr;
+    PictureRef m_tooltip_pic;
 };
 
 } // namespace BrickLink

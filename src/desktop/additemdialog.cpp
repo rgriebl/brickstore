@@ -1025,7 +1025,7 @@ void AddItemDialog::buildBrowseMenu(BrowseMenuType type)
 
                 auto *a = m->addAction(s);
                 a->setData(i);
-                auto *pic = BrickLink::core()->pictureCache()->picture(item, color, true);
+                auto pic = BrickLink::core()->pictureCache()->picture(item, color, true);
                 if (pic && pic->isValid())
                     a->setIcon(QPixmap::fromImage(pic->image()));
             }

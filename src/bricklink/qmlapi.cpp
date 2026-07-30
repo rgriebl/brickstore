@@ -960,8 +960,8 @@ PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bool highPrio
 BrickLink::Picture *QmlBrickLink::picture(QmlItem item, QmlColor color, bool highPriority)
 {
     auto pic = core()->pictureCache()->picture(item.wrappedObject(), color.wrappedObject(), highPriority);
-    QQmlEngine::setObjectOwnership(pic, QQmlEngine::CppOwnership);
-    return pic;
+    QQmlEngine::setObjectOwnership(pic.get(), QQmlEngine::CppOwnership);
+    return pic.get();
 }
 
 /*! \qmlmethod Lot BrickLink::lot(var lot)

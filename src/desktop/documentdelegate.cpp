@@ -338,7 +338,7 @@ void DocumentDelegate::paint(QPainter *p, const QStyleOptionViewItem &option, co
         break;
 
     case DocumentModel::Picture: {
-        if (auto *pic = BrickLink::core()->pictureCache()->picture(lot->item(), lot->color()))
+        if (auto pic = BrickLink::core()->pictureCache()->picture(lot->item(), lot->color()))
             image = pic->image();
         double dpr = p->device()->devicePixelRatioF();
         QSize s = option.rect.size();
