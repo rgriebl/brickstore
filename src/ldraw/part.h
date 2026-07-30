@@ -9,26 +9,30 @@
 #include <QVector3D>
 #include <QMatrix4x4>
 
-#include "utility/ref.h"
-
-
 namespace LDraw {
 
 class Element;
 class PartElement;
+class Part;
 
 
-class Part final : public Ref
+// Parts live in the Library's cache, but they are shared: sub-parts are referenced by their parents
+// as well, and whoever renders a part keeps it alive for as long as it takes. Always hold on to a
+// part via a PartRef, never via a raw pointer.
+using PartRef = std::shared_ptr<Part>;
+
+
+class Part final
 {
     struct Private { };
 public:
     Part(Private) { };
-    ~Part() override = default;
+    ~Part() = default;
 
     QVector<const Element *> elements() const;
     int cost() const;
 
-    static std::unique_ptr<Part> parse(const QByteArray &data, const QString &dir);
+    static PartRef parse(const QByteArray &data, const QString &dir);
 
 private:
 
@@ -171,18 +175,18 @@ class PartElement : public Element
 public:
     int color() const                { return m_color; }
     const QMatrix4x4 &matrix() const { return m_matrix; }
-    Part *part() const               { return m_part; }
+    const PartRef &part() const      { return m_part; }
     uint size() const override       { return sizeof(*this); }
 
     static std::unique_ptr<PartElement> create(const QStringList &list, const QString &parentdir);
 
-    PartElement(Private, int color, const QMatrix4x4 &m, Part *part);
-    ~PartElement() override;
+    PartElement(Private, int color, const QMatrix4x4 &m, PartRef part);
+    ~PartElement() override = default;
 
 private:
     Q_DISABLE_COPY_MOVE(PartElement)
     QMatrix4x4 m_matrix;
-    Part *     m_part = nullptr;
+    PartRef    m_part;
     int        m_color = 0;
 };
 

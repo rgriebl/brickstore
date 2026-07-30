@@ -103,18 +103,9 @@ std::unique_ptr<BfcCommandElement> BfcCommandElement::create(const QString &text
 }
 
 
-PartElement::PartElement(Private, int color, const QMatrix4x4 &matrix, Part *p)
-    : Element(Type::Part), m_matrix(matrix), m_part(p), m_color(color)
-{
-    if (m_part)
-        m_part->addRef();
-}
-
-PartElement::~PartElement()
-{
-    if (m_part)
-        m_part->release();
-}
+PartElement::PartElement(Private, int color, const QMatrix4x4 &matrix, PartRef p)
+    : Element(Type::Part), m_matrix(matrix), m_part(std::move(p)), m_color(color)
+{ }
 
 std::unique_ptr<PartElement> PartElement::create(const QStringList &list, const QString &parentdir)
 {
@@ -131,15 +122,15 @@ std::unique_ptr<PartElement> PartElement::create(const QStringList &list, const 
     const QString filename = list[13];
     const int color = list[0].toInt();
 
-    if (Part *p = library()->findPart(filename, parentdir))
-        return std::make_unique<PartElement>(Private { }, color, m, p);
+    if (PartRef p = library()->findPart(filename, parentdir))
+        return std::make_unique<PartElement>(Private { }, color, m, std::move(p));
     return nullptr;
 }
 
 
-std::unique_ptr<Part> Part::parse(const QByteArray &data, const QString &dir)
+PartRef Part::parse(const QByteArray &data, const QString &dir)
 {
-    auto p = std::make_unique<Part>(Private { });
+    auto p = std::make_shared<Part>(Private { });
     QTextStream ts(data);
 
     QString line;

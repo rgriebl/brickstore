@@ -39,7 +39,7 @@ namespace LDraw {
 class PartLoaderJob
 {
 public:
-    PartLoaderJob(const QString &file, const QString &path, QPromise<Part *> &&promise)
+    PartLoaderJob(const QString &file, const QString &path, QPromise<PartRef> &&promise)
         : m_file(file)
         , m_path(path)
         , m_promise(std::move(promise))
@@ -49,12 +49,12 @@ public:
     QString path() const { return m_path; }
 
     void start();
-    void finish(Part *part);
+    void finish(PartRef part);
 
 private:
     QString m_file;
     QString m_path;
-    QPromise<Part *> m_promise;
+    QPromise<PartRef> m_promise;
     bool m_started = false;
 };
 
@@ -64,13 +64,12 @@ void PartLoaderJob::start()
     m_started = true;
 }
 
-void PartLoaderJob::finish(Part *part)
+void PartLoaderJob::finish(PartRef part)
 {
     if (!m_started)
         start();
-    if (part)
-        part->addRef();
-    m_promise.addResult(part);
+    // the result owns a reference, so it survives even if the continuation is never run
+    m_promise.addResult(std::move(part));
     m_promise.finish();
     delete this;
 }
@@ -166,13 +165,13 @@ Library::~Library()
     s_inst = nullptr;
 }
 
-QFuture<Part *> Library::partFromId(const QByteArray &id)
+QFuture<PartRef> Library::partFromId(const QByteArray &id)
 {
     QString filename = QString::fromLatin1(id) + u".dat";
     return partFromFile(filename);
 }
 
-QFuture<Part *> Library::partFromBrickLinkId(const QByteArray &brickLinkId)
+QFuture<PartRef> Library::partFromBrickLinkId(const QByteArray &brickLinkId)
 {
     QString ldrawId = QString::fromLatin1(brickLinkId);
 
@@ -180,7 +179,7 @@ QFuture<Part *> Library::partFromBrickLinkId(const QByteArray &brickLinkId)
     if (it != m_partIdMapping.cend()) {
         qCDebug(LogLDraw) << "Mapped" << it.key() << "to" << it.value();
         if (it->isEmpty())
-            return QtFuture::makeReadyFuture<Part *>(nullptr);
+            return QtFuture::makeReadyFuture(PartRef { });
         ldrawId = *it;
     }
 
@@ -188,14 +187,14 @@ QFuture<Part *> Library::partFromBrickLinkId(const QByteArray &brickLinkId)
     return partFromFile(filename);
 }
 
-QFuture<Part *> Library::partFromFile(const QString &file)
+QFuture<PartRef> Library::partFromFile(const QString &file)
 {
-    QPromise<Part *> promise;
-    QFuture<Part *> result = promise.future();
+    QPromise<PartRef> promise;
+    QFuture<PartRef> result = promise.future();
 
     if (m_locked) {
         promise.start();
-        promise.addResult(static_cast<Part *>(nullptr));
+        promise.addResult(PartRef { });
         promise.finish();
     } else {
         auto plj = new PartLoaderJob(file, QFileInfo(file).path(), std::move(promise));
@@ -227,8 +226,8 @@ void Library::partLoaderThread()
             continue;
 
         plj->start();
-        auto *part = m_partLoaderShutdown ? nullptr : findPart(plj->file(), plj->path());
-        plj->finish(part);
+        auto part = m_partLoaderShutdown ? PartRef { } : findPart(plj->file(), plj->path());
+        plj->finish(std::move(part));
     }
 }
 
@@ -256,7 +255,7 @@ void Library::shutdownPartLoaderThread()
         m_partLoaderThread.reset();
     }
     for (auto *plj : std::as_const(m_partLoaderJobs))
-        plj->finish(nullptr);
+        plj->finish({ });
 
     m_partLoaderJobs.clear();
 
@@ -477,7 +476,7 @@ void Library::emitUpdateStartedIfNecessary()
     }
 }
 
-Part *Library::findPart(const QString &_filename, const QString &_parentdir)
+PartRef Library::findPart(const QString &_filename, const QString &_parentdir)
 {
     QString filename;
     QString parentdir;
@@ -561,16 +560,16 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
     }
 
     if (filename.isEmpty() && parentdir.isEmpty())
-        return nullptr;
+        return { };
 
-    Part *p = m_cache[filename];
+    PartRef p = m_cache[filename];
     if (!p) {
         // Break cyclic part references: a part being parsed resolves its sub-parts via
         // findPart() before it is cached, so a self- or mutual reference would recurse
         // forever. Bail out if we are already parsing this file further up the stack.
         if (m_recursionGuard.contains(filename)) {
             qCWarning(LogLDraw) << "Cyclic LDraw part reference detected for" << filename;
-            return nullptr;
+            return { };
         }
         m_recursionGuard.insert(filename);
         auto removeInProgress = qScopeGuard([this, &filename]() { m_recursionGuard.remove(filename); });
@@ -599,8 +598,6 @@ Part *Library::findPart(const QString &_filename, const QString &_parentdir)
             if (auto pParsed = Part::parse(data, parentdir)) {
                 uint cost = pParsed->cost();
                 p = m_cache.insert(filename, std::move(pParsed), cost);
-                if (!p)
-                    qCWarning(LogLDraw) << "Unable to cache file" << filename;
 
                 //qCInfo(LogLDraw) << "Cache at" << m_cache.totalCost() << "/" <<  m_cache.maxCost() << "with" << m_cache.size() << "parts";
                 AppStatistics::inst()->update(m_partsStatId, m_cache.size());

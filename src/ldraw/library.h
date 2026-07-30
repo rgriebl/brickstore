@@ -21,7 +21,7 @@
 
 #include <QCoro/QCoroTask>
 
-#include "utility/refcache.h"
+#include "utility/cache.h"
 #include "part.h"
 
 Q_DECLARE_LOGGING_CATEGORY(LogLDraw)
@@ -59,9 +59,9 @@ public:
     bool startUpdate(bool force);
     void cancelUpdate();
 
-    QFuture<Part *> partFromId(const QByteArray &id);
-    QFuture<Part *> partFromBrickLinkId(const QByteArray &brickLinkId);
-    QFuture<Part *> partFromFile(const QString &filename);
+    QFuture<PartRef> partFromId(const QByteArray &id);
+    QFuture<PartRef> partFromBrickLinkId(const QByteArray &brickLinkId);
+    QFuture<PartRef> partFromFile(const QString &filename);
 
     static QStringList potentialLDrawDirs();
     static bool checkLDrawDir(const QString &dir);
@@ -88,7 +88,7 @@ private:
     friend Library *create(const QString &);
 
     void partLoaderThread();
-    Part *findPart(const QString &_filename, const QString &_parentdir);
+    PartRef findPart(const QString &_filename, const QString &_parentdir);
     QByteArray readLDrawFile(const QString &filename);
     void setUpdateStatus(UpdateStatus updateStatus);
     void emitUpdateStartedIfNecessary();
@@ -111,7 +111,7 @@ private:
     std::unique_ptr<MiniZip> m_zip;
     QStringList m_searchpath;
     QHash<QString, QString> m_partIdMapping;
-    RefCache<QString, Part> m_cache;  // path -> part
+    Cache<QString, Part> m_cache;  // path -> part
     // (filename, parentdir) -> (resolved filename, resolved parentdir, inZip)
     QHash<std::pair<QString, QString>, std::tuple<QString, QString, bool>> m_lookupCache;
     // resolved filenames currently being parsed, to break cyclic part references

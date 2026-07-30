@@ -13,6 +13,7 @@
 
 #include <QCoro/QCoroTask>
 
+#include "ldraw/part.h"
 #include "ldraw/rendergeometry.h"
 #include "bricklink/color.h"
 #include "bricklink/item.h"
@@ -23,8 +24,6 @@ QT_FORWARD_DECLARE_CLASS(QTimer)
 
 
 namespace LDraw {
-
-class Part;
 
 class RenderController : public QObject
 {
@@ -102,7 +101,7 @@ private:
         float radius = 0;
     };
 
-    RenderData calculateRenderData(Part *part, const BrickLink::Color *color);
+    RenderData calculateRenderData(const PartRef &part, const BrickLink::Color *color);
     void applyRenderData(RenderData &&data);
 
     static void fillVertexBuffers(Part *part, const BrickLink::Color *modelColor,
@@ -119,7 +118,7 @@ private:
 
     static QHash<const BrickLink::Color *, QImage> s_materialTextureDatas;
 
-    Part *m_part = nullptr;
+    PartRef m_part;
     const BrickLink::Item *m_item = nullptr;
     const BrickLink::Color *m_color = nullptr;
 
