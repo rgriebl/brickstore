@@ -926,8 +926,8 @@ PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, VatType vatTy
 {
     auto pg = core()->priceGuideCache()->priceGuide(item.wrappedObject(), color.wrappedObject(),
                                                     vatType, highPriority);
-    QQmlEngine::setObjectOwnership(pg, QQmlEngine::CppOwnership);
-    return pg;
+    QQmlEngine::setObjectOwnership(pg.get(), QQmlEngine::CppOwnership);
+    return pg.get();
 }
 
 /*! \qmlmethod PriceGuide BrickLink::priceGuide(Item item, Color color, bool highPriority = false)

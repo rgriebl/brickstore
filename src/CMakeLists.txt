@@ -28,8 +28,6 @@ target_sources(${PROJECT_NAME} PUBLIC
     utility/persistentcookiejar.h
     utility/pooledarray.h
     utility/qparallelsort.h
-    utility/ref.h
-    utility/refcache.h
     utility/stopwatch.h
     utility/transfer.cpp
     utility/transfer.h

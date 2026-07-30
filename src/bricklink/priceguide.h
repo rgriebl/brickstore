@@ -3,11 +3,12 @@
 
 #pragma once
 
+#include <memory>
+
 #include <QtCore/QDateTime>
 #include <QtQml/qqmlregistration.h>
 
 #include "bricklink/global.h"
-#include "utility/ref.h"
 
 class Transfer;
 class TransferJob;
@@ -16,8 +17,14 @@ class TransferJob;
 namespace BrickLink {
 
 class PriceGuideCache;
+class PriceGuide;
 
-class PriceGuide : public QObject, public Ref
+// Price guides live in the PriceGuideCache, but they are shared: whoever displays one keeps it alive
+// for as long as it is needed, whether it is still cached or not. Always hold on to a price guide via
+// a PriceGuideRef, never via a raw pointer.
+using PriceGuideRef = std::shared_ptr<PriceGuide>;
+
+class PriceGuide : public QObject, public std::enable_shared_from_this<PriceGuide>
 {
     Q_OBJECT
     QML_ELEMENT
@@ -51,9 +58,10 @@ public:
     ~PriceGuide() override;
     Q_DISABLE_COPY_MOVE(PriceGuide)
 
-    Q_INVOKABLE void addRef()         { Ref::addRef(); }
-    Q_INVOKABLE void release()        { Ref::release(); }
-    Q_INVOKABLE int refCount() const  { return Ref::refCount(); }
+    // The QML API cannot hold a PriceGuideRef, so it still has to pin its price guides by hand.
+    // Both of these go away once QML gets a handle owning element of its own.
+    Q_INVOKABLE void addRef();
+    Q_INVOKABLE void release();
 
     struct Data
     {
@@ -79,9 +87,10 @@ private:
     bool         m_valid           : 1 = false;
     bool         m_updateAfterLoad : 1 = false;
     UpdateStatus m_updateStatus    : 3 = UpdateStatus::Ok;
-    uint         m_reserved        : 11 = 0;
+    uint         m_qmlPinCount     : 11 = 0;
 
     Data         m_data;
+    PriceGuideRef m_qmlPin; // see addRef() - a deliberate self reference, owned by the QML API
 
     static PriceGuideCache *s_cache;
 
@@ -109,9 +118,9 @@ public:
     void clearCache();
     QPair<int, int> cacheStats() const;
 
-    PriceGuide *priceGuide(const Item *item, const Color *color, bool highPriority = false);
-    PriceGuide *priceGuide(const Item *item, const Color *color, VatType vatType,
-                           bool highPriority = false);
+    PriceGuideRef priceGuide(const Item *item, const Color *color, bool highPriority = false);
+    PriceGuideRef priceGuide(const Item *item, const Color *color, VatType vatType,
+                             bool highPriority = false);
 
     void updatePriceGuide(PriceGuide *pg, bool highPriority = false);
     void cancelPriceGuideUpdate(PriceGuide *pg);
@@ -139,3 +148,6 @@ private:
 } // namespace BrickLink
 
 Q_DECLARE_METATYPE(BrickLink::PriceGuide *)
+// std::shared_ptr, unlike QSharedPointer, has no automatic metatype: needed for TransferJob's
+// user data, which is what keeps a price guide alive while it is being fetched.
+Q_DECLARE_METATYPE(BrickLink::PriceGuideRef)

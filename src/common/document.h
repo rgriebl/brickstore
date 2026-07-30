@@ -316,6 +316,8 @@ private:
     {
         std::vector<std::pair<Lot *, Lot>> changes;
         QMultiHash<BrickLink::PriceGuide *, Lot *>    priceGuides;
+        // one handle per pending price guide, so it cannot be evicted while we wait for it
+        QHash<BrickLink::PriceGuide *, BrickLink::PriceGuideRef> priceGuideRefs;
         int              failCount = 0;
         int              doneCount = 0;
         int              totalCount = 0;

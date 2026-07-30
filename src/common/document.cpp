@@ -1049,7 +1049,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
     m_setToPG->noPgOption = noPgOption;
 
     for (Lot *lot : sel) {
-        BrickLink::PriceGuide *pg = BrickLink::core()->priceGuideCache()->priceGuide(lot->item(), lot->color());
+        BrickLink::PriceGuideRef pg = BrickLink::core()->priceGuideCache()->priceGuide(lot->item(), lot->color());
 
         if (pg && forceUpdate && (pg->updateStatus() != BrickLink::UpdateStatus::Updating)) {
             pg->update();
@@ -1057,11 +1057,11 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
 
         if (pg && ((pg->updateStatus() == BrickLink::UpdateStatus::Loading)
                    || (pg->updateStatus() == BrickLink::UpdateStatus::Updating))) {
-            m_setToPG->priceGuides.insert(pg, lot);
-            pg->addRef();
+            m_setToPG->priceGuides.insert(pg.get(), lot);
+            m_setToPG->priceGuideRefs.insert(pg.get(), pg);
 
         } else {
-            if (!updatePriceToGuide(lot, pg))
+            if (!updatePriceToGuide(lot, pg.get()))
                 ++m_setToPG->failCount;
             ++m_setToPG->doneCount;
             emit blockingOperationProgress(m_setToPG->doneCount, m_setToPG->totalCount);
@@ -1127,11 +1127,11 @@ void Document::priceGuideUpdated(BrickLink::PriceGuide *pg)
             if (!updatePriceToGuide(lot, pg))
                 ++m_setToPG->failCount;
             ++m_setToPG->doneCount;
-            pg->release();
         }
 
         emit blockingOperationProgress(m_setToPG->doneCount, m_setToPG->totalCount);
         m_setToPG->priceGuides.remove(pg);
+        m_setToPG->priceGuideRefs.remove(pg);
     }
 
     if (m_setToPG && m_setToPG->priceGuides.isEmpty()
