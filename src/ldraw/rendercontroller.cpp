@@ -169,7 +169,7 @@ void RenderController::setItemAndColor(const BrickLink::Item *item, const BrickL
                         part->release();
                         return;
                     }
-                    applyRenderData(data);
+                    applyRenderData(std::move(data));
                 });
         });
     }
@@ -191,7 +191,7 @@ RenderController::RenderData RenderController::calculateRenderData(Part *part, c
     part->addRef();
 
     QByteArray lineBuffer;
-    QList<QmlRenderGeometry *> geos;
+    std::vector<std::unique_ptr<QmlRenderGeometry>> geos;
     QVector3D center;
     float radius = 0;
     QHash<const BrickLink::Color *, QByteArray> surfaceBuffers;
@@ -250,10 +250,10 @@ RenderController::RenderData RenderController::calculateRenderData(Part *part, c
         geo->setRadius(surfaceRadius);
         geo->setVertexData(data);
 
-        geos.append(geo.release());
+        geos.push_back(std::move(geo));
     }
 
-    for (auto *geo : std::as_const(geos)) {
+    for (const auto &geo : std::as_const(geos)) {
         // Merge all the bounding spheres. This is not perfect, but very, very close in most cases
         const auto geoCenter = geo->center();
         const auto geoRadius = geo->radius();
@@ -277,17 +277,27 @@ RenderController::RenderData RenderController::calculateRenderData(Part *part, c
     }
 
     part->release();
-    return { lineBuffer, geos, center, radius };
+
+    RenderData rd;
+    rd.lineBuffer = std::move(lineBuffer);
+    rd.geos = std::move(geos);
+    rd.center = center;
+    rd.radius = radius;
+    return rd;
 }
 
-void RenderController::applyRenderData(const RenderData &data)
+void RenderController::applyRenderData(RenderData &&data)
 {
     m_lines->clear();
     if (!data.lineBuffer.isEmpty())
         m_lines->setBuffer(data.lineBuffer);
     m_lines->update();
     qDeleteAll(m_geos);
-    m_geos = data.geos;
+    m_geos.clear();
+    m_geos.reserve(qsizetype(data.geos.size()));
+    for (auto &geo : data.geos)
+        m_geos.append(geo.release()); // m_geos is exposed to QML, so it has to stay a raw pointer list
+    data.geos.clear();
 
     emit surfacesChanged();
 

@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include <QtCore/QObject>
 #include <QtGui/QColor>
 #include <QtGui/QQuaternion>
@@ -84,15 +87,23 @@ signals:
     void clearColorChanged(const QColor &clearColor);
 
 private:
+    // owns its geometries until applyRenderData() takes them over: the continuation calculating
+    // them may be dropped before it ever runs, e.g. when this controller is destroyed.
+    // Move-only, also to keep QFuture from trying to copy the unique_ptrs.
     struct RenderData {
+        RenderData() = default;
+        RenderData(RenderData &&) = default;
+        RenderData &operator=(RenderData &&) = default;
+        Q_DISABLE_COPY(RenderData)
+
         QByteArray lineBuffer;
-        QList<QmlRenderGeometry *> geos;
+        std::vector<std::unique_ptr<QmlRenderGeometry>> geos;
         QVector3D center;
         float radius = 0;
     };
 
     RenderData calculateRenderData(Part *part, const BrickLink::Color *color);
-    void applyRenderData(const RenderData &data);
+    void applyRenderData(RenderData &&data);
 
     static void fillVertexBuffers(Part *part, const BrickLink::Color *modelColor,
                                   const BrickLink::Color *baseColor, const QMatrix4x4 &matrix,
