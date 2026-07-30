@@ -2377,7 +2377,7 @@ void DocumentModel::initializeColumns()
       });
 }
 
-void DocumentModel::pictureUpdated(BrickLink::Picture *pic)
+void DocumentModel::pictureUpdated(const BrickLink::PictureRef &pic)
 {
     if (!pic || !pic->item())
         return;

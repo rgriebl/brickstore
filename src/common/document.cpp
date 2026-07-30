@@ -1057,8 +1057,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
 
         if (pg && ((pg->updateStatus() == BrickLink::UpdateStatus::Loading)
                    || (pg->updateStatus() == BrickLink::UpdateStatus::Updating))) {
-            m_setToPG->priceGuides.insert(pg.get(), lot);
-            m_setToPG->priceGuideRefs.insert(pg.get(), pg);
+            m_setToPG->priceGuides.insert(pg, lot);
 
         } else {
             if (!updatePriceToGuide(lot, pg.get()))
@@ -1072,7 +1071,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
     setBlockingOperationCancelCallback([this]() { cancelPriceGuideUpdates(); });
 
     if (m_setToPG->priceGuides.isEmpty())
-        priceGuideUpdated(nullptr);
+        priceGuideUpdated({ });
 }
 
 bool Document::updatePriceToGuide(BrickLink::Lot *lot, const BrickLink::PriceGuide *pg)
@@ -1113,7 +1112,7 @@ bool Document::updatePriceToGuide(BrickLink::Lot *lot, const BrickLink::PriceGui
     }
 }
 
-void Document::priceGuideUpdated(BrickLink::PriceGuide *pg)
+void Document::priceGuideUpdated(const BrickLink::PriceGuideRef &pg)
 {
     if (m_setToPG && pg) {
         const auto lots = m_setToPG->priceGuides.values(pg);
@@ -1124,14 +1123,13 @@ void Document::priceGuideUpdated(BrickLink::PriceGuide *pg)
             return; // loaded now, but still needs an online update
 
         for (auto lot : lots) {
-            if (!updatePriceToGuide(lot, pg))
+            if (!updatePriceToGuide(lot, pg.get()))
                 ++m_setToPG->failCount;
             ++m_setToPG->doneCount;
         }
 
         emit blockingOperationProgress(m_setToPG->doneCount, m_setToPG->totalCount);
         m_setToPG->priceGuides.remove(pg);
-        m_setToPG->priceGuideRefs.remove(pg);
     }
 
     if (m_setToPG && m_setToPG->priceGuides.isEmpty()
@@ -1161,7 +1159,7 @@ void Document::cancelPriceGuideUpdates()
     if (m_setToPG) {
         m_setToPG->canceled = true;
         const auto pgs = m_setToPG->priceGuides.uniqueKeys();
-        for (BrickLink::PriceGuide *pg : pgs) {
+        for (const BrickLink::PriceGuideRef &pg : pgs) {
             if (pg->updateStatus() == BrickLink::UpdateStatus::Updating)
                 pg->cancelUpdate();
         }
@@ -1814,8 +1812,8 @@ Document *Document::fromPartInventory(const BrickLink::Item *item,
             // destroyed, so nothing is leaked either.
             auto conn = std::make_shared<QMetaObject::Connection>();
             *conn = connect(BrickLink::core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
-                            document, [document, thumbnail, conn](BrickLink::Picture *pic) {
-                if (pic == thumbnail.get()) {
+                            document, [document, thumbnail, conn](const BrickLink::PictureRef &pic) {
+                if (pic == thumbnail) {
                     if (thumbnail->isValid())
                         document->setThumbnail(thumbnail->image());
                     QObject::disconnect(*conn);

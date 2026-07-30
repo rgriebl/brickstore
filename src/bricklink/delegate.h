@@ -56,7 +56,7 @@ public:
               const QPoint &globalPos, QWidget *parent);
 
 private slots:
-    void pictureUpdated(BrickLink::Picture *pic);
+    void pictureUpdated(const BrickLink::PictureRef &pic);
 
 private:
     QString createItemToolTip(const Item *item, const Picture *pic) const;

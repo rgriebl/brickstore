@@ -755,16 +755,16 @@ QmlBrickLink::QmlBrickLink()
             emit currentVatTypeChanged(vatType);
     });
     connect(core()->priceGuideCache(), &BrickLink::PriceGuideCache::priceGuideUpdated,
-            this, [this](::BrickLink::PriceGuide *pg) {
+            this, [this](const ::BrickLink::PriceGuideRef &pg) {
         static const auto sig = QMetaMethod::fromSignal(&QmlBrickLink::priceGuideUpdated);
         if (isSignalConnected(sig))
-            emit priceGuideUpdated(pg);
+            emit priceGuideUpdated(pg.get()); // QML cannot hold a reference
     });
     connect(core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
-            this, [this](::BrickLink::Picture *pic) {
+            this, [this](const ::BrickLink::PictureRef &pic) {
         static const auto sig = QMetaMethod::fromSignal(&QmlBrickLink::pictureUpdated);
         if (isSignalConnected(sig))
-            emit pictureUpdated(pic);
+            emit pictureUpdated(pic.get()); // QML cannot hold a reference
     });
     connect(core(), &BrickLink::Core::transferProgress,
             this, &QmlBrickLink::transferProgress);

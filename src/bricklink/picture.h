@@ -117,7 +117,8 @@ public:
     void cancelAllPictureUpdates();
 
 signals:
-    void pictureUpdated(BrickLink::Picture *pic);
+    // carries a reference, so a slot cannot be handed a picture that dies while it runs
+    void pictureUpdated(const BrickLink::PictureRef &pic);
 
 private:
     PictureCachePrivate *d;

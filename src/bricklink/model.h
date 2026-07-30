@@ -200,7 +200,7 @@ public:
     void setFilterYearRange(int minYear, int maxYear);
 
 protected slots:
-    void pictureUpdated(BrickLink::Picture *);
+    void pictureUpdated(const BrickLink::PictureRef &);
 
 protected:
     int pointerCount() const override;

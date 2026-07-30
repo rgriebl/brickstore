@@ -40,8 +40,8 @@ public:
     virtual void cancelAll() = 0;
 
 signals:
-    void finished(BrickLink::PriceGuide *pg, const BrickLink::PriceGuide::Data &data);
-    void failed(BrickLink::PriceGuide *pg, const QString &errorString);
+    void finished(const BrickLink::PriceGuideRef &pg, const BrickLink::PriceGuide::Data &data);
+    void failed(const BrickLink::PriceGuideRef &pg, const QString &errorString);
 };
 
 class SingleHTMLScrapePGRetriever : public PriceGuideRetrieverInterface
@@ -152,8 +152,8 @@ public:
     void loadThread(QString dbName, int index);
     void saveThread(QString dbName, int index);
 
-    void retrieveFinished(PriceGuide *pg, const PriceGuide::Data &data);
-    void retrieveFailed(PriceGuide *pg, const QString &errorString);
+    void retrieveFinished(const PriceGuideRef &pg, const PriceGuide::Data &data);
+    void retrieveFailed(const PriceGuideRef &pg, const QString &errorString);
 };
 
 } // namespace BrickLink

@@ -188,7 +188,7 @@ void SingleHTMLScrapePGRetriever::transferJobFinished(TransferJob *j, const Pric
         if (job->isCompleted()) {
             PriceGuide::Data data;
             if (parseHtml(job->data(), data))
-                emit finished(pg.get(), data);
+                emit finished(pg, data);
             else
                 throw Exception("invalid price-guide data");
         } else if (job->isAborted()) {
@@ -197,7 +197,7 @@ void SingleHTMLScrapePGRetriever::transferJobFinished(TransferJob *j, const Pric
             throw Exception("%1 (%2)").arg(job->errorString()).arg(job->responseCode());
         }
     } catch (const Exception &e) {
-        emit failed(pg.get(), u"PG download for " + QString::fromLatin1(pg->item()->id()) + u" failed: " + e.errorString());
+        emit failed(pg, u"PG download for " + QString::fromLatin1(pg->item()->id()) + u" failed: " + e.errorString());
     }
     // no release needed: the job's user data owned the reference
 }
@@ -356,10 +356,10 @@ void BatchedAffiliateAPIPGRetriever::cancel(PriceGuide *pg)
         auto index = std::distance(queue.cbegin(), it);
         if (index < prioSize)
             --prioSize;
-        PriceGuideRef pgRef = queue.at(index).first; // keep it alive across the emit below
+        PriceGuideRef pgRef = queue.at(index).first;
         queue.removeAt(index);
 
-        emit failed(pgRef.get(), u"aborted"_qs);
+        emit failed(pgRef, u"aborted"_qs);
     }
 }
 
@@ -376,7 +376,7 @@ void BatchedAffiliateAPIPGRetriever::cancelAll()
     m_nextBatchPrioritySize = 0;
 
     for (const auto &pair : list)
-        emit failed(pair.first.get(), u"aborted"_qs);
+        emit failed(pair.first, u"aborted"_qs);
 }
 
 void BatchedAffiliateAPIPGRetriever::setApiKey(const QString &key)
@@ -522,7 +522,7 @@ void BatchedAffiliateAPIPGRetriever::transferJobFinished(TransferJob *j)
                 parsePGJson(u"ordered_new",    int(Time::PastSix), int(Condition::New));
                 parsePGJson(u"ordered_used",   int(Time::PastSix), int(Condition::Used));
 
-                emit finished(pit->get(), pgdata);
+                emit finished(*pit, pgdata);
 
                 pit->reset();  // mark as "dealt with", releasing the reference
             }
@@ -539,7 +539,7 @@ void BatchedAffiliateAPIPGRetriever::transferJobFinished(TransferJob *j)
     } catch (const Exception &e) {
         for (const auto &pg : std::as_const(m_currentBatch)) {
             if (pg) {
-                emit failed(pg.get(), u"PG download for " + QChar::fromLatin1(pg->item()->itemType()->id())
+                emit failed(pg, u"PG download for " + QChar::fromLatin1(pg->item()->itemType()->id())
                                     + u' ' + QString::fromLatin1(pg->item()->id()) + u" in "
                             + pg->color()->name() + u" failed: " + e.errorString());
             }
@@ -603,11 +603,11 @@ PriceGuideCache::PriceGuideCache(Core *core)
     qInfo() << "Using BrickLink price-guide retriever plugin:" << d->m_retriever->name();
 
     connect(d->m_retriever, &PriceGuideRetrieverInterface::finished,
-            this, [this](PriceGuide *pg, const PriceGuide::Data &data) {
+            this, [this](const PriceGuideRef &pg, const PriceGuide::Data &data) {
         d->retrieveFinished(pg, data);
     });
     connect(d->m_retriever, &PriceGuideRetrieverInterface::failed,
-            this, [this](PriceGuide *pg, const QString &errorString) {
+            this, [this](const PriceGuideRef &pg, const QString &errorString) {
         d->retrieveFailed(pg, errorString);
     });
 
@@ -751,7 +751,7 @@ void PriceGuideCache::updatePriceGuide(PriceGuide *pg, bool highPriority)
         && QNetworkInformation::instance()->supports(QNetworkInformation::Feature::Reachability)
         && (QNetworkInformation::instance()->reachability() != QNetworkInformation::Reachability::Online)) {
         pg->setUpdateStatus(UpdateStatus::UpdateFailed);
-        emit priceGuideUpdated(pg);
+        emit priceGuideUpdated(pgRef);
         return;
     }
 
@@ -958,7 +958,7 @@ void PriceGuideCachePrivate::loadThread(QString dbName, int index)
                 if (loaded && data.isEmpty())
                     pg->setIsValid(false);
 
-                emit q->priceGuideUpdated(pg.get());
+                emit q->priceGuideUpdated(pg);
             }, Qt::QueuedConnection);
         }
     }
@@ -1033,12 +1033,12 @@ void PriceGuideCachePrivate::saveThread(QString dbName, int index)
     db.close();
 }
 
-void PriceGuideCachePrivate::retrieveFinished(PriceGuide *pg, const PriceGuide::Data &data)
+void PriceGuideCachePrivate::retrieveFinished(const PriceGuideRef &pg, const PriceGuide::Data &data)
 {
     pg->setLastUpdated(QDateTime::currentDateTime());
     pg->m_data = data;
 
-    save(pg->weak_from_this().lock());
+    save(pg);
 
 #if 0
     qInfo().noquote() << "PG for" << pg->item()->itemTypeId() << pg->item()->id() << "in"
@@ -1063,7 +1063,7 @@ void PriceGuideCachePrivate::retrieveFinished(PriceGuide *pg, const PriceGuide::
     emit q->priceGuideUpdated(pg);
 }
 
-void PriceGuideCachePrivate::retrieveFailed(PriceGuide *pg, const QString &errorString [[maybe_unused]])
+void PriceGuideCachePrivate::retrieveFailed(const PriceGuideRef &pg, const QString &errorString [[maybe_unused]])
 {
     qCWarning(LogCache).noquote() << errorString;
     pg->setUpdateStatus(UpdateStatus::UpdateFailed);

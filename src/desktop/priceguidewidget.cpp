@@ -210,9 +210,9 @@ void PriceGuideWidget::doUpdate()
 }
 
 
-void PriceGuideWidget::gotUpdate(BrickLink::PriceGuide *pg)
+void PriceGuideWidget::gotUpdate(const BrickLink::PriceGuideRef &pg)
 {
-    if (pg == d->m_pg.get())
+    if (pg == d->m_pg)
         updateNonStaticCells();
 }
 

@@ -59,7 +59,7 @@ protected:
 
 protected slots:
     void doUpdate();
-    void gotUpdate(BrickLink::PriceGuide *pg);
+    void gotUpdate(const BrickLink::PriceGuideRef &pg);
     void showBLCatalogInfo();
     void showBLPriceGuideInfo();
     void showBLLotsForSale();

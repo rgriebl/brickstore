@@ -709,7 +709,7 @@ QHash<int, QByteArray> ItemModel::roleNames() const
     return roles;
 }
 
-void ItemModel::pictureUpdated(Picture *pic)
+void ItemModel::pictureUpdated(const PictureRef &pic)
 {
     if (!pic || !pic->item())
         return;
@@ -962,7 +962,7 @@ InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<SimpleLo
         case Mode::Relationships: fillRelationships(list); break;
     }
     connect(core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
-            this, [this](Picture *pic) {
+            this, [this](const PictureRef &pic) {
         if (!pic || !pic->item())
             return;
 
@@ -976,7 +976,7 @@ InternalInventoryModel::InternalInventoryModel(Mode mode, const QVector<SimpleLo
 
         for (int row = 0; row < m_entries.size(); ++row) {
             auto *e = m_entries.at(row);
-            if (!e->isSection() && pictureMatch(e, pic))
+            if (!e->isSection() && pictureMatch(e, pic.get()))
                 indexes << index(row, InventoryModel::PictureColumn); // clazy:exclude=reserve-candidates
         }
 

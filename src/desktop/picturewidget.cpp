@@ -178,8 +178,8 @@ PictureWidget::PictureWidget(QWidget *parent)
     });
 
     connect(BrickLink::core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
-            this, [this](BrickLink::Picture *pic) {
-        if (pic == m_pic.get()) {
+            this, [this](const BrickLink::PictureRef &pic) {
+        if (pic == m_pic) {
             if (pic->isValid())
                 m_image = pic->image();
             m_currentImageSize = { };

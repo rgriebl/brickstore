@@ -225,7 +225,7 @@ public:
     void resetDifferenceMode(const LotList &lotList);
 
 public slots:
-    void pictureUpdated(BrickLink::Picture *pic);
+    void pictureUpdated(const BrickLink::PictureRef &pic);
 
 public:
     DocumentModel();

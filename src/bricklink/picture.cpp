@@ -353,7 +353,7 @@ void PictureCache::updatePicture(Picture *pic, bool highPriority)
         && QNetworkInformation::instance()->supports(QNetworkInformation::Feature::Reachability)
         && (QNetworkInformation::instance()->reachability() != QNetworkInformation::Reachability::Online)) {
         pic->setUpdateStatus(UpdateStatus::UpdateFailed);
-        emit pictureUpdated(pic);
+        emit pictureUpdated(picRef);
         return;
     }
 
@@ -555,7 +555,7 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
 
                 m_cache.setObjectCost(cacheKey(pic->item(), pic->color()), pic->cost());
 
-                emit q->pictureUpdated(pic.get());
+                emit q->pictureUpdated(pic);
             }, Qt::QueuedConnection);
         }
     }
@@ -673,7 +673,7 @@ void PictureCachePrivate::transferJobFinished(TransferJob *j, const PictureRef &
         pic->setUpdateStatus(UpdateStatus::UpdateFailed);
     }
 
-    emit q->pictureUpdated(pic.get());
+    emit q->pictureUpdated(pic);
     // no release needed: the job's user data owned the reference
 }
 

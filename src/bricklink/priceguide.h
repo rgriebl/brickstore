@@ -137,7 +137,8 @@ public:
     static QString descriptionForVatType(VatType vatType);
 
 signals:
-    void priceGuideUpdated(BrickLink::PriceGuide *pg);
+    // carries a reference, so a slot cannot be handed a price guide that dies while it runs
+    void priceGuideUpdated(const BrickLink::PriceGuideRef &pg);
     void currentVatTypeChanged(BrickLink::VatType vatType);
 
 private:

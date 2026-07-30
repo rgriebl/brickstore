@@ -282,9 +282,9 @@ QString ToolTip::yearSpan(int from, int to)
     return yearStr;
 }
 
-void ToolTip::pictureUpdated(Picture *pic)
+void ToolTip::pictureUpdated(const PictureRef &pic)
 {
-    if (!pic || (pic != m_tooltip_pic.get()))
+    if (!pic || (pic != m_tooltip_pic))
         return;
 
     if ((pic->updateStatus() != UpdateStatus::Updating)
@@ -297,7 +297,7 @@ void ToolTip::pictureUpdated(Picture *pic)
         for (QWidget *w : tlwidgets) {
             if (w->inherits("QTipLabel")) {
                 qobject_cast<QLabel *>(w)->clear();
-                qobject_cast<QLabel *>(w)->setText(createItemToolTip(pic->item(), pic));
+                qobject_cast<QLabel *>(w)->setText(createItemToolTip(pic->item(), pic.get()));
 
                 QRect r(w->pos(), w->sizeHint());
                 QRect desktop = w->window()->windowHandle()->screen()->availableGeometry();

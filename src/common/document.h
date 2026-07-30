@@ -278,7 +278,7 @@ private:
     void applyTo(const LotList &lots,
                  const char *actionName, const std::function<DocumentModel::ApplyToResult (const Lot &, Lot &)> &callback);
     bool updatePriceToGuide(BrickLink::Lot *lot, const BrickLink::PriceGuide *pg);
-    void priceGuideUpdated(BrickLink::PriceGuide *pg);
+    void priceGuideUpdated(const BrickLink::PriceGuideRef &pg);
     void cancelPriceGuideUpdates();
     enum ExportCheckMode {
         ExportToFile = 0,
@@ -315,9 +315,8 @@ private:
     struct SetToPriceGuideData
     {
         std::vector<std::pair<Lot *, Lot>> changes;
-        QMultiHash<BrickLink::PriceGuide *, Lot *>    priceGuides;
-        // one handle per pending price guide, so it cannot be evicted while we wait for it
-        QHash<BrickLink::PriceGuide *, BrickLink::PriceGuideRef> priceGuideRefs;
+        // the key owns a reference, so a pending price guide cannot be evicted while we wait
+        QMultiHash<BrickLink::PriceGuideRef, Lot *>   priceGuides;
         int              failCount = 0;
         int              doneCount = 0;
         int              totalCount = 0;
