@@ -277,7 +277,8 @@ Page {
                                                                      picCell.bllot.color)
                         background: QImageItem {
                             fillColor: "white"
-                            image: picCell.pic?.image ?? BL.BrickLink.noImage(width, height)
+                            image: picCell.pic?.isValid ? picCell.pic.image
+                                                        : BL.BrickLink.noImage(width, height)
                         }
                     }
                 }

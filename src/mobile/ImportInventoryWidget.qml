@@ -77,7 +77,7 @@ Pane {
                     implicitWidth: height * 4 / 3
 
                     property BL.Picture pic: BL.BrickLink.picture(root.currentItem, BL.BrickLink.noColor, true)
-                    image: pic ? pic.image : BL.BrickLink.noImage(width, height)
+                    image: pic?.isValid ? pic.image : BL.BrickLink.noImage(width, height)
                 }
                 Label {
                     Layout.fillWidth: true
