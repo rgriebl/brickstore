@@ -112,8 +112,8 @@ public:
 
     PictureRef picture(const Item *item, const Color *color, bool highPriority = false);
 
-    void updatePicture(Picture *pic, bool highPriority = false);
-    void cancelPictureUpdate(Picture *pic);
+    void updatePicture(const PictureRef &pic, bool highPriority = false);
+    void cancelPictureUpdate(const PictureRef &pic);
     void cancelAllPictureUpdates();
 
 signals:

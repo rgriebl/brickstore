@@ -35,7 +35,9 @@ Picture::Picture(Private, const Item *item, const Color *color)
 
 Picture::~Picture()
 {
-    cancelUpdate();
+    // No cancelUpdate() here: while a transfer job is running, its user data owns a reference to
+    // this picture, so we could not be destroyed at all.
+    Q_ASSERT(!m_transferJob);
 }
 
 // A picture can be handed out to a worker thread, which may end up dropping the last reference to
@@ -110,14 +112,15 @@ void Picture::setImage(const QImage &newImage)
 
 void Picture::update(bool highPriority)
 {
-    if (s_cache)
-        s_cache->updatePicture(this, highPriority);
+    // weak_from_this(), because a stale QML pointer may well outlive the last reference
+    if (auto self = s_cache ? weak_from_this().lock() : PictureRef { })
+        s_cache->updatePicture(self, highPriority);
 }
 
 void Picture::cancelUpdate()
 {
-    if (s_cache)
-        s_cache->cancelPictureUpdate(this);
+    if (auto self = s_cache ? weak_from_this().lock() : PictureRef { })
+        s_cache->cancelPictureUpdate(self);
 }
 
 
@@ -342,18 +345,16 @@ PictureRef PictureCache::picture(const Item *item, const Color *color, bool high
     return pic;
 }
 
-void PictureCache::updatePicture(Picture *pic, bool highPriority)
+void PictureCache::updatePicture(const PictureRef &pic, bool highPriority)
 {
-    // weak_from_this(), because a stale QML pointer may well outlive the last reference
-    auto picRef = pic ? pic->weak_from_this().lock() : PictureRef { };
-    if (!picRef || (pic->m_updateStatus == UpdateStatus::Updating))
+    if (!pic || (pic->m_updateStatus == UpdateStatus::Updating))
         return;
 
     if (QNetworkInformation::instance()
         && QNetworkInformation::instance()->supports(QNetworkInformation::Feature::Reachability)
         && (QNetworkInformation::instance()->reachability() != QNetworkInformation::Reachability::Online)) {
         pic->setUpdateStatus(UpdateStatus::UpdateFailed);
-        emit pictureUpdated(picRef);
+        emit pictureUpdated(pic);
         return;
     }
 
@@ -370,11 +371,11 @@ void PictureCache::updatePicture(Picture *pic, bool highPriority)
 
     pic->m_transferJob = TransferJob::get(url);
     // the job owns a reference, so the picture cannot go away while it is being downloaded
-    pic->m_transferJob->setUserData("picture", QVariant::fromValue(picRef));
+    pic->m_transferJob->setUserData("picture", QVariant::fromValue(pic));
     d->m_core->retrieve(pic->m_transferJob, highPriority);
 }
 
-void PictureCache::cancelPictureUpdate(Picture *pic)
+void PictureCache::cancelPictureUpdate(const PictureRef &pic)
 {
     if (pic && pic->m_transferJob)
         pic->m_transferJob->abort();
@@ -384,7 +385,7 @@ void PictureCache::cancelAllPictureUpdates()
 {
     const auto keys = d->m_cache.keys();
     for (const auto &key : keys)
-        cancelPictureUpdate(d->m_cache.object(key).get());
+        cancelPictureUpdate(d->m_cache.object(key));
 }
 
 
@@ -400,7 +401,7 @@ quint32 PictureCachePrivate::cacheKey(const Item *item, const Color *color)
             | (quint32(item ? (item->index() + 1) : 0));
 }
 
-QString PictureCachePrivate::databaseTag(Picture *pic)
+QString PictureCachePrivate::databaseTag(const Picture *pic)
 {
     if (!pic || !pic->item())
         return { };
@@ -434,7 +435,7 @@ bool PictureCachePrivate::imageFromData(QImage &img, const QByteArray &data)
     return valid;
 }
 
-bool PictureCachePrivate::isUpdateNeeded(Picture *pic) const
+bool PictureCachePrivate::isUpdateNeeded(const Picture *pic) const
 {
     return (m_updateInterval > 0)
             && (!pic->isValid()
@@ -548,7 +549,7 @@ void PictureCachePrivate::loadThread(QString dbName, int index)
 
                 if (pic->m_updateAfterLoad || isUpdateNeeded(pic.get()))  {
                     pic->m_updateAfterLoad = false;
-                    q->updatePicture(pic.get(), highPriority);
+                    q->updatePicture(pic, highPriority);
                 }
                 if (loaded && img.isNull())
                     pic->setIsValid(false);

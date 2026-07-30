@@ -36,7 +36,7 @@ public:
     virtual QVector<VatType> supportedVatTypes() const = 0;
 
     virtual void fetch(const PriceGuideRef &pg, bool highPriority) = 0;
-    virtual void cancel(PriceGuide *pg) = 0;
+    virtual void cancel(const PriceGuideRef &pg) = 0;
     virtual void cancelAll() = 0;
 
 signals:
@@ -57,7 +57,7 @@ public:
     QVector<VatType> supportedVatTypes() const override;
 
     void fetch(const PriceGuideRef &pg, bool highPriority) override;
-    void cancel(PriceGuide *pg) override;
+    void cancel(const PriceGuideRef &pg) override;
     void cancelAll() override;
 
 private:
@@ -82,7 +82,7 @@ public:
     QVector<VatType> supportedVatTypes() const override;
 
     void fetch(const PriceGuideRef &pg, bool highPriority) override;
-    void cancel(PriceGuide *pg) override;
+    void cancel(const PriceGuideRef &pg) override;
     void cancelAll() override;
 
     void setApiKey(const QString &key);
@@ -144,8 +144,8 @@ public:
     int m_savesStatId = -1;
 
     static quint64 cacheKey(const Item *item, const Color *color, VatType vatType);
-    static QString databaseTag(PriceGuide *pg, PriceGuideRetrieverInterface *retriever);
-    bool isUpdateNeeded(PriceGuide *pg) const;
+    static QString databaseTag(const PriceGuide *pg, PriceGuideRetrieverInterface *retriever);
+    bool isUpdateNeeded(const PriceGuide *pg) const;
 
     void load(PriceGuideRef pg, bool highPriority);
     void save(PriceGuideRef pg);

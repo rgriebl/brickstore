@@ -55,9 +55,9 @@ public:
     int m_savesStatId = -1;
 
     static quint32 cacheKey(const Item *item, const Color *color);
-    static QString databaseTag(Picture *pic);
+    static QString databaseTag(const Picture *pic);
     static bool imageFromData(QImage &img, const QByteArray &data);
-    bool isUpdateNeeded(Picture *pic) const;
+    bool isUpdateNeeded(const Picture *pic) const;
 
     void load(PictureRef pic, bool highPriority);
     void reprioritize(const Picture *pic, bool highPriority);

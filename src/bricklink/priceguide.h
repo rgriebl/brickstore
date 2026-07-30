@@ -122,8 +122,8 @@ public:
     PriceGuideRef priceGuide(const Item *item, const Color *color, VatType vatType,
                              bool highPriority = false);
 
-    void updatePriceGuide(PriceGuide *pg, bool highPriority = false);
-    void cancelPriceGuideUpdate(PriceGuide *pg);
+    void updatePriceGuide(const PriceGuideRef &pg, bool highPriority = false);
+    void cancelPriceGuideUpdate(const PriceGuideRef &pg);
     void cancelAllPriceGuideUpdates();
 
     QString retrieverName() const;

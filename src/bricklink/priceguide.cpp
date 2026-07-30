@@ -69,7 +69,8 @@ PriceGuide::PriceGuide(Private, const Item *item, const Color *color, VatType va
 
 PriceGuide::~PriceGuide()
 {
-    cancelUpdate();
+    // No cancelUpdate() here: while an update is queued or running, the retriever owns a reference
+    // to this price guide, so we could not be destroyed at all.
 }
 
 void PriceGuide::setIsValid(bool valid)
@@ -98,14 +99,15 @@ void PriceGuide::setLastUpdated(const QDateTime &dt)
 
 void PriceGuide::update(bool highPriority)
 {
-    if (s_cache)
-        s_cache->updatePriceGuide(this, highPriority);
+    // weak_from_this(), because a stale QML pointer may well outlive the last reference
+    if (auto self = s_cache ? weak_from_this().lock() : PriceGuideRef { })
+        s_cache->updatePriceGuide(self, highPriority);
 }
 
 void PriceGuide::cancelUpdate()
 {
-    if (s_cache)
-        s_cache->cancelPriceGuideUpdate(this);
+    if (auto self = s_cache ? weak_from_this().lock() : PriceGuideRef { })
+        s_cache->cancelPriceGuideUpdate(self);
 }
 
 
@@ -167,9 +169,9 @@ void SingleHTMLScrapePGRetriever::fetch(const PriceGuideRef &pg, bool highPriori
     m_core->retrieve(job, highPriority);
 }
 
-void SingleHTMLScrapePGRetriever::cancel(PriceGuide *pg)
+void SingleHTMLScrapePGRetriever::cancel(const PriceGuideRef &pg)
 {
-    if (auto job = m_jobs.value(pg))
+    if (auto job = m_jobs.value(pg.get()))
         job->abort();
 }
 
@@ -338,28 +340,25 @@ void BatchedAffiliateAPIPGRetriever::fetch(const PriceGuideRef &pg, bool highPri
     check();
 }
 
-void BatchedAffiliateAPIPGRetriever::cancel(PriceGuide *pg)
+void BatchedAffiliateAPIPGRetriever::cancel(const PriceGuideRef &pg)
 {
-    if (std::any_of(m_currentBatch.cbegin(), m_currentBatch.cend(),
-                    [pg](const auto &batched) { return (batched.get() == pg); })) {
+    if (m_currentBatch.contains(pg))
         m_currentJob->abort();
-    }
 
     bool wrongVatType = (pg->vatType() != m_nextBatchVatType);
     auto &queue = wrongVatType ? m_wrongVatTypeQueue : m_nextBatch;
     auto &prioSize = wrongVatType ? m_wrongVatTypeQueuePrioritySize : m_nextBatchPrioritySize;
 
-    auto it = std::find_if(queue.cbegin(), queue.cend(), [pg](const auto &pair) {
-        return (pair.first.get() == pg);
+    auto it = std::find_if(queue.cbegin(), queue.cend(), [&pg](const auto &pair) {
+        return (pair.first == pg);
     });
     if (it != queue.cend()) {
         auto index = std::distance(queue.cbegin(), it);
         if (index < prioSize)
             --prioSize;
-        PriceGuideRef pgRef = queue.at(index).first;
         queue.removeAt(index);
 
-        emit failed(pgRef, u"aborted"_qs);
+        emit failed(pg, u"aborted"_qs);
     }
 }
 
@@ -740,18 +739,16 @@ PriceGuideRef PriceGuideCache::priceGuide(const Item *item, const Color *color, 
     return pg;
 }
 
-void PriceGuideCache::updatePriceGuide(PriceGuide *pg, bool highPriority)
+void PriceGuideCache::updatePriceGuide(const PriceGuideRef &pg, bool highPriority)
 {
-    // weak_from_this(), because a stale QML pointer may well outlive the last reference
-    auto pgRef = pg ? pg->weak_from_this().lock() : PriceGuideRef { };
-    if (!pgRef || (pg->m_updateStatus == UpdateStatus::Updating))
+    if (!pg || (pg->m_updateStatus == UpdateStatus::Updating))
         return;
 
     if (QNetworkInformation::instance()
         && QNetworkInformation::instance()->supports(QNetworkInformation::Feature::Reachability)
         && (QNetworkInformation::instance()->reachability() != QNetworkInformation::Reachability::Online)) {
         pg->setUpdateStatus(UpdateStatus::UpdateFailed);
-        emit priceGuideUpdated(pgRef);
+        emit priceGuideUpdated(pg);
         return;
     }
 
@@ -762,10 +759,10 @@ void PriceGuideCache::updatePriceGuide(PriceGuide *pg, bool highPriority)
 
     pg->setUpdateStatus(UpdateStatus::Updating);
 
-    d->m_retriever->fetch(pgRef, highPriority);
+    d->m_retriever->fetch(pg, highPriority);
 }
 
-void PriceGuideCache::cancelPriceGuideUpdate(PriceGuide *pg)
+void PriceGuideCache::cancelPriceGuideUpdate(const PriceGuideRef &pg)
 {
     d->m_retriever->cancel(pg);
 }
@@ -846,7 +843,7 @@ quint64 PriceGuideCachePrivate::cacheKey(const Item *item, const Color *color, V
             | (quint64(item ? (item->index() + 1) : 0));
 }
 
-QString PriceGuideCachePrivate::databaseTag(PriceGuide *pg, PriceGuideRetrieverInterface *retriever)
+QString PriceGuideCachePrivate::databaseTag(const PriceGuide *pg, PriceGuideRetrieverInterface *retriever)
 {
     if (!pg || !pg->item() || !pg->color() || !retriever)
         return { };
@@ -856,7 +853,7 @@ QString PriceGuideCachePrivate::databaseTag(PriceGuide *pg, PriceGuideRetrieverI
             + u'@' + retriever->id() + QString::number(int(pg->vatType()));
 }
 
-bool PriceGuideCachePrivate::isUpdateNeeded(PriceGuide *pg) const
+bool PriceGuideCachePrivate::isUpdateNeeded(const PriceGuide *pg) const
 {
     return (m_updateInterval > 0)
             && (!pg->isValid()
@@ -953,7 +950,7 @@ void PriceGuideCachePrivate::loadThread(QString dbName, int index)
 
                 if (pg->m_updateAfterLoad || isUpdateNeeded(pg.get()))  {
                     pg->m_updateAfterLoad = false;
-                    q->updatePriceGuide(pg.get(), highPriority);
+                    q->updatePriceGuide(pg, highPriority);
                 }
                 if (loaded && data.isEmpty())
                     pg->setIsValid(false);
