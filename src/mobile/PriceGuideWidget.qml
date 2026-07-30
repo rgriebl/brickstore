@@ -17,7 +17,9 @@ Control {
     property BL.Item item: BL.BrickLink.noItem
     property BL.Color color: BL.BrickLink.noColor
 
-    property BL.PriceGuide priceGuide: null
+    // the wrapper holds the reference; dropping it is what releases the price guide
+    property BL.PriceGuideRef priceGuideRef: null
+    readonly property BL.PriceGuide priceGuide: priceGuideRef ? priceGuideRef.priceGuide : null
     property bool isUpdating: (priceGuide && (priceGuide.updateStatus === BL.BrickLink.UpdateStatus.Updating))
     property real currencyRate: BS.Currency.rate(currencyCode)
 
@@ -25,25 +27,14 @@ Control {
     onColorChanged: { Qt.callLater(root.updatePriceGuide) }
 
     function updatePriceGuide() {
-        if (priceGuide)
-            priceGuide.release()
-
         if (root.item.isNull || root.color.isNull)
-            priceGuide = null
+            priceGuideRef = null
         else
-            priceGuide = BL.BrickLink.priceGuide(root.item, root.color, true)
-
-        if (priceGuide)
-            priceGuide.addRef()
+            priceGuideRef = BL.BrickLink.priceGuide(root.item, root.color, true)
     }
 
     implicitHeight: layout.implicitHeight
     implicitWidth: layout.implicitWidth
-
-    Component.onDestruction: {
-        if (priceGuide)
-            priceGuide.release()
-    }
 
     component HeaderLabel : Label {
         Layout.fillWidth: true

@@ -85,7 +85,8 @@ Control {
                             implicitHeight: fm.height * 3
                             implicitWidth: height * 4 / 3
 
-                            property BL.Picture pic: BL.BrickLink.picture(delegate.blitem, BL.BrickLink.noColor)
+                            property BL.PictureRef picRef: BL.BrickLink.picture(delegate.blitem, BL.BrickLink.noColor)
+                            readonly property BL.Picture pic: picRef ? picRef.picture : null
                             property var noImage: BL.BrickLink.noImage(width, height)
 
                             image: pic && pic.isValid ? pic.image : noImage

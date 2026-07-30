@@ -50,21 +50,6 @@ static void deletePicture(Picture *pic)
         pic->deleteLater();
 }
 
-void Picture::addRef()
-{
-    // weak_from_this(), because a stale QML pointer may well outlive the last reference
-    if (auto self = weak_from_this().lock()) {
-        if (!m_qmlPinCount++)
-            m_qmlPin = std::move(self);
-    }
-}
-
-void Picture::release()
-{
-    if (m_qmlPinCount && !--m_qmlPinCount)
-        m_qmlPin.reset(); // may well be the last reference, deleting this
-}
-
 const QImage Picture::image() const
 {
     return m_image;

@@ -909,36 +909,104 @@ QmlItem QmlBrickLink::item(const QString &itemTypeId, const QString &itemId) con
     return core()->item(firstCharInString(itemTypeId), itemId.toLatin1());
 }
 
+/*! \qmltype PictureRef
+    \inqmlmodule BrickLink
+    \ingroup qml-api
+    \brief Keeps a Picture alive for as long as you hold on to this object.
+
+    QML cannot hold a reference counted C++ handle itself, so BrickLink::picture() hands out this
+    wrapper instead: the picture stays in the cache for as long as a PictureRef to it exists. Once
+    the last one is gone, the picture may be evicted again.
+
+    You cannot create PictureRef objects yourself, but you can retrieve one via
+    BrickLink::picture().
+
+    \sa Picture
+*/
+/*! \qmlproperty Picture PictureRef::picture
+    \readonly
+    The Picture this object is holding on to. Do not store this value on its own: unlike the
+    PictureRef, it does not keep the picture alive.
+*/
+
+/*! \qmltype PriceGuideRef
+    \inqmlmodule BrickLink
+    \ingroup qml-api
+    \brief Keeps a PriceGuide alive for as long as you hold on to this object.
+
+    QML cannot hold a reference counted C++ handle itself, so BrickLink::priceGuide() hands out this
+    wrapper instead: the price guide stays in the cache for as long as a PriceGuideRef to it exists.
+    Once the last one is gone, the price guide may be evicted again.
+
+    You cannot create PriceGuideRef objects yourself, but you can retrieve one via
+    BrickLink::priceGuide().
+
+    \sa PriceGuide
+*/
+/*! \qmlproperty PriceGuide PriceGuideRef::priceGuide
+    \readonly
+    The PriceGuide this object is holding on to. Do not store this value on its own: unlike the
+    PriceGuideRef, it does not keep the price guide alive.
+*/
+
+QmlPictureRef::QmlPictureRef(PictureRef picture)
+    : m_picture(std::move(picture))
+{
+    // the reference lives here, so make sure QML never thinks it owns the picture itself
+    if (m_picture)
+        QQmlEngine::setObjectOwnership(m_picture.get(), QQmlEngine::CppOwnership);
+}
+
+QmlPriceGuideRef::QmlPriceGuideRef(PriceGuideRef priceGuide)
+    : m_priceGuide(std::move(priceGuide))
+{
+    if (m_priceGuide)
+        QQmlEngine::setObjectOwnership(m_priceGuide.get(), QQmlEngine::CppOwnership);
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
 /*! \qmlsignal BrickLink::priceGuideUpdated(PriceGuide priceGuide)
     This signal is emitted every time the state of the \a priceGuide object changes. Receiving this
     signal doesn't mean the price guide data is available: you have to check the object's
     properties to see what has changed.
 */
-/*! \qmlmethod PriceGuide BrickLink::priceGuide(Item item, Color color, VatType vatType, bool highPriority = false)
-    Creates a PriceGuide object that asynchronously loads (or downloads) the price guide data for
-    the given \a item, \a color and \a vatType combination. If you set \a highPriority to \c true, the
-    load/download request will be prepended to the work queue instead of appended.
+/*! \qmlmethod PriceGuideRef BrickLink::priceGuide(Item item, Color color, VatType vatType, bool highPriority = false)
+    Creates a PriceGuideRef holding a PriceGuide object that asynchronously loads (or downloads) the
+    price guide data for the given \a item, \a color and \a vatType combination. If you set
+    \a highPriority to \c true, the load/download request will be prepended to the work queue
+    instead of appended.
     You need to connect to the signal BrickLink::priceGuideUpdated() to know when the data has
     been loaded.
-    \sa PriceGuide
+    \note Keep the returned PriceGuideRef for as long as you need the price guide: its
+          PriceGuideRef::priceGuide alone does not keep the object alive.
+    \sa PriceGuideRef, PriceGuide
 */
-PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, VatType vatType, bool highPriority)
+QmlPriceGuideRef *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, VatType vatType, bool highPriority)
 {
     auto pg = core()->priceGuideCache()->priceGuide(item.wrappedObject(), color.wrappedObject(),
                                                     vatType, highPriority);
-    QQmlEngine::setObjectOwnership(pg.get(), QQmlEngine::CppOwnership);
-    return pg.get();
+    if (!pg)
+        return nullptr;
+    auto *ref = new QmlPriceGuideRef(std::move(pg));
+    QQmlEngine::setObjectOwnership(ref, QQmlEngine::JavaScriptOwnership);
+    return ref;
 }
 
-/*! \qmlmethod PriceGuide BrickLink::priceGuide(Item item, Color color, bool highPriority = false)
-    Creates a PriceGuide object that asynchronously loads (or downloads) the price guide data for
-    the given \a item, \a color and currentVatType combination. If you set \a highPriority to \c true, the
-    load/download request will be prepended to the work queue instead of appended.
+/*! \qmlmethod PriceGuideRef BrickLink::priceGuide(Item item, Color color, bool highPriority = false)
+    Creates a PriceGuideRef holding a PriceGuide object that asynchronously loads (or downloads) the
+    price guide data for the given \a item, \a color and currentVatType combination. If you set
+    \a highPriority to \c true, the load/download request will be prepended to the work queue
+    instead of appended.
     You need to connect to the signal BrickLink::priceGuideUpdated() to know when the data has
     been loaded.
-    \sa PriceGuide
+    \sa PriceGuideRef, PriceGuide
 */
-PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bool highPriority)
+QmlPriceGuideRef *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bool highPriority)
 {
     return priceGuide(item, color, currentVatType(), highPriority);
 }
@@ -949,19 +1017,24 @@ PriceGuide *QmlBrickLink::priceGuide(QmlItem item, QmlColor color, bool highPrio
     signal doesn't mean the picture is available: you have to check the object's properties
     to see what has changed.
 */
-/*! \qmlmethod Picture BrickLink::picture(Item item, Color color, bool highPriority = false)
-    Creates a \l Picture object that asynchronously loads (or downloads) the picture for the given
-    \a item and \a color combination. If you set \a highPriority to \c true the load/download
-    request will be prepended to the work queue instead of appended.
+/*! \qmlmethod PictureRef BrickLink::picture(Item item, Color color, bool highPriority = false)
+    Creates a \l PictureRef holding a \l Picture object that asynchronously loads (or downloads) the
+    picture for the given \a item and \a color combination. If you set \a highPriority to \c true
+    the load/download request will be prepended to the work queue instead of appended.
     You need to connect to the signal BrickLink::pictureUpdated() to know when the data has
     been loaded.
-    \sa Picture
+    \note Keep the returned PictureRef for as long as you need the picture: its
+          PictureRef::picture alone does not keep the object alive.
+    \sa PictureRef, Picture
 */
-BrickLink::Picture *QmlBrickLink::picture(QmlItem item, QmlColor color, bool highPriority)
+QmlPictureRef *QmlBrickLink::picture(QmlItem item, QmlColor color, bool highPriority)
 {
     auto pic = core()->pictureCache()->picture(item.wrappedObject(), color.wrappedObject(), highPriority);
-    QQmlEngine::setObjectOwnership(pic.get(), QQmlEngine::CppOwnership);
-    return pic.get();
+    if (!pic)
+        return nullptr;
+    auto *ref = new QmlPictureRef(std::move(pic));
+    QQmlEngine::setObjectOwnership(ref, QQmlEngine::JavaScriptOwnership);
+    return ref;
 }
 
 /*! \qmlmethod Lot BrickLink::lot(var lot)

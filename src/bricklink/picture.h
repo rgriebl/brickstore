@@ -57,11 +57,6 @@ public:
     ~Picture() override;
     Q_DISABLE_COPY_MOVE(Picture)
 
-    // The QML API cannot hold a PictureRef, so it still has to pin its pictures by hand. Both of
-    // these go away once QML gets a handle owning element of its own.
-    Q_INVOKABLE void addRef();
-    Q_INVOKABLE void release();
-
 signals:
     void isValidChanged(bool newIsValid);
     void lastUpdatedChanged(const QDateTime &newLastUpdated);
@@ -77,12 +72,11 @@ private:
     bool         m_valid           : 1 = false;
     bool         m_updateAfterLoad : 1 = false;
     UpdateStatus m_updateStatus    : 3 = UpdateStatus::Ok;
-    uint         m_qmlPinCount     : 27 = 0;
+    uint         m_reserved        : 27 = 0;
 
     TransferJob *m_transferJob = nullptr;
 
     QImage       m_image;
-    PictureRef   m_qmlPin; // see addRef() - a deliberate self reference, owned by the QML API
 
     static PictureCache *s_cache;
 

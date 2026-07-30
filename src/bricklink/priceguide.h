@@ -58,11 +58,6 @@ public:
     ~PriceGuide() override;
     Q_DISABLE_COPY_MOVE(PriceGuide)
 
-    // The QML API cannot hold a PriceGuideRef, so it still has to pin its price guides by hand.
-    // Both of these go away once QML gets a handle owning element of its own.
-    Q_INVOKABLE void addRef();
-    Q_INVOKABLE void release();
-
     struct Data
     {
         int    quantities [int(Time::Count)][int(Condition::Count)] = { };
@@ -87,10 +82,9 @@ private:
     bool         m_valid           : 1 = false;
     bool         m_updateAfterLoad : 1 = false;
     UpdateStatus m_updateStatus    : 3 = UpdateStatus::Ok;
-    uint         m_qmlPinCount     : 11 = 0;
+    uint         m_reserved        : 11 = 0;
 
     Data         m_data;
-    PriceGuideRef m_qmlPin; // see addRef() - a deliberate self reference, owned by the QML API
 
     static PriceGuideCache *s_cache;
 

@@ -46,21 +46,6 @@ static void deletePriceGuide(PriceGuide *pg)
         pg->deleteLater();
 }
 
-void PriceGuide::addRef()
-{
-    // weak_from_this(), because a stale QML pointer may well outlive the last reference
-    if (auto self = weak_from_this().lock()) {
-        if (!m_qmlPinCount++)
-            m_qmlPin = std::move(self);
-    }
-}
-
-void PriceGuide::release()
-{
-    if (m_qmlPinCount && !--m_qmlPinCount)
-        m_qmlPin.reset(); // may well be the last reference, deleting this
-}
-
 PriceGuide::PriceGuide(Private, const Item *item, const Color *color, VatType vatType)
     : m_item(item)
     , m_color(color)

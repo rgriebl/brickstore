@@ -13,6 +13,8 @@
 
 #include "core.h"
 #include "color.h"
+#include "picture.h"
+#include "priceguide.h"
 #include "itemtype.h"
 #include "category.h"
 #include "item.h"
@@ -33,6 +35,47 @@ class QmlItemType;
 class QmlCategory;
 class QmlItem;
 class QmlLot;
+
+
+// QML has no way to hold a PictureRef or a PriceGuideRef itself (QTBUG-43080), so these wrappers
+// hold the reference instead: their lifetime is managed by the QML engine, and they hand out the
+// cached object as a plain pointer via a property. Keep the wrapper around for as long as you need
+// the object - a bare pointer taken out of it does not keep anything alive.
+
+class QmlPictureRef : public QObject
+{
+    Q_OBJECT
+    QML_NAMED_ELEMENT(PictureRef)
+    QML_UNCREATABLE("")
+    Q_PROPERTY(BrickLink::Picture *picture READ picture CONSTANT FINAL)
+
+public:
+    explicit QmlPictureRef(PictureRef picture);
+
+    Picture *picture() const { return m_picture.get(); }
+
+private:
+    PictureRef m_picture;
+    Q_DISABLE_COPY_MOVE(QmlPictureRef)
+};
+
+
+class QmlPriceGuideRef : public QObject
+{
+    Q_OBJECT
+    QML_NAMED_ELEMENT(PriceGuideRef)
+    QML_UNCREATABLE("")
+    Q_PROPERTY(BrickLink::PriceGuide *priceGuide READ priceGuide CONSTANT FINAL)
+
+public:
+    explicit QmlPriceGuideRef(PriceGuideRef priceGuide);
+
+    PriceGuide *priceGuide() const { return m_priceGuide.get(); }
+
+private:
+    PriceGuideRef m_priceGuide;
+    Q_DISABLE_COPY_MOVE(QmlPriceGuideRef)
+};
 
 //namespace QmlTime {
 //Q_NAMESPACE
@@ -84,13 +127,13 @@ public:
     Q_INVOKABLE BrickLink::QmlItem item(const QVariant &v) const;
     Q_INVOKABLE BrickLink::QmlItem item(const QString &itemTypeId, const QString &itemId) const;
 
-    Q_INVOKABLE BrickLink::PriceGuide *priceGuide(BrickLink::QmlItem item, BrickLink::QmlColor color,
-                                                  bool highPriority = false);
-    Q_INVOKABLE BrickLink::PriceGuide *priceGuide(BrickLink::QmlItem item, BrickLink::QmlColor color,
-                                                  BrickLink::VatType vatType, bool highPriority = false);
+    Q_INVOKABLE BrickLink::QmlPriceGuideRef *priceGuide(BrickLink::QmlItem item, BrickLink::QmlColor color,
+                                                       bool highPriority = false);
+    Q_INVOKABLE BrickLink::QmlPriceGuideRef *priceGuide(BrickLink::QmlItem item, BrickLink::QmlColor color,
+                                                       BrickLink::VatType vatType, bool highPriority = false);
 
-    Q_INVOKABLE BrickLink::Picture *picture(BrickLink::QmlItem item, BrickLink::QmlColor color,
-                                            bool highPriority = false);
+    Q_INVOKABLE BrickLink::QmlPictureRef *picture(BrickLink::QmlItem item, BrickLink::QmlColor color,
+                                                 bool highPriority = false);
 
     Q_INVOKABLE BrickLink::QmlLot lot(const QVariant &v) const;
 
