@@ -17,9 +17,8 @@ Control {
     property BL.Item item: BL.BrickLink.noItem
     property BL.Color color: BL.BrickLink.noColor
 
-    // the wrapper holds the reference; dropping it is what releases the price guide
-    property BL.PriceGuideRef priceGuideRef: null
-    readonly property BL.PriceGuide priceGuide: priceGuideRef ? priceGuideRef.priceGuide : null
+    // this object owns the reference: dropping it is what releases the price guide
+    property BL.PriceGuide priceGuide: null
     property bool isUpdating: (priceGuide && (priceGuide.updateStatus === BL.BrickLink.UpdateStatus.Updating))
     property real currencyRate: BS.Currency.rate(currencyCode)
 
@@ -28,9 +27,9 @@ Control {
 
     function updatePriceGuide() {
         if (root.item.isNull || root.color.isNull)
-            priceGuideRef = null
+            priceGuide = null
         else
-            priceGuideRef = BL.BrickLink.priceGuide(root.item, root.color, true)
+            priceGuide = BL.BrickLink.priceGuide(root.item, root.color, true)
     }
 
     implicitHeight: layout.implicitHeight

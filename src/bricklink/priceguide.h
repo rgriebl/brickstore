@@ -6,7 +6,6 @@
 #include <memory>
 
 #include <QtCore/QDateTime>
-#include <QtQml/qqmlregistration.h>
 
 #include "bricklink/global.h"
 
@@ -24,17 +23,11 @@ class PriceGuide;
 // a PriceGuideRef, never via a raw pointer.
 using PriceGuideRef = std::shared_ptr<PriceGuide>;
 
-class PriceGuide : public QObject, public std::enable_shared_from_this<PriceGuide>
+// Not exposed to QML: BrickLink::QmlPriceGuide is the QML facing half, as QML needs an object whose
+// lifetime it can manage in order to hold on to a reference at all.
+class PriceGuide : public QObject
 {
     Q_OBJECT
-    QML_ELEMENT
-    QML_UNCREATABLE("")
-    Q_PROPERTY(const BrickLink::Item *item READ item CONSTANT FINAL)
-    Q_PROPERTY(const BrickLink::Color *color READ color CONSTANT FINAL)
-    Q_PROPERTY(BrickLink::VatType vatType READ vatType CONSTANT FINAL)
-    Q_PROPERTY(bool isValid READ isValid NOTIFY isValidChanged FINAL)
-    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged FINAL)
-    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
 
     struct Private { };
 
@@ -42,17 +35,14 @@ public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
     VatType vatType() const           { return m_vatType; }
-
-    Q_INVOKABLE void update(bool highPriority = false);
     QDateTime lastUpdated() const     { return m_lastUpdated; }
-    Q_INVOKABLE void cancelUpdate();
 
     bool isValid() const              { return m_valid; }
     UpdateStatus updateStatus() const { return m_updateStatus; }
 
-    Q_INVOKABLE int quantity(BrickLink::Time t, BrickLink::Condition c) const           { return m_data.quantities[int(t)][int(c)]; }
-    Q_INVOKABLE int lots(BrickLink::Time t, BrickLink::Condition c) const               { return m_data.lots[int(t)][int(c)]; }
-    Q_INVOKABLE double price(BrickLink::Time t, BrickLink::Condition c, BrickLink::Price p) const  { return m_data.prices[int(t)][int(c)][int(p)]; }
+    int quantity(BrickLink::Time t, BrickLink::Condition c) const           { return m_data.quantities[int(t)][int(c)]; }
+    int lots(BrickLink::Time t, BrickLink::Condition c) const               { return m_data.lots[int(t)][int(c)]; }
+    double price(BrickLink::Time t, BrickLink::Condition c, BrickLink::Price p) const  { return m_data.prices[int(t)][int(c)][int(p)]; }
 
     PriceGuide(Private, const Item *item, const Color *color, VatType vatType);
     ~PriceGuide() override;
@@ -85,8 +75,6 @@ private:
     uint         m_reserved        : 11 = 0;
 
     Data         m_data;
-
-    static PriceGuideCache *s_cache;
 
 private:
     void setIsValid(bool valid);
@@ -142,7 +130,6 @@ private:
 
 } // namespace BrickLink
 
-Q_DECLARE_METATYPE(BrickLink::PriceGuide *)
 // std::shared_ptr, unlike QSharedPointer, has no automatic metatype: needed for TransferJob's
 // user data, which is what keeps a price guide alive while it is being fetched.
 Q_DECLARE_METATYPE(BrickLink::PriceGuideRef)

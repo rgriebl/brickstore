@@ -37,44 +37,92 @@ class QmlItem;
 class QmlLot;
 
 
-// QML has no way to hold a PictureRef or a PriceGuideRef itself (QTBUG-43080), so these wrappers
-// hold the reference instead: their lifetime is managed by the QML engine, and they hand out the
-// cached object as a plain pointer via a property. Keep the wrapper around for as long as you need
-// the object - a bare pointer taken out of it does not keep anything alive.
+// QML cannot hold a PictureRef or a PriceGuideRef itself (QTBUG-43080), so these are the QML facing
+// halves of Picture and PriceGuide: each one owns a reference to the cached object and forwards its
+// API. Their lifetime is managed by the QML engine, so the reference lives exactly as long as QML
+// needs it. The cached objects themselves are not exposed to QML at all.
 
-class QmlPictureRef : public QObject
+class QmlPicture : public QObject
 {
     Q_OBJECT
-    QML_NAMED_ELEMENT(PictureRef)
+    QML_NAMED_ELEMENT(Picture)
     QML_UNCREATABLE("")
-    Q_PROPERTY(BrickLink::Picture *picture READ picture CONSTANT FINAL)
+    Q_PROPERTY(const BrickLink::Item *item READ item CONSTANT FINAL)
+    Q_PROPERTY(const BrickLink::Color *color READ color CONSTANT FINAL)
+    Q_PROPERTY(bool isValid READ isValid NOTIFY isValidChanged FINAL)
+    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged FINAL)
+    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
+    Q_PROPERTY(QImage image READ image NOTIFY imageChanged FINAL)
 
 public:
-    explicit QmlPictureRef(PictureRef picture);
+    // The only way to make one: the wrapper is handed to the QML engine, which owns it, so the
+    // reference it holds dies together with it.
+    static QmlPicture *create(PictureRef picture);
 
-    Picture *picture() const { return m_picture.get(); }
+    const Item *item() const;
+    const Color *color() const;
+    bool isValid() const;
+    QDateTime lastUpdated() const;
+    UpdateStatus updateStatus() const;
+    QImage image() const;
+
+    Q_INVOKABLE void update(bool highPriority = false);
+    Q_INVOKABLE void cancelUpdate();
+
+signals:
+    void isValidChanged(bool newIsValid);
+    void lastUpdatedChanged(const QDateTime &newLastUpdated);
+    void updateStatusChanged(BrickLink::UpdateStatus newUpdateStatus);
+    void imageChanged(const QImage &newImage);
 
 private:
+    explicit QmlPicture(PictureRef picture);
+
     PictureRef m_picture;
-    Q_DISABLE_COPY_MOVE(QmlPictureRef)
+    Q_DISABLE_COPY_MOVE(QmlPicture)
 };
 
 
-class QmlPriceGuideRef : public QObject
+class QmlPriceGuide : public QObject
 {
     Q_OBJECT
-    QML_NAMED_ELEMENT(PriceGuideRef)
+    QML_NAMED_ELEMENT(PriceGuide)
     QML_UNCREATABLE("")
-    Q_PROPERTY(BrickLink::PriceGuide *priceGuide READ priceGuide CONSTANT FINAL)
+    Q_PROPERTY(const BrickLink::Item *item READ item CONSTANT FINAL)
+    Q_PROPERTY(const BrickLink::Color *color READ color CONSTANT FINAL)
+    Q_PROPERTY(BrickLink::VatType vatType READ vatType CONSTANT FINAL)
+    Q_PROPERTY(bool isValid READ isValid NOTIFY isValidChanged FINAL)
+    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged FINAL)
+    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
 
 public:
-    explicit QmlPriceGuideRef(PriceGuideRef priceGuide);
+    // see QmlPicture::create()
+    static QmlPriceGuide *create(PriceGuideRef priceGuide);
 
-    PriceGuide *priceGuide() const { return m_priceGuide.get(); }
+    const Item *item() const;
+    const Color *color() const;
+    VatType vatType() const;
+    bool isValid() const;
+    QDateTime lastUpdated() const;
+    UpdateStatus updateStatus() const;
+
+    Q_INVOKABLE void update(bool highPriority = false);
+    Q_INVOKABLE void cancelUpdate();
+
+    Q_INVOKABLE int quantity(BrickLink::Time t, BrickLink::Condition c) const;
+    Q_INVOKABLE int lots(BrickLink::Time t, BrickLink::Condition c) const;
+    Q_INVOKABLE double price(BrickLink::Time t, BrickLink::Condition c, BrickLink::Price p) const;
+
+signals:
+    void isValidChanged(bool newIsValid);
+    void lastUpdatedChanged(const QDateTime &newLastUpdated);
+    void updateStatusChanged(BrickLink::UpdateStatus newUpdateStatus);
 
 private:
+    explicit QmlPriceGuide(PriceGuideRef priceGuide);
+
     PriceGuideRef m_priceGuide;
-    Q_DISABLE_COPY_MOVE(QmlPriceGuideRef)
+    Q_DISABLE_COPY_MOVE(QmlPriceGuide)
 };
 
 //namespace QmlTime {
@@ -127,13 +175,13 @@ public:
     Q_INVOKABLE BrickLink::QmlItem item(const QVariant &v) const;
     Q_INVOKABLE BrickLink::QmlItem item(const QString &itemTypeId, const QString &itemId) const;
 
-    Q_INVOKABLE BrickLink::QmlPriceGuideRef *priceGuide(BrickLink::QmlItem item, BrickLink::QmlColor color,
-                                                       bool highPriority = false);
-    Q_INVOKABLE BrickLink::QmlPriceGuideRef *priceGuide(BrickLink::QmlItem item, BrickLink::QmlColor color,
-                                                       BrickLink::VatType vatType, bool highPriority = false);
+    Q_INVOKABLE BrickLink::QmlPriceGuide *priceGuide(BrickLink::QmlItem item, BrickLink::QmlColor color,
+                                                    bool highPriority = false);
+    Q_INVOKABLE BrickLink::QmlPriceGuide *priceGuide(BrickLink::QmlItem item, BrickLink::QmlColor color,
+                                                    BrickLink::VatType vatType, bool highPriority = false);
 
-    Q_INVOKABLE BrickLink::QmlPictureRef *picture(BrickLink::QmlItem item, BrickLink::QmlColor color,
-                                                 bool highPriority = false);
+    Q_INVOKABLE BrickLink::QmlPicture *picture(BrickLink::QmlItem item, BrickLink::QmlColor color,
+                                              bool highPriority = false);
 
     Q_INVOKABLE BrickLink::QmlLot lot(const QVariant &v) const;
 
@@ -155,8 +203,8 @@ public:
     Q_INVOKABLE void setApiQuirkActive(BrickLink::ApiQuirk apiQuirk, bool active);
 
 signals:
-    void priceGuideUpdated(BrickLink::PriceGuide *priceGuide);
-    void pictureUpdated(BrickLink::Picture *picture);
+    void priceGuideUpdated(BrickLink::QmlPriceGuide *priceGuide);
+    void pictureUpdated(BrickLink::QmlPicture *picture);
     void currentVatTypeChanged(BrickLink::VatType vatType);
     void transferProgress(int progress, int total);
 

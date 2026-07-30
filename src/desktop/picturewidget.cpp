@@ -105,7 +105,7 @@ PictureWidget::PictureWidget(QWidget *parent)
         if (w_stackLayout->currentWidget() == w_ldraw) {
             w_ldraw->resetCamera();
         } else if (m_pic) {
-            m_pic->update(true);
+            BrickLink::core()->pictureCache()->updatePicture(m_pic, true);
             m_currentImageSize = { };
             showImage();
         }

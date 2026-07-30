@@ -16,9 +16,8 @@ Control {
     property bool is3D: true         // current UI state
     property bool canRender3D: true  // current LDraw state
     property bool prefer3D: true     // User preference
-    // the wrapper holds the reference; dropping it is what releases the picture
-    property BL.PictureRef pictureRef: null
-    readonly property BL.Picture picture: pictureRef ? pictureRef.picture : null
+    // this object owns the reference: dropping it is what releases the picture
+    property BL.Picture picture: null
     property bool isUpdating: (picture && (picture.updateStatus === BL.BrickLink.UpdateStatus.Updating))
 
     BS.ExtraConfig {
@@ -31,7 +30,7 @@ Control {
     onColorChanged: { Qt.callLater(updateInfo) }
 
     function updateInfo() {
-        pictureRef = BL.BrickLink.picture(root.item, root.color, true)
+        picture = BL.BrickLink.picture(root.item, root.color, true)
 
         info3D.renderController.setItemAndColor(root.item, root.color)
         root.is3D = prefer3D && info3D.renderController.canRender

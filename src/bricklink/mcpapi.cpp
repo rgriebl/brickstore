@@ -576,7 +576,7 @@ McpTool::Result CatalogPriceGuideMcpTool::execute(const QJsonObject &arguments)
             entry.error = error;
         } else if (PriceGuideRef pg = cache->priceGuide(item, color, true /*highPriority*/)) {
             if (!pg->isValid() && (pg->updateStatus() != UpdateStatus::UpdateFailed))
-                pg->update(true);
+                cache->updatePriceGuide(pg, true);
             entry.pg = std::move(pg);
         } else {
             entry.error = u"Could not create a price guide request"_s;
@@ -659,7 +659,7 @@ McpTool::Result CatalogPictureMcpTool::execute(const QJsonObject &arguments)
         return Result::error(u"Could not create a picture request"_s);
 
     if (!pic->isValid() && (pic->updateStatus() != UpdateStatus::UpdateFailed)) {
-        pic->update(true);
+        BrickLink::core()->pictureCache()->updatePicture(pic, true);
         if (pic->updateStatus() != UpdateStatus::Ok) {
             QCoro::waitFor([]() -> QCoro::Task<> {
                 co_await qCoro(BrickLink::core()->pictureCache(),

@@ -76,8 +76,7 @@ Pane {
                     implicitHeight: lfm.height * 5
                     implicitWidth: height * 4 / 3
 
-                    property BL.PictureRef picRef: BL.BrickLink.picture(root.currentItem, BL.BrickLink.noColor, true)
-                    readonly property BL.Picture pic: picRef ? picRef.picture : null
+                    property BL.Picture pic: BL.BrickLink.picture(root.currentItem, BL.BrickLink.noColor, true)
                     image: pic ? pic.image : BL.BrickLink.noImage(width, height)
                 }
                 Label {

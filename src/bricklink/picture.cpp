@@ -26,8 +26,6 @@ Q_DECLARE_LOGGING_CATEGORY(LogSql)
 
 namespace BrickLink {
 
-PictureCache *Picture::s_cache = nullptr;
-
 Picture::Picture(Private, const Item *item, const Color *color)
     : m_item(item)
     , m_color(color)
@@ -95,20 +93,6 @@ void Picture::setImage(const QImage &newImage)
     }
 }
 
-void Picture::update(bool highPriority)
-{
-    // weak_from_this(), because a stale QML pointer may well outlive the last reference
-    if (auto self = s_cache ? weak_from_this().lock() : PictureRef { })
-        s_cache->updatePicture(self, highPriority);
-}
-
-void Picture::cancelUpdate()
-{
-    if (auto self = s_cache ? weak_from_this().lock() : PictureRef { })
-        s_cache->cancelPictureUpdate(self);
-}
-
-
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -120,9 +104,6 @@ PictureCache::PictureCache(Core *core, quint64 physicalMem)
 {
     d->q = this;
     d->m_core = core;
-
-    Q_ASSERT(!Picture::s_cache);
-    Picture::s_cache = this;
 
     d->m_cacheStatId = AppStatistics::inst()->addSource(u"Pictures in memory cache"_qs);
     d->m_loadsStatId = AppStatistics::inst()->addSource(u"Pictures queued for disk load"_qs);
@@ -273,7 +254,6 @@ PictureCache::~PictureCache()
     }
     d->m_db.close();
     delete d;
-    Picture::s_cache = nullptr;
 }
 
 void PictureCache::setUpdateInterval(int interval)
@@ -667,67 +647,5 @@ void PictureCachePrivate::transferJobFinished(TransferJob *j, const PictureRef &
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-
-/*! \qmltype Picture
-    \inqmlmodule BrickLink
-    \ingroup qml-api
-    \brief This value type represents a picture of a BrickLink item.
-
-    Each picture of an item in the BrickLink catalog is available as a Picture object.
-
-    You cannot create Picture objects yourself, but you can retrieve a Picture object given the
-    item and color id via BrickLink::picture().
-
-    \note Pictures aren't readily available, but need to be asynchronously loaded (or even
-          downloaded) at runtime. You need to connect to the signal BrickLink::pictureUpdated()
-          to know when the data has been loaded.
-*/
-/*! \qmlproperty bool Picture::isNull
-    \readonly
-    Returns whether this Picture is \c null. Since this type is a value wrapper around a C++
-    object, we cannot use the normal JavaScript \c null notation.
-*/
-/*! \qmlproperty ItemPointer Picture::item
-    \readonly
-    The BrickLink item reference this picture is requested for as a raw
-    C++ pointer. You can convert it to a QML \l Item object like this:
-    \code
-    let item = BrickLink.item(pic.item)
-    \endcode
-*/
-/*! \qmlproperty ColorPointer Picture::color
-    \readonly
-    The BrickLink color reference this picture is requested for as a raw
-    C++ pointer. You can convert it to a QML \l Color object like this:
-    \code
-    let color = BrickLink.color(pic.color)
-    \endcode
-*/
-/*! \qmlproperty date Picture::lastUpdated
-    \readonly
-    Holds the time stamp of the last successful update of this picture.
-*/
-/*! \qmlproperty UpdateStatus Picture::updateStatus
-    \readonly
-    Returns the current update status. The available values are:
-    \value BrickLink.UpdateStatus.Ok            The last picture load (or download) was successful.
-    \value BrickLink.UpdateStatus.Loading       BrickStore is currently loading the picture from the local cache.
-    \value BrickLink.UpdateStatus.Updating      BrickStore is currently downloading the picture from BrickLink.
-    \value BrickLink.UpdateStatus.UpdateFailed  The last download from BrickLink failed. isValid might still be
-                                                \c true, if there was a valid picture available before the
-                                                failed update!
-*/
-/*! \qmlproperty bool Picture::isValid
-    \readonly
-    Returns whether the image property currently holds a valid image.
-*/
-/*! \qmlproperty image Picture::image
-    \readonly
-    Returns the image if the Picture object isValid, or a null image otherwise.
-*/
-/*! \qmlmethod Picture::update(bool highPriority = false)
-    Tries to re-download the picture from the BrickLink server. If you set \a highPriority to \c
-    true the load/download request will be prepended to the work queue instead of appended.
-*/
 
 } // namespace BrickLink

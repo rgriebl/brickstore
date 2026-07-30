@@ -205,7 +205,7 @@ QSize PriceGuideWidget::sizeHint() const
 void PriceGuideWidget::doUpdate()
 {
     if (d->m_pg)
-        d->m_pg->update(true);
+        BrickLink::core()->priceGuideCache()->updatePriceGuide(d->m_pg, true);
     updateNonStaticCells();
 }
 

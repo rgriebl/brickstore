@@ -1052,7 +1052,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
         BrickLink::PriceGuideRef pg = BrickLink::core()->priceGuideCache()->priceGuide(lot->item(), lot->color());
 
         if (pg && forceUpdate && (pg->updateStatus() != BrickLink::UpdateStatus::Updating)) {
-            pg->update();
+            BrickLink::core()->priceGuideCache()->updatePriceGuide(pg);
         }
 
         if (pg && ((pg->updateStatus() == BrickLink::UpdateStatus::Loading)
@@ -1161,7 +1161,7 @@ void Document::cancelPriceGuideUpdates()
         const auto pgs = m_setToPG->priceGuides.uniqueKeys();
         for (const BrickLink::PriceGuideRef &pg : pgs) {
             if (pg->updateStatus() == BrickLink::UpdateStatus::Updating)
-                pg->cancelUpdate();
+                BrickLink::core()->priceGuideCache()->cancelPriceGuideUpdate(pg);
         }
     }
 }

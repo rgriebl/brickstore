@@ -7,7 +7,6 @@
 
 #include <QtCore/QDateTime>
 #include <QtGui/QImage>
-#include <QtQml/qqmlregistration.h>
 
 #include "global.h"
 
@@ -24,27 +23,18 @@ class Picture;
 // PictureRef, never via a raw pointer.
 using PictureRef = std::shared_ptr<Picture>;
 
-class Picture : public QObject, public std::enable_shared_from_this<Picture>
+// Not exposed to QML: BrickLink::QmlPicture is the QML facing half, as QML needs an object whose
+// lifetime it can manage in order to hold on to a reference at all.
+class Picture : public QObject
 {
     Q_OBJECT
-    QML_ELEMENT
-    QML_UNCREATABLE("")
-    Q_PROPERTY(const BrickLink::Item *item READ item CONSTANT FINAL)
-    Q_PROPERTY(const BrickLink::Color *color READ color CONSTANT FINAL)
-    Q_PROPERTY(bool isValid READ isValid NOTIFY isValidChanged FINAL)
-    Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged FINAL)
-    Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
-    Q_PROPERTY(QImage image READ image NOTIFY imageChanged FINAL)
 
     struct Private { };
 
 public:
     const Item *item() const          { return m_item; }
     const Color *color() const        { return m_color; }
-
-    Q_INVOKABLE void update(bool highPriority = false);
-    QDateTime lastUpdated() const      { return m_lastUpdated; }
-    Q_INVOKABLE void cancelUpdate();
+    QDateTime lastUpdated() const     { return m_lastUpdated; }
 
     bool isValid() const              { return m_valid; }
     UpdateStatus updateStatus() const { return m_updateStatus; }
@@ -77,8 +67,6 @@ private:
     TransferJob *m_transferJob = nullptr;
 
     QImage       m_image;
-
-    static PictureCache *s_cache;
 
 private:
     void setIsValid(bool valid);
@@ -120,7 +108,6 @@ private:
 
 } // namespace BrickLink
 
-Q_DECLARE_METATYPE(BrickLink::Picture *)
 // std::shared_ptr, unlike QSharedPointer, has no automatic metatype: needed for TransferJob's
 // user data, which is what keeps a picture alive while it is being downloaded.
 Q_DECLARE_METATYPE(BrickLink::PictureRef)

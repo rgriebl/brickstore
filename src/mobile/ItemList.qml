@@ -76,8 +76,7 @@ Control {
                 required property string name
                 required property var itemPointer
                 property BL.Item blitem: BL.BrickLink.item(delegate.itemPointer)
-                property BL.PictureRef picRef: BL.BrickLink.picture(delegate.blitem, delegate.blitem.defaultColor)
-                readonly property BL.Picture pic: delegate.picRef ? delegate.picRef.picture : null
+                property BL.Picture pic: BL.BrickLink.picture(delegate.blitem, delegate.blitem.defaultColor)
 
                 QImageItem {
                     anchors.fill: parent
