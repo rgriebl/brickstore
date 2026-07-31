@@ -206,19 +206,27 @@ void ItemScannerDialog::updateCameraDevices()
 {
     const auto allCameraDevices = QMediaDevices::videoInputs();
 
-    QByteArray oldCameraId = m_selectCamera->currentData().toByteArray();
+    const QByteArray oldCameraId = m_selectCamera->currentData().toByteArray();
     int newCurrentIndex = -1;
-    m_selectCamera->setCurrentIndex(-1);
-    m_selectCamera->clear();
 
-    const auto camIcon = QIcon::fromTheme(u"camera-photo"_qs);
-    for (const auto &cameraDevice : allCameraDevices) {
-        m_selectCamera->addItem(camIcon, cameraDevice.description(), cameraDevice.id());
-        if (cameraDevice.id() == oldCameraId)
-            newCurrentIndex = m_selectCamera->count() - 1;
-    }
-    if (newCurrentIndex >= 0)
+    {
+        // Repopulating emits currentIndexChanged all by itself - adding the first item to an
+        // empty combo box makes it the current one - which would switch cameras behind the
+        // user's back whenever a device is plugged in or removed.
+        const QSignalBlocker blocker(m_selectCamera);
+        m_selectCamera->clear();
+
+        const auto camIcon = QIcon::fromTheme(u"camera-photo"_qs);
+        for (const auto &cameraDevice : allCameraDevices) {
+            m_selectCamera->addItem(camIcon, cameraDevice.description(), cameraDevice.id());
+            if (cameraDevice.id() == oldCameraId)
+                newCurrentIndex = m_selectCamera->count() - 1;
+        }
+        if ((newCurrentIndex < 0) && !allCameraDevices.isEmpty())
+            newCurrentIndex = 0;
         m_selectCamera->setCurrentIndex(newCurrentIndex);
+    }
+    m_capture->setCurrentCameraId(m_selectCamera->currentData().toByteArray());
 
     setEnabled(!allCameraDevices.isEmpty());
     updateStatusText();
