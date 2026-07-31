@@ -41,11 +41,10 @@ Control {
         clip: true
         currentIndex: root.is3D ? 1 : 0
 
-        QImageItem {
+        PictureImage {
             id: infoImage
-            fillColor: "white"
-            image: root.picture && root.picture.isValid ? root.picture.image : noImage
-            property var noImage: BL.BrickLink.noImage(0, 0)
+            color: "white"
+            picture: root.picture
 
             Text {
                 id: infoNoImage

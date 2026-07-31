@@ -72,12 +72,11 @@ Pane {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 0
-                QImageItem {
+                PictureImage {
                     implicitHeight: lfm.height * 5
                     implicitWidth: height * 4 / 3
 
-                    property BL.Picture pic: BL.BrickLink.picture(root.currentItem, BL.BrickLink.noColor, true)
-                    image: pic?.isValid ? pic.image : BL.BrickLink.noImage(width, height)
+                    picture: BL.BrickLink.picture(root.currentItem, BL.BrickLink.noColor, true)
                 }
                 Label {
                     Layout.fillWidth: true

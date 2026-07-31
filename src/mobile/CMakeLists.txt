@@ -9,8 +9,8 @@ qt_add_library(mobile_module STATIC
     mobileuihelpers.h
     mobileuihelpers_p.h
     mobileuihelpers.cpp
-    qmlimageitem.h
-    qmlimageitem.cpp
+    qmlimageprovider.h
+    qmlimageprovider.cpp
     qmlstyle.h
     qmlstyle.cpp
 )
@@ -64,6 +64,7 @@ qt_add_qml_module(mobile_module
         AutoSizingDialog.qml
         CheckButton.qml
         CheckForUpdatesDialog.qml
+        ColorSampleImage.qml
         CornerTag.qml
         DialogLoader.qml
         DeveloperConsole.qml
@@ -87,6 +88,7 @@ qt_add_qml_module(mobile_module
         Main.qml
         MainWindow.qml
         MessageDialog.qml
+        PictureImage.qml
         PriceGuideWidget.qml
         ScrollableLayout.qml
         SelectColor.qml

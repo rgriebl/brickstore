@@ -103,6 +103,10 @@ public:
 
     PictureRef picture(const Item *item, const Color *color, bool highPriority = false);
 
+    // Unlike picture(), this neither creates a cache entry, nor starts a download. A stale picture
+    // counts as a miss: it cannot be attributed to an item anymore.
+    PictureRef cachedPicture(const Item *item, const Color *color);
+
     void updatePicture(const PictureRef &pic, bool highPriority = false);
     void cancelPictureUpdate(const PictureRef &pic);
     void cancelAllPictureUpdates();

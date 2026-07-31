@@ -19,9 +19,11 @@
 #include "common/undo.h"
 #include "common/eventfilter.h"
 #include "mobileapplication.h"
+#include "bricklink/qmlapi.h"
 #include "mobileuihelpers.h"
 #include "mobilefileopenhandler.h"
 #include "common/qmlapi.h"
+#include "qmlimageprovider.h"
 
 #if defined(Q_OS_ANDROID)
 
@@ -62,6 +64,9 @@ void MobileApplication::init()
 
     // add all relevant QML modules here
     extern void qml_register_types_Mobile(); qml_register_types_Mobile();
+
+    m_engine->addImageProvider(QString::fromLatin1(BrickLink::QmlPicture::imageProviderId),
+                               new QmlImageProvider);
 
     MobileUIHelpers::create(m_engine);
 

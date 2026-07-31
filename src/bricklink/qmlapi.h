@@ -53,11 +53,16 @@ class QmlPicture : public QObject
     Q_PROPERTY(QDateTime lastUpdated READ lastUpdated NOTIFY lastUpdatedChanged FINAL)
     Q_PROPERTY(BrickLink::UpdateStatus updateStatus READ updateStatus NOTIFY updateStatusChanged FINAL)
     Q_PROPERTY(QImage image READ image NOTIFY imageChanged FINAL)
+    Q_PROPERTY(QUrl imageUrl READ imageUrl NOTIFY imageUrlChanged FINAL)
 
 public:
     // The only way to make one: the wrapper is handed to the QML engine, which owns it, so the
     // reference it holds dies together with it.
     static QmlPicture *create(PictureRef picture);
+
+    // The QML image provider that resolves the URLs returned by imageUrl(). Registering it is up
+    // to the UI: see QmlImageProvider in src/mobile.
+    static constexpr QLatin1StringView imageProviderId { "bricklink" };
 
     const Item *item() const;
     const Color *color() const;
@@ -65,6 +70,14 @@ public:
     QDateTime lastUpdated() const;
     UpdateStatus updateStatus() const;
     QImage image() const;
+
+    // The image(), addressed via the "bricklink" QML image provider, so that a QML Image can share
+    // one decoded copy and one texture across all items showing this picture.
+    // Returns an empty URL whenever there is no image to serve - the picture may still be loading,
+    // BrickLink may have no picture for the item at all, or the picture may have gone stale.
+    // The URL embeds lastUpdated(), because QQuickPixmapCache keys its entries by URL: a stable URL
+    // would keep showing the image from before the last update.
+    QUrl imageUrl() const;
 
     Q_INVOKABLE void update(bool highPriority = false);
     Q_INVOKABLE void cancelUpdate();
@@ -74,6 +87,7 @@ signals:
     void lastUpdatedChanged(const QDateTime &newLastUpdated);
     void updateStatusChanged(BrickLink::UpdateStatus newUpdateStatus);
     void imageChanged(const QImage &newImage);
+    void imageUrlChanged();
 
 private:
     explicit QmlPicture(PictureRef picture);

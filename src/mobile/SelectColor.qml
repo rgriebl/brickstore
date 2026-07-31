@@ -6,7 +6,6 @@ pragma ComponentBehavior: Bound
 import Mobile
 import BrickLink as BL
 import BrickStore as BS
-import QtQuick.Window
 
 
 AutoSizingDialog {
@@ -141,12 +140,11 @@ AutoSizingDialog {
                 width: ListView.view.width
                 leftPadding: 8 + height + 8
 
-                QImageItem {
+                ColorSampleImage {
                     x: 8
-                    width: parent.height
-                    height: parent.height
-                    property real s: Screen.devicePixelRatio
-                    image: delegate.colorObject.sampleImage(width * s, height * s)
+                    width: delegate.height
+                    height: delegate.height
+                    color: delegate.colorObject
                 }
                 onClicked: {
                     root.color = colorObject

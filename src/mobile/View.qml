@@ -275,10 +275,9 @@ Page {
                         // a data role cannot carry a picture, so ask the cache for it directly
                         property BL.Picture pic: BL.BrickLink.picture(picCell.bllot.item,
                                                                      picCell.bllot.color)
-                        background: QImageItem {
-                            fillColor: "white"
-                            image: picCell.pic?.isValid ? picCell.pic.image
-                                                        : BL.BrickLink.noImage(width, height)
+                        background: PictureImage {
+                            color: "white"
+                            picture: picCell.pic
                         }
                     }
                 }
@@ -287,7 +286,7 @@ Page {
                     GridCell {
                         id: colorCell
                         required property var edit
-                        QImageItem {
+                        ColorSampleImage {
                             id: colorImage
                             anchors {
                                 left: colorCell.left
@@ -295,9 +294,8 @@ Page {
                                 top: colorCell.top
                                 bottom: colorCell.bottom
                             }
-                            property real s: Screen.devicePixelRatio
                             width: colorCell.font.pixelSize * 2
-                            image: BL.BrickLink.color(colorCell.edit).sampleImage(width * s, height * s)
+                            color: BL.BrickLink.color(colorCell.edit)
                         }
                         textLeftPadding: colorImage.width + 4
                         text: display

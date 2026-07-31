@@ -1071,6 +1071,11 @@ QmlPicture::QmlPicture(PictureRef picture)
     connect(m_picture.get(), &Picture::lastUpdatedChanged, this, &QmlPicture::lastUpdatedChanged);
     connect(m_picture.get(), &Picture::updateStatusChanged, this, &QmlPicture::updateStatusChanged);
     connect(m_picture.get(), &Picture::imageChanged, this, &QmlPicture::imageChanged);
+
+    // imageUrl is derived from all three of these
+    connect(m_picture.get(), &Picture::isValidChanged, this, &QmlPicture::imageUrlChanged);
+    connect(m_picture.get(), &Picture::lastUpdatedChanged, this, &QmlPicture::imageUrlChanged);
+    connect(m_picture.get(), &Picture::imageChanged, this, &QmlPicture::imageUrlChanged);
 }
 
 const Item *QmlPicture::item() const          { return m_picture->item(); }
@@ -1079,6 +1084,21 @@ bool QmlPicture::isValid() const              { return m_picture->isValid(); }
 QDateTime QmlPicture::lastUpdated() const     { return m_picture->lastUpdated(); }
 UpdateStatus QmlPicture::updateStatus() const { return m_picture->updateStatus(); }
 QImage QmlPicture::image() const              { return m_picture->image(); }
+
+QUrl QmlPicture::imageUrl() const
+{
+    const auto *item = m_picture->item();  // nullptr if the picture went stale
+    const auto *color = m_picture->color();
+
+    if (!item || !m_picture->isValid() || m_picture->image().isNull())
+        return { };
+
+    return QUrl(u"image://" + imageProviderId + u"/picture/"
+                + QString::number(m_picture->lastUpdated().toMSecsSinceEpoch()) + u'/'
+                + QChar::fromLatin1(item->itemTypeId()) + u'/'
+                + QString::number(color ? color->id() : 0) + u'/'
+                + QString::fromLatin1(item->id()));
+}
 
 void QmlPicture::update(bool highPriority)
 {

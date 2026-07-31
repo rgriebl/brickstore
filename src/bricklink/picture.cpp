@@ -291,6 +291,20 @@ QPair<int, int> PictureCache::cacheStats() const
     return qMakePair(d->m_cache.totalCost(), d->m_cache.maxCost());
 }
 
+PictureRef PictureCache::cachedPicture(const Item *item, const Color *color)
+{
+    if (!item)
+        return { };
+
+    if (!color)
+        color = item->defaultColor();
+    if (!color)
+        color = d->m_core->color(0);
+
+    PictureRef pic = d->m_cache[PictureCachePrivate::cacheKey(item, color)];
+    return (pic && !pic->isStale()) ? pic : PictureRef { };
+}
+
 PictureRef PictureCache::picture(const Item *item, const Color *color, bool highPriority)
 {
     if (!item)

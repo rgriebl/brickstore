@@ -66,8 +66,6 @@ Control {
                 Component.onCompleted: { sort(1, Qt.AscendingOrder) }
             }
 
-            property var noImage: BL.BrickLink.noImage(cellWidth, cellHeight)
-
             delegate: MouseArea {
                 id: delegate
                 width: (GridView.view as GridView).cellWidth
@@ -78,10 +76,10 @@ Control {
                 property BL.Item blitem: BL.BrickLink.item(delegate.itemPointer)
                 property BL.Picture pic: BL.BrickLink.picture(delegate.blitem, delegate.blitem.defaultColor)
 
-                QImageItem {
+                PictureImage {
                     anchors.fill: parent
                     anchors.bottomMargin: itemList.labelHeight
-                    image: delegate.pic && delegate.pic.isValid ? delegate.pic.image : itemList.noImage
+                    picture: delegate.pic
                     Rectangle {
                         visible: root.currentItem === delegate.blitem
                         anchors.fill: parent
