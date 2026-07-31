@@ -536,13 +536,18 @@ QCoro::Task<bool> Document::requestClose()
     bool doClose = true;
 
     if (m_model->isModified()) {
+        // the file dialog is only window modal on macOS, so the document can be
+        // closed and deleted while this coroutine is suspended
+        QPointer<Document> that = this;
+
         switch (co_await UIHelpers::question(tr("The document %1 has been modified.").arg(CMB_BOLD(fileName()))
                                              + u"<br><br>" + tr("Do you want to save your changes?"),
                                              UIHelpers::Save | UIHelpers::Discard | UIHelpers::Cancel,
                                              UIHelpers::Save)) {
         case UIHelpers::Save:
-            co_await save(false);
-            doClose = (!m_model->isModified());
+            if (that)
+                co_await save(false);
+            doClose = that && !that->m_model->isModified();
             break;
 
         case UIHelpers::Discard:
@@ -552,6 +557,8 @@ QCoro::Task<bool> Document::requestClose()
             doClose = false;
             break;
         }
+        if (!that)
+            co_return true; // it was already closed and deleted
     }
     if (doClose) {
         emit closeAllViewsForDocument();
@@ -1518,11 +1525,12 @@ QCoro::Task<> Document::exportBrickLinkXMLToFile()
         co_return;
 
     QString fn;
+    QPointer<Document> that = this; // the lots die with the document
     if (auto f = co_await UIHelpers::getSaveFileName(fn, DocumentIO::nameFiltersForBrickLinkXML(),
                                                      tr("Export File"))) {
         fn = *f;
     }
-    if (fn.isEmpty())
+    if (fn.isEmpty() || !that)
         co_return;
 
 #if !defined(Q_OS_ANDROID)
@@ -1702,6 +1710,10 @@ QCoro::Task<bool> Document::save(bool saveAs)
     QString fn;
     const auto filters = DocumentIO::nameFiltersForBrickStoreXML();
 
+    // the file dialog is only window modal on macOS, so the document can be
+    // closed and deleted while this coroutine is suspended
+    QPointer<Document> that = this;
+
     if (saveAs || filePath().isEmpty()) {
         fn = filePath();
         if (fn.right(4) == u".xml")
@@ -1721,7 +1733,7 @@ QCoro::Task<bool> Document::save(bool saveAs)
         fn = filePath();
     }
 
-    if (!fn.isEmpty()) {
+    if (!fn.isEmpty() && that) {
 #if !defined(Q_OS_ANDROID)
         QString suffix = u'.' + filters.at(0).second.at(0);
 

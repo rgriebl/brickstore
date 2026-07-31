@@ -233,7 +233,10 @@ QCoro::Task<std::optional<QString>> DesktopUIHelpers::getFileName(bool doSave, Q
                    filters.join(u";;"));
     fd.setFileMode(doSave ? QFileDialog::AnyFile : QFileDialog::ExistingFile);
     fd.setAcceptMode(doSave ? QFileDialog::AcceptSave : QFileDialog::AcceptOpen);
-#if defined(Q_OS_MACOS)  // QTBUG-42516
+    // The Cocoa QPA only implements ApplicationModal for the blocking exec() path, so an
+    // ApplicationModal dialog would never show up at all here: we have to live with a
+    // window modal sheet - and with the document being closable behind our back.
+#if defined(Q_OS_MACOS)  // QTBUG-42516, still broken as of Qt 6.10.3
     fd.setWindowModality(Qt::WindowModal);
 #else
     fd.setWindowModality(Qt::ApplicationModal);
