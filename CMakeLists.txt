@@ -331,6 +331,7 @@ qt_add_resources(${PROJECT_NAME} brickstore_qrc PREFIX / FILES
     ${ICONS_QRC}
     ${FLAGS_QRC}
     extensions/classic-print-script.bs.qml
+    extensions/lego-pickabrick-export.bs.qml
 )
 
 #get_cmake_property(_variableNames VARIABLES)
