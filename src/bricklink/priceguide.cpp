@@ -47,8 +47,24 @@ static void deletePriceGuide(PriceGuide *pg)
 PriceGuide::PriceGuide(Private, const Item *item, const Color *color, VatType vatType)
     : m_item(item)
     , m_color(color)
+    , m_generation(Database::generation())
     , m_vatType(vatType)
 { }
+
+bool PriceGuide::isStale() const
+{
+    return (m_generation != Database::generation());
+}
+
+const Item *PriceGuide::item() const
+{
+    return isStale() ? nullptr : m_item;
+}
+
+const Color *PriceGuide::color() const
+{
+    return isStale() ? nullptr : m_color;
+}
 
 PriceGuide::~PriceGuide()
 {
@@ -116,7 +132,7 @@ QVector<VatType> SingleHTMLScrapePGRetriever::supportedVatTypes() const
 
 void SingleHTMLScrapePGRetriever::fetch(const PriceGuideRef &pg, bool highPriority)
 {
-    if (m_jobs.contains(pg.get()))
+    if (m_jobs.contains(pg.get()) || !pg->item() || !pg->color())
         return;
 
     auto job = TransferJob::get(u"https://www.bricklink.com/priceGuideSummary.asp"_qs,
@@ -168,7 +184,8 @@ void SingleHTMLScrapePGRetriever::transferJobFinished(TransferJob *j, const Pric
             throw Exception("%1 (%2)").arg(job->errorString()).arg(job->responseCode());
         }
     } catch (const Exception &e) {
-        emit failed(pg, u"PG download for " + QString::fromLatin1(pg->item()->id()) + u" failed: " + e.errorString());
+        emit failed(pg, u"PG download for " + (pg->item() ? QString::fromLatin1(pg->item()->id())
+                                                         : u"<stale>"_qs) + u" failed: " + e.errorString());
     }
     // no release needed: the job's user data owned the reference
 }
@@ -283,6 +300,9 @@ void BatchedAffiliateAPIPGRetriever::fetch(const PriceGuideRef &pg, bool highPri
     if (m_currentBatch.contains(pg))
         return;
 
+    if (!pg->item() || !pg->color())
+        return;
+
     bool wrongVatType = (pg->vatType() != m_nextBatchVatType);
     auto &queue = wrongVatType ? m_wrongVatTypeQueue : m_nextBatch;
     auto &prioSize = wrongVatType ? m_wrongVatTypeQueuePrioritySize : m_nextBatchPrioritySize;
@@ -390,6 +410,8 @@ void BatchedAffiliateAPIPGRetriever::check()
 
             for (auto i = 0; i < batchSize; ++i) {
                 const auto &pg = m_nextBatch.at(i).first;
+                if (!pg->item() || !pg->color()) // went stale while queued
+                    continue;
                 const QString itemId = QString::fromLatin1(pg->item()->id());
                 const QString typeId = itemTypeApiId(pg->item()->itemType());
                 int colorId = int(pg->color()->id());
@@ -461,7 +483,8 @@ void BatchedAffiliateAPIPGRetriever::transferJobFinished(TransferJob *j)
 
                 auto pit = std::find_if(m_currentBatch.begin(), m_currentBatch.end(),
                                         [&](const auto &pg) {
-                    return pg && (QLatin1String(pg->item()->id()) == itemId)
+                    return pg && pg->item() && pg->color()
+                            && (QLatin1String(pg->item()->id()) == itemId)
                             && (itemTypeApiId(pg->item()->itemType()) == typeId)
                             && (pg->color()->id() == uint(colorId));
                 });
@@ -506,10 +529,12 @@ void BatchedAffiliateAPIPGRetriever::transferJobFinished(TransferJob *j)
         }
     } catch (const Exception &e) {
         for (const auto &pg : std::as_const(m_currentBatch)) {
-            if (pg) {
+            if (pg && pg->item() && pg->color()) {
                 emit failed(pg, u"PG download for " + QChar::fromLatin1(pg->item()->itemType()->id())
                                     + u' ' + QString::fromLatin1(pg->item()->id()) + u" in "
                             + pg->color()->name() + u" failed: " + e.errorString());
+            } else if (pg) {
+                emit failed(pg, u"PG download failed: " + e.errorString());
             }
         }
     }
@@ -685,6 +710,12 @@ PriceGuideRef PriceGuideCache::priceGuide(const Item *item, const Color *color, 
     auto key = PriceGuideCachePrivate::cacheKey(item, color, vatType);
     PriceGuideRef pg = d->m_cache[key];
 
+    // see PictureCache::picture()
+    if (pg && pg->isStale()) {
+        d->m_cache.remove(key);
+        pg.reset();
+    }
+
     bool needToLoad = !pg || (!pg->isValid() && (pg->updateStatus() == UpdateStatus::UpdateFailed));
 
     if (!pg) {
@@ -706,7 +737,8 @@ PriceGuideRef PriceGuideCache::priceGuide(const Item *item, const Color *color, 
 
 void PriceGuideCache::updatePriceGuide(const PriceGuideRef &pg, bool highPriority)
 {
-    if (!pg || (pg->m_updateStatus == UpdateStatus::Updating))
+    // a stale price guide has no item anymore, so there is nothing left to fetch
+    if (!pg || !pg->item() || (pg->m_updateStatus == UpdateStatus::Updating))
         return;
 
     if (QNetworkInformation::instance()

@@ -345,6 +345,7 @@ Core::Core(const QString &datadir, const QString &updateUrl, quint64 physicalMem
 #endif
     });
 
+
     connect(m_transfer, &Transfer::finished,
             this, &Core::transferFinished);
     connect(m_transfer, &Transfer::overallProgress,

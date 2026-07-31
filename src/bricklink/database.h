@@ -60,6 +60,11 @@ public:
     Q_INVOKABLE bool isUpdateNeeded() const;
 
     bool isValid() const          { return m_valid; }
+
+    // Bumped every time the item/color tables are swapped out, which is when every raw Item and
+    // Color pointer handed out so far goes stale. Static, so that objects holding such pointers can
+    // check it without needing a way back to the Core instance - there is only ever one Database.
+    static quint32 generation();
     QDateTime lastUpdated() const { return m_lastUpdated; }
     BrickLink::UpdateStatus updateStatus() const  { return m_updateStatus; }
 

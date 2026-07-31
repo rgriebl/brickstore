@@ -32,9 +32,16 @@ class Picture : public QObject
     struct Private { };
 
 public:
-    const Item *item() const          { return m_item; }
-    const Color *color() const        { return m_color; }
+    // Both return nullptr once the database has been swapped out from under us: the pointers are
+    // raw and the objects they pointed at are long gone by then. See isStale().
+    const Item *item() const;
+    const Color *color() const;
     QDateTime lastUpdated() const     { return m_lastUpdated; }
+
+    // A picture outlives its cache entry whenever someone still holds a reference, and a database
+    // update can happen in between. Such a picture cannot be used for anything anymore - it is not
+    // even possible to tell which item it belonged to.
+    bool isStale() const;
 
     bool isValid() const              { return m_valid; }
     UpdateStatus updateStatus() const { return m_updateStatus; }
@@ -58,6 +65,8 @@ private:
     const Color *m_color;
 
     QDateTime    m_lastUpdated;
+
+    quint32      m_generation      = 0; // of the database the item/color pointers point into
 
     bool         m_valid           : 1 = false;
     bool         m_updateAfterLoad : 1 = false;

@@ -613,7 +613,8 @@ McpTool::Result CatalogPriceGuideMcpTool::execute(const QJsonObject &arguments)
             results.append(priceGuideJson(e.pg.get(), e.pg->item(), e.pg->color()));
         } else {
             results.append(QJsonObject {
-                { u"item_id"_s, QString::fromLatin1(e.pg->item()->id()) },
+                { u"item_id"_s, e.pg->item() ? QString::fromLatin1(e.pg->item()->id())
+                                             : QString { } },
                 { u"error"_s, u"Price guide not available yet: still fetching, try again shortly"_s }
             });
         }

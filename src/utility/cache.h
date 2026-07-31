@@ -49,6 +49,10 @@ public:
     Ptr insert(const KEY &key, Ptr ptr, uint cost = 1);
     void setObjectCost(const KEY &key, uint cost);
 
+    // Drops this cache's reference. The object itself stays alive for as long as anyone else holds
+    // one, it just isn't cached anymore, so the key is free for a new object.
+    bool remove(const KEY &key);
+
     Ptr object(const KEY &key);
     inline Ptr operator[](const KEY &key) { return object(key); }
 
@@ -193,6 +197,21 @@ typename Cache<KEY, VALUE>::Ptr Cache<KEY, VALUE>::insert(const KEY &key, Ptr pt
     Ptr inserted = node->m_ptr;
     trimTo(m_maxCost);
     return inserted;
+}
+
+template <typename KEY, typename VALUE>
+bool Cache<KEY, VALUE>::remove(const KEY &key)
+{
+    auto it = m_hash.find(key);
+    if (it == m_hash.end())
+        return false;
+
+    Node *node = *it;
+    m_totalCost -= node->m_cost;
+    m_hash.erase(it);
+    unlink(node);
+    delete node;
+    return true;
 }
 
 template <typename KEY, typename VALUE>

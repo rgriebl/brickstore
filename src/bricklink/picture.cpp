@@ -29,7 +29,23 @@ namespace BrickLink {
 Picture::Picture(Private, const Item *item, const Color *color)
     : m_item(item)
     , m_color(color)
+    , m_generation(Database::generation())
 { }
+
+bool Picture::isStale() const
+{
+    return (m_generation != Database::generation());
+}
+
+const Item *Picture::item() const
+{
+    return isStale() ? nullptr : m_item;
+}
+
+const Color *Picture::color() const
+{
+    return isStale() ? nullptr : m_color;
+}
 
 Picture::~Picture()
 {
@@ -288,6 +304,13 @@ PictureRef PictureCache::picture(const Item *item, const Color *color, bool high
     auto key = PictureCachePrivate::cacheKey(item, color);
     PictureRef pic = d->m_cache[key];
 
+    // A picture that survived a database update is inert (see Picture::isStale()) and would keep its
+    // key occupied forever, as insert() never replaces an existing entry.
+    if (pic && pic->isStale()) {
+        d->m_cache.remove(key);
+        pic.reset();
+    }
+
     bool needToLoad = !pic || (!pic->isValid() && (pic->updateStatus() == UpdateStatus::UpdateFailed));
 
     if (!pic) {
@@ -312,7 +335,8 @@ PictureRef PictureCache::picture(const Item *item, const Color *color, bool high
 
 void PictureCache::updatePicture(const PictureRef &pic, bool highPriority)
 {
-    if (!pic || (pic->m_updateStatus == UpdateStatus::Updating))
+    // a stale picture has no item anymore, so there is nothing left to download
+    if (!pic || !pic->item() || (pic->m_updateStatus == UpdateStatus::Updating))
         return;
 
     if (QNetworkInformation::instance()

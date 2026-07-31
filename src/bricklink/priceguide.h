@@ -32,9 +32,16 @@ class PriceGuide : public QObject
     struct Private { };
 
 public:
-    const Item *item() const          { return m_item; }
-    const Color *color() const        { return m_color; }
+    // Both return nullptr once the database has been swapped out from under us: the pointers are
+    // raw and the objects they pointed at are long gone by then. See isStale().
+    const Item *item() const;
+    const Color *color() const;
     VatType vatType() const           { return m_vatType; }
+
+    // A price guide outlives its cache entry whenever someone still holds a reference, and a
+    // database update can happen in between. Such a price guide cannot be used for anything
+    // anymore - it is not even possible to tell which item it belonged to.
+    bool isStale() const;
     QDateTime lastUpdated() const     { return m_lastUpdated; }
 
     bool isValid() const              { return m_valid; }
@@ -66,6 +73,8 @@ private:
     const Color *m_color;
 
     QDateTime    m_lastUpdated;
+
+    quint32      m_generation      = 0; // of the database the item/color pointers point into
 
     VatType      m_vatType         : 8 = VatType::Excluded;
     char         m_retrieverId     : 8 = '0';

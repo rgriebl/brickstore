@@ -27,6 +27,13 @@
 
 namespace BrickLink {
 
+static quint32 s_generation = 0;
+
+quint32 Database::generation()
+{
+    return s_generation;
+}
+
 Database::Database(const QString &updateUrl, QObject *parent)
     : QObject(parent)
     , m_updateUrl(updateUrl)
@@ -123,6 +130,10 @@ void Database::setUpdateStatus(UpdateStatus updateStatus)
 
 void Database::clear()
 {
+    // same as in read(): every Item and Color pointer handed out so far dangles from here on. This
+    // matters on shutdown, where the cache worker threads still run while the database goes away.
+    ++s_generation;
+
     m_colors.clear();
     m_ldrawExtraColors.clear();
     m_itemTypes.clear();
@@ -431,6 +442,9 @@ void Database::read(const QString &fileName)
         // matches hold into the other collections are not
         checkIndexConsistency(items, relationshipMatches, colors.size(), categories.size(),
                               itemTypes.size(), f.fileName());
+
+        // every Item and Color pointer handed out so far dangles from here on
+        ++s_generation;
 
         m_colors = std::move(colors);
         m_ldrawExtraColors = std::move(ldrawExtraColors);
