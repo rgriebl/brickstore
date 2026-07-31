@@ -48,6 +48,7 @@ class QmlCapture : public QObject
     Q_PRIVATE_PROPERTY(d, QString lastError READ lastError NOTIFY stateChanged)
     Q_PRIVATE_PROPERTY(d, bool cameraActive READ isCameraActive NOTIFY cameraActiveChanged)
     Q_PRIVATE_PROPERTY(d, QObject *videoOutput READ videoOutput WRITE setVideoOutput NOTIFY videoOutputChanged)
+    Q_PRIVATE_PROPERTY(d, bool windowVisible READ isWindowVisible WRITE setWindowVisible NOTIFY windowVisibleChanged)
     Q_PRIVATE_PROPERTY(d, QByteArray currentBackendId READ currentBackendId WRITE setCurrentBackendId NOTIFY currentBackendIdChanged)
     Q_PRIVATE_PROPERTY(d, QByteArray currentCameraId READ currentCameraId WRITE setCurrentCameraId NOTIFY currentCameraIdChanged)
     Q_PROPERTY(BrickLink::QmlItemType currentItemTypeFilter READ currentItemTypeFilter WRITE setCurrentItemTypeFilter NOTIFY currentItemTypeFilterChanged)
@@ -63,6 +64,8 @@ public:
 
     QObject *videoOutput() const;
     Q_SIGNAL void videoOutputChanged();
+
+    Q_SIGNAL void windowVisibleChanged();
 
     Q_SIGNAL void currentCameraIdChanged();
     Q_SIGNAL void currentBackendIdChanged();

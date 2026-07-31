@@ -30,6 +30,7 @@ AutoSizingDialog {
     Scanner.Capture {
         id: capture
         videoOutput: viewFinder
+        windowVisible: root.visible
 
         onCaptureAndScanFinished: function(items) {
             let f = ""

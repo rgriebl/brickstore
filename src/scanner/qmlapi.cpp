@@ -25,6 +25,8 @@ QmlCapture::QmlCapture(QObject *parent)
             this, &QmlCapture::stateChanged);
     connect(d, &Capture::cameraActiveChanged,
             this, &QmlCapture::cameraActiveChanged);
+    connect(d, &Capture::windowVisibleChanged,
+            this, &QmlCapture::windowVisibleChanged);
     connect(d, &Capture::currentBackendIdChanged,
             this, &QmlCapture::currentBackendIdChanged);
     connect(d, &Capture::currentCameraIdChanged,

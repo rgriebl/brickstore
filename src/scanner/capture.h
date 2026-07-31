@@ -25,7 +25,17 @@ public:
     void setVideoOutput(QObject *videoOutput);
     Q_SIGNAL void videoOutputChanged();
 
+    // The camera device is only ever opened while the app is active AND the scanner UI is on
+    // screen. Nothing else - not a scan finishing late, not the camera list changing while the
+    // user is somewhere else entirely - may turn the camera on: as soon as either condition is
+    // false, the QCamera object is destroyed again.
+    // Widget based UIs track their window via trackWindowVisibility(), QML UIs set the
+    // windowVisible property directly.
     void trackWindowVisibility(QObject *window);
+
+    bool isWindowVisible() const;
+    void setWindowVisible(bool visible);
+    Q_SIGNAL void windowVisibleChanged(bool visible);
 
     Q_INVOKABLE void captureAndScan();
 
@@ -72,6 +82,8 @@ signals:
 
 private:
     void setState(State newState);
+    void updateCameraActive();
+    void releaseCamera();
 
     std::unique_ptr<CapturePrivate> d;
 };

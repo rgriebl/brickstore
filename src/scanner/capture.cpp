@@ -36,6 +36,7 @@ public:
     QMediaCaptureSession *captureSession = nullptr;
     QImageCapture *imageCapture = nullptr;
     QByteArray currentCameraId;
+    QCameraDevice currentCameraDevice;
     std::unique_ptr<QCamera> camera;
     std::optional<int> currentCaptureId;
     QDeadlineTimer tryCaptureBefore;
@@ -175,12 +176,13 @@ Capture::Capture(QObject *parent)
             this, [this](Qt::ApplicationState appState) {
         if (appState == Qt::ApplicationInactive) {
             d->appActive = false;
-            if (state() != State::Inactive)
-                setState(State::Inactive);
+            setState(State::Inactive);
+            updateCameraActive();
         } else if (appState == Qt::ApplicationActive) {
             d->appActive = true;
             if (d->winVisible && (state() == State::Inactive))
                 setState(State::Idle);
+            updateCameraActive();
         }
     });
 }
@@ -198,23 +200,36 @@ void Capture::setVideoOutput(QObject *videoOutput)
 void Capture::trackWindowVisibility(QObject *window)
 {
     delete d->windowTracker;
-    d->winVisible = false;
+    setWindowVisible(false);
     if (!window)
         return;
 
     d->windowTracker = new EventFilter(window, { QEvent::Hide, QEvent::Show },
                                        [this](QObject *, QEvent *e) {
-        if (e->type() == QEvent::Hide) {
-            d->winVisible = false;
-            if (state() != State::Inactive)
-                setState(State::Inactive);
-        } else if (e->type() == QEvent::Show) {
-            d->winVisible = true;
-            if (d->appActive && (state() == State::Inactive))
-                setState(State::Idle);
-        }
+        setWindowVisible(e->type() == QEvent::Show);
         return EventFilter::ContinueEventProcessing;
     });
+}
+
+bool Capture::isWindowVisible() const
+{
+    return d->winVisible;
+}
+
+void Capture::setWindowVisible(bool visible)
+{
+    if (d->winVisible == visible)
+        return;
+
+    d->winVisible = visible;
+
+    if (!visible)
+        setState(State::Inactive);
+    else if (d->appActive && (state() == State::Inactive))
+        setState(State::Idle);
+
+    updateCameraActive();
+    emit windowVisibleChanged(visible);
 }
 
 void Capture::captureAndScan()
@@ -282,12 +297,7 @@ void Capture::setState(State newState)
 
     switch (newState) {
     case State::Idle:
-        if (d->camera && !d->camera->isActive())
-            d->camera->start();
-        break;
     case State::Inactive:
-        if (d->camera && d->camera->isActive())
-            d->camera->stop();
         break;
     case State::Capturing:
         d->currentScanTime.start();
@@ -331,6 +341,39 @@ bool Capture::isCameraActive() const
     return d->camera ? d->camera->isActive() : false;
 }
 
+void Capture::updateCameraActive()
+{
+    if (!d->appActive || !d->winVisible || d->currentCameraDevice.isNull()) {
+        releaseCamera();
+        return;
+    }
+
+    if (!d->camera) {
+        d->camera = std::make_unique<QCamera>(d->currentCameraDevice);
+        connect(d->camera.get(), &QCamera::activeChanged,
+                this, &Capture::cameraActiveChanged);
+        d->captureSession->setCamera(d->camera.get());
+    }
+    if (!d->camera->isActive())
+        d->camera->start();
+}
+
+void Capture::releaseCamera()
+{
+    if (!d->camera)
+        return;
+
+    const bool wasActive = d->camera->isActive();
+    disconnect(d->camera.get(), &QCamera::activeChanged,
+               this, &Capture::cameraActiveChanged);
+    d->camera->stop();
+    d->captureSession->setCamera(nullptr);
+    d->camera.reset();
+
+    if (wasActive)
+        emit cameraActiveChanged(false);
+}
+
 QByteArray Capture::currentCameraId() const
 {
     return d->currentCameraId;
@@ -349,18 +392,15 @@ void Capture::setCurrentCameraId(const QByteArray &newCameraId)
             break;
         }
     }
-    if (newCameraDevice.isNull())
+    if (newCameraDevice.isNull() && !newCameraId.isEmpty()) // an empty id means "no camera at all"
         return;
 
     d->currentCameraId = newCameraId;
+    d->currentCameraDevice = newCameraDevice;
     emit currentCameraIdChanged(newCameraId);
 
-    d->camera = std::make_unique<QCamera>(newCameraDevice);
-    connect(d->camera.get(), &QCamera::activeChanged,
-            this, &Capture::cameraActiveChanged);
-
-    d->captureSession->setCamera(d->camera.get());
-    d->camera->start();
+    releaseCamera(); // the new device needs a new QCamera
+    updateCameraActive();
 }
 
 QByteArray Capture::currentBackendId() const
