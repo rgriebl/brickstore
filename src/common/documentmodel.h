@@ -336,7 +336,14 @@ private:
                       LotList &unfiltered);
     void sortDirect(const QVector<QPair<int, Qt::SortOrder>> &columns, bool &sorted, LotList &unsorted);
 
-    void emitDataChanged(const QModelIndex &tl = { }, const QModelIndex &br = { });
+    // Coalesces all calls within one event loop pass into a single dataChanged covering the
+    // bounding rectangle. An empty roles list means "all roles"; batches with differing role
+    // lists merge into their union, or into "all roles" if any of them asked for that.
+    // High-frequency emitters should pass explicit roles: QQuickTableView with a DelegateChooser
+    // (like the mobile View.qml) rebuilds its entire viewport on any dataChanged that does not
+    // rule out the chooser role via the roles list.
+    void emitDataChanged(const QModelIndex &tl = { }, const QModelIndex &br = { },
+                         const QList<int> &roles = { });
     void emitStatisticsChanged();
     void updateLotFlags(const Lot *lot);
     void setLotFlags(const Lot *lot, quint64 errors, quint64 updated);
@@ -407,6 +414,7 @@ private:
     QTimer *          m_delayedEmitOfStatisticsChanged = nullptr;
     QTimer *          m_delayedEmitOfDataChanged = nullptr;
     QPair<QPoint, QPoint> m_nextDataChangedEmit;
+    QList<int>        m_nextDataChangedRoles;
 
     static std::function<ConsolidateFunction> s_consolidateFunction;
 
