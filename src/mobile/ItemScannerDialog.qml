@@ -30,7 +30,8 @@ AutoSizingDialog {
     Scanner.Capture {
         id: capture
         videoOutput: viewFinder
-        windowVisible: root.visible
+        // the second page shows the scan results: no preview, no camera
+        windowVisible: root.visible && (pages.currentIndex === 0)
 
         onCaptureAndScanFinished: function(items) {
             let f = ""
