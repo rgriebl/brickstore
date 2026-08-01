@@ -412,8 +412,10 @@ jobs:
         chmod +x .cqtdeployer/bin/CQtDeployer
         chmod +x .cqtdeployer/CQtDeployer.sh
         cd build
+        # -libDir is what gets Qt's bundled FFmpeg libs deployed for the QtMultimedia backend
         ../.cqtdeployer/CQtDeployer.sh \
             -bin bin/brickstore -qmlDir ../src \
+            -libDir "${Qt6_DIR}/lib" \
             -qmake "${Qt6_DIR}/bin/qmake" \
             -targetDir BrickStore-Install/usr -libOut lib -binOut bin \
             -disableRunScript brickstore -disableShortCut brickstore
