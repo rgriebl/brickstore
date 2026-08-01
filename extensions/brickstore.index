@@ -136,6 +136,9 @@
             <qmlproperty name="valid" fullname="BrickLink.Database.valid" href="qml-bricklink-database.html#valid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
         </qmlclass>
         <qmlclass name="Document" qml-module-name="BrickStore" fullname="BrickStore.Document" href="qml-brickstore-document.html" status="active" access="public" documented="true" groups="qml-api" title="Document" fulltitle="Document" subtitle="" brief="Each instance of this type represents an open document">
+            <function name="close" fullname="BrickStore.Document.close" href="qml-brickstore-document.html#close-method" status="active" access="public" documented="true" since="1.2" meta="qmlmethod" type="bool">
+                <parameter type="bool" name="force" default="false"/>
+            </function>
             <function name="lots.add" fullname="BrickStore.Document.lots.add" href="qml-brickstore-document.html#lots.add-method" status="active" access="public" documented="true" meta="qmlmethod" type="int">
                 <parameter type="Item" name="item" default=""/>
                 <parameter type="Color" name="color" default=""/>
