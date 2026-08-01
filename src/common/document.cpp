@@ -560,11 +560,26 @@ QCoro::Task<bool> Document::requestClose()
         if (!that)
             co_return true; // it was already closed and deleted
     }
-    if (doClose) {
-        emit closeAllViewsForDocument();
-        delete this;
-    }
+    if (doClose)
+        closeInternal();
     co_return doClose;
+}
+
+bool Document::close(bool force)
+{
+    if (isBlockingOperationActive())
+        return false;
+    if (m_model->isModified() && !force)
+        return false;
+
+    closeInternal();
+    return true;
+}
+
+void Document::closeInternal()
+{
+    emit closeAllViewsForDocument();
+    delete this;
 }
 
 QString Document::filePath() const

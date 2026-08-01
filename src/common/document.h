@@ -98,7 +98,11 @@ public:
 
     void setActive(bool active);
 
+    // Asks the user about unsaved changes, then closes (and deletes) the document.
     QCoro::Task<bool> requestClose();
+
+    // Closes (and deletes) the document without any user interaction
+    bool close(bool force = false);
 
     QString filePath() const;
     QString fileName() const;
@@ -292,6 +296,8 @@ private:
     void resizeColumnDirect(int logical, int newSize);
     void hideColumnDirect(int logical, bool newHidden);
     void setColumnLayoutDirect(QVector<ColumnData> &columnData);
+
+    void closeInternal();
 
     void autosave() const;
     void deleteAutosave();

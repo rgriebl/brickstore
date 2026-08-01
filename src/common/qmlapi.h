@@ -113,6 +113,8 @@ public:
     Q_INVOKABLE void priceAdjust(bool isFixed, double value, bool applyToTiers);
     Q_INVOKABLE void costAdjust(bool isFixed, double value);
 
+    Q_REVISION(1, 2) Q_INVOKABLE bool close(bool force = false);
+
 signals:
     void columnLayoutChanged();
 

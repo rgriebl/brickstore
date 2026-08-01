@@ -108,7 +108,7 @@ endif()
 
 qt_add_qml_module(common_module
     URI BrickStore
-    VERSION 1.1
+    VERSION 1.2
     OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/imports/BrickStore
     IMPORT_PATH ${CMAKE_BINARY_DIR}/imports
     NO_PLUGIN

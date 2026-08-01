@@ -596,6 +596,22 @@ void QmlDocument::costAdjust(bool isFixed, double value)
     m_doc->costAdjust(isFixed, value);
 }
 
+/*! \qmlmethod bool Document::close(bool force = false)
+    \since 1.2
+    \brief Closes this document, without asking the user anything.
+
+    A document with unsaved changes is only closed if \a force is set to \c true, discarding these
+    changes. A document that is currently busy with a blocking operation (e.g. a price guide
+    update) is never closed, not even when forcing.
+
+    Returns \c true if the document was closed. In this case, this Document object is destroyed as
+    well, so it cannot be used anymore afterwards.
+*/
+bool QmlDocument::close(bool force)
+{
+    return m_doc->close(force); // 'this' is destroyed together with the document
+}
+
 
 void QmlDocument::setDocument(Document *doc)
 {
