@@ -4,7 +4,7 @@
 name: brickstore
 grade: stable
 confinement: strict
-base: core22
+base: core24
 compression: lzo
 license: GPL-3.0
 source-code: 'https://@GITHUB_URL@'
@@ -14,8 +14,6 @@ icon: snap/gui/brickstore.png
 
 apps:
   brickstore:
-    command-chain:
-      - bin/graphics-core22-wrapper
     command: usr/bin/brickstore
     common-id: dev.brickstore.BrickStore
     desktop: usr/share/applications/dev.brickstore.BrickStore.desktop
@@ -29,16 +27,10 @@ apps:
       - network-manager-observe
       - network-status
       - home
+      - cups
       - removable-media
-      - cups-control
       - camera
       - password-manager-service
-
-plugs:
-  graphics-core22:
-    interface: content
-    target: $SNAP/graphics
-    default-provider: mesa-core22
 
 parts:
   brickstore:
@@ -47,6 +39,7 @@ parts:
     parse-info: [ usr/share/metainfo/dev.brickstore.BrickStore.metainfo.xml ]
     stage-packages:
       - libtbb12
+      - libx11-data
       - libxcb-cursor0
       - libxcb-icccm4
       - libxcb-image0
@@ -56,25 +49,10 @@ parts:
       - libxcb-xkb1
       - libxkbcommon-x11-0
 
-  graphics-core22:
-      after: [ brickstore ]
-      source: https://github.com/MirServer/graphics-core.git
-      plugin: dump
-      override-prime: |
-        craftctl default
-        ${CRAFT_PART_SRC}/bin/graphics-core22-cleanup mesa-core22 nvidia-core22
-      prime:
-        - bin/graphics-core22-wrapper
-
+# the gnome 46 extension supplies a lot, but not this one
 layout:
-  /usr/share/libdrm:
-    bind: $SNAP/graphics/libdrm
-  /usr/share/drirc.d:
-    symlink: $SNAP/graphics/drirc.d
-  /usr/share/X11/XErrorDB:
-    symlink: $SNAP/graphics/X11/XErrorDB
   /usr/share/X11/locale:
-    symlink: $SNAP/graphics/X11/locale
+    bind: $SNAP/usr/share/X11/locale
 
-architectures:
-  - build-on: amd64
+platforms:
+  amd64:
