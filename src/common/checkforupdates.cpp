@@ -3,6 +3,7 @@
 
 #include <QEvent>
 #include <QNetworkReply>
+#include <QPointer>
 #include <QBuffer>
 #include <QJsonDocument>
 #include <QJsonValue>
@@ -72,7 +73,10 @@ void CheckForUpdates::initialize(const QString &baseUrl, Mode mode)
 
         if (m_lastRunVersion < m_currentVersion) {
             QTimer::singleShot(2s, this, [this]() -> QCoro::Task<> {
+                QPointer<CheckForUpdates> that = this;
                 QString md = co_await versionChangeLog(m_lastRunVersion, m_currentVersion);
+                if (!that)
+                    co_return;
                 if (!md.isEmpty()) {
                     md.prepend(changeLogHeader(tr("BrickStore was updated:"), m_currentVersion));
                     const auto releaseUrl = m_releaseUrl.arg(m_currentVersion.toString());
@@ -112,7 +116,13 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
     m_checking = true;
     m_silent = silent;
 
+    // Application deletes us on shutdown, which takes m_nam - and with it any pending reply - down
+    // as well. Every co_await below can therefore return into a destroyed object.
+    QPointer<CheckForUpdates> that = this;
+
     QNetworkReply *reply = co_await m_nam.get(QNetworkRequest(m_checkUrl));
+    if (!that)
+        co_return;
 
     reply->deleteLater();
 
@@ -166,13 +176,21 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
         QTimer t;
         t.start(0);
         co_await t;
+        if (!that)
+            co_return;
 
         if (latestVersion.isNull()) {
             co_await UIHelpers::warning(tr("Version information is not available."));
+            if (!that)
+                co_return;
         } else if (latestVersion <= m_currentVersion) {
             co_await UIHelpers::information(tr("Your currently installed version is up-to-date."));
+            if (!that)
+                co_return;
         } else {
             QString md = co_await versionChangeLog(m_currentVersion, latestVersion);
+            if (!that)
+                co_return;
             if (!md.isEmpty()) {
                 md.prepend(changeLogHeader(tr("A newer version than the one currently installed is available:"),
                                            latestVersion));
@@ -189,7 +207,11 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
 QCoro::Task<QString> CheckForUpdates::versionChangeLog(QVersionNumber fromVersion,
                                                        QVersionNumber toVersion)
 {
+    QPointer<CheckForUpdates> that = this;
+
     QNetworkReply *reply = co_await m_nam.get(QNetworkRequest(m_changelogUrl));
+    if (!that)
+        co_return { };
 
     reply->deleteLater();
 
