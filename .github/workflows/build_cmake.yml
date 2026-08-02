@@ -157,7 +157,7 @@ jobs:
           qt_target: 'android'
           qt_version: '6.11.1'
           qt_arch: 'android_x86_64'
-          qt_extra_archs: 'android_arm64_v8a android_armv7 android_x86'
+          qt_extra_archs: 'android_arm64_v8a android_armv7'
           cmake_extra_config: '-DSENTRY=ON'
 
         - name: "iOS"
