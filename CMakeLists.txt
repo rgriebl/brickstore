@@ -662,10 +662,17 @@ elseif (ANDROID)
         DEPENDS apk
     )
 
-    string(TOLOWER "${CMAKE_BUILD_TYPE}" lower_build_type)
+    # gradle only knows "release" and "debug": androiddeployqt maps every release-ish
+    # config onto the former, so we cannot just lowercase CMAKE_BUILD_TYPE here
+    set(GRADLE_RELEASE_CONFIGS Release RelWithDebInfo MinSizeRel)
+    if (CMAKE_BUILD_TYPE IN_LIST GRADLE_RELEASE_CONFIGS)
+        set(GRADLE_VARIANT "release")
+    else()
+        set(GRADLE_VARIANT "debug")
+    endif()
 
     add_custom_target(final-aab
-        COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_BINARY_DIR}/android-build/build/outputs/bundle/${lower_build_type}/android-build-release.aab"
+        COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_BINARY_DIR}/android-build/build/outputs/bundle/${GRADLE_VARIANT}/android-build-${GRADLE_VARIANT}.aab"
                                            "${CMAKE_BINARY_DIR}/${PROJECT_NAME}-${VERSION}.aab"
         COMMENT "Moving aab to final name and location..."
         DEPENDS aab

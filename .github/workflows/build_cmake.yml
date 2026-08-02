@@ -488,7 +488,7 @@ jobs:
         export QT_ANDROID_KEYSTORE_STORE_PASS="${{ secrets.ANDROID_KEYSTORE_STORE_PASS }}"
         export QT_ANDROID_KEYSTORE_KEY_PASS="${{ secrets.ANDROID_KEYSTORE_KEY_PASS }}"
 
-        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
+        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -D "QT_HOST_PATH=$(readlink -f $Qt6_DIR/../gcc_64)" \
             -D "QT_ANDROID_TARGET_SDK_VERSION=35" \
             -D "QT_ANDROID_BUILD_ALL_ABIS=TRUE" \
@@ -498,11 +498,11 @@ jobs:
             -D "QT_ANDROID_MULTI_ABI_FORWARD_VARS=SENTRY" \
             ${{ matrix.config.cmake_extra_config }} -B build -S .
         echo "Creating AAB"
-        cmake --build build --config Release --parallel --target final-aab --verbose
+        cmake --build build --config RelWithDebInfo --parallel --target final-aab --verbose
         echo "Creating ARM64 APK"
-        cmake --build build/android_abi_builds/arm64-v8a --config Release --parallel --target final-apk --verbose
+        cmake --build build/android_abi_builds/arm64-v8a --config RelWithDebInfo --parallel --target final-apk --verbose
         echo "Creating ARM APK"
-        cmake --build build/android_abi_builds/armeabi-v7a --config Release --parallel --target final-apk --verbose
+        cmake --build build/android_abi_builds/armeabi-v7a --config RelWithDebInfo --parallel --target final-apk --verbose
 
         echo VERSION_NUMBER="`cat VERSION_NUMBER`" >> $GITHUB_ENV
       shell: bash
@@ -538,6 +538,21 @@ jobs:
         status: completed
         tracks: beta
         releaseName: "${{ env.VERSION_NUMBER }} (build: ${{ env.BUILD_NUMBER }})"
+
+    - name: Upload Android debug info to sentry.io
+      if: (matrix.config.os == 'android')
+      run: |
+        curl -L --output sentry-cli "https://github.com/getsentry/sentry-cli/releases/latest/download/sentry-cli-Linux-x86_64"
+        chmod +x sentry-cli
+        # The .so only carries the symbol table: enable_separate_debug_info() moves the
+        # DWARF into the BrickStore.debug companion, so both are needed.
+        # Qt's own Android libraries are shipped stripped and without companion debug files.
+        ./sentry-cli --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} upload-dif \
+            --org brickstore --project brickstore \
+            build/libBrickStore_*.so build/BrickStore.debug \
+            build/android_abi_builds/*/libBrickStore_*.so \
+            build/android_abi_builds/*/BrickStore.debug
+      shell: bash
 
     # Build for macOS
     #################################################
