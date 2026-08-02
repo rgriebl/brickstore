@@ -14,6 +14,9 @@
 #define ApplicationVersion RemoveFileExt(ApplicationVersionFull)
 #define ApplicationPublisher GetFileCompany(SOURCE_DIR + "\BrickStore.exe")
 
+; the MSVC runtime we require is the one windeployqt bundled from the build toolset
+#define VCRedistVersion GetVersionNumbersString(SOURCE_DIR + "\vc_redist." + ARCH + ".exe")
+
 [Setup]
 ; Windows 10 or Windows Server 2019, version 1809
 MinVersion=10.0.17763
@@ -104,7 +107,7 @@ function noMSVCInstalled(Arch: String): Boolean;
 var
     Version: Int64;
 begin
-    Version := PackVersionComponents(14, 42, 34433, 0);
+    StrToVersion('{#VCRedistVersion}', Version);
     if Arch = 'arm64' then
         Result := not IsMsiProductInstalled('{DC9BAE42-810B-423A-9E25-E4073F1C7B00}', Version)
     else if Arch = 'x64' then
