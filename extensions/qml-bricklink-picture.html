@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-<!-- picture.cpp -->
-  <meta name="description" content="This value type represents a picture of a BrickLink item.">
+<!-- qmlapi.cpp -->
+  <meta name="description" content="This type represents a picture of a BrickLink item.">
   <title>Picture QML Type | BrickStore Extensions</title>
   <link rel="stylesheet" type="text/css" href="style/extensions.css" />
 </head>
@@ -33,7 +33,7 @@
 <div class="context">
 <h1 class="title" translate="no">Picture QML Type</h1>
 <!-- $$$Picture-brief -->
-<p>This value type represents a picture of a BrickLink item. <a href="#details">More...</a></p>
+<p>This type represents a picture of a BrickLink item. <a href="#details">More...</a></p>
 <!-- @@@Picture -->
 <div class="table"><table class="alignedsummary requisites" translate="no">
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> <code translate="no">import BrickLink 1.0</code></td></tr>
@@ -45,7 +45,6 @@
 <ul>
 <li class="fn" translate="no"><b><a href="qml-bricklink-picture.html#color-prop" translate="no">color</a></b> : ColorPointer</li>
 <li class="fn" translate="no"><b><a href="qml-bricklink-picture.html#image-prop" translate="no">image</a></b> : image</li>
-<li class="fn" translate="no"><b><a href="qml-bricklink-picture.html#isNull-prop" translate="no">isNull</a></b> : bool</li>
 <li class="fn" translate="no"><b><a href="qml-bricklink-picture.html#isValid-prop" translate="no">isValid</a></b> : bool</li>
 <li class="fn" translate="no"><b><a href="qml-bricklink-picture.html#item-prop" translate="no">item</a></b> : ItemPointer</li>
 <li class="fn" translate="no"><b><a href="qml-bricklink-picture.html#lastUpdated-prop" translate="no">lastUpdated</a></b> : date</li>
@@ -84,16 +83,6 @@
 </table></div></div>
 <div class="qmldoc"><p>Returns the image if the Picture object <a href="qml-bricklink-picture.html#isValid-prop" translate="no">isValid</a>, or a null image otherwise.</p>
 </div></div><!-- @@@image -->
-<br/>
-<!-- $$$isNull -->
-<div class="qmlitem"><div class="qmlproto" translate="no">
-<div class="table"><table class="qmlname">
-<tr valign="top" class="odd" id="isNull-prop">
-<td class="tblQmlPropNode"><p>
-<span class="name">isNull</span> : <span class="type">bool</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
-</table></div></div>
-<div class="qmldoc"><p>Returns whether this Picture is <code translate="no">null</code>. Since this type is a value wrapper around a C++ object, we cannot use the normal JavaScript <code translate="no">null</code> notation.</p>
-</div></div><!-- @@@isNull -->
 <br/>
 <!-- $$$isValid -->
 <div class="qmlitem"><div class="qmlproto" translate="no">

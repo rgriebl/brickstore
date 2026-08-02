@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-<!-- priceguide.cpp -->
-  <meta name="description" content="This value type represents the price guide for a BrickLink item.">
+<!-- qmlapi.cpp -->
+  <meta name="description" content="This type represents the price guide for a BrickLink item.">
   <title>PriceGuide QML Type | BrickStore Extensions</title>
   <link rel="stylesheet" type="text/css" href="style/extensions.css" />
 </head>
@@ -33,7 +33,7 @@
 <div class="context">
 <h1 class="title" translate="no">PriceGuide QML Type</h1>
 <!-- $$$PriceGuide-brief -->
-<p>This value type represents the price guide for a BrickLink item. <a href="#details">More...</a></p>
+<p>This type represents the price guide for a BrickLink item. <a href="#details">More...</a></p>
 <!-- @@@PriceGuide -->
 <div class="table"><table class="alignedsummary requisites" translate="no">
 <tr><td class="memItemLeft rightAlign topAlign"> Import Statement:</td><td class="memItemRight bottomAlign"> <code translate="no">import BrickLink 1.0</code></td></tr>
@@ -44,7 +44,6 @@
 <h2 id="properties">Properties</h2>
 <ul>
 <li class="fn" translate="no"><b><a href="qml-bricklink-priceguide.html#color-prop" translate="no">color</a></b> : ColorPointer</li>
-<li class="fn" translate="no"><b><a href="qml-bricklink-priceguide.html#isNull-prop" translate="no">isNull</a></b> : bool</li>
 <li class="fn" translate="no"><b><a href="qml-bricklink-priceguide.html#isValid-prop" translate="no">isValid</a></b> : bool</li>
 <li class="fn" translate="no"><b><a href="qml-bricklink-priceguide.html#item-prop" translate="no">item</a></b> : ItemPointer</li>
 <li class="fn" translate="no"><b><a href="qml-bricklink-priceguide.html#lastUpdated-prop" translate="no">lastUpdated</a></b> : date</li>
@@ -94,16 +93,6 @@
 <div class="qmldoc"><p>The BrickLink color reference this price guide is requested for as a raw C++ pointer. You can convert it to a QML <a href="qml-bricklink-color.html" translate="no">Color</a> object like this:</p>
 <pre class="cpp" translate="no">let color <span class="operator">=</span> BrickLink<span class="operator">.</span>color(pg<span class="operator">.</span>color)</pre>
 </div></div><!-- @@@color -->
-<br/>
-<!-- $$$isNull -->
-<div class="qmlitem"><div class="qmlproto" translate="no">
-<div class="table"><table class="qmlname">
-<tr valign="top" class="odd" id="isNull-prop">
-<td class="tblQmlPropNode"><p>
-<span class="name">isNull</span> : <span class="type">bool</span> <code class="details extra" translate="no">[read-only]</code></p></td></tr>
-</table></div></div>
-<div class="qmldoc"><p>Returns whether this <a href="qml-bricklink-priceguide.html" translate="no">PriceGuide</a> is <code translate="no">null</code>. Since this type is a value wrapper around a C++ object, we cannot use the normal JavaScript <code translate="no">null</code> notation.</p>
-</div></div><!-- @@@isNull -->
 <br/>
 <!-- $$$isValid -->
 <div class="qmlitem"><div class="qmlproto" translate="no">

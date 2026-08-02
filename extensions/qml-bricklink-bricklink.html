@@ -134,6 +134,9 @@
 <span class="name">pictureUpdated</span>(<span class="type"><a href="qml-bricklink-picture.html" translate="no">Picture</a></span> <i>picture</i>)</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>This signal is emitted every time the state of the <i translate="no">picture</i> object changes. Receiving this signal doesn't mean the picture is available: you have to check the object's properties to see what has changed.</p>
+<div class="admonition note">
+<p><b>Note: </b>Each emission hands out a new Picture object for the same picture, so compare its item and color instead of comparing object identity. Binding to a Picture's own properties is usually simpler than using this signal.</p>
+</div>
 <div class="admonition note"><p><b>Note: </b>The corresponding handler is <code translate="no">onPictureUpdated</code>.</p>
 </div></div></div><!-- @@@pictureUpdated -->
 <br/>
@@ -145,6 +148,9 @@
 <span class="name">priceGuideUpdated</span>(<span class="type"><a href="qml-bricklink-priceguide.html" translate="no">PriceGuide</a></span> <i>priceGuide</i>)</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>This signal is emitted every time the state of the <i translate="no">priceGuide</i> object changes. Receiving this signal doesn't mean the price guide data is available: you have to check the object's properties to see what has changed.</p>
+<div class="admonition note">
+<p><b>Note: </b>Each emission hands out a new <a href="qml-bricklink-priceguide.html" translate="no">PriceGuide</a> object for the same price guide, so compare its item and color instead of comparing object identity. Binding to a <a href="qml-bricklink-priceguide.html" translate="no">PriceGuide</a>'s own properties is usually simpler than using this signal.</p>
+</div>
 <div class="admonition note"><p><b>Note: </b>The corresponding handler is <code translate="no">onPriceGuideUpdated</code>.</p>
 </div></div></div><!-- @@@priceGuideUpdated -->
 <br/>
@@ -280,6 +286,9 @@
 <span class="type"><a href="qml-bricklink-picture.html" translate="no">Picture</a></span> <span class="name">picture</span>(<span class="type"><a href="qml-bricklink-item.html" translate="no">Item</a></span> <i>item</i>, <span class="type"><a href="qml-bricklink-color.html" translate="no">Color</a></span> <i>color</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Creates a <a href="qml-bricklink-picture.html" translate="no">Picture</a> object that asynchronously loads (or downloads) the picture for the given <i translate="no">item</i> and <i translate="no">color</i> combination. If you set <i translate="no">highPriority</i> to <code translate="no">true</code> the load/download request will be prepended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#pictureUpdated-signal" translate="no">BrickLink::pictureUpdated</a>() to know when the data has been loaded.</p>
+<div class="admonition note">
+<p><b>Note: </b>Hold on to the returned object for as long as you need the picture: it is what keeps the image in BrickStore's cache.</p>
+</div>
 <p><b>See also </b><a href="qml-bricklink-picture.html" translate="no">Picture</a>.</p>
 </div></div><!-- @@@picture -->
 <br/>
@@ -302,6 +311,9 @@
 <span class="type"><a href="qml-bricklink-priceguide.html" translate="no">PriceGuide</a></span> <span class="name">priceGuide</span>(<span class="type"><a href="qml-bricklink-item.html" translate="no">Item</a></span> <i>item</i>, <span class="type"><a href="qml-bricklink-color.html" translate="no">Color</a></span> <i>color</i>, <span class="type">VatType</span> <i>vatType</i>, <span class="type">bool</span> <i>highPriority</i> = false)</p></td></tr>
 </table></div></div>
 <div class="qmldoc"><p>Creates a <a href="qml-bricklink-priceguide.html" translate="no">PriceGuide</a> object that asynchronously loads (or downloads) the price guide data for the given <i translate="no">item</i>, <i translate="no">color</i> and <i translate="no">vatType</i> combination. If you set <i translate="no">highPriority</i> to <code translate="no">true</code>, the load/download request will be prepended to the work queue instead of appended. You need to connect to the signal <a href="qml-bricklink-bricklink.html#priceGuideUpdated-signal" translate="no">BrickLink::priceGuideUpdated</a>() to know when the data has been loaded.</p>
+<div class="admonition note">
+<p><b>Note: </b>Hold on to the returned object for as long as you need the price guide: it is what keeps the data in BrickStore's cache.</p>
+</div>
 <p><b>See also </b><a href="qml-bricklink-priceguide.html" translate="no">PriceGuide</a>.</p>
 </div></div><!-- @@@priceGuide -->
 <br/>

@@ -276,13 +276,12 @@
             <qmlproperty name="vatChargeBrickLink" fullname="BrickLink.Order.vatChargeBrickLink" href="qml-bricklink-order.html#vatChargeBrickLink-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
             <qmlproperty name="vatChargeSeller" fullname="BrickLink.Order.vatChargeSeller" href="qml-bricklink-order.html#vatChargeSeller-prop" status="active" access="public" documented="true" type="real" attached="false" writable="false"/>
         </qmlclass>
-        <qmlclass name="Picture" qml-module-name="BrickLink" fullname="BrickLink.Picture" href="qml-bricklink-picture.html" status="active" access="public" documented="true" groups="qml-api" title="Picture" fulltitle="Picture" subtitle="" brief="This value type represents a picture of a BrickLink item">
+        <qmlclass name="Picture" qml-module-name="BrickLink" fullname="BrickLink.Picture" href="qml-bricklink-picture.html" status="active" access="public" documented="true" groups="qml-api" title="Picture" fulltitle="Picture" subtitle="" brief="This type represents a picture of a BrickLink item">
             <function name="update" fullname="BrickLink.Picture.update" href="qml-bricklink-picture.html#update-method" status="active" access="public" documented="true" meta="qmlmethod">
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
             <qmlproperty name="color" fullname="BrickLink.Picture.color" href="qml-bricklink-picture.html#color-prop" status="active" access="public" documented="true" type="ColorPointer" attached="false" writable="false"/>
             <qmlproperty name="image" fullname="BrickLink.Picture.image" href="qml-bricklink-picture.html#image-prop" status="active" access="public" documented="true" type="image" attached="false" writable="false"/>
-            <qmlproperty name="isNull" fullname="BrickLink.Picture.isNull" href="qml-bricklink-picture.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
             <qmlproperty name="isValid" fullname="BrickLink.Picture.isValid" href="qml-bricklink-picture.html#isValid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
             <qmlproperty name="item" fullname="BrickLink.Picture.item" href="qml-bricklink-picture.html#item-prop" status="active" access="public" documented="true" type="ItemPointer" attached="false" writable="false"/>
             <qmlproperty name="lastUpdated" fullname="BrickLink.Picture.lastUpdated" href="qml-bricklink-picture.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
@@ -293,7 +292,7 @@
             <contents name="intermediate-changes" title="Intermediate changes" level="2"/>
             <contents name="complex-changes" title="Complex changes" level="2"/>
         </page>
-        <qmlclass name="PriceGuide" qml-module-name="BrickLink" fullname="BrickLink.PriceGuide" href="qml-bricklink-priceguide.html" status="active" access="public" documented="true" groups="qml-api" title="PriceGuide" fulltitle="PriceGuide" subtitle="" brief="This value type represents the price guide for a BrickLink item">
+        <qmlclass name="PriceGuide" qml-module-name="BrickLink" fullname="BrickLink.PriceGuide" href="qml-bricklink-priceguide.html" status="active" access="public" documented="true" groups="qml-api" title="PriceGuide" fulltitle="PriceGuide" subtitle="" brief="This type represents the price guide for a BrickLink item">
             <function name="lots" fullname="BrickLink.PriceGuide.lots" href="qml-bricklink-priceguide.html#lots-method" status="active" access="public" documented="true" meta="qmlmethod" type="int">
                 <parameter type="Time" name="time" default=""/>
                 <parameter type="Condition" name="condition" default=""/>
@@ -311,7 +310,6 @@
                 <parameter type="bool" name="highPriority" default="false"/>
             </function>
             <qmlproperty name="color" fullname="BrickLink.PriceGuide.color" href="qml-bricklink-priceguide.html#color-prop" status="active" access="public" documented="true" type="ColorPointer" attached="false" writable="false"/>
-            <qmlproperty name="isNull" fullname="BrickLink.PriceGuide.isNull" href="qml-bricklink-priceguide.html#isNull-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
             <qmlproperty name="isValid" fullname="BrickLink.PriceGuide.isValid" href="qml-bricklink-priceguide.html#isValid-prop" status="active" access="public" documented="true" type="bool" attached="false" writable="false"/>
             <qmlproperty name="item" fullname="BrickLink.PriceGuide.item" href="qml-bricklink-priceguide.html#item-prop" status="active" access="public" documented="true" type="ItemPointer" attached="false" writable="false"/>
             <qmlproperty name="lastUpdated" fullname="BrickLink.PriceGuide.lastUpdated" href="qml-bricklink-priceguide.html#lastUpdated-prop" status="active" access="public" documented="true" type="date" attached="false" writable="false"/>
