@@ -1344,7 +1344,7 @@
 <context>
     <name>BrickLink::Database</name>
     <message>
-        <location filename="../src/bricklink/database.cpp" line="+65"/>
+        <location filename="../src/bricklink/database.cpp" line="+72"/>
         <source>Already up-to-date.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1492,7 +1492,7 @@
 <context>
     <name>BrickLink::PriceGuideCache</name>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="+825"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="+816"/>
         <source>VAT is included</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1652,27 +1652,27 @@
 <context>
     <name>CheckForUpdates</name>
     <message>
-        <location filename="../src/common/checkforupdates.cpp" line="+77"/>
+        <location filename="../src/common/checkforupdates.cpp" line="+81"/>
         <source>BrickStore was updated:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+94"/>
+        <location line="+102"/>
         <source>Version information is not available.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+4"/>
         <source>Your currently installed version is up-to-date.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+8"/>
         <source>A newer version than the one currently installed is available:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-82"/>
+        <location line="-96"/>
         <source>Changes:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2014,12 +2014,12 @@
 <context>
     <name>Currency</name>
     <message>
-        <location filename="../src/common/currency.cpp" line="+258"/>
+        <location filename="../src/common/currency.cpp" line="+265"/>
         <source>no currency data found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+6"/>
         <source>Failed to download exchange rates.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2094,7 +2094,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location line="+309"/>
+        <location line="+331"/>
         <source>Duplicated %Ln item(s)</source>
         <translation>
             <numerusform>Duplicated one item</numerusform>
@@ -2102,7 +2102,7 @@
         </translation>
     </message>
     <message>
-        <location line="-520"/>
+        <location line="-542"/>
         <source>Enter the new price for all selected items:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2211,7 +2211,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+27"/>
+        <location line="+31"/>
         <source>The document %1 has been modified.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2221,12 +2221,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+476"/>
+        <location line="+494"/>
+        <source>No exchange rate is available for this document&apos;s currency (%1).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
         <source>Loading price guide data from disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+33"/>
+        <location line="+32"/>
         <source>Downloading price guide data from BrickLink</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2241,7 +2246,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location line="+48"/>
+        <location line="+47"/>
         <source>Set price to guide on %n item(s)</source>
         <translation>
             <numerusform>Set price to guide on one item</numerusform>
@@ -2275,7 +2280,7 @@
         </translation>
     </message>
     <message>
-        <location line="+195"/>
+        <location line="+196"/>
         <source>Export File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2316,7 +2321,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+15"/>
+        <location line="+19"/>
         <source>Save File as</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2336,7 +2341,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+54"/>
         <source>You have selected more than 1,000 lots, but BrickLink&apos;s servers are unable to cope with this many lots at the same time.&lt;br&gt;You should better export multiple, smaller batches.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2591,7 +2596,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location line="+668"/>
+        <location line="+684"/>
         <source>%1 on %Ln item(s)</source>
         <extracomment>Generic undo/redo text: %1 == action name (e.g. &quot;Set price&quot;)</extracomment>
         <translation>
@@ -2643,7 +2648,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+15"/>
         <source>Item Id</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2901,7 +2906,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+348"/>
+        <location line="+350"/>
         <source>This document has no differences that could be exported.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2924,7 +2929,7 @@
 <context>
     <name>DocumentStatistics</name>
     <message>
-        <location line="-2432"/>
+        <location line="-2453"/>
         <source>min.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3357,7 +3362,7 @@
     </message>
     <message>
         <location line="+45"/>
-        <location filename="../src/mobile/ImportInventoryWidget.qml" line="+102"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="+101"/>
         <source>Condition:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3720,7 +3725,7 @@
 <context>
     <name>InfoWidget</name>
     <message>
-        <location filename="../src/mobile/InfoWidget.qml" line="+71"/>
+        <location filename="../src/mobile/InfoWidget.qml" line="+60"/>
         <source>No image available</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3789,17 +3794,17 @@
 <context>
     <name>ItemScannerDialog</name>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="+267"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="+276"/>
         <source>Item Scanner</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-209"/>
+        <location line="-218"/>
         <source>Any</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+212"/>
+        <location line="+221"/>
         <source>Camera</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3829,7 +3834,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+49"/>
+        <location line="+51"/>
         <source>Tap on the camera preview to capture an image.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3869,7 +3874,7 @@
 <context>
     <name>LDraw::Library</name>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="+121"/>
+        <location filename="../src/ldraw/library.cpp" line="+120"/>
         <source>download failed</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4015,7 +4020,7 @@ Right click: Menu</source>
 <context>
     <name>MobileApplication</name>
     <message>
-        <location filename="../src/mobile/mobileapplication.cpp" line="+109"/>
+        <location filename="../src/mobile/mobileapplication.cpp" line="+93"/>
         <source>Would you like to consolidate %L1 lots?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4283,12 +4288,12 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+75"/>
+        <location line="+67"/>
         <source>Please wait... updating</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-103"/>
+        <location line="-95"/>
         <source>Center view</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4336,7 +4341,7 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mobile/PriceGuideWidget.qml" line="+115"/>
+        <location filename="../src/mobile/PriceGuideWidget.qml" line="+105"/>
         <location line="+27"/>
         <location filename="../src/desktop/priceguidewidget.cpp" line="+2"/>
         <source>Qty.</source>
@@ -4421,7 +4426,7 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/desktop/priceguidewidget.cpp" line="+580"/>
+        <location filename="../src/desktop/priceguidewidget.cpp" line="+572"/>
         <source>Lowest price</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4947,12 +4952,12 @@ Right click: Menu</source>
 <context>
     <name>Scanner::Capture</name>
     <message>
-        <location filename="../src/scanner/capture.cpp" line="+164"/>
+        <location filename="../src/scanner/capture.cpp" line="+165"/>
         <source>Scanning failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+78"/>
+        <location line="+92"/>
         <source>BrickStore&apos;s request for camera access was denied. You will not be able to use your webcam to identify parts until you grant the required permissions via your system&apos;s Settings application.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4973,7 +4978,7 @@ Right click: Menu</source>
 <context>
     <name>SelectColor</name>
     <message>
-        <location filename="../src/mobile/SelectColor.qml" line="+75"/>
+        <location filename="../src/mobile/SelectColor.qml" line="+74"/>
         <location filename="../src/desktop/selectcolor.cpp" line="+152"/>
         <source>All Colors</source>
         <translation type="unfinished"></translation>
@@ -6109,7 +6114,7 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+455"/>
+        <location line="+460"/>
         <location filename="../src/desktop/view.cpp" line="-202"/>
         <source>Increase or decrease the prices of the selected items by</source>
         <translation type="unfinished"></translation>
@@ -6164,7 +6169,7 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mobile/View.qml" line="-263"/>
+        <location filename="../src/mobile/View.qml" line="-266"/>
         <source>CP</source>
         <translation type="unfinished"></translation>
     </message>

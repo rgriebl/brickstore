@@ -1363,7 +1363,7 @@
 <context>
     <name>BrickLink::Database</name>
     <message>
-        <location filename="../src/bricklink/database.cpp" line="+65"/>
+        <location filename="../src/bricklink/database.cpp" line="+72"/>
         <source>Already up-to-date.</source>
         <translation>Är redan uppdaterad.</translation>
     </message>
@@ -1511,7 +1511,7 @@
 <context>
     <name>BrickLink::PriceGuideCache</name>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="+825"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="+816"/>
         <source>VAT is included</source>
         <translation>Inklusive Moms</translation>
     </message>
@@ -1687,17 +1687,17 @@
 <context>
     <name>CheckForUpdates</name>
     <message>
-        <location filename="../src/common/checkforupdates.cpp" line="+77"/>
+        <location filename="../src/common/checkforupdates.cpp" line="+81"/>
         <source>BrickStore was updated:</source>
         <translation>BrickStore uppdaterades:</translation>
     </message>
     <message>
-        <location line="+94"/>
+        <location line="+102"/>
         <source>Version information is not available.</source>
         <translation>Versionsinformation finns inte tillgängligt.</translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+4"/>
         <source>Your currently installed version is up-to-date.</source>
         <translation>Din nuvarande installation är uppdaterad.</translation>
     </message>
@@ -1706,12 +1706,12 @@
         <translation type="vanished">Uppdatera</translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+8"/>
         <source>A newer version than the one currently installed is available:</source>
         <translation>Det finns en nyare version än nuvarande installerat program:</translation>
     </message>
     <message>
-        <location line="-82"/>
+        <location line="-96"/>
         <source>Changes:</source>
         <translation>Ändringar:</translation>
     </message>
@@ -2099,12 +2099,12 @@
         <translation type="vanished">%1 (rad %2, kolumn %3)</translation>
     </message>
     <message>
-        <location filename="../src/common/currency.cpp" line="+258"/>
+        <location filename="../src/common/currency.cpp" line="+265"/>
         <source>no currency data found</source>
         <translation>Valuta information saknas</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+6"/>
         <source>Failed to download exchange rates.</source>
         <translation>Kunde inte ladda ner växelkurser.</translation>
     </message>
@@ -2292,7 +2292,7 @@
         <translation>Du har läst in en gamalt dokument som inte har någon valutainformation bifogat. Du kan konvertera detta dokument till att inkludera denna information genom att använda valutakodväljaren i det övre högra hörnet.</translation>
     </message>
     <message>
-        <location line="+27"/>
+        <location line="+31"/>
         <source>The document %1 has been modified.</source>
         <translation>Dokumentet %1 har blivit ändrad.</translation>
     </message>
@@ -2302,7 +2302,7 @@
         <translation>Vill du spara dina ändringar?</translation>
     </message>
     <message numerus="yes">
-        <location line="+277"/>
+        <location line="+295"/>
         <source>Duplicated %Ln item(s)</source>
         <translation>
             <numerusform>Dupplicerat %Ln artikel</numerusform>
@@ -2311,11 +2311,16 @@
     </message>
     <message>
         <location line="+199"/>
+        <source>No exchange rate is available for this document&apos;s currency (%1).</source>
+        <translation>Ingen växelkurs är tillgänglig för det här dokumentets valuta (%1).</translation>
+    </message>
+    <message>
+        <location line="+8"/>
         <source>Loading price guide data from disk</source>
         <translation>Laddar prisguide information från disk</translation>
     </message>
     <message>
-        <location line="+33"/>
+        <location line="+32"/>
         <source>Downloading price guide data from BrickLink</source>
         <translation>Laddar ner prisguide information från BrickLink</translation>
     </message>
@@ -2330,7 +2335,7 @@
         <translation>Inga data</translation>
     </message>
     <message numerus="yes">
-        <location line="+48"/>
+        <location line="+47"/>
         <source>Set price to guide on %n item(s)</source>
         <translation>
             <numerusform>Sätt prisguide priser på %n artikel</numerusform>
@@ -2364,7 +2369,7 @@
         </translation>
     </message>
     <message>
-        <location line="+195"/>
+        <location line="+196"/>
         <source>Export File</source>
         <translation>Exportera Fil</translation>
     </message>
@@ -2405,7 +2410,7 @@
         <translation>Misslyckades läsa in dokument %1: %2</translation>
     </message>
     <message>
-        <location line="+15"/>
+        <location line="+19"/>
         <source>Save File as</source>
         <translation>Spara fil som</translation>
     </message>
@@ -2425,7 +2430,7 @@
         <translation>Lager för %1</translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+54"/>
         <source>You have selected more than 1,000 lots, but BrickLink&apos;s servers are unable to cope with this many lots at the same time.&lt;br&gt;You should better export multiple, smaller batches.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Du har valt mer än 1000 poster, men BrickLink&apos;s servrar klarar inte av så många poster samtidigt.&lt;br&gt;Du bör exportera flera mindre omgångar.&lt;br&gt;&lt;br&gt;Vill du exportera den här listan ändå?</translation>
     </message>
@@ -2750,7 +2755,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location line="+668"/>
+        <location line="+684"/>
         <source>%1 on %Ln item(s)</source>
         <extracomment>Generic undo/redo text: %1 == action name (e.g. &quot;Set price&quot;)</extracomment>
         <translation>
@@ -2802,7 +2807,7 @@
         <translation>Bild</translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+15"/>
         <source>Item Id</source>
         <translation>Artikel nummer</translation>
     </message>
@@ -3072,7 +3077,7 @@
         <translation>Alternativt Artikel nummer</translation>
     </message>
     <message>
-        <location line="+348"/>
+        <location line="+350"/>
         <source>This document has no differences that could be exported.</source>
         <translation>Detta dokument har inga förändringar som kan exporteras.</translation>
     </message>
@@ -3095,7 +3100,7 @@
 <context>
     <name>DocumentStatistics</name>
     <message>
-        <location line="-2432"/>
+        <location line="-2453"/>
         <source>min.</source>
         <translation>min.</translation>
     </message>
@@ -3532,7 +3537,7 @@
     </message>
     <message>
         <location line="+45"/>
-        <location filename="../src/mobile/ImportInventoryWidget.qml" line="+102"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="+101"/>
         <source>Condition:</source>
         <translation>Skick:</translation>
     </message>
@@ -3895,7 +3900,7 @@
 <context>
     <name>InfoWidget</name>
     <message>
-        <location filename="../src/mobile/InfoWidget.qml" line="+71"/>
+        <location filename="../src/mobile/InfoWidget.qml" line="+60"/>
         <source>No image available</source>
         <translation>Ingen bild tillgänglig</translation>
     </message>
@@ -3968,17 +3973,17 @@
         <translation type="vanished">BrickStores begäran om kameraåtkomst avslogs. Du kommer inte att kunna använda din webbkamera för att identifiera delar förrän du har beviljat de nödvändiga behörigheterna via ditt systems Inställningar-applikation.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="+267"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="+276"/>
         <source>Item Scanner</source>
         <translation>Scanner för artiklar</translation>
     </message>
     <message>
-        <location line="-209"/>
+        <location line="-218"/>
         <source>Any</source>
         <translation>Någon</translation>
     </message>
     <message>
-        <location line="+212"/>
+        <location line="+221"/>
         <source>Camera</source>
         <translation>Kamera</translation>
     </message>
@@ -4008,7 +4013,7 @@
         <translation>Lägg till</translation>
     </message>
     <message>
-        <location line="+49"/>
+        <location line="+51"/>
         <source>Tap on the camera preview to capture an image.</source>
         <translation>Tryck på kamerans förhandsgranskning för att ta en bild.</translation>
     </message>
@@ -4052,7 +4057,7 @@
 <context>
     <name>LDraw::Library</name>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="+121"/>
+        <location filename="../src/ldraw/library.cpp" line="+120"/>
         <source>download failed</source>
         <translation>Nedladdning misslyckades</translation>
     </message>
@@ -4265,7 +4270,7 @@ Högerklicka: Meny</translation>
 <context>
     <name>MobileApplication</name>
     <message>
-        <location filename="../src/mobile/mobileapplication.cpp" line="+109"/>
+        <location filename="../src/mobile/mobileapplication.cpp" line="+93"/>
         <source>Would you like to consolidate %L1 lots?</source>
         <translation>Vill du slå ihop %L1 poster?</translation>
     </message>
@@ -4558,7 +4563,7 @@ Högerklicka: Meny</translation>
         <translation>Visa Partier (Lots) som är till salu på BrickLink...</translation>
     </message>
     <message>
-        <location line="+75"/>
+        <location line="+67"/>
         <source>Please wait... updating</source>
         <translation>Var vänlig vänta... uppdaterar</translation>
     </message>
@@ -4586,7 +4591,7 @@ Högerklicka: Meny</translation>
         <translation>Visa Partier (Lots) som är till salu på BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/mobile/PriceGuideWidget.qml" line="+115"/>
+        <location filename="../src/mobile/PriceGuideWidget.qml" line="+105"/>
         <location line="+27"/>
         <location filename="../src/desktop/priceguidewidget.cpp" line="+2"/>
         <source>Qty.</source>
@@ -4671,7 +4676,7 @@ Högerklicka: Meny</translation>
         <translation>Var vänlig vänta... uppdaterar</translation>
     </message>
     <message>
-        <location filename="../src/desktop/priceguidewidget.cpp" line="+580"/>
+        <location filename="../src/desktop/priceguidewidget.cpp" line="+572"/>
         <source>Lowest price</source>
         <translation>Lägsta pris</translation>
     </message>
@@ -5197,12 +5202,12 @@ Högerklicka: Meny</translation>
 <context>
     <name>Scanner::Capture</name>
     <message>
-        <location filename="../src/scanner/capture.cpp" line="+164"/>
+        <location filename="../src/scanner/capture.cpp" line="+165"/>
         <source>Scanning failed</source>
         <translation>Skanning misslyckades</translation>
     </message>
     <message>
-        <location line="+78"/>
+        <location line="+92"/>
         <source>BrickStore&apos;s request for camera access was denied. You will not be able to use your webcam to identify parts until you grant the required permissions via your system&apos;s Settings application.</source>
         <translation>BrickStores begäran om kameraåtkomst avslogs. Du kommer inte att kunna använda din webbkamera för att identifiera delar förrän du har beviljat de nödvändiga behörigheterna via ditt systems Inställningar-applikation.</translation>
     </message>
@@ -5223,7 +5228,7 @@ Högerklicka: Meny</translation>
 <context>
     <name>SelectColor</name>
     <message>
-        <location filename="../src/mobile/SelectColor.qml" line="+74"/>
+        <location filename="../src/mobile/SelectColor.qml" line="+73"/>
         <location filename="../src/desktop/selectcolor.cpp" line="+151"/>
         <source>Known Colors</source>
         <translation>Kända färger</translation>
@@ -6400,7 +6405,7 @@ Högerklicka: Meny</translation>
         <translation type="vanished">U</translation>
     </message>
     <message>
-        <location line="+226"/>
+        <location line="+228"/>
         <source>CP</source>
         <translation>CP</translation>
     </message>
@@ -6420,7 +6425,7 @@ Högerklicka: Meny</translation>
         <translation>Vilken artikel ska tas bort från nuvarande dokument:</translation>
     </message>
     <message>
-        <location filename="../src/mobile/View.qml" line="+229"/>
+        <location filename="../src/mobile/View.qml" line="+232"/>
         <location filename="../src/desktop/view.cpp" line="+26"/>
         <source>Increase or decrease the prices of the selected items by</source>
         <translation>Öka eller minska priset på de markerade artiklarna med</translation>

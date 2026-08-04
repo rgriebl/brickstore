@@ -1032,6 +1032,14 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
                                BrickLink::NoPriceGuideOption noPgOption)
 {
     Q_ASSERT(!m_setToPG);
+
+    const double currencyRate = Currency::inst()->rate(m_model->currencyCode());
+    if (qFuzzyIsNull(currencyRate)) {
+        UIHelpers::warning(tr("No exchange rate is available for this document's currency (%1).")
+                               .arg(CMB_BOLD(m_model->currencyCode())));
+        return;
+    }
+
     const auto sel = selectedLots();
 
     Q_ASSERT(!isBlockingOperationActive());
@@ -1045,7 +1053,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
     m_setToPG->doneCount = 0;
     m_setToPG->time = time;
     m_setToPG->price = price;
-    m_setToPG->currencyRate = Currency::inst()->rate(m_model->currencyCode());
+    m_setToPG->currencyRate = currencyRate;
     m_setToPG->noPgOption = noPgOption;
 
     for (Lot *lot : sel) {

@@ -1367,7 +1367,7 @@
 <context>
     <name>BrickLink::Database</name>
     <message>
-        <location filename="../src/bricklink/database.cpp" line="+65"/>
+        <location filename="../src/bricklink/database.cpp" line="+72"/>
         <source>Already up-to-date.</source>
         <translation>Bereits auf dem aktuellen Stand.</translation>
     </message>
@@ -1515,7 +1515,7 @@
 <context>
     <name>BrickLink::PriceGuideCache</name>
     <message>
-        <location filename="../src/bricklink/priceguide.cpp" line="+825"/>
+        <location filename="../src/bricklink/priceguide.cpp" line="+816"/>
         <source>VAT is included</source>
         <translation>Inklusive MwSt.</translation>
     </message>
@@ -1691,17 +1691,17 @@
 <context>
     <name>CheckForUpdates</name>
     <message>
-        <location filename="../src/common/checkforupdates.cpp" line="+77"/>
+        <location filename="../src/common/checkforupdates.cpp" line="+81"/>
         <source>BrickStore was updated:</source>
         <translation>BrickStore wurde aktualisiert:</translation>
     </message>
     <message>
-        <location line="+94"/>
+        <location line="+102"/>
         <source>Version information is not available.</source>
         <translation>Keine Versionsinformationen verfügbar.</translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+4"/>
         <source>Your currently installed version is up-to-date.</source>
         <translation>Ihre momentan installierte Version ist bereits auf dem neuesten Stand.</translation>
     </message>
@@ -1710,12 +1710,12 @@
         <translation type="vanished">Programm-Updates</translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+8"/>
         <source>A newer version than the one currently installed is available:</source>
         <translation>Es ist eine neuere Version als die momentan installierte verfügbar:</translation>
     </message>
     <message>
-        <location line="-82"/>
+        <location line="-96"/>
         <source>Changes:</source>
         <translation>Änderungen:</translation>
     </message>
@@ -2103,12 +2103,12 @@
         <translation type="vanished">%1 (Zeile %2, Spalte %3)</translation>
     </message>
     <message>
-        <location filename="../src/common/currency.cpp" line="+258"/>
+        <location filename="../src/common/currency.cpp" line="+265"/>
         <source>no currency data found</source>
         <translation>keine Wechselkurse gefunden</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+6"/>
         <source>Failed to download exchange rates.</source>
         <translation>Ein Fehler beim Herunterladen der Wechselkurse ist aufgetreten.</translation>
     </message>
@@ -2300,7 +2300,7 @@
         <translation>Sie haben ein altes Dokument geladen, das keine Infomationen zur benutzten Währung hat. Konvertieren Sie das Dokument mit Hilfe der Währungsauswahl in der rechten, oberen Ecke, um die fehlenden Informationen zu ergänzen.</translation>
     </message>
     <message>
-        <location line="+27"/>
+        <location line="+31"/>
         <source>The document %1 has been modified.</source>
         <translation>Das Dokument %1 beinhaltet Änderungen.</translation>
     </message>
@@ -2310,7 +2310,7 @@
         <translation>Sollen die Änderungen gespeichert werden?</translation>
     </message>
     <message numerus="yes">
-        <location line="+277"/>
+        <location line="+295"/>
         <source>Duplicated %Ln item(s)</source>
         <translation>
             <numerusform>Ein Teil dupliziert</numerusform>
@@ -2319,11 +2319,16 @@
     </message>
     <message>
         <location line="+199"/>
+        <source>No exchange rate is available for this document&apos;s currency (%1).</source>
+        <translation>Für die Währung dieses Dokuments (%1) ist kein Wechselkurs verfügbar.</translation>
+    </message>
+    <message>
+        <location line="+8"/>
         <source>Loading price guide data from disk</source>
         <translation>Lade Richtpreise vom Dateisystem</translation>
     </message>
     <message>
-        <location line="+33"/>
+        <location line="+32"/>
         <source>Downloading price guide data from BrickLink</source>
         <translation>Lade Richtpreise von BrickLink herunter</translation>
     </message>
@@ -2338,7 +2343,7 @@
         <translation>Keine Daten</translation>
     </message>
     <message numerus="yes">
-        <location line="+48"/>
+        <location line="+47"/>
         <source>Set price to guide on %n item(s)</source>
         <translation>
             <numerusform>Preis für ein Teil auf Richtpreis gesetzt</numerusform>
@@ -2372,7 +2377,7 @@
         </translation>
     </message>
     <message>
-        <location line="+195"/>
+        <location line="+196"/>
         <source>Export File</source>
         <translation>Datei exportieren</translation>
     </message>
@@ -2413,7 +2418,7 @@
         <translation>Dokument %1 konnte nicht geladen werden: %2</translation>
     </message>
     <message>
-        <location line="+15"/>
+        <location line="+19"/>
         <source>Save File as</source>
         <translation>Datei speichern unter</translation>
     </message>
@@ -2433,7 +2438,7 @@
         <translation>Inventarliste von %1</translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+54"/>
         <source>You have selected more than 1,000 lots, but BrickLink&apos;s servers are unable to cope with this many lots at the same time.&lt;br&gt;You should better export multiple, smaller batches.&lt;br&gt;&lt;br&gt;Do you want to export this list anyway?</source>
         <translation>Sie haben mehr als 1.000 Posten selektiert, aber die BrickLink Server können diese Anzahl an Posten nicht auf einmal verarbeiten.&lt;br&gt;Es wäre besser den Export auf mehrere, kleinere Sätze aufzuteilen.&lt;br&gt;&lt;br&gt;Soll diese Liste trotzdem exportiert werden?</translation>
     </message>
@@ -2757,7 +2762,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location line="+668"/>
+        <location line="+684"/>
         <source>%1 on %Ln item(s)</source>
         <extracomment>Generic undo/redo text: %1 == action name (e.g. &quot;Set price&quot;)</extracomment>
         <translation>
@@ -2809,7 +2814,7 @@
         <translation>Bild</translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+15"/>
         <source>Item Id</source>
         <translation>Teile-Id</translation>
     </message>
@@ -3079,7 +3084,7 @@
         <translation>Alternative Id</translation>
     </message>
     <message>
-        <location line="+348"/>
+        <location line="+350"/>
         <source>This document has no differences that could be exported.</source>
         <translation>Dieses Dokument hat keine Differenzen die exportiert werden könnenten.</translation>
     </message>
@@ -3102,7 +3107,7 @@
 <context>
     <name>DocumentStatistics</name>
     <message>
-        <location line="-2432"/>
+        <location line="-2453"/>
         <source>min.</source>
         <translation>min.</translation>
     </message>
@@ -3539,7 +3544,7 @@
     </message>
     <message>
         <location line="+45"/>
-        <location filename="../src/mobile/ImportInventoryWidget.qml" line="+102"/>
+        <location filename="../src/mobile/ImportInventoryWidget.qml" line="+101"/>
         <source>Condition:</source>
         <translation>Zustand:</translation>
     </message>
@@ -3902,7 +3907,7 @@
 <context>
     <name>InfoWidget</name>
     <message>
-        <location filename="../src/mobile/InfoWidget.qml" line="+71"/>
+        <location filename="../src/mobile/InfoWidget.qml" line="+60"/>
         <source>No image available</source>
         <translation>Kein Bild verfügbar</translation>
     </message>
@@ -3975,17 +3980,17 @@
         <translation type="vanished">Die Anfrage von BrickStore nach Kamerazugriff wurde abgelehnt. Sie können Ihre Webcam erst dann zur Identifizierung von Teilen verwenden, wenn die erforderlichen Berechtigungen über die Systemeinstellungen erteilt wurdent.</translation>
     </message>
     <message>
-        <location filename="../src/desktop/itemscannerdialog.cpp" line="+267"/>
+        <location filename="../src/desktop/itemscannerdialog.cpp" line="+276"/>
         <source>Item Scanner</source>
         <translation>Teile Scanner</translation>
     </message>
     <message>
-        <location line="-209"/>
+        <location line="-218"/>
         <source>Any</source>
         <translation>Beliebig</translation>
     </message>
     <message>
-        <location line="+212"/>
+        <location line="+221"/>
         <source>Camera</source>
         <translation>Kamera</translation>
     </message>
@@ -4015,7 +4020,7 @@
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location line="+49"/>
+        <location line="+51"/>
         <source>Tap on the camera preview to capture an image.</source>
         <translation>Tippen Sie auf die Kameravorschau, um ein Bild aufzunehmen.</translation>
     </message>
@@ -4059,7 +4064,7 @@
 <context>
     <name>LDraw::Library</name>
     <message>
-        <location filename="../src/ldraw/library.cpp" line="+121"/>
+        <location filename="../src/ldraw/library.cpp" line="+120"/>
         <source>download failed</source>
         <translation>Fehler beim Herunterladen</translation>
     </message>
@@ -4279,7 +4284,7 @@ Rechts-Click: Menü</translation>
 <context>
     <name>MobileApplication</name>
     <message>
-        <location filename="../src/mobile/mobileapplication.cpp" line="+109"/>
+        <location filename="../src/mobile/mobileapplication.cpp" line="+93"/>
         <source>Would you like to consolidate %L1 lots?</source>
         <translation>Sollen %L1 Posten zusammengeführt werden?</translation>
     </message>
@@ -4567,12 +4572,12 @@ Rechts-Click: Menü</translation>
         <translation>Verkaufsangebote auf BrickLink...</translation>
     </message>
     <message>
-        <location line="+75"/>
+        <location line="+67"/>
         <source>Please wait... updating</source>
         <translation>Bitte warten... Aktualisierung läuft</translation>
     </message>
     <message>
-        <location line="-103"/>
+        <location line="-95"/>
         <source>Center view</source>
         <translation>Ansicht zentrieren</translation>
     </message>
@@ -4600,7 +4605,7 @@ Rechts-Click: Menü</translation>
         <translation>Verkaufsangebote auf BrickLink...</translation>
     </message>
     <message>
-        <location filename="../src/mobile/PriceGuideWidget.qml" line="+115"/>
+        <location filename="../src/mobile/PriceGuideWidget.qml" line="+105"/>
         <location line="+27"/>
         <location filename="../src/desktop/priceguidewidget.cpp" line="+2"/>
         <source>Qty.</source>
@@ -4685,7 +4690,7 @@ Rechts-Click: Menü</translation>
         <translation>Bitte warten... Aktualisierung läuft</translation>
     </message>
     <message>
-        <location filename="../src/desktop/priceguidewidget.cpp" line="+580"/>
+        <location filename="../src/desktop/priceguidewidget.cpp" line="+572"/>
         <source>Lowest price</source>
         <translation>Niedrigster Preis</translation>
     </message>
@@ -5211,12 +5216,12 @@ Rechts-Click: Menü</translation>
 <context>
     <name>Scanner::Capture</name>
     <message>
-        <location filename="../src/scanner/capture.cpp" line="+164"/>
+        <location filename="../src/scanner/capture.cpp" line="+165"/>
         <source>Scanning failed</source>
         <translation>Der Scanvorgang ist fehlgeschlagen</translation>
     </message>
     <message>
-        <location line="+78"/>
+        <location line="+92"/>
         <source>BrickStore&apos;s request for camera access was denied. You will not be able to use your webcam to identify parts until you grant the required permissions via your system&apos;s Settings application.</source>
         <translation>Die Anfrage von BrickStore nach Kamerazugriff wurde abgelehnt. Sie können Ihre Webcam erst dann zur Identifizierung von Teilen verwenden, wenn die erforderlichen Berechtigungen über die Systemeinstellungen erteilt wurdent.</translation>
     </message>
@@ -5237,7 +5242,7 @@ Rechts-Click: Menü</translation>
 <context>
     <name>SelectColor</name>
     <message>
-        <location filename="../src/mobile/SelectColor.qml" line="+74"/>
+        <location filename="../src/mobile/SelectColor.qml" line="+73"/>
         <location filename="../src/desktop/selectcolor.cpp" line="+151"/>
         <source>Known Colors</source>
         <translation>Bekannte Farben</translation>
@@ -6413,12 +6418,12 @@ Rechts-Click: Menü</translation>
         <translation type="vanished">G</translation>
     </message>
     <message>
-        <location line="+226"/>
+        <location line="+228"/>
         <source>CP</source>
         <translation>CP</translation>
     </message>
     <message>
-        <location line="+229"/>
+        <location line="+232"/>
         <location filename="../src/desktop/view.cpp" line="-202"/>
         <source>Increase or decrease the prices of the selected items by</source>
         <translation>Erhöhe oder erniedrige die Preise der ausgewählten Teile um</translation>

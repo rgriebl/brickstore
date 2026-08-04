@@ -93,6 +93,8 @@ static const QVector<RateProviderDefinition> &rateProviderDefinitions()
                  throw Exception(u"%1 (line %2, column %3)"_qs.arg(xml.errorString())
                                      .arg(xml.lineNumber()).arg(xml.columnNumber()));
              }
+             if (!rates.isEmpty())
+                 rates.insert(u"USD"_qs, 1);
              return rates;
          } }
     };
@@ -149,7 +151,7 @@ Currency *Currency::inst()
 
 QStringList Currency::currencyCodes() const
 {
-    QStringList ccodes;
+    QStringList ccodes { u"USD"_qs };
     for (const auto &p : rateProviderDefinitions())
         ccodes << m_rates[p.rateProvider].keys();
     ccodes.removeDuplicates();
@@ -207,6 +209,10 @@ double Currency::legacyRate() const
 
 double Currency::rate(const QString &currencyCode) const
 {
+    // Make sure the USD rate is always available
+    if (currencyCode == u"USD")
+        return 1;
+
     for (const auto &p : rateProviderDefinitions()) {
         const auto rates = m_rates.value(p.rateProvider);
         if (auto it = rates.constFind(currencyCode); it != rates.cend())
@@ -238,8 +244,10 @@ QCoro::Task<> Currency::updateRates(bool silent)
     for (const auto &p : rateProviderDefinitions())
         replies << m_nam->get(QNetworkRequest(p.euroFeedUrl));
 
-    decltype(m_rates) newRates;
-    QSet<QString> seenCurrencyCodes { u"RUB"_qs, u"BYN"_qs };
+    // Start out with what we know already: the feeds are independent of each other, so one of
+    // them failing must not throw away the rates of the others.
+    decltype(m_rates) newRates = m_rates;
+    QVector<RateProvider> updatedProviders;
 
     for (qsizetype i = 0; i < replies.size(); ++i) {
         auto reply = replies.at(i);
@@ -248,24 +256,16 @@ QCoro::Task<> Currency::updateRates(bool silent)
 
         auto &p = rateProviderDefinitions().at(i);
 
-        QHash<QString, double> rates;
         try {
             if (reply->error() != QNetworkReply::NoError)
                 throw Exception(reply->errorString());
 
-            rates = p.feedParser(reply->readAll());
+            QHash<QString, double> rates = p.feedParser(reply->readAll());
             if (rates.isEmpty())
                 throw Exception(tr("no currency data found"));
 
-            rates.removeIf([&](auto it) {
-                if (seenCurrencyCodes.contains(it.key())) {
-                    return true;
-                } else {
-                    seenCurrencyCodes.insert(it.key());
-                    return false;
-                }
-            });
             newRates.insert(p.rateProvider, rates);
+            updatedProviders << p.rateProvider;
         } catch (const Exception &e) {
             if (OnlineState::inst()->isOnline() && !m_silent) {
                 emit updateRatesFailed(tr("Failed to download exchange rates.")
@@ -275,11 +275,37 @@ QCoro::Task<> Currency::updateRates(bool silent)
         }
     }
 
-    if (!newRates.isEmpty()) {
-        m_rates = newRates;
-        m_lastUpdate = QDateTime::currentDateTime();
-        emit ratesChanged();
+    if (updatedProviders.isEmpty())
+        co_return;
+
+    // A currency can be supplied by more than one feed and the first provider to claim it wins.
+    // The ones refreshed just now come first: for the others we are down to cached rates
+    QVector<RateProvider> claimOrder = updatedProviders;
+    for (const auto &p : rateProviderDefinitions()) {
+        if (!claimOrder.contains(p.rateProvider))
+            claimOrder << p.rateProvider;
     }
+
+    QSet<QString> seenCurrencyCodes { u"RUB"_qs, u"BYN"_qs };
+
+    for (const auto &rateProvider : std::as_const(claimOrder)) {
+        auto ratesIt = newRates.find(rateProvider);
+        if (ratesIt == newRates.end())
+            continue;
+
+        ratesIt->removeIf([&](auto it) {
+            if (seenCurrencyCodes.contains(it.key())) {
+                return true;
+            } else {
+                seenCurrencyCodes.insert(it.key());
+                return false;
+            }
+        });
+    }
+
+    m_rates = newRates;
+    m_lastUpdate = QDateTime::currentDateTime();
+    emit ratesChanged();
 }
 
 QDateTime Currency::lastUpdate() const
