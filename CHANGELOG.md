@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+## [2026.8.1] - 2026-08-05
+
+A lot of performance and stability fixes, with the most notable resolved bugs being:
+- The new **Pick a Brick** exporter script is now correctly installed.
+- All Linux packages should now be able to access the webcam for Brickcognize part identification.
+- Legacy macOS (10.15 to 12) version are not getting SSL certificate updates from Apple and now fail to connect to sites that are issuing new ones like the ECB (European Central Bank) did on Aug 1st. BrickStore will now try to fall back to floatrates.com if it cannot get its exchange rates from the ECB (these rates were also required for USD based documents).
+
+
 ## [2026.7.1] - 2026-07-29
 
 A bigger release this time, with a few new features and a lot of stability fixes:
@@ -786,7 +795,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2026.7.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2026.8.1...HEAD
+[2026.8.1]: https://github.com/rgriebl/brickstore/releases/tag/v2026.8.1
 [2026.7.1]: https://github.com/rgriebl/brickstore/releases/tag/v2026.7.1
 [2026.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2026.3.2
 [2026.3.1]: https://github.com/rgriebl/brickstore/releases/tag/v2026.3.1
