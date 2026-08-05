@@ -11,6 +11,10 @@
 
 ## BrickStore
 
+<!-- hy-mt2-i18n:start -->
+**English** · [中文](./README_zh-CN.md) · [日本語](./README_ja.md) · [Español](./README_es.md)
+<!-- hy-mt2-i18n:end -->
+
 BrickStore is a BrickLink offline management tool. It is **multi-platform** (Windows, macOS and Linux as well as iOS and Android), **multilingual** (currently English, German, Spanish, Swedish and French), **fast** and **stable**.
 
 ## License
