@@ -20,11 +20,11 @@ class SelectDocument : public QWidget
 {
     Q_OBJECT
 public:
-    SelectDocument(const DocumentModel *self, QWidget *parent = nullptr);
+    SelectDocument(const DocumentModel *self, bool multipleDocuments, QWidget *parent = nullptr);
     ~SelectDocument() override;
 
     bool isDocumentSelected() const;
-    BrickLink::LotList lots() const;
+    BrickLink::LotList lots(const DocumentModel *model) const;
     QString currencyCode() const;
 
 signals:
@@ -62,11 +62,10 @@ class SelectCopyMergeDialog : public QWizard
     Q_OBJECT
 public:
     SelectCopyMergeDialog(const DocumentModel *self, const QString &chooseDocText,
-                          const QString &chooseFieldsText, QWidget *parent = nullptr);
+                          const QString &chooseFieldsText, bool addDocuments, QWidget *parent = nullptr);
     ~SelectCopyMergeDialog() override;
 
-    LotList lots() const;
-    QString currencyCode() const;
+    LotList lots(const DocumentModel &model) const;
     QHash<DocumentModel::Field, DocumentModel::MergeMode> fieldMergeModes() const;
 
 protected:
