@@ -1,16 +1,21 @@
 # Copyright (C) 2004-2026 Robert Griebl
 # SPDX-License-Identifier: GPL-3.0-only
 
-include(FetchContent)
+if(FLATHUB_NETWORK_OFF)
+  set(sentry_SOURCE_DIR "${CMAKE_SOURCE_DIR}/_deps/sentry-src")
+  set(sentry_BINARY_DIR "${CMAKE_BINARY_DIR}/_deps/sentry-build")
+else()
+  include(FetchContent)
 
-FetchContent_Declare(
-    sentry
-    GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-    GIT_TAG        ${SENTRY_VERSION}
-    SOURCE_SUBDIR  "NeedManualAddSubDir" # make it possible to add_subdirectory below
-)
+  FetchContent_Declare(
+      sentry
+      GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
+      GIT_TAG        ${SENTRY_VERSION}
+      SOURCE_SUBDIR  "NeedManualAddSubDir" # make it possible to add_subdirectory below
+  )
 
-FetchContent_MakeAvailable(sentry)
+  FetchContent_MakeAvailable(sentry)
+endif()
 
 set(mll ${CMAKE_MESSAGE_LOG_LEVEL})
 if (NOT VERBOSE_FETCH)
