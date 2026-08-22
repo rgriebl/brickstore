@@ -236,7 +236,6 @@ jobs:
         host: 'linux'
         arch: 'linux_gcc_64'
         dir: 'gcc_64'
-        tools: tools_opensslv3_src
         modules: ${{ env.BRICKSTORE_GUI_QT6_INSTALLER_MODULES }}
 
     - name: Build for Linux (Snap / Flatpak)
@@ -249,22 +248,6 @@ jobs:
             -B build -S .
         cmake --build build --config RelWithDebInfo --parallel --verbose
         env DESTDIR=build/BrickStore-Install cmake --install build --config RelWithDebInfo --prefix /usr
-
-    - name: OpenSSLv3 for Linux (Snap)
-      if: matrix.config.snap
-      run: |
-        cd ${Qt6_DIR}/../../Tools/OpenSSLv3/src
-        ./Configure --prefix=/usr --libdir=lib --openssldir=/etc/ssl '-Wl,-rpath,\$$ORIGIN,--enable-new-dtags'
-        make -j4 build_libs
-        make DESTDIR=${GITHUB_WORKSPACE}/build/BrickStore-Install install_runtime_libs
-
-        # Qt opens the unversioned libs first, so we need to prevent those from being
-        # loaded from the host system.
-        cd ${GITHUB_WORKSPACE}/build/BrickStore-Install/usr/lib/
-        for i in crypto ssl; do
-            rm -f lib${i}.so.1*
-            ln -sr lib${i}.so.3 lib${i}.so
-        done
 
     - name: Create Linux Snap / Flatpak 1
       run: |
