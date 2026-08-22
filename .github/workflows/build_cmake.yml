@@ -203,39 +203,56 @@ jobs:
 
   build-snap-flatpak:
     name: ${{ matrix.config.name }}
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.config.runs-on }}
 
     strategy:
       fail-fast: false
       matrix:
         config:
-        - name: "Ubuntu Snap"
-          artifact: "Linux-Snap"
+        - name: "Ubuntu Snap Intel 64bit"
+          artifact: "Linux-Snap-amd64"
           snap: true
+          runs-on: ubuntu-24.04
+          qt_host: 'linux'
+          qt_arch: 'linux_gcc_64'
+          qt_dir: 'gcc_64'
 
-        - name: "Linux Flatpak"
-          artifact: "Linux-Flatpak"
+        - name: "Ubuntu Snap ARM 64bit"
+          artifact: "Linux-Snap-arm64"
+          snap: true
+          runs-on: ubuntu-24.04-arm
+          qt_host: 'linux_arm64'
+          qt_arch: 'linux_gcc_arm64'
+          qt_dir: 'gcc_arm64'
+
+        - name: "Linux Flatpak Intel 64bit"
+          artifact: "Linux-Flatpak-amd64"
           flatpak: true
+          runs-on: ubuntu-24.04
+          qt_host: 'linux'
+          qt_arch: 'linux_gcc_64'
+          qt_dir: 'gcc_64'
 
-        # An ARM Flatpak is not possible ATM, because the QCQtDeployer project does not
-        # distribute native ARM64 builds. It would need a separate job anyway: runs-on
-        # and the Qt architecture are fixed per job now, not per matrix entry.
+        - name: "Linux Flatpak ARM 64bit"
+          artifact: "Linux-Flatpak-arm64"
+          flatpak: true
+          runs-on: ubuntu-24.04-arm
+          qt_host: 'linux_arm64'
+          qt_arch: 'linux_gcc_arm64'
+          qt_dir: 'gcc_arm64'
 
     steps:
     - uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
-    # the OpenSSL sources are only needed by the Snap, but installing the tool for
-    # both keeps the aqtinstall cache shared between the two legs
-
     - uses: $/.github/actions/install-qt
       with:
         os: linux
         version: ${{ env.BRICKSTORE_QT_DESKTOP_VERSION }}
-        host: 'linux'
-        arch: 'linux_gcc_64'
-        dir: 'gcc_64'
+        host: ${{ matrix.config.qt_host }}
+        arch: ${{ matrix.config.qt_arch }}
+        dir: ${{ matrix.config.qt_dir }}
         modules: ${{ env.BRICKSTORE_GUI_QT6_INSTALLER_MODULES }}
 
     - name: Build for Linux (Snap / Flatpak)
@@ -665,16 +682,25 @@ jobs:
   # instead of rebuilding. The debug info uploads cannot move here: they scan
   # Qt's installed libraries, which only exist on the build runner.
 
+  # One revision per architecture: the store keeps them apart, and the promote step
+  # in the release job moves all of a channel's revisions at once.
+
   publish-snap:
     if: startsWith(github.ref, 'refs/tags/v')
-    name: "Publish Snap"
+    name: "Publish Snap (${{ matrix.artifact }})"
     needs: [ build-snap-flatpak ]
     runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        artifact: [ "Linux-Snap-amd64", "Linux-Snap-arm64" ]
+
     steps:
     - name: Download the snap
       uses: actions/download-artifact@v7
       with:
-        name: Linux-Snap
+        name: ${{ matrix.artifact }}
         path: snap
 
     - name: Resolve the snap file name
