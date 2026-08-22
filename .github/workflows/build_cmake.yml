@@ -249,16 +249,24 @@ jobs:
         cmake --build build --config RelWithDebInfo --parallel --verbose
         env DESTDIR=build/BrickStore-Install cmake --install build --config RelWithDebInfo --prefix /usr
 
+    # QuasarApp only releases x86_64 binaries. Building from source needs nothing but
+    # Qt Core and takes well under a minute, so do it on every architecture.
+
+    - name: Build CQtDeployer
+      run: |
+        git clone --recursive --branch v1.6.2441.67ee1ef \
+            https://github.com/QuasarApp/CQtDeployer.git .cqtdeployer/src
+        # the pe-parse submodule builds with -Werror, but newer GCCs deprecate wstring_convert
+        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCQT_DEPLOYER_TESTS=OFF \
+            -DCMAKE_CXX_FLAGS=-Wno-error=deprecated-declarations \
+            -B .cqtdeployer/build -S .cqtdeployer/src
+        cmake --build .cqtdeployer/build --parallel
+
     - name: Create Linux Snap / Flatpak 1
       run: |
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install libfuse2
-        wget  -P .cqtdeployer -N "https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2441.67ee1ef/CQtDeployer_1.6.2441.67ee1ef_Linux_x86_64.zip"
-        unzip -u .cqtdeployer/CQtDeployer_1.6.2441.67ee1ef_Linux_x86_64.zip -d .cqtdeployer
-        chmod +x .cqtdeployer/bin/CQtDeployer
-        chmod +x .cqtdeployer/CQtDeployer.sh
         cd build
         # -libDir is what gets Qt's bundled FFmpeg libs deployed for the QtMultimedia backend
-        ../.cqtdeployer/CQtDeployer.sh \
+        ../.cqtdeployer/build/src/CQtDeployer/CQtDeployer \
             -bin bin/brickstore -qmlDir ../src \
             -libDir "${Qt6_DIR}/lib" \
             -qmake "${Qt6_DIR}/bin/qmake" \
