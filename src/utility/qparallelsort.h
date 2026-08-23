@@ -1,94 +1,148 @@
 // Copyright (C) 2004-2026 Robert Griebl
 // SPDX-License-Identifier: GPL-3.0-only
 
+// The merges are split with the co-rank binary search from Odeh, Green, Mwassi,
+// Shmueli, Birk: "Merge Path - Parallel Merging Made Simple" (IPDPS 2012).
 
-// The parallel merge sort algorithm was derived from Markus Weissmann's
-// BSD licensed "pmsort" (originally implemented in C and pthreads):
-
-/*_
- * Copyright (c) 2006, 2007, Markus W. Weissmann <mail@mweissmann.de>
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of OpenDarwin nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
- * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * $Id: $
- *
- */
 #pragma once
 
+#include <algorithm>
+#include <bit>
+#include <iterator>
+#include <memory>
+
+#include <QtCore/QThreadPool>
+#include <QtCore/QVarLengthArray>
 #include <QtConcurrentRun>
 
 //#define QPARALLELSORT_TESTING // benchmarking
-//#define QPARALLELSORT_INPLACE_MERGE
+
+// Bottom-up parallel merge sort:
+//   phase 1: sort `chunks` equally sized blocks in parallel with std::sort
+//   phase 2: log2(chunks) levels, each merging pairs of adjacent runs
+//
+// Every merge is split into as many independent output pieces as there are
+// chunks. Serial merges would make the top level merge alone O(n) on a single
+// thread, which caps the speedup at ~6x regardless of the core count.
+// Consecutive levels ping-pong between the array and the scratch buffer, so no
+// copy-back is needed; if the number of levels is odd, phase 1 moves the sorted
+// chunks into the buffer first, so that the last level lands in the array.
 
 static constexpr qsizetype MinParallelSpan = 4096;
 
-template <typename RandomAccessIterator, typename T, typename LessThan>
-void qParallelSortThread(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan,
-                         T *tmp, int threadCount)
+// Runs fn(0) to fn(count - 1) in parallel; the calling thread takes part.
+template <typename Fn>
+inline void qParallelRun(int count, Fn fn)
 {
-    const qsizetype span = end - begin;
-
-    // stop if there are no threads left OR if size of array is at most MinParallelSpan (to avoid overhead)
-    if ((threadCount == 1) || (span <= MinParallelSpan)) {
-        // let's just sort this in serial
-        std::sort(begin, end, lessThan);
-        return;
-    } else {
-        // divide & conquer
-        const qsizetype middle = (span + 1) / 2; // bigger half of array if array-size is uneven
-
-        QFuture<void> future = QtConcurrent::run(qParallelSortThread<RandomAccessIterator, T, LessThan>,
-                                                 begin + middle, end, lessThan, tmp + middle, threadCount / 2);
-        qParallelSortThread(begin, begin + middle, lessThan, tmp, (threadCount + 1) / 2);
+    QVarLengthArray<QFuture<void>, 64> futures;
+    futures.reserve(count - 1);
+    for (int i = 1; i < count; ++i)
+        futures.append(QtConcurrent::run(fn, i));
+    fn(0);
+    for (auto &future : futures)
         future.waitForFinished();
+}
 
-#ifdef QPARALLELSORT_INPLACE_MERGE
-        std::inplace_merge(begin, begin + middle, end, lessThan);
-#else
-        std::merge(begin, begin + middle, begin + middle, end, tmp, lessThan);
-        std::copy(tmp, tmp + span, begin);
-#endif
+// Where to cut the merge of [x, x + nx) and [y, y + ny) to get exactly the
+// first k elements of the merged range: returns the number of elements to take
+// from x. Both cut points of a piece are valid merge path positions, so the
+// pieces neither overlap nor leave gaps.
+template <typename T, typename LessThan>
+inline qsizetype qParallelMergeSplit(const T *x, qsizetype nx, const T *y, qsizetype ny,
+                                     qsizetype k, LessThan lessThan)
+{
+    qsizetype lo = std::max(qsizetype(0), k - ny);
+    qsizetype hi = std::min(k, nx);
+
+    while (lo < hi) {
+        const qsizetype i = lo + (hi - lo) / 2; // i < nx and 0 <= k - i - 1 < ny
+        if (lessThan(x[i], y[k - i - 1]))
+            lo = i + 1;
+        else
+            hi = i;
     }
+    return lo;
+}
+
+template <typename T, typename LessThan>
+void qParallelMergeSortImpl(T *array, qsizetype n, LessThan lessThan)
+{
+    // as many chunks as the pool can run at once (the calling thread replaces
+    // the one task we do not hand to the pool), rounded down to a power of 2,
+    // but never smaller than MinParallelSpan elements each
+    const qsizetype maxChunks = std::min(qsizetype(QThreadPool::globalInstance()->maxThreadCount()),
+                                         n / MinParallelSpan);
+    const int levels = (maxChunks < 2) ? 0 : (std::bit_width(size_t(maxChunks)) - 1);
+    const int chunks = 1 << levels;
+
+    if (chunks < 2) {
+        std::sort(array, array + n, lessThan);
+        return;
+    }
+
+    // plain new[]: make_unique would value-initialize, i.e. needlessly zero out
+    // the whole buffer for scalar types
+    const std::unique_ptr<T[]> scratch(new T[n]);
+
+    const qsizetype chunkSize = (n + chunks - 1) / chunks;
+    const bool startInScratch = (levels & 1);
+    T *src = startInScratch ? scratch.get() : array;
+    T *dst = startInScratch ? array : scratch.get();
+
+    qParallelRun(chunks, [=, buffer = scratch.get()](int chunk) {
+        const qsizetype from = qsizetype(chunk) * chunkSize;
+        const qsizetype to = std::min(from + chunkSize, n);
+
+        std::sort(array + from, array + to, lessThan);
+        if (startInScratch)
+            std::move(array + from, array + to, buffer + from);
+    });
+
+    for (int level = 0; level < levels; ++level) {
+        const qsizetype runSize = chunkSize << level;
+        const int pieces = 2 << level; // pieces per merge: pairs * pieces == chunks
+
+        qParallelRun(chunks, [=](int task) {
+            const qsizetype xFrom = qsizetype(task / pieces) * 2 * runSize;
+            const qsizetype xTo = std::min(xFrom + runSize, n);
+            const qsizetype yTo = std::min(xTo + runSize, n);
+            const qsizetype nx = xTo - xFrom;
+            const qsizetype ny = yTo - xTo;
+
+            // this thread merges the output range [k0, k1) of this pair
+            const int piece = task % pieces;
+            const qsizetype pieceSize = ((nx + ny) + pieces - 1) / pieces;
+            const qsizetype k0 = std::min(pieceSize * piece, nx + ny);
+            const qsizetype k1 = std::min(k0 + pieceSize, nx + ny);
+            if (k0 == k1)
+                return;
+
+            const T *x = src + xFrom;
+            const T *y = src + xTo;
+            const qsizetype i0 = qParallelMergeSplit(x, nx, y, ny, k0, lessThan);
+            const qsizetype i1 = qParallelMergeSplit(x, nx, y, ny, k1, lessThan);
+
+            std::merge(x + i0, x + i1, y + (k0 - i0), y + (k1 - i1),
+                       dst + xFrom + k0, lessThan);
+        });
+        std::swap(src, dst);
+    }
+    Q_ASSERT(src == array);
 }
 
 template <typename RandomAccessIterator, typename LessThan>
 inline void qParallelSortImpl(RandomAccessIterator begin, RandomAccessIterator end, LessThan lessThan)
 {
     const qsizetype span = end - begin;
-    if (span >= 2) {
-        static const int threadCount = QThread::idealThreadCount();
-#ifdef QPARALLELSORT_INPLACE_MERGE
-        typename std::iterator_traits<RandomAccessIterator>::value_type tmp[] = nullptr;
-#else
-        auto tmp = new typename std::iterator_traits<RandomAccessIterator>::value_type[span];
-#endif
-        qParallelSortThread(begin, end, lessThan, tmp, threadCount);
-        if (tmp)
-            delete [] tmp;
-    }
+    if (span < 2)
+        return;
+
+    // ping-ponging between the array and the scratch buffer needs both to be
+    // the same type, so anything not backed by plain memory is sorted serially
+    if constexpr (std::contiguous_iterator<RandomAccessIterator>)
+        qParallelMergeSortImpl(std::to_address(begin), span, lessThan);
+    else
+        std::sort(begin, end, lessThan);
 }
 
 
