@@ -115,12 +115,61 @@ jobs:
         name: ${{ matrix.config.artifact }}
         path: "build/*.exe"
 
+    # the deployed tree is what the universal installer is assembled from
+    - name: Upload the deployed tree
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ matrix.config.artifact }}-Deployed
+        path: "build/bin"
+
     - name: Upload Windows debug info to sentry.io
       uses: $/.github/actions/sentry-upload-dif
       with:
         os: windows
         auth-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
         paths: build/bin %Qt6_DIR%\bin
+
+  # BUILD the universal Windows installer
+  #################################################
+
+  # One installer carrying both architectures, assembled from the deployed trees of
+  # the two build-windows legs. Only this job needs iscc, and it runs on x64 - the
+  # arm64 runner never compiles an installer.
+  #
+  # The per-architecture installers above stay for now: the in-app update check
+  # still refers to them by name.
+
+  build-windows-installer:
+    name: "Windows Universal"
+    needs: [ build-windows ]
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Download the x64 tree
+      uses: actions/download-artifact@v7
+      with:
+        name: Windows-x64-Deployed
+        path: payload/x64
+
+    - name: Download the arm64 tree
+      uses: actions/download-artifact@v7
+      with:
+        name: Windows-ARM64-Deployed
+        path: payload/arm64
+
+    - name: Create the universal installer
+      run: |
+        set /p VERSION=<VERSION_NUMBER
+        iscc.exe "/DSOURCE_DIR=%CD%\payload" "/O%CD%\build" "/FBrickStore-%VERSION%" windows\brickstore-universal.iss
+      shell: cmd
+
+    - name: Upload the universal installer
+      uses: actions/upload-artifact@v7
+      with:
+        name: Windows-Universal
+        path: "build/*.exe"
 
   # BUILD for Linux (AppImage)
   #################################################
@@ -819,8 +868,8 @@ jobs:
   release:
     if: startsWith(github.ref, 'refs/tags/v')
     name: "Release"
-    needs: [ build-windows, build-appimage, build-snap-flatpak, build-macos,
-             build-android, build-ios, build-debian, build-backend,
+    needs: [ build-windows, build-windows-installer, build-appimage, build-snap-flatpak,
+             build-macos, build-android, build-ios, build-debian, build-backend,
              publish-snap, publish-playstore, publish-appstore, publish-backend-docker, publish-docs ]
     runs-on: ubuntu-24.04
     permissions:
@@ -837,7 +886,8 @@ jobs:
       run: |
         # everything left in artifacts/ becomes a release asset, so drop the ones
         # that are only a handover between jobs
-        rm -rf artifacts/Documentation artifacts/Backend-Docker-Image
+        rm -rf artifacts/Documentation artifacts/Backend-Docker-Image \
+               artifacts/Windows-x64-Deployed artifacts/Windows-ARM64-Deployed
         find artifacts -mindepth 2 -type f -print0 | while read -d $'\0' a; do
           d="$(dirname $a)"
           mv "$a" "${d}-$(basename $a)"

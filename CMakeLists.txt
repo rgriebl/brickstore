@@ -637,8 +637,10 @@ elseif (WIN32)
         list(APPEND WINDEPLOYQT_EXTRA_ARGS --skip-plugin-types qmltooling)
     endif ()
 
-    # deploy Qt dependencies and create an INNO setup installer
-    add_custom_target(installer
+    # deploy the Qt dependencies next to the executable. Split out of the installer
+    # target, because the universal installer is built from the deployed trees of
+    # both architectures, on a machine that has neither Qt nor a build directory.
+    add_custom_target(deploy
         COMMAND "${WINDEPLOYQT_PATH}/windeployqt" $<TARGET_FILE:${PROJECT_NAME}>
                 ${WINDEPLOYQT_EXTRA_ARGS}
                 "--qmldir=${CMAKE_CURRENT_SOURCE_DIR}"
@@ -646,11 +648,17 @@ elseif (WIN32)
                 "--no-translations"
                 "--verbose" "2"
         ${COPY_SENTRY_COMMAND}
+        COMMENT "Deploying Qt dependencies. Please wait..."
+        DEPENDS ${PROJECT_NAME}
+    )
+
+    # create an INNO setup installer for this architecture alone
+    add_custom_target(installer
         COMMAND "iscc.exe" "/DSOURCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/bin" "/DARCH=${INNO_ARCH}"
                 "/O${CMAKE_CURRENT_BINARY_DIR}"
                 "/F${PROJECT_NAME}-${VERSION}" "${CMAKE_SOURCE_DIR}/windows/brickstore.iss"
         COMMENT "Creating INNO Setup installer. Please wait..."
-        DEPENDS ${PROJECT_NAME}
+        DEPENDS deploy
     )
 
 elseif (ANDROID)
