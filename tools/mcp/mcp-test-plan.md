@@ -27,16 +27,16 @@ autosave locations; only the BrickLink database and image cache are shared).
 It runs the suite over both transports:
 
 ```sh
-scripts/mcp-test-sandbox.sh            # builds/qt-dev-desktop-debug binary
-BRICKSTORE_BIN=path/to/brickstore scripts/mcp-test-sandbox.sh
-scripts/mcp-test-sandbox.sh --keep     # keep the sandbox dir for inspection
+tools/mcp/mcp-test-sandbox.sh            # builds/qt-dev-desktop-debug binary
+BRICKSTORE_BIN=path/to/brickstore tools/mcp/mcp-test-sandbox.sh
+tools/mcp/mcp-test-sandbox.sh --keep     # keep the sandbox dir for inspection
 ```
 
 To run against a manually started instance instead (all MCP permissions must
 be enabled in Settings > AI):
 
 ```sh
-python3 scripts/mcp-smoke-test.py [--port 45111] [--transport http|sse]
+python3 tools/mcp/mcp-smoke-test.py [--port 45111] [--transport http|sse]
 ```
 
 ## Manual tests

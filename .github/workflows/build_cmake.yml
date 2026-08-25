@@ -105,8 +105,21 @@ jobs:
       run: |
         choco install ninja
         call "${{ matrix.config.environment_script }}"
+        rem imagescale generates the .ico files during the build and is not deployed
+        set PATH=%Qt6_DIR%\bin;%PATH%
         call %Qt6_DIR%\bin\qt-cmake.bat -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSENTRY=ON -B build -S .
         cmake --build build --config RelWithDebInfo --parallel --target installer --verbose
+      shell: cmd
+
+    # The tile images do not depend on the architecture, so only one leg generates
+    # them. Needs the MSVC environment again (every step gets a fresh shell) and
+    # Qt in PATH, because imagescale is built outside the deployed tree.
+    - name: Generate the MSIX assets
+      if: matrix.config.artifact == 'Windows-x64'
+      run: |
+        call "${{ matrix.config.environment_script }}"
+        set PATH=%Qt6_DIR%\bin;%PATH%
+        cmake --build build --target msix-assets --verbose
       shell: cmd
 
     - name: Upload Windows Installer
@@ -114,6 +127,23 @@ jobs:
       with:
         name: ${{ matrix.config.artifact }}
         path: "build/*.exe"
+
+    - name: Upload the MSIX assets
+      if: matrix.config.artifact == 'Windows-x64'
+      uses: actions/upload-artifact@v7
+      with:
+        name: Windows-MSIX-Assets
+        path: "build/msix"
+
+    # The Inno Setup wizard image is generated, not committed, and the universal
+    # installer job has no build directory to generate it in. It does not depend on
+    # the architecture, so one leg ships it.
+    - name: Upload the installer assets
+      if: matrix.config.artifact == 'Windows-x64'
+      uses: actions/upload-artifact@v7
+      with:
+        name: Windows-Installer-Assets
+        path: "build/generated/icons/windows-installer.png"
 
     # the deployed tree is what the universal installer is assembled from
     - name: Upload the deployed tree
@@ -158,6 +188,14 @@ jobs:
       with:
         name: Windows-ARM64-Deployed
         path: payload/arm64
+
+    # the .iss looks for this next to the payload, at the same place relative to
+    # SOURCE_DIR that it sits at in a real build tree
+    - name: Download the installer assets
+      uses: actions/download-artifact@v7
+      with:
+        name: Windows-Installer-Assets
+        path: generated/icons
 
     - name: Create the universal installer
       run: |
@@ -483,7 +521,7 @@ jobs:
         done
 
         sudo DEBIAN_FRONTEND=noninteractive apt -y update
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install cmake ninja-build
+        sudo DEBIAN_FRONTEND=noninteractive apt -y install cmake ninja-build libglvnd-dev
 
         echo "${{ secrets.ANDROID_KEYSTORE_STORE_DATA }}" | base64 --decode >android_release.keystore
         export QT_ANDROID_KEYSTORE_PATH="`pwd`/android_release.keystore"
@@ -887,7 +925,8 @@ jobs:
         # everything left in artifacts/ becomes a release asset, so drop the ones
         # that are only a handover between jobs
         rm -rf artifacts/Documentation artifacts/Backend-Docker-Image \
-               artifacts/Windows-x64-Deployed artifacts/Windows-ARM64-Deployed
+               artifacts/Windows-x64-Deployed artifacts/Windows-ARM64-Deployed \
+               artifacts/Windows-MSIX-Assets
         find artifacts -mindepth 2 -type f -print0 | while read -d $'\0' a; do
           d="$(dirname $a)"
           mv "$a" "${d}-$(basename $a)"

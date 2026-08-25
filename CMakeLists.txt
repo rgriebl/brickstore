@@ -343,10 +343,49 @@ add_subdirectory(3rdparty)
 include_directories(src)
 add_subdirectory(src)
 
+# the generated app icons are not committed, so every platform that needs some
+# needs the tool that scales them
+include(BuildImageScale)
+
 if (WIN32)
     # Windows resources: icons and file-version record
-    configure_file(windows/brickstore.rc.in generated/brickstore.rc @ONLY)
-    target_sources(${PROJECT_NAME} PUBLIC generated/brickstore.rc)
+    set(GENERATED_ICONS_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated/icons")
+    set(GENERATED_ICONS
+        "${GENERATED_ICONS_DIR}/brickstore.ico"
+        "${GENERATED_ICONS_DIR}/brickstore_doc.ico"
+    )
+    # not an input to the resource compiler, so it is kept out of GENERATED_ICONS -
+    # only the same script happens to produce it
+    set(WIZARD_IMAGE "${GENERATED_ICONS_DIR}/windows-installer.png")
+    add_custom_command(
+        OUTPUT ${GENERATED_ICONS} "${WIZARD_IMAGE}"
+        COMMAND "${CMAKE_COMMAND}" "-DIMAGESCALE=${IMAGESCALE_EXECUTABLE}"
+                "-DASSET_DIR=${CMAKE_SOURCE_DIR}/assets"
+                "-DOUT_DIR=${GENERATED_ICONS_DIR}"
+                -P "${CMAKE_SOURCE_DIR}/windows/generate-icons.cmake"
+        DEPENDS imagescale
+                "${CMAKE_SOURCE_DIR}/assets/brickstore.png"
+                "${CMAKE_SOURCE_DIR}/assets/generated-app-icons/brickstore_doc.png"
+                "${CMAKE_SOURCE_DIR}/windows/generate-icons.cmake"
+                "${CMAKE_SOURCE_DIR}/cmake/RunImageScale.cmake"
+        COMMENT "Generating the Windows icons..."
+        VERBATIM
+    )
+
+    # The icons are an input to the resource compiler, so rc.exe has to wait for
+    # them. OBJECT_DEPENDS below says exactly that, but not every generator honors
+    # it, hence the belt-and-braces target: a target-level dependency is respected
+    # everywhere, and it completes before any source of BrickStore starts building.
+    add_custom_target(windows-icons DEPENDS ${GENERATED_ICONS} "${WIZARD_IMAGE}")
+    add_dependencies(${PROJECT_NAME} windows-icons)
+
+    set(GENERATED_RC "${CMAKE_CURRENT_BINARY_DIR}/generated/brickstore.rc")
+    configure_file(windows/brickstore.rc.in "${GENERATED_RC}" @ONLY)
+    target_sources(${PROJECT_NAME} PRIVATE "${GENERATED_RC}")
+    set_source_files_properties("${GENERATED_RC}" PROPERTIES
+        GENERATED TRUE
+        OBJECT_DEPENDS "${GENERATED_ICONS}"
+    )
 
     # always link against widgets
     find_package(Qt6 REQUIRED Widgets)
@@ -410,10 +449,30 @@ if (APPLE)
             MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/macos/Info.macos.plist"
             MACOSX_BUNDLE_GUI_IDENTIFIER "de.brickforge.brickstore"
         )
+        # CFBundleIconName needs a compiled asset catalog, and the Ninja generator
+        # used here has no step for that - unlike the Xcode generator for iOS above.
+        set(ASSETS_CAR "${CMAKE_CURRENT_BINARY_DIR}/macos/Assets.car")
+        add_custom_command(
+            OUTPUT "${ASSETS_CAR}"
+            COMMAND "${CMAKE_COMMAND}" "-DIMAGESCALE=${IMAGESCALE_EXECUTABLE}"
+                    "-DASSET_DIR=${CMAKE_SOURCE_DIR}/assets"
+                    "-DOUT_DIR=${CMAKE_CURRENT_BINARY_DIR}/macos"
+                    "-DDEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}"
+                    -P "${CMAKE_SOURCE_DIR}/macos/generate-macos-icons.cmake"
+            DEPENDS imagescale
+                    "${CMAKE_SOURCE_DIR}/assets/brickstore.png"
+                    "${CMAKE_SOURCE_DIR}/macos/generate-macos-icons.cmake"
+                    "${CMAKE_SOURCE_DIR}/cmake/RunImageScale.cmake"
+            COMMENT "Generating the macOS asset catalog..."
+            VERBATIM
+        )
+        set_source_files_properties("${ASSETS_CAR}" PROPERTIES GENERATED TRUE)
+
         set(MACOS_RESOURCES
             assets/generated-app-icons/brickstore.icns
             assets/generated-app-icons/brickstore_doc.icns
             macos/macos.entitlements
+            "${ASSETS_CAR}"
         )
         target_sources(${PROJECT_NAME} PUBLIC ${MACOS_RESOURCES})
         set_source_files_properties(${MACOS_RESOURCES} PROPERTIES
@@ -438,8 +497,27 @@ if (ANDROID)
         # the 1000000 offset is necessary because I screwed up the first PlayStore upload
         math(EXPR VERSION_CODE "1000000 + ${BUILD_NUMBER}")
     endif()
+    # androiddeployqt copies one package source directory over its Gradle template
+    # and offers no way to add generated files on the side, so the whole directory
+    # is staged in the build tree and the launcher icons are generated into the
+    # staged copy. The app target depends on it, and the apk target depends on the
+    # app, so this is always in place before androiddeployqt runs.
+    set(ANDROID_PACKAGE_DIR "${CMAKE_CURRENT_BINARY_DIR}/android-package")
+
+    add_custom_target(android-package-source
+        COMMAND "${CMAKE_COMMAND}" "-DIMAGESCALE=${IMAGESCALE_EXECUTABLE}"
+                "-DASSET_DIR=${CMAKE_SOURCE_DIR}/assets"
+                "-DSOURCE_DIR=${CMAKE_SOURCE_DIR}/android"
+                "-DOUT_DIR=${ANDROID_PACKAGE_DIR}"
+                -P "${CMAKE_SOURCE_DIR}/android/generate-package.cmake"
+        COMMENT "Staging the Android package source..."
+        DEPENDS imagescale
+        VERBATIM
+    )
+    add_dependencies(${PROJECT_NAME} android-package-source)
+
     set_target_properties(${PROJECT_NAME} PROPERTIES
-        QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/android"
+        QT_ANDROID_PACKAGE_SOURCE_DIR "${ANDROID_PACKAGE_DIR}"
         QT_ANDROID_PACKAGE_NAME "de.brickforge.brickstore"
         QT_ANDROID_VERSION_CODE ${VERSION_CODE}
         QT_ANDROID_VERSION_NAME ${VERSION}
@@ -517,6 +595,7 @@ add_custom_target("Other-Files" SOURCES
     configure
     android/AndroidManifest.xml
     android/build.gradle
+    android/generate-package.cmake
     android/gradle.properties
     android/gradle/wrapper/gradle-wrapper.jar
     android/gradle/wrapper/gradle-wrapper.properties
@@ -530,6 +609,8 @@ add_custom_target("Other-Files" SOURCES
     assets/COPYING-ICONS
     assets/COPYING-FLAGS
     assets/generate-assets.sh
+    cmake/BuildImageScale.cmake
+    cmake/RunImageScale.cmake
     cmake/SeparateDebugInfo.cmake
     cmake/SeparateDebugInfo.Info.plist.in
     doc/extensions.css
@@ -547,13 +628,15 @@ add_custom_target("Other-Files" SOURCES
     ldraw/mappings/wheels.yaml
     macos/dmg-background.png
     macos/dmg-ds_store
+    macos/generate-ios-icons.cmake
+    macos/generate-macos-icons.cmake
     macos/ExportOptions.ios.plist
     macos/Info.ios.plist
     macos/Info.macos.plist
     macos/LaunchScreen.storyboard
     macos/locversion.plist.in
     macos/PrivacyInfo.xcprivacy
-    scripts/git-release.sh
+    tools/git-release.sh
     translations/translations.json
     unix/dev.brickstore.BrickStore.desktop
     unix/dev.brickstore.BrickStore.mime.xml
@@ -562,6 +645,8 @@ add_custom_target("Other-Files" SOURCES
     unix/snapcraft.yaml.in
     windows/brickstore.iss
     windows/brickstore.rc.in
+    windows/generate-icons.cmake
+    windows/msix/generate-assets.cmake
 )
 
 ## Installers, Bundles, etc.
@@ -658,7 +743,22 @@ elseif (WIN32)
                 "/O${CMAKE_CURRENT_BINARY_DIR}"
                 "/F${PROJECT_NAME}-${VERSION}" "${CMAKE_SOURCE_DIR}/windows/brickstore.iss"
         COMMENT "Creating INNO Setup installer. Please wait..."
-        DEPENDS deploy
+        DEPENDS deploy "${WIZARD_IMAGE}"
+    )
+
+    # The MSIX tile images are generated instead of committed: only the package
+    # consumes them, and the scale matrix is ~20 files.
+    #
+    # imagescale is deliberately not in bin/: everything that lands there is
+    # either swept up by the installer's *.exe glob or ends up in the deployed
+    # tree, and this is build tooling, not payload.
+    add_custom_target(msix-assets
+        COMMAND "${CMAKE_COMMAND}" "-DIMAGESCALE=${IMAGESCALE_EXECUTABLE}"
+                "-DASSET_DIR=${CMAKE_SOURCE_DIR}/assets"
+                "-DOUT_DIR=${CMAKE_CURRENT_BINARY_DIR}/msix/Assets"
+                -P "${CMAKE_SOURCE_DIR}/windows/msix/generate-assets.cmake"
+        COMMENT "Generating MSIX assets..."
+        DEPENDS imagescale
     )
 
 elseif (ANDROID)

@@ -11,13 +11,11 @@ which realpath >/dev/null && b="$(realpath --relative-to=. $b)"
 cus="$b/custom"
 
 gai="$b/generated-app-icons"
-gin="$b/generated-installers"
 
 theme="brickstore-breeze"
 s=64
 
 mkdir -p "$gai"
-mkdir -p "$gin"
 
 ######################################
 # app and doc icons
@@ -30,10 +28,6 @@ convert -size 256x256 canvas:transparent \
         $cus/oxygen-x-office-spreadsheet.png -composite \
         $b/brickstore.png -geometry 172x172+40+8 -composite \
         $gai/brickstore_doc.png
-
-# Windows icons
-convert $gai/brickstore.png -define icon:auto-resize=256,96,48,32,16 $gai/brickstore.ico
-convert $gai/brickstore_doc.png -define icon:auto-resize=256,96,48,32,16 $gai/brickstore_doc.ico
 
 # macOS icons
 ## png2icns is broken for icons >= 256x256
@@ -152,16 +146,6 @@ done
 rm -rf "$tmp"
 
 echo "done"
-
-#######################################
-# creating installer images
-
-echo -n "Generating images for installers... "
-
-convert $gai/brickstore.png -resize 96x96 -define bmp3:alpha=true bmp3:$gin/windows-installer.bmp
-
-echo "done"
-
 
 #######################################
 # optimize sizes

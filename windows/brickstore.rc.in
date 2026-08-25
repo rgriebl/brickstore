@@ -3,8 +3,8 @@
 
 #include <windows.h>
 
-IDI_ICON1 ICON "../assets/generated-app-icons/brickstore.ico"
-IDI_ICON2 ICON "../assets/generated-app-icons/brickstore_doc.ico"
+IDI_ICON1 ICON "@GENERATED_ICONS_DIR@/brickstore.ico"
+IDI_ICON2 ICON "@GENERATED_ICONS_DIR@/brickstore_doc.ico"
 
 VS_VERSION_INFO VERSIONINFO
     FILEVERSION    @VERSION_MAJOR@,@VERSION_MINOR@,@VERSION_PATCH@,0

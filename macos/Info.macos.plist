@@ -11,6 +11,9 @@
     <key>CFBundleIconFile</key>
     <string>brickstore.icns</string>
 
+    <key>CFBundleIconName</key>
+    <string>AppIcon</string>
+
     <key>CFBundlePackageType</key>
     <string>APPL</string>
 
