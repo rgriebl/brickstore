@@ -260,6 +260,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(CheckForUpdates::inst(), &CheckForUpdates::versionCanBeUpdated,
             m_checkForUpdatesDialog, &CheckForUpdatesDialog::showVersionChanges);
 
+    // updates come through the Store when packaged - a manual check would be a no-op
+    if (CheckForUpdates::inst()->mode() == CheckForUpdates::Mode::NotifyAfterUpdate)
+        ActionManager::inst()->qAction("check_for_updates")->setVisible(false);
+
     setupScripts();
 
     connect(DocumentList::inst(), &DocumentList::documentAdded,

@@ -16,6 +16,9 @@
 #  include <QCoreApplication>
 #  include <jni.h>
 #  include <QJniObject>
+#elif defined(Q_OS_WINDOWS)
+#  include <windows.h>
+#  include <appmodel.h>
 #endif
 
 #include "utility.h"
@@ -312,4 +315,16 @@ bool Utility::Android::isSideLoaded()
     return false;
 #endif
 
+}
+
+bool Utility::Windows::isPackaged()
+{
+#if defined(Q_OS_WINDOWS)
+    // Asked without a buffer, a packaged process answers with the size it would
+    // need; an unpackaged one has no package to report on.
+    UINT32 length = 0;
+    return (GetCurrentPackageFullName(&length, nullptr) != APPMODEL_ERROR_NO_PACKAGE);
+#else
+    return false;
+#endif
 }

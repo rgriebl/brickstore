@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copyright (C) 2004-2026 Robert Griebl -->
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+
+<!-- Identity Name, Publisher and PublisherDisplayName are assigned by Partner  -->
+<!-- Center (Product management > Product identity) and are fixed for the life  -->
+<!-- of the product. They are case sensitive and must match exactly.            -->
+
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+  <Identity Name="RobertGriebl.BrickStore"
+            Publisher="CN=E67564D6-FF3C-4A7B-921A-0EB1729E3624"
+            Version="@MSIX_VERSION@"
+            ProcessorArchitecture="@MSIX_ARCH@" />
+
+  <Properties>
+    <DisplayName>BrickStore</DisplayName>
+    <PublisherDisplayName>Robert Griebl</PublisherDisplayName>
+    <Description>@DESCRIPTION@</Description>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Resources>
+@MSIX_RESOURCES@
+  </Resources>
+
+  <Dependencies>
+    <!-- same floor as the Inno installer: Windows 10 1809 -->
+    <TargetDeviceFamily Name="Windows.Desktop"
+                        MinVersion="10.0.17763.0"
+                        MaxVersionTested="10.0.22621.0" />
+
+    <!-- The MSVC runtime. A packaged app cannot run vc_redist, and Microsoft's   -->
+    <!-- guidance for packaged desktop apps is to depend on this framework       -->
+    <!-- package rather than ship the DLLs app-local: the Store installs and     -->
+    <!-- services it. It has to be the UWPDesktop flavor - plain                 -->
+    <!-- Microsoft.VCLibs.140.00 is the app-container CRT with differently named -->
+    <!-- DLLs. MinVersion is the release verified to carry everything the        -->
+    <!-- binaries import; the 14.0.24217.0 in Microsoft's example predates       -->
+    <!-- msvcp140_atomic_wait.dll.                                               -->
+    <PackageDependency Name="Microsoft.VCLibs.140.00.UWPDesktop"
+                       MinVersion="14.0.33728.0"
+                       Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" />
+  </Dependencies>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+
+  <Applications>
+    <!-- uap10:RuntimeBehavior/TrustLevel would be the modern spelling, but they  -->
+    <!-- need 10.0.19041 and the floor above is older, so EntryPoint it is.       -->
+    <Application Id="BrickStore"
+                 Executable="BrickStore.exe"
+                 EntryPoint="Windows.FullTrustApplication">
+
+      <uap:VisualElements DisplayName="BrickStore"
+                          Description="@DESCRIPTION@"
+                          BackgroundColor="transparent"
+                          Square150x150Logo="Assets\Square150x150Logo.png"
+                          Square44x44Logo="Assets\Square44x44Logo.png" />
+
+      <Extensions>
+        <!-- replaces the HKCR writes the Inno installer does: a packaged app -->
+        <!-- cannot register a file type through the registry -->
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="bsx">
+            <uap:DisplayName>BrickStore Document</uap:DisplayName>
+            <uap:Logo>Assets\BsxDocumentLogo.png</uap:Logo>
+            <uap:SupportedFileTypes>
+              <uap:FileType>.bsx</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+</Package>

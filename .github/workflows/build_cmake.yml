@@ -209,6 +209,62 @@ jobs:
         name: Windows-Universal
         path: "build/*.exe"
 
+  # BUILD the MSIX bundle for the Microsoft Store
+  #################################################
+
+  # Both architectures in one .msixbundle, assembled from the same deployed trees
+  # as the universal installer. It is unsigned - the Store signs on submission -
+  # so it is a handover to the publishing step, never a release asset.
+
+  build-windows-msix:
+    name: "Windows MSIX"
+    needs: [ build-windows ]
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Download the x64 tree
+      uses: actions/download-artifact@v7
+      with:
+        name: Windows-x64-Deployed
+        path: payload/x64
+
+    - name: Download the arm64 tree
+      uses: actions/download-artifact@v7
+      with:
+        name: Windows-ARM64-Deployed
+        path: payload/arm64
+
+    - name: Download the MSIX assets
+      uses: actions/download-artifact@v7
+      with:
+        name: Windows-MSIX-Assets
+        path: msix
+
+    # makepri and makeappx are Windows SDK tools; vcvars puts them on PATH. The
+    # package version has four parts and the Store wants the last one to be 0.
+    - name: Stage, pack and bundle
+      run: |
+        call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+        set /p VERSION=<VERSION_NUMBER
+        for %%A in (x64 arm64) do (
+          cmake -DPAYLOAD_DIR=%CD%\payload\%%A -DASSETS_DIR=%CD%\msix\Assets ^
+                -DSOURCE_DIR=%CD% -DOUT_DIR=%CD%\msix\%%A ^
+                -DMSIX_ARCH=%%A -DMSIX_VERSION=%VERSION%.0 -DMAKEAPPX=ON ^
+                -P windows\msix\generate-package.cmake || exit /b 1
+        )
+        cmake "-DPACKAGES=%CD%\msix\BrickStore-%VERSION%.0-x64.msix;%CD%\msix\BrickStore-%VERSION%.0-arm64.msix" ^
+              -DOUT_FILE=%CD%\build\BrickStore-%VERSION%.msixbundle -DBUNDLE_VERSION=%VERSION%.0 ^
+              -P windows\msix\generate-bundle.cmake
+      shell: cmd
+
+    - name: Upload the MSIX bundle
+      uses: actions/upload-artifact@v7
+      with:
+        name: Windows-MSIX
+        path: "build/*.msixbundle"
+
   # BUILD for Linux (AppImage)
   #################################################
 
@@ -906,7 +962,7 @@ jobs:
   release:
     if: startsWith(github.ref, 'refs/tags/v')
     name: "Release"
-    needs: [ build-windows, build-windows-installer, build-appimage, build-snap-flatpak,
+    needs: [ build-windows, build-windows-installer, build-windows-msix, build-appimage, build-snap-flatpak,
              build-macos, build-android, build-ios, build-debian, build-backend,
              publish-snap, publish-playstore, publish-appstore, publish-backend-docker, publish-docs ]
     runs-on: ubuntu-24.04
@@ -926,7 +982,7 @@ jobs:
         # that are only a handover between jobs
         rm -rf artifacts/Documentation artifacts/Backend-Docker-Image \
                artifacts/Windows-x64-Deployed artifacts/Windows-ARM64-Deployed \
-               artifacts/Windows-MSIX-Assets
+               artifacts/Windows-MSIX-Assets artifacts/Windows-MSIX
         find artifacts -mindepth 2 -type f -print0 | while read -d $'\0' a; do
           d="$(dirname $a)"
           mv "$a" "${d}-$(basename $a)"

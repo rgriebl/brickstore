@@ -646,7 +646,11 @@ add_custom_target("Other-Files" SOURCES
     windows/brickstore.iss
     windows/brickstore.rc.in
     windows/generate-icons.cmake
+    windows/msix/AppxManifest.xml.in
     windows/msix/generate-assets.cmake
+    windows/msix/generate-bundle.cmake
+    windows/msix/generate-package.cmake
+    windows/msix/priconfig.xml
 )
 
 ## Installers, Bundles, etc.

@@ -23,6 +23,7 @@ public:
 
     static CheckForUpdates *inst();
     void initialize(const QString &baseUrl, Mode mode);
+    Mode mode() const  { return m_mode; }
 
     QCoro::Task<> check(bool silent);
 

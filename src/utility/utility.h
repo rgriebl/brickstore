@@ -69,4 +69,11 @@ bool isSideLoaded();
 
 }
 
+namespace Windows {
+
+// running from an MSIX package (Store or side-loaded), not from a plain install
+bool isPackaged();
+
+}
+
 } // namespace Utility

@@ -62,6 +62,7 @@
 #include "utility/exception.h"
 #include "common/systeminfo.h"
 #include "utility/transfer.h"
+#include "utility/utility.h"
 #include "common/undo.h"
 #include "common/sentryinterface.h"
 #include "scanner/core.h"
@@ -174,6 +175,14 @@ void Application::init()
     qInfo() << "Android app is side-loaded:" << sideLoaded;
 #  endif
     if (!sideLoaded)
+        updateMode = CheckForUpdates::Mode::NotifyAfterUpdate;
+#elif defined(Q_OS_WINDOWS)
+    // Store policy forbids an app updating itself outside the Store, so an MSIX
+    // install behaves like the mobile store builds: it only gets told what
+    // changed after the Store has updated it.
+    bool packaged = Utility::Windows::isPackaged();
+    qInfo() << "Windows app is MSIX packaged:" << packaged;
+    if (packaged)
         updateMode = CheckForUpdates::Mode::NotifyAfterUpdate;
 #endif
     CheckForUpdates::inst()->initialize(gitHubUrl(), updateMode);

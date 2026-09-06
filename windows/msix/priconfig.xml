@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!-- Copyright (C) 2004-2026 Robert Griebl -->
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+
+<!-- makepri configuration for the MSIX package. `makepri createconfig /dq en-US`  -->
+<!-- produces almost this, with two differences that matter:                      -->
+<!--                                                                              -->
+<!--   * no <packaging> block. With it, makepri splits the scale-125/150/200/400   -->
+<!--     tile variants into resources.scale-*.pri resource packs. Those are only   -->
+<!--     ever loaded from a bundle with separate resource packages; a single       -->
+<!--     package would show the scale-100 tile everywhere.                         -->
+<!--   * only the folder indexer. There are no .resw/.resjson/.pri to index, and    -->
+<!--     generate-package.cmake points makepri at a project directory that holds   -->
+<!--     nothing but Assets\, so the Qt DLLs and QML files never become resources. -->
+
+<resources targetOsVersion="10.0.0" majorVersion="1">
+  <index root="\" startIndexAt="\">
+    <default>
+      <qualifier name="Language" value="en-US"/>
+      <qualifier name="Contrast" value="standard"/>
+      <qualifier name="Scale" value="100"/>
+      <qualifier name="HomeRegion" value="001"/>
+      <qualifier name="TargetSize" value="256"/>
+      <qualifier name="LayoutDirection" value="LTR"/>
+      <qualifier name="Theme" value="dark"/>
+      <qualifier name="AlternateForm" value=""/>
+      <qualifier name="DXFeatureLevel" value="DX9"/>
+      <qualifier name="Configuration" value=""/>
+      <qualifier name="DeviceFamily" value="Universal"/>
+      <qualifier name="Custom" value=""/>
+    </default>
+    <indexer-config type="folder" foldernameAsQualifier="true" filenameAsQualifier="true" qualifierDelimiter="."/>
+  </index>
+</resources>
