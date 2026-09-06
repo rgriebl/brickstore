@@ -40,3 +40,4 @@ compile_commands.json
 .qtcreator/
 .vscode/
 android/.gradle/
+.mds/
