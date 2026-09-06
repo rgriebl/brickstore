@@ -641,6 +641,10 @@ public:
 
     Q_INVOKABLE void crash(bool useException) const;
 
+    Q_INVOKABLE bool renderPartImage(const QString &partId, const QString &colorName,
+                                     const QString &fileName, int size,
+                                     const QVariantMap &options = { }) const;
+
 signals:
     void defaultCurrencyCodeChanged(const QString &defaultCurrencyCode);
     void showSettings(const QString &page);

@@ -7,11 +7,11 @@
 #include <QtQuick3D/QQuick3D>
 #include <QtQuick/QQuickView>
 #include <QtQuick/QQuickItem>
-#include <QtQuick/QQuickItemGrabResult>
 #include <QtQuickWidgets/QQuickWidget>
 
 #include "common/systeminfo.h"
 #include "rendercontroller.h"
+#include "rendersettings.h"
 #include "renderwidget.h"
 
 namespace LDraw {
@@ -121,20 +121,18 @@ void RenderWidget::setAnimationActive(bool active)
     m_controller->setTumblingAnimationActive(active);
 }
 
-bool RenderWidget::startGrab()
+std::optional<QQuaternion> RenderWidget::modelRotation() const
 {
-    if (m_widget->rootObject() && !m_grabResult) {
-        m_grabResult = m_widget->rootObject()->grabToImage();
-        if (m_grabResult) {
-            connect(m_grabResult.get(), &QQuickItemGrabResult::ready,
-                    this, [this]() {
-                emit grabFinished(m_grabResult->image());
-                m_grabResult.clear();
-            });
-            return true;
-        }
-    }
-    return false;
+    if (auto *root = m_widget->rootObject())
+        return root->property("modelRotation").value<QQuaternion>();
+    return { };
+}
+
+bool RenderWidget::renderLines() const
+{
+    if (auto *root = m_widget->rootObject())
+        return root->property("renderLines").toBool();
+    return RenderSettings::inst()->renderLines();
 }
 
 void RenderWidget::resetCamera()

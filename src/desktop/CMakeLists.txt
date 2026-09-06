@@ -83,6 +83,9 @@ qt_add_library(desktop_module STATIC
     printdialog.ui
     progresscircle.cpp
     progresscircle.h
+    renderimagedialog.cpp
+    renderimagedialog.h
+    renderimagedialog.ui
     rendersettingsdialog.cpp
     rendersettingsdialog.h
     rendersettingsdialog.ui

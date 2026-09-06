@@ -6,6 +6,8 @@ qt_add_library(ldraw_module STATIC
     library.cpp
     part.h
     part.cpp
+    partimagerenderer.h
+    partimagerenderer.cpp
     rendercontroller.h
     rendercontroller.cpp
     rendergeometry.h
@@ -18,6 +20,7 @@ qt_add_library(ldraw_module STATIC
 
 target_link_libraries(ldraw_module PRIVATE
     Qt6::Concurrent
+    Qt6::GuiPrivate # rhi/qrhi.h, for the offscreen part image renderer
     Qt6::Qml
     Qt6::Quick
     Qt6::Quick3D

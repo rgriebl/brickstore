@@ -11,6 +11,9 @@
 #include <QGuiApplication>
 #include <QPalette>
 #include <QWindow>
+#include <QtGui/QColor>
+#include <QtGui/QQuaternion>
+#include <QtGui/QVector3D>
 #include <QtCore/private/qabstractanimation_p.h>
 
 #include "utility/utility.h"
@@ -19,6 +22,7 @@
 #include "bricklink/order.h"
 #include "bricklink/dimensions.h"
 #include "ldraw/library.h"
+#include "ldraw/partimagerenderer.h"
 #include "common/actionmanager.h"
 #include "common/application.h"
 #include "common/checkforupdates.h"
@@ -370,6 +374,62 @@ void QmlBrickStore::crash(bool useException) const
         throw Exception("Test exception");
     else
         static_cast<int *>(nullptr)[0] = 1; // NOLINT
+}
+
+bool QmlBrickStore::renderPartImage(const QString &partId, const QString &colorName,
+                                    const QString &fileName, int size,
+                                    const QVariantMap &options) const
+{
+    const auto *item = BrickLink::core()->item('P', partId.toLatin1());
+    if (!item) {
+        qWarning() << "renderPartImage: there is no part" << partId;
+        return false;
+    }
+    const auto *color = BrickLink::core()->colorFromName(colorName);
+    if (!color) {
+        qWarning() << "renderPartImage: there is no color" << colorName;
+        return false;
+    }
+    if (fileName.isEmpty()) {
+        qWarning() << "renderPartImage: no file name";
+        return false;
+    }
+
+    LDraw::PartImageOptions opts;
+    opts.size = { size, size }; // square: this exists to regenerate the app icon
+
+    for (auto it = options.cbegin(); it != options.cend(); ++it) {
+        const QString &key = it.key();
+        const QVariant &value = it.value();
+
+        if (key == u"supersample") {
+            opts.supersample = value.toInt();
+        } else if (key == u"margin") {
+            opts.margin = value.toReal();
+        } else if (key == u"background") {
+            opts.background = value.value<QColor>();
+        } else if (key == u"lines") {
+            opts.renderLines = value.toBool();
+        } else if (key == u"rotation") {
+            // either a ready-made quaternion or euler angles, like RenderSettings does it
+            if (value.canConvert<QQuaternion>())
+                opts.rotation = value.value<QQuaternion>();
+            else
+                opts.rotation = QQuaternion::fromEulerAngles(value.value<QVector3D>());
+        } else {
+            qWarning() << "renderPartImage: ignoring unknown option" << key;
+        }
+    }
+
+    const QImage img = QCoro::waitFor(LDraw::renderPartImage(item, color, opts));
+    if (img.isNull())
+        return false;
+
+    if (!img.save(fileName, "PNG")) {
+        qWarning() << "renderPartImage: could not write" << fileName;
+        return false;
+    }
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////

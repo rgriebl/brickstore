@@ -8,6 +8,8 @@
 #include <QImage>
 #include <QStackedLayout>
 
+#include <QCoro/QCoroTask>
+
 #include "bricklink/global.h"
 
 namespace LDraw {
@@ -48,6 +50,9 @@ protected:
 private:
     void updateButtons();
 
+    QCoro::Task<> screenshot3D();
+    QCoro::Task<> saveImage(QImage img);
+
     const BrickLink::Item * m_item = nullptr;
     const BrickLink::Color *m_color = nullptr;
     BrickLink::PictureRef m_pic;
@@ -67,6 +72,7 @@ private:
     QSize m_currentImageSize;
 
     QAction *m_renderSettings;
+    QAction *m_screenshot3D;
     QAction *m_copyImage;
     QAction *m_saveImageAs;
     QAction *m_blCatalog;

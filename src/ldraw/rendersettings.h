@@ -56,6 +56,8 @@ public:
 
   public:
     bool smoothNormals() const;
+    bool renderLines() const;
+    QQuaternion defaultRotation() const;
 
     void save();
     void load();

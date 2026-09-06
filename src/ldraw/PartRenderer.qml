@@ -12,6 +12,13 @@ Item {
 
     property RenderController renderController: RenderController { }
 
+    // overridable defaults: assigning these replaces the binding, so an offscreen
+    // render can pick its own values without touching the persisted RenderSettings
+    // (see LDraw::renderPartImage). "rotation" is taken by QQuickItem.
+    property alias modelRotation: rootNode.rotation
+    property bool renderLines: RenderSettings.renderLines
+    property int antiAliasing: RenderSettings.antiAliasing
+
     // gated target: workaround for QTBUG-148459 (crash in connectSignalsToMethods
     // during async incubation); bind the target only after incubation finished
     Connections {
@@ -64,11 +71,11 @@ Item {
             id: env
             clearColor: root.renderController.clearColor
             backgroundMode: SceneEnvironment.Color
-            antialiasingMode: (RenderSettings.antiAliasing === RenderSettings.No) ?
+            antialiasingMode: (root.antiAliasing === RenderSettings.No) ?
                                   SceneEnvironment.NoAA : SceneEnvironment.SSAA
-            antialiasingQuality: (RenderSettings.antiAliasing === RenderSettings.Medium)
+            antialiasingQuality: (root.antiAliasing === RenderSettings.Medium)
                                  ? SceneEnvironment.Medium
-                                 : ((RenderSettings.antiAliasing === RenderSettings.VeryHigh)
+                                 : ((root.antiAliasing === RenderSettings.VeryHigh)
                                     ? SceneEnvironment.VeryHigh
                                     : SceneEnvironment.High)
             lightProbe: Texture { source: "./textures/lightbox.ktx" }
@@ -193,8 +200,8 @@ Item {
             Model {
                 id: lines
                 geometry: root.renderController.lineGeometry
-                instancing: RenderSettings.renderLines ? root.renderController.lines : null
-                visible: RenderSettings.renderLines
+                instancing: root.renderLines ? root.renderController.lines : null
+                visible: root.renderLines
                 depthBias: -10
 
                 materials: CustomMaterial {

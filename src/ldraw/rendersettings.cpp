@@ -37,6 +37,16 @@ bool RenderSettings::smoothNormals() const
     return m_smoothNormals;
 }
 
+bool RenderSettings::renderLines() const
+{
+    return m_renderLines;
+}
+
+QQuaternion RenderSettings::defaultRotation() const
+{
+    return m_defaultRotation;
+}
+
 void RenderSettings::forEachProperty(const std::function<void(QMetaProperty &)> &callback)
 {
     const QMetaObject *mo = &staticMetaObject;

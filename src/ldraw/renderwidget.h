@@ -3,12 +3,14 @@
 
 #pragma once
 
+#include <optional>
+
 #include <QWidget>
+#include <QtGui/QQuaternion>
 
 #include "bricklink/color.h"
 #include "bricklink/item.h"
 
-QT_FORWARD_DECLARE_CLASS(QQuickItemGrabResult)
 QT_FORWARD_DECLARE_CLASS(QQuickView)
 QT_FORWARD_DECLARE_CLASS(QQuickWidget)
 QT_FORWARD_DECLARE_CLASS(QQmlEngine)
@@ -37,7 +39,8 @@ public:
     bool isAnimationActive() const;
     void setAnimationActive(bool active);
 
-    bool startGrab();
+    std::optional<QQuaternion> modelRotation() const;
+    bool renderLines() const;
 
 public slots:
     void resetCamera();
@@ -46,7 +49,6 @@ public slots:
 
 signals:
     void animationActiveChanged();
-    void grabFinished(QImage grabbedImage);
     void canRenderChanged(bool b);
 
 protected:
@@ -58,7 +60,6 @@ private:
 
     RenderController *m_controller = nullptr;
     std::unique_ptr<QQuickWidget> m_widget;
-    QSharedPointer<QQuickItemGrabResult> m_grabResult;
 };
 
 }

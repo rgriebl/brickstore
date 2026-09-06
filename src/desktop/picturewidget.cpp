@@ -13,8 +13,9 @@
 #include <QToolButton>
 #include <QStyle>
 #include <QClipboard>
-#include <QFileDialog>
+#include <QPointer>
 #include <QQmlApplicationEngine>
+#include <QScopeGuard>
 #include <QStackedLayout>
 
 #include <QCoro/QCoroSignal>
@@ -27,9 +28,12 @@
 #include "common/application.h"
 #include "common/config.h"
 #include "common/eventfilter.h"
+#include "common/uihelpers.h"
 #include "ldraw/library.h"
+#include "ldraw/partimagerenderer.h"
 #include "ldraw/renderwidget.h"
 #include "picturewidget.h"
+#include "renderimagedialog.h"
 #include "rendersettingsdialog.h"
 
 
@@ -137,44 +141,19 @@ PictureWidget::PictureWidget(QWidget *parent)
         RenderSettingsDialog::inst()->show();
     });
 
+    m_screenshot3D = new QAction(QIcon::fromTheme(u"camera-photo"_qs), { }, this);
+    connect(m_screenshot3D, &QAction::triggered, this, &PictureWidget::screenshot3D);
+
     m_copyImage = new QAction(QIcon::fromTheme(u"edit-copy"_qs), { }, this);
-    connect(m_copyImage, &QAction::triggered, this, [this]() -> QCoro::Task<> {
-        QImage img;
-        if (w_stackLayout->currentWidget() == w_ldraw) {
-            if (w_ldraw->startGrab()) {
-                img = co_await qCoro(w_ldraw, &LDraw::RenderWidget::grabFinished);
-            }
-        } else if (!m_image.isNull()) {
-            img = m_image;
-        }
-        auto clip = QGuiApplication::clipboard();
-        clip->setImage(img);
+    connect(m_copyImage, &QAction::triggered, this, [this]() {
+        if (!m_image.isNull()) // never replace the clipboard's contents with nothing
+            QGuiApplication::clipboard()->setImage(m_image);
     });
 
     m_saveImageAs = new QAction(QIcon::fromTheme(u"document-save"_qs), { }, this);
-    connect(m_saveImageAs, &QAction::triggered, this, [this]() -> QCoro::Task<> {
-        QImage img;
-        if (w_stackLayout->currentWidget() == w_ldraw) {
-            if (w_ldraw->startGrab()) {
-                img = co_await qCoro(w_ldraw, &LDraw::RenderWidget::grabFinished);
-            }
-        } else if (!m_image.isNull()) {
-            img = m_image;
-        }
-        QStringList filters;
-        filters << tr("PNG Image") + u" (*.png)";
-
-        QString fn = QFileDialog::getSaveFileName(this, tr("Save image as"),
-                                                  Config::inst()->lastDirectory(),
-                                                  filters.join(u";;"));
-        if (!fn.isEmpty()) {
-            Config::inst()->setLastDirectory(QFileInfo(fn).absolutePath());
-
-            if (fn.right(4) != u".png") {
-                fn += u".png"_qs;
-            }
-            img.save(fn, "PNG");
-        }
+    connect(m_saveImageAs, &QAction::triggered, this, [this]() {
+        if (!m_image.isNull())
+            saveImage(m_image);
     });
 
     connect(BrickLink::core()->pictureCache(), &BrickLink::PictureCache::pictureUpdated,
@@ -192,10 +171,7 @@ PictureWidget::PictureWidget(QWidget *parent)
         w_ldraw->clear();
     });
 
-    connect(w_stackLayout, &QStackedLayout::currentChanged,
-            this, [this]() {
-        stackSwitch();
-    });
+    connect(w_stackLayout, &QStackedLayout::currentChanged, this, &PictureWidget::stackSwitch);
 
     connect(w_ldraw, &LDraw::RenderWidget::canRenderChanged,
             this, [this](bool b) {
@@ -229,6 +205,9 @@ void PictureWidget::stackSwitch()
     w_reloadRescale->setIcon(is3D ? m_rescaleIcon : m_reloadIcon);
     w_reloadRescale->setToolTip(is3D ? tr("Center view") : tr("Update"));
     m_renderSettings->setVisible(is3D);
+    m_screenshot3D->setVisible(is3D && LDraw::canRenderPartImages);
+    m_copyImage->setVisible(!is3D);
+    m_saveImageAs->setVisible(!is3D);
 
     if (!is3D) {
         w_ldraw->stopAnimation();
@@ -250,9 +229,10 @@ void PictureWidget::stackSwitch()
 
 void PictureWidget::languageChange()
 {
-    m_renderSettings->setText(tr("3D render settings..."));
-    m_copyImage->setText(tr("Copy image"));
-    m_saveImageAs->setText(tr("Save image as..."));
+    m_renderSettings->setText(tr("3D Render Settings..."));
+    m_screenshot3D->setText(tr("3D Screenshot..."));
+    m_copyImage->setText(tr("Copy Image"));
+    m_saveImageAs->setText(tr("Save Image as..."));
     m_blCatalog->setText(tr("Show BrickLink Catalog Info..."));
     m_blPriceGuide->setText(tr("Show BrickLink Price Guide Info..."));
     m_blLotsForSale->setText(tr("Show Lots for Sale on BrickLink..."));
@@ -303,6 +283,74 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
 
     if (w_stackLayout->currentWidget() == w_image)
         showImage();
+}
+
+QCoro::Task<> PictureWidget::screenshot3D()
+{
+    const auto *item = m_item;
+    const auto *color = m_color;
+    if (!item)
+        co_return;
+
+    LDraw::PartImageOptions opts;
+    // a screenshot is a still of what is on screen, so it keeps the orientation the user
+    // dragged to. Zoom is not carried over - the border replaces them.
+    opts.rotation = w_ldraw->modelRotation();
+    opts.renderLines = w_ldraw->renderLines();
+
+    QPointer<PictureWidget> that = this;
+    RenderImageDialog::Action action = { };
+    {
+        RenderImageDialog dlg(this);
+        dlg.setWindowModality(Qt::ApplicationModal);
+        dlg.show();
+        if (co_await qCoro(&dlg, &QDialog::finished) != QDialog::Accepted)
+            co_return;
+        if (!that) // safeguard
+            co_return;
+
+        action = dlg.action();
+        opts.size = dlg.imageSize();
+        opts.background = dlg.background();
+        opts.margin = dlg.border();
+    }
+
+    QImage img = co_await LDraw::renderPartImage(item, color, opts);
+    if (img.isNull() || !that)
+        co_return;
+
+    if (action == RenderImageDialog::Action::CopyToClipboard)
+        QGuiApplication::clipboard()->setImage(img);
+    else
+        co_await saveImage(img);
+}
+
+QCoro::Task<> PictureWidget::saveImage(QImage img)
+{
+    if (img.isNull())
+        co_return;
+
+    QString suggestion;
+    if (m_item) {
+        suggestion = QString::fromLatin1(m_item->id());
+        if (m_color)
+            suggestion = suggestion + u' ' + m_color->name();
+    }
+
+    // the filter list cannot be a braced-init-list in the co_await expression: gcc 13 ICEs on
+    // braced-init temporaries in a co_await operand (build_special_member_call, cp/call.cc)
+    const QList<QPair<QString, QStringList>> filters = { { tr("PNG Image"), { u"png"_qs } } };
+
+    const auto fileName = co_await UIHelpers::getSaveFileName(
+                { }, filters, tr("Save Image as"), suggestion);
+    if (!fileName)
+        co_return;
+
+    QString fn = *fileName;
+    if (fn.right(4) != u".png")
+        fn = fn + u".png";
+    if (!img.save(fn, "PNG"))
+        co_await UIHelpers::warning(tr("Failed to save the image to %1.").arg(fn));
 }
 
 bool PictureWidget::prefer3D() const
@@ -388,6 +436,7 @@ void PictureWidget::contextMenuEvent(QContextMenuEvent *e)
             m_contextMenu->addSeparator();
             m_contextMenu->addAction(m_renderSettings);
             m_contextMenu->addSeparator();
+            m_contextMenu->addAction(m_screenshot3D);
             m_contextMenu->addAction(m_copyImage);
             m_contextMenu->addAction(m_saveImageAs);
         }

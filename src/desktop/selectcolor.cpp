@@ -64,12 +64,12 @@ SelectColor::SelectColor(const QVector<Feature> &features, QWidget *parent)
     w_filter->setMaxVisibleItems(w_filter->count());
 
     w_lock = new QToolButton(this);
-    w_lock->setIcon(QIcon::fromTheme(u"folder-locked"_qs));
     w_lock->setProperty("iconScaling", true);
     w_lock->setCheckable(true);
     w_lock->setChecked(false);
     w_lock->setVisible(m_hasLock);
     connect(w_lock, &QToolButton::toggled, this, &SelectColor::setColorLock);
+    setColorLock(false);
 
     w_colors = new ColorTreeView(this);
     w_colors->setAlternatingRowColors(true);
@@ -238,6 +238,7 @@ void SelectColor::setColorLock(bool locked)
         w_lock->setChecked(locked);
         emit colorLockChanged(locked ? currentColor() : nullptr);
     }
+    w_lock->setIcon(QIcon::fromTheme(locked ? u"folder-locked"_qs : u"folder-unlocked"_qs));
 }
 
 void SelectColor::setShowInputError(bool show)
