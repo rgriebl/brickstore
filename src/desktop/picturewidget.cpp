@@ -284,8 +284,6 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
     if (m_pic && m_pic->isValid())
         m_image = m_pic->image();
 
-    w_ldraw->setItemAndColor(item, color);
-
     m_blCatalog->setVisible(item);
     m_blPriceGuide->setVisible(item && color);
     m_blLotsForSale->setVisible(item && color);
@@ -294,10 +292,15 @@ void PictureWidget::setItemAndColor(const BrickLink::Item *item, const BrickLink
                                                        palette().color(QPalette::Highlight));
     w_text->setText(u"<center>" + s + u"</center>");
     w_image->setPixmap({ });
-    w_3d->setEnabled(w_ldraw->canRender());
+    m_currentImageSize = { }; // showImage() caches the pixmap's size: clearing one clears both
     w_reloadRescale->setEnabled(m_item);
 
-    // the RenderWidget will emit canRender() asynchronously, so we don't handle that here
+    // has to come last: a 2D-only item makes this emit canRender(false) synchronously, which
+    // switches the stack over to w_image and repaints it - anything still pending above would
+    // clear that pixmap again. Only canRender(true) is asynchronous.
+    w_ldraw->setItemAndColor(item, color);
+    w_3d->setEnabled(w_ldraw->canRender());
+
     if (w_stackLayout->currentWidget() == w_image)
         showImage();
 }
