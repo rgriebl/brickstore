@@ -125,7 +125,7 @@ jobs:
     - name: Upload Windows Installer
       uses: actions/upload-artifact@v7
       with:
-        name: ${{ matrix.config.artifact }}
+        name: ${{ matrix.config.artifact }}-only
         path: "build/*.exe"
 
     - name: Upload the MSIX assets
@@ -170,7 +170,7 @@ jobs:
   # still refers to them by name.
 
   build-windows-installer:
-    name: "Windows Universal"
+    name: "Windows Installer"
     needs: [ build-windows ]
     runs-on: windows-2022
 
@@ -206,7 +206,7 @@ jobs:
     - name: Upload the universal installer
       uses: actions/upload-artifact@v7
       with:
-        name: Windows-Universal
+        name: Windows
         path: "build/*.exe"
 
   # BUILD the MSIX bundle for the Microsoft Store
@@ -829,7 +829,7 @@ jobs:
 
   publish-snap:
     if: startsWith(github.ref, 'refs/tags/v')
-    name: "Publish Snap (${{ matrix.artifact }})"
+    name: "Publish Snap"
     needs: [ build-snap-flatpak ]
     runs-on: ubuntu-24.04
 
