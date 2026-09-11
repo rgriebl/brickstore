@@ -47,16 +47,17 @@ runs:
       key: "Qt-${{ inputs.version }}-${{ inputs.host }}-${{ inputs.arch }}-1"
 
   - name: "Fix Python version"
+    id: python
     uses: actions/setup-python@v6
     with:
-      python-version: '3.13'
+      python-version: '3.14'
 
   - name: Install Qt via aqtinstall
     if: steps.restore-cache-qt.outputs.cache-hit != 'true'
     shell: sh
     run: |
-      # pipx install aqtinstall
-      pipx install git+https://github.com/miurahr/aqtinstall@c84e1470349e5bedbeee977bd62ec495d50d65b6
+      pipx install --python "${{ steps.python.outputs.python-path }}" \
+          git+https://github.com/miurahr/aqtinstall@076e1659807d0b362a3ed684d54c2e9c775eb9c7
       if [ "${{ inputs.host-arch }}" != "" ]; then
         aqt -c .github/aqt-settings.ini install-qt -O "${{ runner.workspace }}/Qt/" \
             ${{ inputs.host }} desktop \
