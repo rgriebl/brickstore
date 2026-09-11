@@ -5,8 +5,8 @@ name: CMake Build Matrix
 
 env:
   BUILD_NUMBER: ${{ github.run_number }}
-  BRICKSTORE_QT_DESKTOP_VERSION: '6.10.3'
-  BRICKSTORE_QT_MOBILE_VERSION: '6.11.1'
+  BRICKSTORE_QT_DESKTOP_VERSION: '6.11.2'
+  BRICKSTORE_QT_MOBILE_VERSION: '6.11.2'
   BRICKSTORE_QT6_DEB_PACKAGES: >-
       build-essential cmake ninja-build
       libglvnd-dev libtbb-dev
@@ -268,12 +268,15 @@ jobs:
   # BUILD for Linux (AppImage)
   #################################################
 
-  # Built on the oldest supported runner on purpose: the AppImage has to run on
-  # distros with an older glibc than the Snap and Flatpak builds need to.
+  # Ubuntu 22.04 defines the min. glibc version as 2.35.
+  # Qt's own binaries need at most 2.34, so they run in there unchanged.
+  # GitHub retired the ubuntu-22.04 runner images, so we have to work with nested containers.
 
   build-appimage:
     name: "Linux AppImage"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    env:
+      APPIMAGE_BASE_IMAGE: "ubuntu:22.04"
 
     steps:
     - uses: actions/checkout@v6
@@ -287,42 +290,37 @@ jobs:
         host: 'linux'
         arch: 'linux_gcc_64'
         dir: 'gcc_64'
-        tools: tools_opensslv3_src
         modules: ${{ env.BRICKSTORE_GUI_QT6_INSTALLER_MODULES }}
 
-    - name: Build for Linux (AppImage)
+    # APPIMAGE_EXTRACT_AND_RUN is needed because linuxdeploy and the tools it calls
+    # are AppImages themselves, and a container has no /dev/fuse to mount them on.
+    - name: Build and package for Linux (AppImage)
       run: |
-        sudo DEBIAN_FRONTEND=noninteractive apt -y update
-        sudo DEBIAN_FRONTEND=noninteractive apt -y install \
-            g++-10 cmake ninja-build libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
-            libxcb-\* libpulse-dev libgstreamer\*1.0-dev libsecret-1-dev libva-dev libcups2-dev libfuse2
-        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DCMAKE_C_COMPILER=/usr/bin/gcc-10 -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 \
-            -B build -S .
+        docker run --rm -i \
+            -v "${{ runner.workspace }}:${{ runner.workspace }}" \
+            -w "$GITHUB_WORKSPACE" \
+            -e Qt6_DIR \
+            -e BUILD_NUMBER \
+            -e APPIMAGE_EXTRACT_AND_RUN=1 \
+            -e DEBIAN_FRONTEND=noninteractive \
+            "$APPIMAGE_BASE_IMAGE" bash -s <<'SCRIPT'
+        set -eu
+
+        apt -y update
+        apt -y install \
+            g++ cmake ninja-build dpkg-dev wget ca-certificates git file \
+            libglvnd-dev libtbb-dev libxkbcommon-dev libxkbcommon-x11-0 \
+            libxcb-* libpulse-dev libgstreamer*1.0-dev libsecret-1-dev \
+            libva-dev libcups2-dev libfuse2
+
+        ${Qt6_DIR}/bin/qt-cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -B build -S .
         cmake --build build --config RelWithDebInfo --parallel --verbose
         env DESTDIR=build/BrickStore-Install cmake --install build --config RelWithDebInfo --prefix /usr
 
-    - name: OpenSSLv3 for Linux (AppImage)
-      run: |
-        cd ${Qt6_DIR}/../../Tools/OpenSSLv3/src
-        ./Configure --prefix=/usr --libdir=lib --openssldir=/etc/ssl '-Wl,-rpath,\$$ORIGIN,--enable-new-dtags'
-        make -j4 build_libs
-        make DESTDIR=${GITHUB_WORKSPACE}/build/BrickStore-Install install_runtime_libs
-
-        # Qt opens the unversioned libs first, so we need to prevent those from being
-        # loaded from the host system.
-        cd ${GITHUB_WORKSPACE}/build/BrickStore-Install/usr/lib/
-        for i in crypto ssl; do
-            rm -f lib${i}.so.1*
-            ln -sr lib${i}.so.3 lib${i}.so
-        done
-
-    - name: Create Linux AppImage
-      run: |
         mkdir -p .linuxdeploy
-        wget  -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+        wget -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
         chmod +x .linuxdeploy/linuxdeploy-x86_64.AppImage
-        wget  -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
+        wget -P .linuxdeploy -N "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
         chmod +x .linuxdeploy/linuxdeploy-plugin-qt-x86_64.AppImage
         # the libva libs have to be the versioned ones: Qt's ffmpeg stubs dlopen them by soname
         env VERSION=`cat VERSION_NUMBER` QML_SOURCES_PATHS=src EXTRA_QT_PLUGINS=svg \
@@ -334,6 +332,7 @@ jobs:
                 -l /usr/lib/$(dpkg-architecture -qDEB_BUILD_MULTIARCH)/libva-x11.so.2 \
                 --plugin qt \
                 --output appimage
+        SCRIPT
 
     - name: Upload Linux AppImage
       uses: actions/upload-artifact@v7

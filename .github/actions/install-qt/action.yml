@@ -32,14 +32,13 @@ inputs:
   extra-archs:
     description: "additional target architectures to install"
     default: ''
-  tools:
-    description: "aqt tool to install alongside, e.g. tools_opensslv3_src"
-    default: ''
 
 runs:
   using: composite
   steps:
 
+  # Whatever ends up in the key has to fully determine the contents of the Qt
+  # directory, or two jobs sharing a key will race over what gets saved.
   - name: Restore cached Qt from aqtinstall
     id: restore-cache-qt
     uses: actions/cache/restore@v6
@@ -69,11 +68,6 @@ runs:
             ${{ inputs.host }} ${{ inputs.target }} \
             ${{ inputs.version }} $arch \
             -m ${{ inputs.modules }}
-        if [ "${{ inputs.tools }}" != "" ]; then
-          aqt -c .github/aqt-settings.ini install-tool -O "${{ runner.workspace }}/Qt/" \
-              ${{ inputs.host }} ${{ inputs.target }} \
-              ${{ inputs.tools }}
-        fi
       done
 
   - name: Install Qt via aqtinstall (finalize)
