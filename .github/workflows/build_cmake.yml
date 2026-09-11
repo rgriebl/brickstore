@@ -911,6 +911,45 @@ jobs:
             --apiIssuer "${{ secrets.APPSTORE_API_KEY_ISSUER }}" \
             --apiKey "${{ secrets.APPSTORE_API_KEY_ID }}"
 
+  # The msstore CLI needs the four Entra ID / Partner Center values as secrets.
+  # The product ID is the public Store ID from Product management > Product
+  # identity, the same one in the apps.microsoft.com listing URL.
+  #
+  # --noCommit leaves the submission in draft instead of sending it to
+  # certification: the Store has no pre-release channel to aim at the way the
+  # snap and the PlayStore builds do, and withdrawing a submission that is
+  # already in certification is tedious. Drop the flag to publish outright.
+  publish-msstore:
+    if: startsWith(github.ref, 'refs/tags/v')
+    name: "Publish MSStore"
+    needs: [ build-windows-msix ]
+    runs-on: windows-2022
+    env:
+      MSSTORE_PRODUCT_ID: "9N2FQLWPSGWC"
+    steps:
+    - name: Download the MSIX bundle
+      uses: actions/download-artifact@v7
+      with:
+        name: Windows-MSIX
+        path: build
+
+    - name: Set up the Microsoft Store CLI
+      uses: microsoft/microsoft-store-apppublisher@v1.1
+
+    - name: Configure the Microsoft Store CLI
+      run: |
+        msstore reconfigure --tenantId ${{ secrets.MSSTORE_TENANT_ID }} `
+                            --sellerId ${{ secrets.MSSTORE_SELLER_ID }} `
+                            --clientId ${{ secrets.MSSTORE_CLIENT_ID }} `
+                            --clientSecret ${{ secrets.MSSTORE_CLIENT_SECRET }}
+      shell: pwsh
+
+    - name: Upload the bundle to the Store
+      run: |
+        $bundle = (Get-ChildItem build/*.msixbundle)[0].FullName
+        msstore publish $bundle -id $env:MSSTORE_PRODUCT_ID -v
+      shell: pwsh
+
   publish-backend-docker:
     if: inputs.publish_docker || startsWith(github.ref, 'refs/tags/v')
     name: "Publish Docker"
@@ -964,7 +1003,8 @@ jobs:
     name: "Release"
     needs: [ build-windows, build-windows-installer, build-windows-msix, build-appimage, build-snap-flatpak,
              build-macos, build-android, build-ios, build-debian, build-backend,
-             publish-snap, publish-playstore, publish-appstore, publish-backend-docker, publish-docs ]
+             publish-snap, publish-playstore, publish-appstore, publish-msstore,
+             publish-backend-docker, publish-docs ]
     runs-on: ubuntu-24.04
     permissions:
       contents: write   # creates the GitHub release
