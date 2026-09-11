@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## [2026.9.1] - 2026-09-12
+
+A few bug fixes, plus some new features:
+- Improved both the visual quality and performance of the 3D part renderer.
+- When saving a screenshot of a 3D rendered part, you can now choose a custom size and background.
+- Ubuntu Snaps now have webcam access right out of the box.
+- Both Linux Snaps and Flatpaks are now available for ARM processors as well.
+- Added a single, universal Windows installer that works on both Intel and ARM machines.
+- BrickStore is now also published to the Microsoft store. This helps with installations where Windows will not let you run the unsigned installer from GitHub.
+
+
 ## [2026.8.1] - 2026-08-05
 
 A lot of performance and stability fixes, with the most notable resolved bugs being:
@@ -795,7 +806,8 @@ These are a few of the highlights, but I probably forgot a lot of things ;-)
 - Per-document column configurations and the "Collector" as well as the "Simple" view mode are not (re)implemented yet.
 
 
-[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2026.8.1...HEAD
+[Unreleased]: https://github.com/rgriebl/brickstore/compare/v2026.9.1...HEAD
+[2026.9.1]: https://github.com/rgriebl/brickstore/releases/tag/v2026.9.1
 [2026.8.1]: https://github.com/rgriebl/brickstore/releases/tag/v2026.8.1
 [2026.7.1]: https://github.com/rgriebl/brickstore/releases/tag/v2026.7.1
 [2026.3.2]: https://github.com/rgriebl/brickstore/releases/tag/v2026.3.2

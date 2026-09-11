@@ -39,5 +39,6 @@ CMakeUserPresets.json
 compile_commands.json
 .qtcreator/
 .vscode/
+.claude/
 android/.gradle/
 .mds/
