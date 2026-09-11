@@ -154,11 +154,8 @@ QCoro::Task<> CheckForUpdates::check(bool silent)
                 bool osLegacy = (macos < QVersionNumber(13));
                 match = (dlLegacy == osLegacy);
             }
-#elif defined(Q_OS_WINDOWS) && defined(_M_AMD64)
-            match = name.startsWith(u"Windows-x64-", Qt::CaseInsensitive)
-                    || name.startsWith(u"Windows-Intel64-", Qt::CaseInsensitive);
-#elif defined(Q_OS_WINDOWS) && defined(_M_ARM64)
-            match = name.startsWith(u"Windows-ARM64-", Qt::CaseInsensitive);
+#elif defined(Q_OS_WINDOWS)
+            match = name.startsWith(u"Windows-Universal-", Qt::CaseInsensitive);
 #endif
             if (match) {
                 m_installerName = name;
