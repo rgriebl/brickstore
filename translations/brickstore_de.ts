@@ -1105,7 +1105,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="+195"/>
+        <location filename="../src/common/application.cpp" line="+204"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Die Installation ist defekt: benötigte Bildformat Plugins sind nicht verfügbar!</translation>
     </message>
@@ -2419,8 +2419,12 @@
     </message>
     <message>
         <location line="+19"/>
+        <source>Save File</source>
+        <translation>Datei speichern</translation>
+    </message>
+    <message>
         <source>Save File as</source>
-        <translation>Datei speichern unter</translation>
+        <translation type="vanished">Datei speichern unter</translation>
     </message>
     <message>
         <location line="+4"/>
@@ -4087,14 +4091,26 @@
 <context>
     <name>LDraw::RenderWidget</name>
     <message>
-        <location filename="../src/ldraw/renderwidget.cpp" line="+172"/>
         <source>Hold left button: Rotate
 Hold right button: Move
 Mouse wheel: Zoom
 Double click: Reset camera
 Right click: Menu</source>
-        <translation>Linke Taste halten: Drehen
+        <translation type="vanished">Linke Taste halten: Drehen
 Rechte Taste halten: Verschieben
+Mausrad: Vergrößern
+Doppel-Click: Kamera zurücksetzen
+Rechts-Click: Menü</translation>
+    </message>
+    <message>
+        <location filename="../src/ldraw/renderwidget.cpp" line="+166"/>
+        <source>Hold left button: Rotate
+Pinch gesture: Zoom
+Mouse wheel: Zoom
+Double click: Reset camera
+Right click: Menu</source>
+        <translation>Linke Taste halten: Drehen
+Aufzieh Geste: Vergrößern
 Mausrad: Vergrößern
 Doppel-Click: Kamera zurücksetzen
 Rechts-Click: Menü</translation>
@@ -4110,7 +4126,7 @@ Rechts-Click: Menü</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="+376"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="+380"/>
         <source>Toolbar</source>
         <translation>Werkzeugleiste</translation>
     </message>
@@ -4527,33 +4543,45 @@ Rechts-Click: Menü</translation>
 <context>
     <name>PictureWidget</name>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="+165"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="+341"/>
         <source>PNG Image</source>
         <translation>PNG Bild</translation>
     </message>
     <message>
-        <location line="+2"/>
         <source>Save image as</source>
-        <translation>Bild speichern</translation>
+        <translation type="vanished">Bild speichern</translation>
     </message>
     <message>
-        <location line="+63"/>
+        <location line="-135"/>
         <source>Update</source>
         <translation>Aktualisieren</translation>
     </message>
     <message>
-        <location line="+24"/>
         <source>Copy image</source>
-        <translation>Bild kopieren</translation>
+        <translation type="vanished">Bild kopieren</translation>
     </message>
     <message>
-        <location line="-1"/>
-        <source>3D render settings...</source>
+        <location line="+26"/>
+        <source>3D Render Settings...</source>
         <translation>3D Anzeige Einstellungen...</translation>
     </message>
     <message>
-        <location line="+2"/>
         <source>Save image as...</source>
+        <translation type="vanished">Bild speichern unter...</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>3D Screenshot...</source>
+        <translation>3D Screenshot...</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy Image</source>
+        <translation>Bild kopieren</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Save Image as...</source>
         <translation>Bild speichern unter...</translation>
     </message>
     <message>
@@ -4572,12 +4600,22 @@ Rechts-Click: Menü</translation>
         <translation>Verkaufsangebote auf BrickLink...</translation>
     </message>
     <message>
-        <location line="+67"/>
+        <location line="+103"/>
+        <source>Save Image</source>
+        <translation>Bild speichern</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Failed to save the image to %1.</source>
+        <translation>Speichern des Bildes in Datei %1 ist fehlgeschlagen.</translation>
+    </message>
+    <message>
+        <location line="+23"/>
         <source>Please wait... updating</source>
         <translation>Bitte warten... Aktualisierung läuft</translation>
     </message>
     <message>
-        <location line="-95"/>
+        <location line="-166"/>
         <source>Center view</source>
         <translation>Ansicht zentrieren</translation>
     </message>
@@ -4988,7 +5026,7 @@ Rechts-Click: Menü</translation>
 <context>
     <name>QmlBrickStore</name>
     <message>
-        <location filename="../src/common/qmlapi.cpp" line="+335"/>
+        <location filename="../src/common/qmlapi.cpp" line="+339"/>
         <source>Save File</source>
         <translation>Datei speichern</translation>
     </message>
@@ -5020,6 +5058,54 @@ Rechts-Click: Menü</translation>
         <location line="+2"/>
         <source>Clear recent files</source>
         <translation>Lösche Liste der zuletzt geöffneten Dateien</translation>
+    </message>
+</context>
+<context>
+    <name>RenderImageDialog</name>
+    <message>
+        <location filename="../src/desktop/renderimagedialog.ui" line="+14"/>
+        <source>Screenshot</source>
+        <translation>Screenshot</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Size</source>
+        <translation>Größe</translation>
+    </message>
+    <message>
+        <location line="+79"/>
+        <source>Background</source>
+        <translation>Hintergrund</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Transparent</source>
+        <translation>Transparent</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>White</source>
+        <translation>Weiß</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Black</source>
+        <translation>Schwarz</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Border</source>
+        <translation>Rand</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/renderimagedialog.cpp" line="+18"/>
+        <source>Lock the aspect ratio</source>
+        <translation>Seitenverhältnis sperren</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Copy</source>
+        <translation>Kopieren</translation>
     </message>
 </context>
 <context>

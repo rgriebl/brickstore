@@ -1098,7 +1098,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="+195"/>
+        <location filename="../src/common/application.cpp" line="+204"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2322,7 +2322,7 @@
     </message>
     <message>
         <location line="+19"/>
-        <source>Save File as</source>
+        <source>Save File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3897,9 +3897,9 @@
 <context>
     <name>LDraw::RenderWidget</name>
     <message>
-        <location filename="../src/ldraw/renderwidget.cpp" line="+172"/>
+        <location filename="../src/ldraw/renderwidget.cpp" line="+166"/>
         <source>Hold left button: Rotate
-Hold right button: Move
+Pinch gesture: Zoom
 Mouse wheel: Zoom
 Double click: Reset camera
 Right click: Menu</source>
@@ -3909,7 +3909,7 @@ Right click: Menu</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="+376"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="+380"/>
         <source>Toolbar</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4263,22 +4263,37 @@ Right click: Menu</source>
 <context>
     <name>PictureWidget</name>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="+230"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="+206"/>
         <source>Update</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location line="+30"/>
         <source>Show BrickLink Catalog Info...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-3"/>
-        <source>3D render settings...</source>
+        <location line="-4"/>
+        <source>3D Render Settings...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+4"/>
+        <location line="+1"/>
+        <source>3D Screenshot...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy Image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Save Image as...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
         <source>Show BrickLink Price Guide Info...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4288,33 +4303,28 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+67"/>
+        <location line="+103"/>
+        <source>Save Image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Failed to save the image to %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+23"/>
         <source>Please wait... updating</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-95"/>
+        <location line="-166"/>
         <source>Center view</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-65"/>
+        <location line="+135"/>
         <source>PNG Image</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+2"/>
-        <source>Save image as</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+87"/>
-        <source>Copy image</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+1"/>
-        <source>Save image as...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4724,7 +4734,7 @@ Right click: Menu</source>
 <context>
     <name>QmlBrickStore</name>
     <message>
-        <location filename="../src/common/qmlapi.cpp" line="+335"/>
+        <location filename="../src/common/qmlapi.cpp" line="+339"/>
         <source>Save File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4755,6 +4765,54 @@ Right click: Menu</source>
     <message>
         <location line="+2"/>
         <source>Clear recent files</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>RenderImageDialog</name>
+    <message>
+        <location filename="../src/desktop/renderimagedialog.ui" line="+14"/>
+        <source>Screenshot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+79"/>
+        <source>Background</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Transparent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>White</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Black</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Border</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/renderimagedialog.cpp" line="+18"/>
+        <source>Lock the aspect ratio</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
