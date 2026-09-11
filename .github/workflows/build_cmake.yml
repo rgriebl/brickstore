@@ -132,7 +132,7 @@ jobs:
       if: matrix.config.artifact == 'Windows-x64'
       uses: actions/upload-artifact@v7
       with:
-        name: Windows-MSIX-Assets
+        name: Staging-Windows-MSIX-Assets
         path: "build/msix"
 
     # The Inno Setup wizard image is generated, not committed, and the universal
@@ -142,14 +142,14 @@ jobs:
       if: matrix.config.artifact == 'Windows-x64'
       uses: actions/upload-artifact@v7
       with:
-        name: Windows-Installer-Assets
+        name: Staging-Windows-Installer-Assets
         path: "build/generated/icons/windows-installer.png"
 
     # the deployed tree is what the universal installer is assembled from
     - name: Upload the deployed tree
       uses: actions/upload-artifact@v7
       with:
-        name: ${{ matrix.config.artifact }}-Deployed
+        name: Staging-${{ matrix.config.artifact }}-Deployed
         path: "build/bin"
 
     - name: Upload Windows debug info to sentry.io
@@ -180,13 +180,13 @@ jobs:
     - name: Download the x64 tree
       uses: actions/download-artifact@v7
       with:
-        name: Windows-x64-Deployed
+        name: Staging-Windows-x64-Deployed
         path: payload/x64
 
     - name: Download the arm64 tree
       uses: actions/download-artifact@v7
       with:
-        name: Windows-ARM64-Deployed
+        name: Staging-Windows-ARM64-Deployed
         path: payload/arm64
 
     # the .iss looks for this next to the payload, at the same place relative to
@@ -194,7 +194,7 @@ jobs:
     - name: Download the installer assets
       uses: actions/download-artifact@v7
       with:
-        name: Windows-Installer-Assets
+        name: Staging-Windows-Installer-Assets
         path: generated/icons
 
     - name: Create the universal installer
@@ -227,19 +227,19 @@ jobs:
     - name: Download the x64 tree
       uses: actions/download-artifact@v7
       with:
-        name: Windows-x64-Deployed
+        name: Staging-Windows-x64-Deployed
         path: payload/x64
 
     - name: Download the arm64 tree
       uses: actions/download-artifact@v7
       with:
-        name: Windows-ARM64-Deployed
+        name: Staging-Windows-ARM64-Deployed
         path: payload/arm64
 
     - name: Download the MSIX assets
       uses: actions/download-artifact@v7
       with:
-        name: Windows-MSIX-Assets
+        name: Staging-Windows-MSIX-Assets
         path: msix
 
     # makepri and makeappx are Windows SDK tools; vcvars puts them on PATH. The
@@ -262,7 +262,7 @@ jobs:
     - name: Upload the MSIX bundle
       uses: actions/upload-artifact@v7
       with:
-        name: Windows-MSIX
+        name: Staging-Windows-MSIX
         path: "build/*.msixbundle"
 
   # BUILD for Linux (AppImage)
@@ -462,7 +462,7 @@ jobs:
       if: matrix.config.snap
       uses: actions/upload-artifact@v7
       with:
-        name: ${{ matrix.config.artifact }}
+        name: Staging-${{ matrix.config.artifact }}
         path: ${{ steps.create-snap.outputs.snap }}
 
   # BUILD for macOS
@@ -603,7 +603,7 @@ jobs:
     - name: Upload Android AAB
       uses: actions/upload-artifact@v7
       with:
-        name: "Android-PlayStore"
+        name: "Staging-Android-PlayStore"
         path: "build/*.aab"
 
     - name: Upload Android ARM64 APK
@@ -685,7 +685,7 @@ jobs:
     - name: Upload iOS IPA
       uses: actions/upload-artifact@v7
       with:
-        name: "iOS-AppStore"
+        name: "Staging-iOS-AppStore"
         path: "build/*.ipa"
 
   # BUILD for Linux (distro packages)
@@ -780,7 +780,7 @@ jobs:
     - name: Upload Documentation
       uses: actions/upload-artifact@v7
       with:
-        name: Documentation
+        name: Staging-Documentation
         path: "build/doc/html/extensions"
 
   # BUILD the Backend Docker image
@@ -814,7 +814,7 @@ jobs:
     - name: Upload the Docker image
       uses: actions/upload-artifact@v7
       with:
-        name: Backend-Docker-Image
+        name: Staging-Backend-Docker-Image
         path: backend-docker-image.tar.gz
 
   # PUBLISH
@@ -842,7 +842,7 @@ jobs:
     - name: Download the snap
       uses: actions/download-artifact@v7
       with:
-        name: ${{ matrix.artifact }}
+        name: Staging-${{ matrix.artifact }}
         path: snap
 
     - name: Resolve the snap file name
@@ -868,7 +868,7 @@ jobs:
     - name: Download the AAB
       uses: actions/download-artifact@v7
       with:
-        name: Android-PlayStore
+        name: Staging-Android-PlayStore
         path: build
 
     # the build job used to put this into the environment for the release name
@@ -895,7 +895,7 @@ jobs:
     - name: Download the IPA
       uses: actions/download-artifact@v7
       with:
-        name: iOS-AppStore
+        name: Staging-iOS-AppStore
         path: build
 
     - name: Set up the AppStore API key
@@ -929,7 +929,7 @@ jobs:
     - name: Download the MSIX bundle
       uses: actions/download-artifact@v7
       with:
-        name: Windows-MSIX
+        name: Staging-Windows-MSIX
         path: build
 
     - name: Set up the Microsoft Store CLI
@@ -958,7 +958,7 @@ jobs:
     - name: Download the Docker image
       uses: actions/download-artifact@v7
       with:
-        name: Backend-Docker-Image
+        name: Staging-Backend-Docker-Image
 
     - name: Push the Docker image
       env:
@@ -983,7 +983,7 @@ jobs:
     - name: Download the documentation
       uses: actions/download-artifact@v7
       with:
-        name: Documentation
+        name: Staging-Documentation
         path: extensions-doc
 
     - name: Publish Documentation
@@ -1017,11 +1017,8 @@ jobs:
 
     - name: Rename Artifacts
       run: |
-        # everything left in artifacts/ becomes a release asset, so drop the ones
-        # that are only a handover between jobs
-        rm -rf artifacts/Documentation artifacts/Backend-Docker-Image \
-               artifacts/Windows-x64-Deployed artifacts/Windows-ARM64-Deployed \
-               artifacts/Windows-MSIX-Assets artifacts/Windows-MSIX
+        # Everything in artifacts/ becomes a release asset, unless its name starts with "Staging-"
+        rm -rf artifacts/Staging-*
         find artifacts -mindepth 2 -type f -print0 | while read -d $'\0' a; do
           d="$(dirname $a)"
           mv "$a" "${d}-$(basename $a)"
