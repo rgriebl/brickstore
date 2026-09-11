@@ -1105,7 +1105,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="+195"/>
+        <location filename="../src/common/application.cpp" line="+204"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Su instalación está rota: faltan los plugins de formato de imagen!</translation>
     </message>
@@ -2411,8 +2411,12 @@
     </message>
     <message>
         <location line="+19"/>
+        <source>Save File</source>
+        <translation>Guardar Archivo</translation>
+    </message>
+    <message>
         <source>Save File as</source>
-        <translation>Guardar Archivo como</translation>
+        <translation type="vanished">Guardar Archivo como</translation>
     </message>
     <message>
         <location line="+4"/>
@@ -4079,14 +4083,26 @@
 <context>
     <name>LDraw::RenderWidget</name>
     <message>
-        <location filename="../src/ldraw/renderwidget.cpp" line="+172"/>
         <source>Hold left button: Rotate
 Hold right button: Move
 Mouse wheel: Zoom
 Double click: Reset camera
 Right click: Menu</source>
-        <translation>Manten botón izquierdo: Rotar
+        <translation type="vanished">Manten botón izquierdo: Rotar
 Manten botón derecho: Mover
+Rueda del ratón: Zoom
+Doble clic: Restablecer cámara
+Clic derecho: Menu</translation>
+    </message>
+    <message>
+        <location filename="../src/ldraw/renderwidget.cpp" line="+166"/>
+        <source>Hold left button: Rotate
+Pinch gesture: Zoom
+Mouse wheel: Zoom
+Double click: Reset camera
+Right click: Menu</source>
+        <translation>Manten botón izquierdo: Rotar
+Gesto de pinza: Zoom
 Rueda del ratón: Zoom
 Doble clic: Restablecer cámara
 Clic derecho: Menu</translation>
@@ -4102,7 +4118,7 @@ Clic derecho: Menu</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="+376"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="+380"/>
         <source>Toolbar</source>
         <translation>Barra de herramientas</translation>
     </message>
@@ -4511,33 +4527,45 @@ Clic derecho: Menu</translation>
 <context>
     <name>PictureWidget</name>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="+165"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="+341"/>
         <source>PNG Image</source>
         <translation>Imagen PNG</translation>
     </message>
     <message>
-        <location line="+2"/>
         <source>Save image as</source>
-        <translation>Guardar imagen como</translation>
+        <translation type="vanished">Guardar imagen como</translation>
     </message>
     <message>
-        <location line="+63"/>
+        <location line="-135"/>
         <source>Update</source>
         <translation>Actualizar</translation>
     </message>
     <message>
-        <location line="+24"/>
         <source>Copy image</source>
-        <translation>Copia imagen</translation>
+        <translation type="vanished">Copia imagen</translation>
     </message>
     <message>
-        <location line="-1"/>
-        <source>3D render settings...</source>
+        <location line="+26"/>
+        <source>3D Render Settings...</source>
         <translation>Opciones de renderizado 3D...</translation>
     </message>
     <message>
-        <location line="+2"/>
         <source>Save image as...</source>
+        <translation type="vanished">Guardar imagen como...</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>3D Screenshot...</source>
+        <translation>Captura de pantalla 3D...</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy Image</source>
+        <translation>Copia imagen</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Save Image as...</source>
         <translation>Guardar imagen como...</translation>
     </message>
     <message>
@@ -4556,12 +4584,22 @@ Clic derecho: Menu</translation>
         <translation>Mostar Lotes a la Venta en BrickLink...</translation>
     </message>
     <message>
-        <location line="+67"/>
+        <location line="+103"/>
+        <source>Save Image</source>
+        <translation>Guardar imagen</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Failed to save the image to %1.</source>
+        <translation>Fallo al guardar la imagen al archivo %1.</translation>
+    </message>
+    <message>
+        <location line="+23"/>
         <source>Please wait... updating</source>
         <translation>Espere por favor... actualizando</translation>
     </message>
     <message>
-        <location line="-95"/>
+        <location line="-166"/>
         <source>Center view</source>
         <translation>Centrar vista</translation>
     </message>
@@ -4972,7 +5010,7 @@ Clic derecho: Menu</translation>
 <context>
     <name>QmlBrickStore</name>
     <message>
-        <location filename="../src/common/qmlapi.cpp" line="+335"/>
+        <location filename="../src/common/qmlapi.cpp" line="+339"/>
         <source>Save File</source>
         <translation>Guardar Archivo</translation>
     </message>
@@ -5004,6 +5042,54 @@ Clic derecho: Menu</translation>
         <location line="+2"/>
         <source>Clear recent files</source>
         <translation>Borrar archivos recientes</translation>
+    </message>
+</context>
+<context>
+    <name>RenderImageDialog</name>
+    <message>
+        <location filename="../src/desktop/renderimagedialog.ui" line="+14"/>
+        <source>Screenshot</source>
+        <translation>Captura de pantalla</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Size</source>
+        <translation>Tamaño</translation>
+    </message>
+    <message>
+        <location line="+79"/>
+        <source>Background</source>
+        <translation>Fondo</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Transparent</source>
+        <translation>Transparente</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>White</source>
+        <translation>Blanco</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Black</source>
+        <translation>Negro</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Border</source>
+        <translation>Margen</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/renderimagedialog.cpp" line="+18"/>
+        <source>Lock the aspect ratio</source>
+        <translation>Bloquear la relación de aspecto</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Copy</source>
+        <translation>Copiar</translation>
     </message>
 </context>
 <context>

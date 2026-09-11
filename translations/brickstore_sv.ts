@@ -1105,7 +1105,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="+195"/>
+        <location filename="../src/common/application.cpp" line="+204"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Din installation är trasig: Bildformatets plugin saknas!</translation>
     </message>
@@ -2411,8 +2411,12 @@
     </message>
     <message>
         <location line="+19"/>
+        <source>Save File</source>
+        <translation>Spara fil</translation>
+    </message>
+    <message>
         <source>Save File as</source>
-        <translation>Spara fil som</translation>
+        <translation type="vanished">Spara fil som</translation>
     </message>
     <message>
         <location line="+4"/>
@@ -4080,14 +4084,26 @@
 <context>
     <name>LDraw::RenderWidget</name>
     <message>
-        <location filename="../src/ldraw/renderwidget.cpp" line="+172"/>
         <source>Hold left button: Rotate
 Hold right button: Move
 Mouse wheel: Zoom
 Double click: Reset camera
 Right click: Menu</source>
-        <translation>Håll nere vänster knapp: Rotera
+        <translation type="vanished">Håll nere vänster knapp: Rotera
 Håll nere höger knapp: Flytta
+Musens hjul: Zooma
+Dubbelklicka: Återställ kameran
+Högerklicka: Meny</translation>
+    </message>
+    <message>
+        <location filename="../src/ldraw/renderwidget.cpp" line="+166"/>
+        <source>Hold left button: Rotate
+Pinch gesture: Zoom
+Mouse wheel: Zoom
+Double click: Reset camera
+Right click: Menu</source>
+        <translation>Håll nere vänster knapp: Rotera
+Nypgest: Zooma
 Musens hjul: Zooma
 Dubbelklicka: Återställ kameran
 Högerklicka: Meny</translation>
@@ -4103,7 +4119,7 @@ Högerklicka: Meny</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/desktop/mainwindow.cpp" line="+376"/>
+        <location filename="../src/desktop/mainwindow.cpp" line="+380"/>
         <source>Toolbar</source>
         <translation>Verktygsfält</translation>
     </message>
@@ -4513,17 +4529,16 @@ Högerklicka: Meny</translation>
 <context>
     <name>PictureWidget</name>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="+165"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="+341"/>
         <source>PNG Image</source>
         <translation>PNG bild</translation>
     </message>
     <message>
-        <location line="+2"/>
         <source>Save image as</source>
-        <translation>Spara bild som</translation>
+        <translation type="vanished">Spara bild som</translation>
     </message>
     <message>
-        <location line="+63"/>
+        <location line="-135"/>
         <source>Update</source>
         <translation>Uppdatera</translation>
     </message>
@@ -4533,18 +4548,31 @@ Högerklicka: Meny</translation>
         <translation>Centrera vy</translation>
     </message>
     <message>
-        <location line="+23"/>
-        <source>3D render settings...</source>
+        <location line="+26"/>
+        <source>3D Render Settings...</source>
         <translation>3 renderings inställningar...</translation>
     </message>
     <message>
-        <location line="+1"/>
         <source>Copy image</source>
+        <translation type="vanished">Kopiera bild</translation>
+    </message>
+    <message>
+        <source>Save image as...</source>
+        <translation type="vanished">Spara bild som...</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>3D Screenshot...</source>
+        <translation>3D-skärmbild...</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy Image</source>
         <translation>Kopiera bild</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Save image as...</source>
+        <source>Save Image as...</source>
         <translation>Spara bild som...</translation>
     </message>
     <message>
@@ -4563,7 +4591,17 @@ Högerklicka: Meny</translation>
         <translation>Visa Partier (Lots) som är till salu på BrickLink...</translation>
     </message>
     <message>
-        <location line="+67"/>
+        <location line="+103"/>
+        <source>Save Image</source>
+        <translation>Spara bild</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Failed to save the image to %1.</source>
+        <translation>Misslyckades spara bilden till filen %1.</translation>
+    </message>
+    <message>
+        <location line="+23"/>
         <source>Please wait... updating</source>
         <translation>Var vänlig vänta... uppdaterar</translation>
     </message>
@@ -4974,7 +5012,7 @@ Högerklicka: Meny</translation>
 <context>
     <name>QmlBrickStore</name>
     <message>
-        <location filename="../src/common/qmlapi.cpp" line="+335"/>
+        <location filename="../src/common/qmlapi.cpp" line="+339"/>
         <source>Save File</source>
         <translation>Spara fil</translation>
     </message>
@@ -5006,6 +5044,54 @@ Högerklicka: Meny</translation>
         <location line="+2"/>
         <source>Clear recent files</source>
         <translation>Rensa senaste filer</translation>
+    </message>
+</context>
+<context>
+    <name>RenderImageDialog</name>
+    <message>
+        <location filename="../src/desktop/renderimagedialog.ui" line="+14"/>
+        <source>Screenshot</source>
+        <translation>Skärmbild</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Size</source>
+        <translation>Storlek</translation>
+    </message>
+    <message>
+        <location line="+79"/>
+        <source>Background</source>
+        <translation>Bakgrund</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Transparent</source>
+        <translation>Transparent</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>White</source>
+        <translation>Vit</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Black</source>
+        <translation>Svart</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Border</source>
+        <translation>Marginal</translation>
+    </message>
+    <message>
+        <location filename="../src/desktop/renderimagedialog.cpp" line="+18"/>
+        <source>Lock the aspect ratio</source>
+        <translation>Lås bildförhållandet</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Copy</source>
+        <translation>Kopiera</translation>
     </message>
 </context>
 <context>

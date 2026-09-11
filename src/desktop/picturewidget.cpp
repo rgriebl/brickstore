@@ -342,7 +342,7 @@ QCoro::Task<> PictureWidget::saveImage(QImage img)
     const QList<QPair<QString, QStringList>> filters = { { tr("PNG Image"), { u"png"_qs } } };
 
     const auto fileName = co_await UIHelpers::getSaveFileName(
-                { }, filters, tr("Save Image as"), suggestion);
+                { }, filters, tr("Save Image"), suggestion);
     if (!fileName)
         co_return;
 

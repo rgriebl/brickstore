@@ -1740,7 +1740,7 @@ QCoro::Task<bool> Document::save(bool saveAs)
         if (fn.right(4) == u".xml")
             fn.truncate(fn.length() - 4);
 
-        if (auto f = co_await UIHelpers::getSaveFileName(fn, filters, tr("Save File as"), title())) {
+        if (auto f = co_await UIHelpers::getSaveFileName(fn, filters, tr("Save File"), title())) {
             if (!DocumentList::inst()->documentForFile(*f)) {
                 fn = *f;
             } else {
