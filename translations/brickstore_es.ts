@@ -1105,7 +1105,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="+204"/>
+        <location filename="../src/common/application.cpp" line="+202"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Su instalación está rota: faltan los plugins de formato de imagen!</translation>
     </message>
@@ -1195,7 +1195,7 @@
         <translation>Lo más probable es que su token haya caducado: puede pulsar &lt;i&gt;Reintentar&lt;/i&gt; para abrir las Opciones y renovarlo.</translation>
     </message>
     <message>
-        <location line="+411"/>
+        <location line="+425"/>
         <source>No valid BrickLink access token found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
         <translation>No se ha encontrado ningún token de acceso a BrickLink válido.&lt;br /&gt;&lt;br /&gt;¿Quiere cambiar estos ajustes ahora?</translation>
     </message>
@@ -1692,7 +1692,7 @@
         <translation>BrickStore se ha actualizado:</translation>
     </message>
     <message>
-        <location line="+102"/>
+        <location line="+99"/>
         <source>Version information is not available.</source>
         <translation>Información de versión no está disponible.</translation>
     </message>
@@ -1711,7 +1711,7 @@
         <translation>Una versión más nueva que la instalada actualmente está disponible:</translation>
     </message>
     <message>
-        <location line="-96"/>
+        <location line="-93"/>
         <source>Changes:</source>
         <translation>Cambios:</translation>
     </message>
@@ -4527,7 +4527,7 @@ Clic derecho: Menu</translation>
 <context>
     <name>PictureWidget</name>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="+341"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="+342"/>
         <source>PNG Image</source>
         <translation>Imagen PNG</translation>
     </message>
@@ -4536,7 +4536,7 @@ Clic derecho: Menu</translation>
         <translation type="vanished">Guardar imagen como</translation>
     </message>
     <message>
-        <location line="-135"/>
+        <location line="-136"/>
         <source>Update</source>
         <translation>Actualizar</translation>
     </message>
@@ -4584,7 +4584,7 @@ Clic derecho: Menu</translation>
         <translation>Mostar Lotes a la Venta en BrickLink...</translation>
     </message>
     <message>
-        <location line="+103"/>
+        <location line="+107"/>
         <source>Save Image</source>
         <translation>Guardar imagen</translation>
     </message>
@@ -4599,7 +4599,7 @@ Clic derecho: Menu</translation>
         <translation>Espere por favor... actualizando</translation>
     </message>
     <message>
-        <location line="-166"/>
+        <location line="-170"/>
         <source>Center view</source>
         <translation>Centrar vista</translation>
     </message>

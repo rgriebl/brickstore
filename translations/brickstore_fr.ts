@@ -1105,7 +1105,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="+204"/>
+        <location filename="../src/common/application.cpp" line="+202"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Votre installation est corrompue&#x202f;: il manque des plugins de format d&apos;image&#x202f;!</translation>
     </message>
@@ -1195,7 +1195,7 @@
         <translation>Votre jeton a probablement expiré&#x202f;: vous pouvez cliquer sur &lt;i&gt;Réessayer&lt;/i&gt; pour ouvrir les paramètres et le renouveler.</translation>
     </message>
     <message>
-        <location line="+411"/>
+        <location line="+425"/>
         <source>No valid BrickLink access token found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
         <translation>Aucun jeton d&apos;accès BrickLink valide n&apos;a été trouvé.&lt;br /&gt;&lt;br /&gt;Voulez-vous changer ces paramètres maintenant&#x202f;?</translation>
     </message>
@@ -1694,7 +1694,7 @@
         <translation>BrickStore a été mis à jour&#x202f;:</translation>
     </message>
     <message>
-        <location line="+102"/>
+        <location line="+99"/>
         <source>Version information is not available.</source>
         <translation>L&apos;information sur la version n&apos;est pas disponible.</translation>
     </message>
@@ -1713,7 +1713,7 @@
         <translation>Une version plus récente que celle installée est disponible:</translation>
     </message>
     <message>
-        <location line="-96"/>
+        <location line="-93"/>
         <source>Changes:</source>
         <translation>Changements:</translation>
     </message>
@@ -4535,7 +4535,7 @@ Clic droit&#x202f;: Menu</translation>
 <context>
     <name>PictureWidget</name>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="+341"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="+342"/>
         <source>PNG Image</source>
         <translation>Image PNG</translation>
     </message>
@@ -4544,7 +4544,7 @@ Clic droit&#x202f;: Menu</translation>
         <translation type="vanished">Enregistrer l&apos;image sous</translation>
     </message>
     <message>
-        <location line="-135"/>
+        <location line="-136"/>
         <source>Update</source>
         <translation>Mettre à jour</translation>
     </message>
@@ -4592,7 +4592,7 @@ Clic droit&#x202f;: Menu</translation>
         <translation>Ouvrir lots en vente sur BrickLink...</translation>
     </message>
     <message>
-        <location line="+103"/>
+        <location line="+107"/>
         <source>Save Image</source>
         <translation>Enregistrer l&apos;image</translation>
     </message>
@@ -4607,7 +4607,7 @@ Clic droit&#x202f;: Menu</translation>
         <translation>Patienter... mise à jour</translation>
     </message>
     <message>
-        <location line="-166"/>
+        <location line="-170"/>
         <source>Center view</source>
         <translation>Vue centrale</translation>
     </message>

@@ -1098,7 +1098,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="+204"/>
+        <location filename="../src/common/application.cpp" line="+202"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1176,7 +1176,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+413"/>
+        <location line="+427"/>
         <source>No valid BrickLink access token found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1657,7 +1657,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+102"/>
+        <location line="+99"/>
         <source>Version information is not available.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1672,7 +1672,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-96"/>
+        <location line="-93"/>
         <source>Changes:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4303,7 +4303,7 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+103"/>
+        <location line="+107"/>
         <source>Save Image</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4318,12 +4318,12 @@ Right click: Menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-166"/>
+        <location line="-170"/>
         <source>Center view</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+135"/>
+        <location line="+136"/>
         <source>PNG Image</source>
         <translation type="unfinished"></translation>
     </message>

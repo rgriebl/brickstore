@@ -1105,7 +1105,7 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/common/application.cpp" line="+204"/>
+        <location filename="../src/common/application.cpp" line="+202"/>
         <source>Your installation is broken: image format plugins are missing!</source>
         <translation>Din installation är trasig: Bildformatets plugin saknas!</translation>
     </message>
@@ -1195,7 +1195,7 @@
         <translation>Troligtvis har din token gått ut: du kan klicka på &lt;i&gt;Försök igen&lt;/i&gt; för att öppna Inställningar och förnya den.</translation>
     </message>
     <message>
-        <location line="+411"/>
+        <location line="+425"/>
         <source>No valid BrickLink access token found.&lt;br /&gt;&lt;br /&gt;Do you want to change the settings now?</source>
         <translation>Ingen giltig BrickLink åtkomsttoken hittades.&lt;br /&gt;&lt;br /&gt;Vill du ändra dessa inställningar nu?</translation>
     </message>
@@ -1692,7 +1692,7 @@
         <translation>BrickStore uppdaterades:</translation>
     </message>
     <message>
-        <location line="+102"/>
+        <location line="+99"/>
         <source>Version information is not available.</source>
         <translation>Versionsinformation finns inte tillgängligt.</translation>
     </message>
@@ -1711,7 +1711,7 @@
         <translation>Det finns en nyare version än nuvarande installerat program:</translation>
     </message>
     <message>
-        <location line="-96"/>
+        <location line="-93"/>
         <source>Changes:</source>
         <translation>Ändringar:</translation>
     </message>
@@ -4529,7 +4529,7 @@ Högerklicka: Meny</translation>
 <context>
     <name>PictureWidget</name>
     <message>
-        <location filename="../src/desktop/picturewidget.cpp" line="+341"/>
+        <location filename="../src/desktop/picturewidget.cpp" line="+342"/>
         <source>PNG Image</source>
         <translation>PNG bild</translation>
     </message>
@@ -4538,7 +4538,7 @@ Högerklicka: Meny</translation>
         <translation type="vanished">Spara bild som</translation>
     </message>
     <message>
-        <location line="-135"/>
+        <location line="-136"/>
         <source>Update</source>
         <translation>Uppdatera</translation>
     </message>
@@ -4591,7 +4591,7 @@ Högerklicka: Meny</translation>
         <translation>Visa Partier (Lots) som är till salu på BrickLink...</translation>
     </message>
     <message>
-        <location line="+103"/>
+        <location line="+107"/>
         <source>Save Image</source>
         <translation>Spara bild</translation>
     </message>
