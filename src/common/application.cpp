@@ -70,6 +70,7 @@
 
 #if defined(Q_OS_ANDROID)
 #  include <dlfcn.h>
+#  include <cstdlib>
 #endif
 
 #if defined(Q_OS_UNIX) || defined(Q_CC_MINGW)
@@ -602,6 +603,20 @@ Application::~Application()
         qInstallMessageHandler(m_defaultMessageHandler);
 
     s_inst = nullptr;
+
+#if defined(Q_OS_ANDROID)
+    // ~QGuiApplication destroys QPlatformMediaIntegration, whose Android backend blocks in
+    // QtCameraAvailabilityListener.cleanup() on a job posted to the UI thread. If Android started
+    // the teardown, that thread is parked in terminateQtNativeApplication() waiting for us to exit,
+    // so both sides wait forever and Android kills the app with an ANR (Sentry BRICKSTORE-322).
+    // Skipping the teardown costs nothing: it only frees memory and destroys the platform plugin in
+    // a process that is being killed either way, and main() has already joined the global thread
+    // pool. _Exit() and not exit(), because the scene graph render thread is still running.
+    // Gate this on QT_VERSION once the Qt-side fix has landed.
+    shutdownSentry();
+    std::_Exit(0);
+#endif
+
     delete m_app;
 
     shutdownSentry();
