@@ -82,7 +82,6 @@ signals:
 
     void tumblingAnimationActiveChanged();
 
-    void requestContextMenu(const QPointF &pos);
     void requestToolTip(const QPointF &pos);
 
     void qmlResetCamera(); //TODO find something nicer

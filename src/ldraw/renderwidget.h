@@ -53,6 +53,7 @@ signals:
 
 protected:
     void changeEvent(QEvent *e) override;
+    bool eventFilter(QObject *o, QEvent *e) override;
 
 private:
     void paletteChange();

@@ -238,16 +238,8 @@ Item {
         }
         Timer {
             interval: 2000
-            running: hovered.hovered && !moveHandler.active && !pinchHandler.active && !arcballHandler.active
+            running: hovered.hovered && !pinchHandler.active && !arcballHandler.active
             onTriggered: root.renderController.requestToolTip(hovered.point.scenePosition)
-        }
-
-        TapHandler {
-            acceptedButtons: Qt.RightButton
-            gesturePolicy: TapHandler.ReleaseWithinBounds
-            onSingleTapped: (eventPoint, button) => {
-                                root.renderController.requestContextMenu(eventPoint.scenePosition)
-                            }
         }
 
         TapHandler {
@@ -264,41 +256,13 @@ Item {
                      }
         }
 
-        DragHandler {
-            id: moveHandler
-
-            property vector3d pressPosition
-            property bool animationWasActive: false
-
-            acceptedButtons: Qt.RightButton
-            enabled: !arcballHandler.active && !pinchHandler.active
-
-            target: null
-
-            onActiveChanged: {
-                if (active) {
-                    animationWasActive = root.renderController.tumblingAnimationActive
-                    root.renderController.tumblingAnimationActive = false
-                    pressPosition = rootNode.position
-                } else {
-                    root.renderController.tumblingAnimationActive = animationWasActive
-                }
-            }
-            onActiveTranslationChanged: {
-                if (!active)
-                    return
-                //TODO: this is not correct for a perspective camera
-                let offset = Qt.vector3d(2 * activeTranslation.x, -2 * activeTranslation.y, 0)
-                rootNode.position = pressPosition.plus(offset)
-            }
-        }
         PinchHandler {
             id: pinchHandler
 
             property vector3d scaleStart
 
             target: null
-            enabled: !moveHandler.active && !arcballHandler.active
+            enabled: !arcballHandler.active
 
             onActiveChanged: {
                 if (active)
@@ -319,7 +283,7 @@ Item {
             property bool animationWasActive: false
 
             acceptedButtons: Qt.LeftButton
-            enabled: !moveHandler.active && !pinchHandler.active
+            enabled: !pinchHandler.active
 
             target: null
             cursorShape: Qt.ClosedHandCursor

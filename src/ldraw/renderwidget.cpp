@@ -71,16 +71,12 @@ RenderWidget::RenderWidget(QQmlEngine *engine, QWidget *parent)
 
     m_widget->setMinimumSize(100, 100);
     m_widget->setFocusPolicy(Qt::NoFocus);
+    m_widget->installEventFilter(this);
 
     connect(m_controller, &RenderController::canRenderChanged,
             this, &RenderWidget::canRenderChanged);
     connect(m_controller, &RenderController::tumblingAnimationActiveChanged,
             this, &RenderWidget::animationActiveChanged);
-    connect(m_controller, &RenderController::requestContextMenu,
-            this, [this](const QPointF &pos) {
-        auto cme = new QContextMenuEvent(QContextMenuEvent::Mouse, pos.toPoint(), mapToGlobal(pos.toPoint()));
-        QCoreApplication::postEvent(this, cme);
-    });
     connect(m_controller, &RenderController::requestToolTip,
             this, [this](const QPointF &pos) {
         auto he = new QHelpEvent(QHelpEvent::ToolTip, pos.toPoint(), mapToGlobal(pos.toPoint()));
@@ -167,7 +163,26 @@ void RenderWidget::paletteChange()
 void RenderWidget::languageChange()
 {
     if (m_widget->rootObject())
-        setToolTip(tr("Hold left button: Rotate\nHold right button: Move\nMouse wheel: Zoom\nDouble click: Reset camera\nRight click: Menu"));
+        setToolTip(tr("Hold left button: Rotate\nPinch gesture: Zoom\nMouse wheel: Zoom\nDouble click: Reset camera\nRight click: Menu"));
+}
+
+bool RenderWidget::eventFilter(QObject *o, QEvent *e)
+{
+#if QT_CONFIG(gestures)
+    // QQuickWidget::event() doesn't forward NativeGesture to its offscreen window, so
+    // trackpad pinches never reach the QML PinchHandler.
+    if ((o == m_widget.get()) && (e->type() == QEvent::NativeGesture)) {
+        auto *nge = static_cast<QNativeGestureEvent *>(e);
+        const QPointF local = m_widget->mapFromGlobal(nge->globalPosition());
+        QNativeGestureEvent mapped(nge->gestureType(), nge->pointingDevice(), nge->fingerCount(),
+                                   local, local, nge->globalPosition(), nge->value(), nge->delta());
+        mapped.setTimestamp(nge->timestamp());
+        QCoreApplication::sendEvent(m_widget->quickWindow(), &mapped);
+        e->setAccepted(mapped.isAccepted());
+        return mapped.isAccepted();
+    }
+#endif
+    return QWidget::eventFilter(o, e);
 }
 
 } // namespace LDraw
