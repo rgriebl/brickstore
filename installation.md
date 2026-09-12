@@ -4,13 +4,24 @@ title: Installation Instructions
 ---
 
 ## Windows
-Only Windows 10 and 11, and only 64 bit installations are supported.  As
-Windows doesn't have a concept of "universal apps", there are two
-installers: one for Intel/AMD (**x64**) and one for ARM (**arm64**) CPUs.
+Only Windows 10 and 11, and only 64 bit installations are supported.
+
+There are 2 ways to install BrickStore:
+
+1. Via the Microsoft Store: just search for BrickStore and click install.
+This installation will then be updated automatically by Windows.
+
+2. Via the Installer you download yourself: choose the one simply named
+**Windows** regardless of your current platform (the x64 or ARM64 ones are
+legacy).
 
 Start the installer, then when Windows tells you that it "protected your
 PC", click `More info` to reveal the `Run anyway` button.  Click that button
 and from there on out, it's a standard installation process.
+
+If there is no `Run anyway` button available, then your Windows installation
+is configured to not allow unsigned installations to run. Your only option
+is then to install from the Microsoft Store.
 
 If you get an error message saying `Error 5: Access is denied`, then please
 start the installer as Administrator (in Explorer, right-click the file and
@@ -20,13 +31,9 @@ are talking about Windows...
 ***
 
 ## macOS
-The application is a universal one, so you will automatically use the native
-ARM version when running on an M1 or M2 powered machine and the Intel
-version otherwise.
-
 Open the DMG image, drag the BrickStore icon to the `Applications` folder
 and eject the BrickStore image again, as you would on any other software
-installation.  Then start BrickStore from your computer's `Applications`
+installation. Then start BrickStore from your computer's `Applications`
 folder.
 
 **Please note:** the standard version will only install on macOS 13 or newer.
@@ -40,19 +47,19 @@ this might have problems with some web cams not working correctly.
 Please note that the Debian *Backend* package is a command-line only utility and its only purpose is to generate BrickStore's database. It is not usable for anything else.
 
 ### Flatpak
-Starting with version 2024.11.1 a [Flatpak package](https://flatpak.org/) is available for download. Getting BrickStore registered on https://flathub.org/ is planned for a future release.
+Flatpaks for both Intel and ARM machines are available for download. Getting BrickStore registered on https://flathub.org/ is planned for a future release.
 The downloaded file should be installable straight from your file manager, or on the commandline via `flatpak install ~/Downloads/BrickStore-<VERSION>-x86_64.flatpak`
 
 ### Ubuntu Snap
 BrickStore for Ubuntu is primarily distributed as a Snap via Ubuntu's Snapcraft store: https://snapcraft.io/brickstore
-You should be able to install and update it straight from the Ubuntu Software Center.
+for both Intel and ARM processors. You should be able to install and update it straight from the Ubuntu Software Center.
 
 ### AppImage
-An AppImage installation is provided, that is completely distribution independent.
+An AppImage installation is provided for Intel processors, that is completely distribution independent.
 You can read more about AppImages here: https://appimage.org/
 
-### Ubuntu 24.04
-A traditional DEB package for Ubuntu 24.04 (and its derivatives) is also available. You can eihter install it using your distro's graphical package managager or via the command line: `sudo apt install ./Downloads/Ubuntu-24.04-brickstore_<VERSION>_amd64.deb`
+### Ubuntu 24.04 and 26.04
+Traditional DEB packages for Ubuntu 24.04 and 26.04 (and their derivatives) are also available. You can eihter install these using your distro's graphical package managager or via the command line: `sudo apt install ./Downloads/Ubuntu-24.04-brickstore_<VERSION>_amd64.deb`
 
 ### Arch
 Arch has a well maintained package, available directly via AUR: https://aur.archlinux.org/packages/brickstore
@@ -74,7 +81,5 @@ ARMv7 and ARM64 packages are also available for side-loading on GitHub.
 BrickStore is now available directly via Apple's App Store: https://apps.apple.com/de/app/brickstore/id1626933201
 
 Test builds between releases are available via Apple's Testflight program: https://testflight.apple.com/join/qIu2smfl
-
-The IPA package on GitHub cannot be installed directly, unless you have a jail-broken device.
 
 

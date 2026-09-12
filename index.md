@@ -1,11 +1,11 @@
 ---
 layout: page
 title: BrickStore
-cover-img: 
+cover-img:
   - "/assets/screenshots/windows.jpg"
   - "/assets/screenshots/macos.jpg"
   - "/assets/screenshots/linux.jpg"
-redirect_from: 
+redirect_from:
   - /software/brickstore/index.html
   - /software/brickstore/index.en.html
   - /software/brickstore/index.de.html
@@ -28,6 +28,8 @@ images:
 BrickStore is a BrickLink offline management tool. It is **multi-platform** (Windows, macOS and
 Linux as well as iOS and Android), **multilingual** (currently English, German, Spanish, Swedish
 and French), **fast** and **stable**.
+
+> ***[Download now](download)***
 
 Some things you can do with BrickStore much more efficiently than with any web based interface:
 

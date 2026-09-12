@@ -8,9 +8,9 @@ All releases are built automatically on GitHub.com and can be downloaded from he
 BrickStore works on:
 * **Windows:** 10 (at least 1809) and 11, 64-bit only, Intel and ARM
 * **macOS:** 10.14 or newer
-* **Linux:** Ubuntu 22.04 package and Snap, Arch AUR, distro independent AppImage
-* **Android:** currently in beta test
-* **iOS:** currently in beta test
+* **Linux:** Ubuntu 24.04 and 26.04 packages, Ubuntu Snap, Flatpak, Arch AUR, distro independent AppImage
+* **Android:** via Play Store
+* **iOS:** via Apple Store
 
 If you need more infomation on what to download and how to install it, then
 head over to the [installation instructions](installation).
