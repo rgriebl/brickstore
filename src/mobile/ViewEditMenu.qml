@@ -65,6 +65,8 @@ AutoSizingMenu {
     ActionMenuItem { actionName: "edit_subcond_incomplete"; visible: enabled && root.is(BS.Document.Condition) }
     ActionMenuItem { actionName: "edit_color"; visible: enabled && root.is(BS.Document.Color) }
     ActionMenuItem { actionName: "edit_qty_set"; visible: enabled && root.is(BS.Document.Quantity) }
+    ActionMenuItem { actionName: "edit_qty_add"; visible: enabled && root.is(BS.Document.Quantity) }
+    ActionMenuItem { actionName: "edit_qty_subtract"; visible: enabled && root.is(BS.Document.Quantity) }
     ActionMenuItem { actionName: "edit_qty_multiply"; visible: enabled && root.is(BS.Document.Quantity) }
     ActionMenuItem { actionName: "edit_qty_divide"; visible: enabled && root.is(BS.Document.Quantity) }
     ActionMenuItem { actionName: "edit_price_set"; visible: enabled && root.is([ BS.Document.Price, BS.Document.Total ]) }
