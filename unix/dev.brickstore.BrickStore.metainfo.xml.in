@@ -4,6 +4,9 @@
   <metadata_license>FSFAP</metadata_license>
   <project_license>GPL-3.0-only</project_license>
   <name>BrickStore</name>
+  <developer id="org.griebl">
+    <name>Robert Griebl</name>
+  </developer>
   <summary>@DESCRIPTION@</summary>
   <content_rating type="oars-1.1" />
   <description>
@@ -11,7 +14,7 @@
 BrickStore is a BrickLink offline management tool. It is multi-platform (Windows, macOS, Linux, Android and iOS), multilingual (currently English, German, Spanish, Swedish and French), fast and stable.
 
 Some things you can do with BrickStore much more efficiently than with any web based interface:
-
+</p>
 <ul>
   <li>Browse and search the BrickLink catalog using a live, as-you-type filter. It is using all the cores in your machine to be as fast as possible.</li>
   <li>Easily create XML files for Mass-Upload and Mass-Update either by parting out sets or by adding individual parts (or both).</li>
@@ -24,7 +27,7 @@ Some things you can do with BrickStore much more efficiently than with any web b
   <li>Unlimited undo/redo support.</li>
   <li>Customized printing via JavaScript based page templates.</li>
 </ul>
-
+<p>
 BrickStore is free software licensed under the GNU General Public License (GPL) version 3, ©2004-2026 by Robert Griebl.
 
 All data from www.bricklink.com is owned by BrickLink. Both BrickLink and LEGO are trademarks of the LEGO group, which does not sponsor, authorize or endorse this software. All other trademarks are the property of their respective owners.
@@ -33,19 +36,27 @@ All data from www.bricklink.com is owned by BrickLink. Both BrickLink and LEGO a
 
   <launchable type="desktop-id">dev.brickstore.BrickStore.desktop</launchable>
 
+  <branding>
+    <color type="primary" scheme_preference="light">#97c5e2</color>
+    <color type="primary" scheme_preference="dark">#114566</color>
+  </branding>
   <screenshots>
     <screenshot type="default">
       <image>https://@BRICKSTORE_URL@/assets/screenshots/linux.jpg</image>
-    </screenshot>
-    <screenshot>
-      <image>https://@BRICKSTORE_URL@/assets/screenshots/macos.jpg</image>
-    </screenshot>
-    <screenshot>
-      <image>https://@BRICKSTORE_URL@/assets/screenshots/windows.jpg</image>
+      <caption>The main interface of BrickStore</caption>
     </screenshot>
   </screenshots>
 
+  <url type="bugtracker">https://@GITHUB_URL@/issues</url>
   <url type="homepage">https://@BRICKSTORE_URL@</url>
+  <url type="translate">https://@BRICKSTORE_URL@/translations</url>
+  <url type="vcs-browser">https://@GITHUB_URL@</url>
+
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+    <display_length compare="ge">768</display_length>
+  </recommends>
 
   <provides>
     <binary>brickstore</binary>
