@@ -55,7 +55,8 @@ Core::Core()
     d->nam = new QNetworkAccessManager(this);
 
     d->availableBackends = {
-        { "brickognize", u"Brickognize.com"_qs, "PSM", 1024 }
+        { "brickognize", u"Brickognize.com"_qs, "PSM", 1024 },
+        { "scanstation", u"ScanStation Cloud"_qs, "PSM", 2000 }
     };
     d->defaultBackendId = d->availableBackends.constFirst().id;
 }
@@ -112,121 +113,145 @@ uint Core::scan(const QImage &image, const BrickLink::ItemType *filter, const QB
     if (!scanId) // overflow
         scanId = ++d->nextId;
 
-    if (backend->id == "brickognize") {
-        QString path = u"/predict/"_qs;
+    // Both backends answer with the exact same shape -- {"items": [{"id",
+    // "type", "score"}, ...]}, best match first -- so only the request
+    // URL differs; the multipart body and the response handling below are
+    // shared. ScanStation Cloud (github.com/maximeferland/scanstation)
+    // was deliberately built to match Brickognize's own contract here
+    // rather than invent a second one.
+    QUrl url;
+    QString serviceName;
 
+    if (backend->id == "brickognize") {
+        serviceName = u"Brickognize"_qs;
+        QString path = u"/predict/"_qs;
         if (itemTypeId == 'P')
             path.append(u"parts/");
         else if (itemTypeId == 'M')
             path.append(u"figs/");
         else if (itemTypeId == 'S')
             path.append(u"sets/");
+        url = QUrl(u"https://api.brickognize.com" + path);
 
-        QByteArray data;
-        QBuffer buffer(&data);
-        buffer.open(QIODevice::WriteOnly);
-        image.scaled({ backend->preferredImageSize, backend->preferredImageSize }, Qt::KeepAspectRatio)
-            .save(&buffer, "JPG");
-        buffer.close();
+    } else if (backend->id == "scanstation") {
+        // No item-type-specific path: identification runs the same way
+        // regardless of what the customer says they're pointing at.
+        serviceName = u"ScanStation Cloud"_qs;
+        url = QUrl(u"https://scanstation-production.up.railway.app/public/identify"_qs);
 
-        QNetworkRequest req(QUrl(u"https://api.brickognize.com" + path));
-        QString ua = QCoreApplication::applicationName() + u'/' + QCoreApplication::applicationVersion();
-        req.setHeader(QNetworkRequest::UserAgentHeader, ua);
-        req.setRawHeader("Accept", "application/json");
-
-        auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
-        QHttpPart imagePart;
-        imagePart.setHeader(QNetworkRequest::ContentTypeHeader, u"image/jpg"_qs);
-        imagePart.setHeader(QNetworkRequest::ContentLengthHeader, data.size());
-        imagePart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                            u"form-data; name=\"query_image\"; filename=\"capture.jpg\""_qs);
-        imagePart.setBody(data);
-        multiPart->append(imagePart);
-
-        auto reply = d->nam->post(req, multiPart);
-
-        multiPart->setParent(reply);
-
-        connect(reply, &QNetworkReply::finished, this, [this, reply, scanId, backendId = backend->id]() {
-            auto statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt();
-
-            if (!statusCode) {
-                emit scanFailed(scanId, reply->errorString());
-
-            } else if (statusCode == 422) {
-                const auto json = QJsonDocument::fromJson(reply->readAll());
-                const auto jsonDetails = json[u"detail"_qs].toArray();
-                QStringList errorStrings;
-                errorStrings.reserve(jsonDetails.size());
-                for (const auto jsonDetail : jsonDetails) {
-                    QString str = jsonDetail[u"msg"_qs].toString() + u" (type: "
-                                  + jsonDetail[u"type"_qs].toString() + u")";
-                    const auto locs = jsonDetail[u"loc"_qs].toArray();
-                    if (!locs.isEmpty()) {
-                        QStringList locList;
-                        locList.reserve(locs.size());
-                        for (const auto loc : locs)
-                            locList << loc.toVariant().toString();
-                        str = str + u" at [" + locList.join(u", ") + u']';
-                    }
-                    errorStrings << str;
-                }
-                emit scanFailed(scanId, u"Brickognize failed: " + errorStrings.join(u", "));
-
-            } else if (statusCode != 200) {
-                emit scanFailed(scanId, u"Brickognize returned an invalid status code: "
-                                            + QString::number(statusCode));
-            } else {
-                const auto json = QJsonDocument::fromJson(reply->readAll());
-                const auto jsonItems = json[u"items"_qs].toArray();
-
-                QVector<Result> itemsAndScores;
-                itemsAndScores.reserve(jsonItems.size());
-
-                for (const auto jsonItem : jsonItems) {
-                    const auto itemId = jsonItem[u"id"_qs].toString();
-                    const auto type   = jsonItem[u"type"_qs].toString();
-                    const auto score  = jsonItem[u"score"_qs].toDouble();
-                    char itemTypeId = 0;
-
-                    if (type == u"part")
-                        itemTypeId = 'P';
-                    else if (type == u"set")
-                        itemTypeId = 'S';
-                    else if (type == u"fig")
-                        itemTypeId = 'M';
-
-                    if (auto item = BrickLink::core()->item(itemTypeId, itemId.toLatin1())) {
-                        itemsAndScores.emplace_back(item, score);
-                        // qCDebug(LogScanner) << "Match:" << item->itemTypeId() << itemId
-                        //                     << " Score:" << score;
-                    } else {
-                        auto inc = new BrickLink::Incomplete;
-                        inc->m_item_id = itemId.toLatin1();
-                        inc->m_itemtype_id = itemTypeId;
-                        BrickLink::Lot lot;
-                        lot.setIncomplete(inc);
-                        const auto lastMonth = QDateTime::currentDateTime().addMonths(-3);
-
-                        if (BrickLink::core()->resolveIncomplete(&lot, 0, lastMonth)
-                                != BrickLink::Core::ResolveResult::Fail) {
-                            itemsAndScores.emplace_back(lot.item(), score);
-                        } else {
-                            qCWarning(LogScanner) << "Brickognize returned an invalid match! type:"
-                                                  << type << "id:" << itemId;
-                        }
-                    }
-                }
-                std::sort(itemsAndScores.begin(), itemsAndScores.end(), [](const auto &is1, const auto &is2) {
-                    return is1.score > is2.score;
-                });
-
-                emit scanFinished(scanId, itemsAndScores);
-            }
-            d->scanning.remove(backendId);
-            reply->deleteLater();
-        });
+    } else {
+        return 0;
     }
+
+    QByteArray data;
+    QBuffer buffer(&data);
+    buffer.open(QIODevice::WriteOnly);
+    image.scaled({ backend->preferredImageSize, backend->preferredImageSize }, Qt::KeepAspectRatio)
+        .save(&buffer, "JPG");
+    buffer.close();
+
+    QNetworkRequest req(url);
+    QString ua = QCoreApplication::applicationName() + u'/' + QCoreApplication::applicationVersion();
+    req.setHeader(QNetworkRequest::UserAgentHeader, ua);
+    req.setRawHeader("Accept", "application/json");
+
+    auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    QHttpPart imagePart;
+    imagePart.setHeader(QNetworkRequest::ContentTypeHeader, u"image/jpg"_qs);
+    imagePart.setHeader(QNetworkRequest::ContentLengthHeader, data.size());
+    imagePart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                        u"form-data; name=\"query_image\"; filename=\"capture.jpg\""_qs);
+    imagePart.setBody(data);
+    multiPart->append(imagePart);
+
+    auto reply = d->nam->post(req, multiPart);
+
+    multiPart->setParent(reply);
+
+    connect(reply, &QNetworkReply::finished, this,
+            [this, reply, scanId, backendId = backend->id, serviceName]() {
+        auto statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt();
+
+        if (!statusCode) {
+            emit scanFailed(scanId, reply->errorString());
+
+        } else if (statusCode == 422) {
+            const auto json = QJsonDocument::fromJson(reply->readAll());
+            const auto jsonDetails = json[u"detail"_qs].toArray();
+            QStringList errorStrings;
+            errorStrings.reserve(jsonDetails.size());
+            for (const auto jsonDetail : jsonDetails) {
+                QString str = jsonDetail[u"msg"_qs].toString() + u" (type: "
+                              + jsonDetail[u"type"_qs].toString() + u")";
+                const auto locs = jsonDetail[u"loc"_qs].toArray();
+                if (!locs.isEmpty()) {
+                    QStringList locList;
+                    locList.reserve(locs.size());
+                    for (const auto loc : locs)
+                        locList << loc.toVariant().toString();
+                    str = str + u" at [" + locList.join(u", ") + u']';
+                }
+                errorStrings << str;
+            }
+            emit scanFailed(scanId, serviceName + u" failed: " + errorStrings.join(u", "));
+
+        } else if (statusCode == 429) {
+            emit scanFailed(scanId, serviceName + u" is rate-limiting this connection "
+                                        u"-- wait a bit before scanning again.");
+
+        } else if (statusCode != 200) {
+            emit scanFailed(scanId, serviceName + u" returned an invalid status code: "
+                                        + QString::number(statusCode));
+        } else {
+            const auto json = QJsonDocument::fromJson(reply->readAll());
+            const auto jsonItems = json[u"items"_qs].toArray();
+
+            QVector<Result> itemsAndScores;
+            itemsAndScores.reserve(jsonItems.size());
+
+            for (const auto jsonItem : jsonItems) {
+                const auto itemId = jsonItem[u"id"_qs].toString();
+                const auto type   = jsonItem[u"type"_qs].toString();
+                const auto score  = jsonItem[u"score"_qs].toDouble();
+                char itemTypeId = 0;
+
+                if (type == u"part")
+                    itemTypeId = 'P';
+                else if (type == u"set")
+                    itemTypeId = 'S';
+                else if (type == u"fig")
+                    itemTypeId = 'M';
+
+                if (auto item = BrickLink::core()->item(itemTypeId, itemId.toLatin1())) {
+                    itemsAndScores.emplace_back(item, score);
+                    // qCDebug(LogScanner) << "Match:" << item->itemTypeId() << itemId
+                    //                     << " Score:" << score;
+                } else {
+                    auto inc = new BrickLink::Incomplete;
+                    inc->m_item_id = itemId.toLatin1();
+                    inc->m_itemtype_id = itemTypeId;
+                    BrickLink::Lot lot;
+                    lot.setIncomplete(inc);
+                    const auto lastMonth = QDateTime::currentDateTime().addMonths(-3);
+
+                    if (BrickLink::core()->resolveIncomplete(&lot, 0, lastMonth)
+                            != BrickLink::Core::ResolveResult::Fail) {
+                        itemsAndScores.emplace_back(lot.item(), score);
+                    } else {
+                        qCWarning(LogScanner) << serviceName << "returned an invalid match! type:"
+                                              << type << "id:" << itemId;
+                    }
+                }
+            }
+            std::sort(itemsAndScores.begin(), itemsAndScores.end(), [](const auto &is1, const auto &is2) {
+                return is1.score > is2.score;
+            });
+
+            emit scanFinished(scanId, itemsAndScores);
+        }
+        d->scanning.remove(backendId);
+        reply->deleteLater();
+    });
 
     return scanId;
 }

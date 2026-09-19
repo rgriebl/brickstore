@@ -29,6 +29,7 @@ qt_add_qml_module(scanner_module
 
     RESOURCES
         service_brickognize.png
+        service_scanstation.png
         media-playback-start.svg
 )
 
