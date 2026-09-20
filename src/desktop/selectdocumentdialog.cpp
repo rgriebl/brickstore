@@ -26,13 +26,16 @@
 #include "selectdocumentdialog.h"
 
 
-SelectDocument::SelectDocument(const DocumentModel *self, QWidget *parent)
+SelectDocument::SelectDocument(const DocumentModel *self, bool multipleDocuments, QWidget *parent)
     : QWidget(parent)
 {
     m_clipboard = new QRadioButton(tr("Items from Clipboard"));
-    m_document = new QRadioButton(tr("Items from an already open document:"));
+    m_document = new QRadioButton(tr(multipleDocuments ? "Items from already open documents:" : "Items from an already open document:"));
     m_documentList = new QListWidget();
     m_documentList->setTextElideMode(Qt::ElideMiddle);
+    if (multipleDocuments) {
+        m_documentList->setSelectionMode(QListWidget::MultiSelection);
+    }
 
     auto layout = new QGridLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -83,27 +86,41 @@ SelectDocument::SelectDocument(const DocumentModel *self, QWidget *parent)
         setFocusProxy(hasClip ? m_clipboard : m_document);
 }
 
-LotList SelectDocument::lots() const
+LotList SelectDocument::lots(const DocumentModel *model) const
 {
-    LotList srcList;
-
     if (!isDocumentSelected())
-        return srcList;
+        return LotList();
 
     if (m_clipboard->isChecked()) {
-        srcList = m_lotsFromClipboard;
+        LotList list;
+        list.reserve(m_lotsFromClipboard.size());
+        for (const Lot *lot : std::as_const(m_lotsFromClipboard)) {
+            list << new Lot(*lot);
+        }
+        if (model) {
+            model->adjustLotCurrencyToModel(list, m_currencyCodeFromClipboard);
+        }
+        return list;
     } else {
-        const auto *model = m_documentList->selectedItems().constFirst()
-                ->data(Qt::UserRole).value<DocumentModel *>();
-        if (model)
-            srcList = model->lots();
-    }
+        LotList list;
 
-    LotList list;
-    list.reserve(srcList.size());
-    for (const Lot *lot : std::as_const(srcList))
-        list << new Lot(*lot);
-    return list;
+        for (auto &&item: m_documentList->selectedItems()) {
+            const auto *from_model = item->data(Qt::UserRole).value<DocumentModel *>();
+            if (from_model) {
+                LotList model_list;
+                auto lots = from_model->lots();
+                model_list.reserve( lots.size());
+                for (const Lot *lot : lots) {
+                    model_list << new Lot(*lot);
+                }
+                if (model) {
+                    model->adjustLotCurrencyToModel(model_list, from_model->currencyCode());
+                }
+                list.append(model_list);
+            }
+        }
+        return list;
+    }
 }
 
 QString SelectDocument::currencyCode() const
@@ -142,7 +159,7 @@ SelectDocumentDialog::SelectDocumentDialog(const DocumentModel *self, const QStr
                                            QWidget *parent)
     : QDialog(parent)
 {
-    m_sd = new SelectDocument(self);
+    m_sd = new SelectDocument(self, false);
 
     auto label = new QLabel(headertext);
     auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -171,7 +188,7 @@ SelectDocumentDialog::~SelectDocumentDialog()
 
 LotList SelectDocumentDialog::lots() const
 {
-    return m_sd->lots();
+    return m_sd->lots(nullptr);
 }
 
 QString SelectDocumentDialog::currencyCode() const
@@ -212,15 +229,15 @@ bool WizardPage::isComplete() const
 
 
 SelectCopyMergeDialog::SelectCopyMergeDialog(const DocumentModel *self, const QString &chooseDocText,
-                                             const QString &chooseFieldsText, QWidget *parent)
+                                             const QString &chooseFieldsText, bool addDocuments, QWidget *parent)
     : QWizard(parent)
 {
     setOptions(QWizard::IndependentPages);
     setWizardStyle(QWizard::ModernStyle);
-    QString title = tr("Copy or merge values");
+    QString title = tr(addDocuments ? "Add items" : "Copy or merge values");
 
-    m_sd = new SelectDocument(self);
-    m_mm = new SelectMergeMode(DocumentModel::MergeMode::Merge);
+    m_sd = new SelectDocument(self, addDocuments);
+    m_mm = nullptr;
 
     auto *dpage = new WizardPage();
     dpage->setTitle(title);
@@ -230,14 +247,20 @@ SelectCopyMergeDialog::SelectCopyMergeDialog(const DocumentModel *self, const QS
     dpage->setFocusProxy(m_sd);
     addPage(dpage);
 
-    auto *mpage = new WizardPage();
-    mpage->setTitle(title);
-    mpage->setSubTitle(chooseFieldsText);
-    mpage->setFinalPage(true);
-    mpage->setComplete(true);
-    auto *mlayout = new QVBoxLayout(mpage);
-    mlayout->addWidget(m_mm);
-    addPage(mpage);
+    WizardPage *mpage = nullptr;
+
+    if (!addDocuments) {
+        m_mm = new SelectMergeMode(DocumentModel::MergeMode::Merge);
+
+        mpage = new WizardPage();
+        mpage->setTitle(title);
+        mpage->setSubTitle(chooseFieldsText);
+        mpage->setFinalPage(true);
+        mpage->setComplete(true);
+        auto *mlayout = new QVBoxLayout(mpage);
+        mlayout->addWidget(m_mm);
+        addPage(mpage);
+    }
 
     connect(m_sd, &SelectDocument::documentSelected,
             dpage, &WizardPage::setComplete);
@@ -247,31 +270,33 @@ SelectCopyMergeDialog::SelectCopyMergeDialog(const DocumentModel *self, const QS
         restoreGeometry(ba);
 
     dpage->adjustSize();
-    mpage->adjustSize();
-    QSize s = mpage->size().expandedTo(dpage->size());
-    dpage->setFixedSize(s);
-    mpage->setFixedSize(s);
 
-    ba = Config::inst()->value(u"MainWindow/SelectCopyMergeDialog/MergeMode"_qs)
-            .toByteArray();
-    m_mm->restoreState(ba);
+    if (mpage) {
+        mpage->adjustSize();
+        QSize s = mpage->size().expandedTo(dpage->size());
+        dpage->setFixedSize(s);
+        mpage->setFixedSize(s);
+    }
+
+    if (m_mm) {
+        ba = Config::inst()->value(u"MainWindow/SelectCopyMergeDialog/MergeMode"_qs)
+                .toByteArray();
+        m_mm->restoreState(ba);
+    }
 }
 
 SelectCopyMergeDialog::~SelectCopyMergeDialog()
 {
     Config::inst()->setValue(u"MainWindow/SelectCopyMergeDialog/Geometry"_qs, saveGeometry());
-    Config::inst()->setValue(u"MainWindow/SelectCopyMergeDialog/MergeMode"_qs, m_mm->saveState());
+    if (m_mm) {
+        Config::inst()->setValue(u"MainWindow/SelectCopyMergeDialog/MergeMode"_qs, m_mm->saveState());
+    }
 }
 
 
-LotList SelectCopyMergeDialog::lots() const
+LotList SelectCopyMergeDialog::lots(const DocumentModel &model) const
 {
-    return m_sd->lots();
-}
-
-QString SelectCopyMergeDialog::currencyCode() const
-{
-    return m_sd->currencyCode();
+    return m_sd->lots(&model);
 }
 
 QHash<DocumentModel::Field, DocumentModel::MergeMode> SelectCopyMergeDialog::fieldMergeModes() const
