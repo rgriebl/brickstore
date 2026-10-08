@@ -379,6 +379,8 @@ void ActionManager::initialize()
     A("edit_delete",                    QT_TR_NOOP("Delete"),               QT_TR_NOOP("Del", "Edit|Delete"),                NeedSelection(1));
     // ^^ QKeySequence::Delete has Ctrl+D as secondary on macOS and Linux and this clashes with Duplicate
     A("edit_additems",                  QT_TR_NOOP("Add Items..."),         QT_TR_NOOP("Insert", "Edit|AddItems"),           NeedDocument);
+    A("edit_scanitems",                 QT_TR_NOOP("Find Item with Camera..."), QT_TR_NOOP("Ctrl+Shift+D", "Edit|Find Item with Camera"), NeedDocument | NeedLots);
+    a->m_iconName = "camera-photo";
     A("edit_subtractitems",             QT_TR_NOOP("Subtract Items..."),                                                     NeedDocument);
     A("edit_mergeitems",                QT_TR_NOOP("Consolidate Items..."), QT_TR_NOOP("Ctrl+L", "Edit|Consolidate Items"),  NeedSelection(2));
     A("edit_partoutitems",              QT_TR_NOOP("Part out Item..."),                                                      NeedInventory | NeedSelection(1) | NeedQuantity);

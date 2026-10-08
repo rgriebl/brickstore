@@ -8,6 +8,7 @@
 #include <QAction>
 #include <QStringList>
 #include <QPointer>
+#include <QVector>
 
 #include <QCoro/QCoroTask>
 
@@ -33,6 +34,7 @@ class TaskLinksWidget;
 class TaskInventoryWidget;
 class DocumentModel;
 class AddItemDialog;
+class ItemScannerDialog;
 class ScriptManager;
 class ImportInventoryDialog;
 class ImportOrderDialog;
@@ -115,6 +117,8 @@ private:
     QDockWidget *createDock(QWidget *widget, const char *name);
     void setActiveViewPane(ViewPane *newActive);
     ViewPane *createViewPane(Document *activeDocument, QWidget *window);
+    void showItemScanner();
+    void selectScannedItems(const QVector<const BrickLink::Item *> &items);
 
     Workspace *m_workspace;
     QList<QAction *> m_extensionContextActions;
@@ -128,7 +132,9 @@ private:
     QMenu *m_extrasMenu;
     LoadColumnLayoutMenuAdapter *m_loadColumnLayoutMenu;
     QVector<QDockWidget *> m_dock_widgets;
+
     QPointer<AddItemDialog> m_add_dialog;
+    QPointer<ItemScannerDialog> m_itemScannerDialog;
     QPointer<ImportInventoryDialog> m_importinventory_dialog;
     QPointer<ImportOrderDialog> m_importorder_dialog;
     QPointer<ImportCartDialog> m_importcart_dialog;
