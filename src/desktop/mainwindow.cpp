@@ -3,6 +3,8 @@
 
 #include <array>
 
+#include <QHash>
+#include <QSet>
 #include <QUndoStack>
 #include <QAction>
 #include <QCloseEvent>
@@ -58,6 +60,7 @@
 
 #include "aboutdialog.h"
 #include "additemdialog.h"
+#include "itemscannerdialog.h"
 #include "announcementsdialog.h"
 #include "importcartdialog.h"
 #include "importinventorydialog.h"
@@ -715,6 +718,7 @@ void MainWindow::setupMenuBar()
                   "edit_select_none",
                   "-",
                   "edit_additems",
+                  "edit_scanitems",
                   "edit_subtractitems",
                   "edit_mergeitems",
                   "edit_partoutitems",
@@ -993,6 +997,12 @@ void MainWindow::createActions()
         { "edit_additems", [this](bool) {
               showAddItemDialog();
           } },
+        { "edit_scanitems", [this](bool) {
+              ItemScannerDialog::checkSystemPermissions(this, [this](bool granted) {
+                  if (granted)
+                      showItemScanner();
+              });
+          } },
         { "view_fullscreen", [this](bool fullScreen) {
               setWindowState(windowState().setFlag(Qt::WindowFullScreen, fullScreen));
           } },
@@ -1132,6 +1142,7 @@ QStringList MainWindow::defaultToolBarActionNames() const
         u"edit_delete"_qs,
         u"-"_qs,
         u"edit_additems"_qs,
+        u"edit_scanitems"_qs,
         u"edit_subtractitems"_qs,
         u"edit_mergeitems"_qs,
         u"edit_partoutitems"_qs,
@@ -1255,6 +1266,64 @@ void MainWindow::showAddItemDialog(const BrickLink::Item *item, const BrickLink:
     }
 }
 
+void MainWindow::showItemScanner()
+{
+    if (m_itemScannerDialog) {
+        m_itemScannerDialog->raise();
+        m_itemScannerDialog->activateWindow();
+    } else {
+        m_itemScannerDialog = new ItemScannerDialog(this);
+        connect(m_itemScannerDialog, &ItemScannerDialog::itemsScanned,
+                this, &MainWindow::selectScannedItems);
+    }
+    m_itemScannerDialog->show();
+}
+
+void MainWindow::selectScannedItems(const QVector<const BrickLink::Item *> &items)
+{
+    Document *doc = m_activeView ? m_activeView->document() : nullptr;
+    if (!doc || items.isEmpty())
+        return;
+
+    // The scanner returns candidates best-first, the same list the Add Items dialog
+    // filters on. Keep the first candidate that is actually in this document: a later,
+    // weaker lookalike is not a substitute for the part the camera recognized.
+    QSet<const BrickLink::Item *> wanted(items.cbegin(), items.cend());
+    QHash<const BrickLink::Item *, BrickLink::LotList> visibleByItem;
+    QSet<const BrickLink::Item *> hiddenItems;
+
+    const auto &lots = doc->model()->lots();
+    for (auto *lot : lots) {
+        const auto *item = lot->item();
+        if (!wanted.contains(item))
+            continue;
+        if (doc->model()->index(lot).isValid())
+            visibleByItem[item].append(lot);
+        else
+            hiddenItems.insert(item);
+    }
+
+    for (const auto *item : items) {
+        const BrickLink::LotList visible = visibleByItem.value(item);
+        if (!visible.isEmpty()) {
+            const auto *current = visible.constFirst();
+            doc->selectLots(visible, current);
+            emit doc->ensureVisible(doc->model()->index(current), true);
+            if (item != items.constFirst()) {
+                UIHelpers::toast(tr("The best match is not in this document. Selected %1 instead.")
+                                 .arg(item->name().toHtmlEscaped()));
+            }
+            return;
+        }
+        if (hiddenItems.contains(item)) {
+            UIHelpers::toast(tr("%1 is in this document, but hidden by the current filter.")
+                             .arg(item->name().toHtmlEscaped()));
+            return;
+        }
+    }
+    UIHelpers::toast(tr("None of the recognized items are in this document."));
+}
+
 void MainWindow::blockUpdate(bool blocked)
 {
     static QUndoStack blockStack;
@@ -1350,6 +1419,7 @@ void MainWindow::resizeEvent(QResizeEvent *e)
 void MainWindow::closeAllDialogs()
 {
     delete m_add_dialog;
+    delete m_itemScannerDialog;
     delete m_importinventory_dialog;
     delete m_importorder_dialog;
     delete m_importcart_dialog;
