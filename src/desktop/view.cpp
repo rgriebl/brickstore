@@ -351,7 +351,7 @@ View::View(Document *document, QWidget *parent)
 
               if (co_await qCoro(&dlg, &QDialog::finished) == QDialog::Accepted) {
                   m_document->setPriceToGuide(dlg.time(), dlg.price(), dlg.forceUpdate(),
-                                              dlg.noPriceGuideOption());
+                                              dlg.noPriceGuideOption(), dlg.updateBricklinkLots());
               }
           } },
         { "edit_price_inc_dec", [this](bool) -> QCoro::Task<> {

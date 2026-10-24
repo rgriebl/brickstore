@@ -1029,7 +1029,7 @@ void Document::setPrice(double price)
 }
 
 void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, bool forceUpdate,
-                               BrickLink::NoPriceGuideOption noPgOption)
+                               BrickLink::NoPriceGuideOption noPgOption, bool updateBricklinkLots)
 {
     Q_ASSERT(!m_setToPG);
 
@@ -1055,6 +1055,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
     m_setToPG->price = price;
     m_setToPG->currencyRate = currencyRate;
     m_setToPG->noPgOption = noPgOption;
+	m_setToPG->updateBricklinkLots = updateBricklinkLots;
 
     for (Lot *lot : sel) {
         BrickLink::PriceGuideRef pg = BrickLink::core()->priceGuideCache()->priceGuide(lot->item(), lot->color());
@@ -1068,7 +1069,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
             m_setToPG->priceGuides.insert(pg, lot);
 
         } else {
-            if (!updatePriceToGuide(lot, pg.get()))
+            if (!updateLotFromPriceGuide(lot, pg.get()))
                 ++m_setToPG->failCount;
             ++m_setToPG->doneCount;
             emit blockingOperationProgress(m_setToPG->doneCount, m_setToPG->totalCount);
@@ -1082,7 +1083,7 @@ void Document::setPriceToGuide(BrickLink::Time time, BrickLink::Price price, boo
         priceGuideUpdated({ });
 }
 
-bool Document::updatePriceToGuide(BrickLink::Lot *lot, const BrickLink::PriceGuide *pg)
+bool Document::updateLotFromPriceGuide(BrickLink::Lot *lot, const BrickLink::PriceGuide *pg)
 {
     bool hasError = !pg || !pg->isValid()
                     || (pg->updateStatus() == BrickLink::UpdateStatus::UpdateFailed)
@@ -1110,14 +1111,27 @@ bool Document::updatePriceToGuide(BrickLink::Lot *lot, const BrickLink::PriceGui
         }
         return false;
 
-    } else if (!qFuzzyCompare(price, lot->price())) {
-        Lot newLot = *lot;
-        newLot.setPrice(price);
-        m_setToPG->changes.emplace_back(lot, newLot);
-        return true;
-    } else {
-        return true;
     }
+    
+	bool hasChanges = false;
+    Lot newLot = *lot;
+	int bricklinkLots = pg->lots(m_setToPG->time);
+    
+    if (!qFuzzyCompare(price, lot->price())) {
+        hasChanges = true;
+        newLot.setPrice(price);
+    }
+
+    if (m_setToPG->updateBricklinkLots && (bricklinkLots != lot->bricklinkLots())) {
+        hasChanges = true;
+        newLot.setBricklinkLots(bricklinkLots);
+    }
+
+    if (hasChanges) {
+        m_setToPG->changes.emplace_back(lot, newLot);
+    }
+
+    return true;
 }
 
 void Document::priceGuideUpdated(const BrickLink::PriceGuideRef &pg)
@@ -1131,7 +1145,7 @@ void Document::priceGuideUpdated(const BrickLink::PriceGuideRef &pg)
             return; // loaded now, but still needs an online update
 
         for (auto lot : lots) {
-            if (!updatePriceToGuide(lot, pg.get()))
+            if (!updateLotFromPriceGuide(lot, pg.get()))
                 ++m_setToPG->failCount;
             ++m_setToPG->doneCount;
         }

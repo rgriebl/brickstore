@@ -72,6 +72,14 @@ PriceGuide::~PriceGuide()
     // to this price guide, so we could not be destroyed at all.
 }
 
+int PriceGuide::lots(BrickLink::Time t) const {
+    int lots = 0;
+    for (int condition = 0; condition < (int)BrickLink::Condition::Count; condition++) {
+        lots += m_data.lots[int(t)][condition];
+    }
+    return lots;
+}
+
 void PriceGuide::setIsValid(bool valid)
 {
     if (valid != m_valid) {

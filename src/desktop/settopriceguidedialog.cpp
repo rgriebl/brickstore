@@ -75,4 +75,9 @@ bool SetToPriceGuideDialog::forceUpdate() const
     return w_force_update->isChecked();
 }
 
+bool SetToPriceGuideDialog::updateBricklinkLots() const
+{
+    return w_updateBricklinkLots->isChecked();
+}
+
 #include "moc_settopriceguidedialog.cpp"

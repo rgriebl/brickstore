@@ -49,7 +49,7 @@ Lot &Lot::operator=(const Lot &copy)
     m_tier_quantity[1]    = copy.m_tier_quantity[1];
     m_tier_quantity[2]    = copy.m_tier_quantity[2];
     m_sale                = copy.m_sale;
-	m_bricklink_quantity  = copy.m_bricklink_quantity;
+	m_bricklink_lots  = copy.m_bricklink_lots;
     m_price               = copy.m_price;
     m_cost                = copy.m_cost;
     m_tier_price[0]       = copy.m_tier_price[0];
@@ -100,7 +100,7 @@ bool Lot::operator==(const Lot &cmp) const
             && (m_tier_quantity[1]      == cmp.m_tier_quantity[1])
             && (m_tier_quantity[2]      == cmp.m_tier_quantity[2])
             && (m_sale                  == cmp.m_sale)
-		    && (m_bricklink_quantity    == cmp.m_bricklink_quantity)
+		    && (m_bricklink_lots    == cmp.m_bricklink_lots)
             && qFuzzyCompare(m_price,         cmp.m_price)
             && qFuzzyCompare(m_cost,          cmp.m_cost)
             && qFuzzyCompare(m_tier_price[0], cmp.m_tier_price[0])
@@ -128,7 +128,7 @@ void Lot::save(QDataStream &ds) const
        << m_weight
        << m_markerText << m_markerColor
        << m_dateAdded << m_dateLastSold
-       << m_bricklink_quantity;
+       << m_bricklink_lots;
 }
 
 Lot *Lot::restore(QDataStream &ds, uint startChangelogAt)
@@ -190,7 +190,7 @@ Lot *Lot::restore(QDataStream &ds, uint startChangelogAt)
         >> lot->m_dateAdded >> lot->m_dateLastSold;
 
     if (version >= 6) {
-        ds >> lot->m_bricklink_quantity;
+        ds >> lot->m_bricklink_lots;
     }
 
     if (ds.status() != QDataStream::Ok)

@@ -2112,14 +2112,14 @@ void DocumentModel::initializeColumns()
           .dataFn = [&](const Lot *lot) { return lot->bulkQuantity(); },
           .setDataFn = [&](Lot *lot, const QVariant &v) { lot->setBulkQuantity(v.toInt()); },
       });
-    C(BricklinkQuantity, Column {
+    C(BricklinkLots, Column {
           .type = Column::Type::Integer,
           .defaultWidth = 5,
           .alignment = Qt::AlignRight,
           .editable = false,
-          .title = QT_TR_NOOP("BL Quantity"),
-          .dataFn = [&](const Lot *lot) { return lot->bricklinkQuantity(); },
-          .setDataFn = [&](Lot *lot, const QVariant &v) { lot->setBricklinkQuantity(v.toInt()); },
+          .title = QT_TR_NOOP("BL Lots"),
+          .dataFn = [&](const Lot *lot) { return lot->bricklinkLots(); },
+          .setDataFn = [&](Lot *lot, const QVariant &v) { lot->setBricklinkLots(v.toInt()); },
       });
     C(PriceOrig, Column {
           .type = Column::Type::Currency,

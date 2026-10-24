@@ -172,7 +172,7 @@ public:
     void setFilterFromSelection();
     void setPrice(double price);
     void setPriceToGuide(BrickLink::Time time, BrickLink::Price price, bool forceUpdate,
-                         BrickLink::NoPriceGuideOption noPgOption);
+                         BrickLink::NoPriceGuideOption noPgOption, bool updateBricklinkLots = false);
     void priceAdjust(bool isFixed, double value, bool applyToTiers);
     void setRelativeTierPrices(const std::array<double, 3> &percentagesOff);
     void roundPrice();
@@ -277,7 +277,7 @@ private:
 
     void applyTo(const LotList &lots,
                  const char *actionName, const std::function<DocumentModel::ApplyToResult (const Lot &, Lot &)> &callback);
-    bool updatePriceToGuide(BrickLink::Lot *lot, const BrickLink::PriceGuide *pg);
+    bool updateLotFromPriceGuide(BrickLink::Lot *lot, const BrickLink::PriceGuide *pg);
     void priceGuideUpdated(const BrickLink::PriceGuideRef &pg);
     void cancelPriceGuideUpdates();
     enum ExportCheckMode {
@@ -324,6 +324,7 @@ private:
         BrickLink::Price price;
         double           currencyRate;
         bool             canceled = false;
+		bool             updateBricklinkLots = false;
         BrickLink::NoPriceGuideOption noPgOption;
     };
     std::unique_ptr<SetToPriceGuideData> m_setToPG;

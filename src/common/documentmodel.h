@@ -121,7 +121,7 @@ public:
         DateLastSold,
         Weight,
         AlternateIds,
-        BricklinkQuantity,
+        BricklinkLots,
 
         FieldCount
     };
