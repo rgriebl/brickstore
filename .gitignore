@@ -42,3 +42,4 @@ compile_commands.json
 .claude/
 android/.gradle/
 .mds/
+.vs/

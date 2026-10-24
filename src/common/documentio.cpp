@@ -517,6 +517,7 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
             { u"Price",        [](auto *lot, auto &v) { lot->setPrice(Utility::fixFinite(v.toDouble())); } },
             { u"Bulk",         [](auto *lot, auto &v) { lot->setBulkQuantity(v.toInt()); } },
             { u"Qty",          [](auto *lot, auto &v) { lot->setQuantity(v.toInt()); } },
+            { u"BLQty",        [](auto *lot, auto &v) { lot->setBricklinkQuantity(v.toInt()); } },
             { u"Sale",         [](auto *lot, auto &v) { lot->setSale(v.toInt()); } },
             { u"Comments",     [](auto *lot, auto &v) { lot->setComments(v); } },
             { u"Remarks",      [](auto *lot, auto &v) { lot->setRemarks(v); } },
@@ -808,6 +809,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
         });
 
         create(u"Qty",       &Lot::quantity,     asInt);
+        create(u"BLQty", &Lot::bricklinkQuantity, asInt);
         create(u"Price",     &Lot::price,        asCurrency);
         create(u"Condition", &Lot::condition, [](auto c) {
             return (c == BrickLink::Condition::New) ? u"N"_qs : u"U"_qs; });
