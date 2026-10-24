@@ -517,6 +517,7 @@ Document *DocumentIO::parseBsxInventory(QFile *in)
             { u"Price",        [](auto *lot, auto &v) { lot->setPrice(Utility::fixFinite(v.toDouble())); } },
             { u"Bulk",         [](auto *lot, auto &v) { lot->setBulkQuantity(v.toInt()); } },
             { u"Qty",          [](auto *lot, auto &v) { lot->setQuantity(v.toInt()); } },
+            { u"BricklinkLots",[](auto *lot, auto &v) { lot->setBricklinkLots(v.toInt()); } },
             { u"Sale",         [](auto *lot, auto &v) { lot->setSale(v.toInt()); } },
             { u"Comments",     [](auto *lot, auto &v) { lot->setComments(v); } },
             { u"Remarks",      [](auto *lot, auto &v) { lot->setRemarks(v); } },
@@ -798,7 +799,7 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
 
         // vvv Required Fields (part 2)
 
-        create(u"Status", &Lot::status, [](auto st) {
+        create(u"Status",       &Lot::status, [](auto st) {
             switch (st) {
             default                        :
             case BrickLink::Status::Exclude: return u"X"_qs;
@@ -807,9 +808,10 @@ bool DocumentIO::createBsxInventory(QIODevice *out, const Document *doc)
             }
         });
 
-        create(u"Qty",       &Lot::quantity,     asInt);
-        create(u"Price",     &Lot::price,        asCurrency);
-        create(u"Condition", &Lot::condition, [](auto c) {
+        create(u"Qty",          &Lot::quantity,     asInt);
+        create(u"BricklinkLots",&Lot::bricklinkLots, asInt);
+        create(u"Price",        &Lot::price,        asCurrency);
+        create(u"Condition",    &Lot::condition, [](auto c) {
             return (c == BrickLink::Condition::New) ? u"N"_qs : u"U"_qs; });
 
         // vvv Optional Fields (part 2)

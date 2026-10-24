@@ -76,6 +76,8 @@ public:
     void setBulkQuantity(int q)        { m_bulk_quantity = std::max(1, q); }
     int tierQuantity(int i) const      { return m_tier_quantity [std::clamp(i, 0, 2)]; }
     void setTierQuantity(int i, int q) { m_tier_quantity [std::clamp(i, 0, 2)] = q; }
+    int bricklinkLots() const      { return m_bricklink_lots; }
+	void setBricklinkLots(int lotsCounts) { m_bricklink_lots = std::max(0, lotsCounts); }
     double price() const               { return m_price; }
     void setPrice(double p)            { m_price = p; }
     double tierPrice(int i) const      { return m_tier_price[std::clamp(i, 0, 2)]; }
@@ -169,6 +171,7 @@ private:
     std::array<int, 3> m_tier_quantity = { 0, 0, 0 };
     int     m_sale = 0;
 
+    int m_bricklink_lots = 0;
     double  m_price = 0;
     double  m_cost = 0;
     std::array<double, 3> m_tier_price = { 0, 0, 0 };

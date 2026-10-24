@@ -48,6 +48,9 @@ public:
     UpdateStatus updateStatus() const { return m_updateStatus; }
 
     int quantity(BrickLink::Time t, BrickLink::Condition c) const           { return m_data.quantities[int(t)][int(c)]; }
+    
+    // Returns the total number of lots, in any conditions, for the given time period.
+    int lots(BrickLink::Time t) const;
     int lots(BrickLink::Time t, BrickLink::Condition c) const               { return m_data.lots[int(t)][int(c)]; }
     double price(BrickLink::Time t, BrickLink::Condition c, BrickLink::Price p) const  { return m_data.prices[int(t)][int(c)][int(p)]; }
 
