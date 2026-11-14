@@ -22,7 +22,7 @@
 
 include_guard(GLOBAL)
 
-set(IMAGESCALE_DIR "${CMAKE_BINARY_DIR}/tools")
+set(IMAGESCALE_DIR "${CMAKE_BINARY_DIR}/tools/bin")
 set(IMAGESCALE_BUILD_DIR "${CMAKE_BINARY_DIR}/tools/imagescale-build")
 set(IMAGESCALE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/tools/imagescale")
 
