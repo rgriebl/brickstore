@@ -62,7 +62,7 @@ if ! command -v cmake >/dev/null 2>&1; then
     echo "FAIL: Could not find a cmake binary"
     exit 2
 fi
-if ! command -v ninja >/dev/null 2>&1 ]; then
+if ! command -v ninja >/dev/null 2>&1; then
     echo "FAIL: Could not find a ninja binary"
     exit 2
 fi
@@ -86,11 +86,10 @@ fi
 
 prefix="-DCMAKE_INSTALL_PREFIX=$prefix"
 qmake="-DQT_QMAKE_EXECUTABLE=$qmake_bin"
-ninja="-DCMAKE_GENERATOR=Ninja"
 
 echo
 echo "Running $qtcmake_bin with the following options:"
-echo "  -S . -B . $prefix $ninja $debug_release $backend_only"
+echo "  -S . -B . -G Ninja $prefix $debug_release $backend_only"
 echo
 
-"$qtcmake_bin" -S . -B . "$prefix" "$ninja" $debug_release $backend_only
+"$qtcmake_bin" -S . -B . -G Ninja "$prefix" $debug_release $backend_only
