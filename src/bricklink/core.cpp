@@ -60,7 +60,7 @@ QUrl Core::urlForWantedListUpload()
 
 QUrl Core::urlForInventoryUpload()
 {
-    return u"https://www.bricklink.com/invXML.asp"_qs;
+    return u"https://v2.bricklink.com/en-us/my-store/inventory/bulk-add"_qs;
 }
 
 QUrl Core::urlForInventoryUpdate()
