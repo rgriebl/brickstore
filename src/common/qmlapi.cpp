@@ -646,6 +646,11 @@ void QmlDocument::setColor(BrickLink::QmlColor color)
     m_doc->setColor(color.wrappedObject());
 }
 
+bool QmlDocument::setItemId(const QString &itemId)
+{
+    return m_doc->setItemId(itemId);
+}
+
 void QmlDocument::priceAdjust(bool isFixed, double value, bool applyToTiers)
 {
     m_doc->priceAdjust(isFixed, value, applyToTiers);

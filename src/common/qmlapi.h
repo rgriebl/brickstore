@@ -109,6 +109,7 @@ public:
 
     Q_INVOKABLE void setPriceToGuide(BrickLink::Time time, BrickLink::Price price, bool forceUpdate);
     Q_INVOKABLE void setColor(BrickLink::QmlColor color);
+    Q_INVOKABLE bool setItemId(const QString &itemId);
 
     Q_INVOKABLE void priceAdjust(bool isFixed, double value, bool applyToTiers);
     Q_INVOKABLE void costAdjust(bool isFixed, double value);

@@ -1526,6 +1526,31 @@ void Document::setColor(const BrickLink::Color *color)
     });
 }
 
+// Changes the item-id of all selected lots, keeping each lot's item-type. Returns false if no
+// item with this id exists (nothing is changed in this case).
+bool Document::setItemId(const QString &itemId)
+{
+    const QByteArray id = itemId.trimmed().toLatin1();
+    if (id.isEmpty() || selectedLots().isEmpty())
+        return false;
+
+    // validate everything up-front, so we never end up with a partial change
+    for (const Lot *lot : selectedLots()) {
+        char tid = lot->itemTypeId() ? lot->itemTypeId() : 'P';
+        if (!BrickLink::core()->item(tid, id))
+            return false;
+    }
+
+    applyTo(selectedLots(), "edit_item", [&id](const Lot &from, Lot &to) {
+        char tid = from.itemTypeId() ? from.itemTypeId() : 'P';
+        to = from;
+        if (auto newItem = BrickLink::core()->item(tid, id))
+            to.setItem(newItem);
+        return DocumentModel::LotChanged;
+    });
+    return true;
+}
+
 void Document::copyAlternateId() const
 {
     QString text;

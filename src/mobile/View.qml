@@ -451,6 +451,43 @@ Page {
     }
 
     DialogLoader {
+        id: editItemIdDialog
+
+        // The item-type of the (first) selected lot is kept when changing the item id
+        property string itemTypeId: root.document.selectedLots.length
+                                    ? root.document.selectedLots[0].itemType.id : "P"
+        property string currentItemId: root.document.selectedLots.length
+                                       ? root.document.selectedLots[0].itemId : ""
+
+        Component {
+            id: editItemId
+
+            InputDialog {
+                id: itemIdInput
+                title: qsTr("Set item")
+                text: qsTr("Item ID")
+
+                readonly property bool isValid: textValue.trim().length > 0
+                    && !BL.BrickLink.item(editItemIdDialog.itemTypeId, textValue.trim()).isNull
+
+                onIsValidChanged: updateOk()
+                Component.onCompleted: {
+                    textValue = editItemIdDialog.currentItemId
+                    updateOk()
+                }
+                function updateOk() {
+                    let ok = standardButton(Dialog.Ok)
+                    if (ok)
+                        ok.enabled = isValid
+                }
+            }
+        }
+
+        sourceComponent: editItemId
+        onAccepted: root.document.setItemId(item.textValue.trim())
+    }
+
+    DialogLoader {
         id: selectColorDialog
         source: "SelectColor.qml"
 
@@ -539,6 +576,7 @@ Page {
             connectionContext = BS.ActionManager.connectQuickActionTable
             ({
                  "edit_price_to_priceguide": () => { setToPGDialog.open() },
+                 "edit_item": () => { editItemIdDialog.open() },
                  "edit_color": () => { selectColorDialog.open() },
                  "edit_price_inc_dec": () => { adjustPriceDialog.open() },
                  "edit_cost_inc_dec": () => { adjustCostDialog.open() },
