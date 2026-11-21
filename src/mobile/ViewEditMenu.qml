@@ -55,7 +55,7 @@ AutoSizingMenu {
     ActionMenuItem { actionName: "edit_status_exclude"; visible: enabled && root.is(BS.Document.Status) }
     ActionMenuItem { actionName: "edit_status_extra"; visible: enabled && root.is(BS.Document.Status) }
     ActionMenuItem { actionName: "edit_status_toggle"; visible: enabled && root.is(BS.Document.Status) }
-//    ActionMenuItem { actionName: "edit_item"; visible: enabled && root.is([ BS.Document.Picture, BS.Document.PartNo, BS.Document.Description ]) }
+    ActionMenuItem { actionName: "edit_item"; visible: enabled && root.is([ BS.Document.Picture, BS.Document.PartNo, BS.Document.Description ]) }
     ActionMenuItem { actionName: "edit_cond_new"; visible: enabled && root.is(BS.Document.Condition) }
     ActionMenuItem { actionName: "edit_cond_used"; visible: enabled && root.is(BS.Document.Condition) }
     ActionMenuSeparator { visible: subCond.visible }

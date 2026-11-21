@@ -18,6 +18,37 @@ Page {
 
     property var goHomeFunction
 
+    // Looks up an item by its id, trying the most common item-types first.
+    function findItemById(itemId : string) {
+        const id = itemId.trim()
+        if (id.length) {
+            for (const typeId of ["P", "S", "M", "G", "B", "C", "I", "O"]) {
+                const item = BL.BrickLink.item(typeId, id)
+                if (!item.isNull)
+                    return item
+            }
+        }
+        return BL.BrickLink.item("P", "")   // null item
+    }
+
+    // Adds a new row for the item, using the first valid color, and selects it.
+    function addItemRow(newItem) {
+        let newColor = BL.BrickLink.color(0)
+        if (newItem.itemType.hasColors) {
+            let knownColors = newItem.knownColors
+            if (knownColors.length > 0)
+                newColor = knownColors[0]
+        }
+
+        let row = root.document.lots.add(newItem, newColor)
+        if (row !== -1) {
+            let index = table.model.index(row, 0)
+            table.selectionModel.select(index, ItemSelectionModel.Rows
+                                        | ItemSelectionModel.ClearAndSelect)
+            table.positionViewAtRow(table.rowAtIndex(index), TableView.Contain)
+        }
+    }
+
     DialogLoader {
         id: infoDialog
         autoUnload: false
@@ -79,6 +110,10 @@ Page {
             ToolButton {
                 icon.name: "help-about"
                 onClicked: if (root.document) infoDialog.open()
+            }
+            ToolButton {
+                icon.name: "vcs-added"
+                onClicked: if (root.document) addItemByIdDialog.open()
             }
             ToolButton {
                 action: BS.ActionManager.quickAction("edit_additems")
@@ -451,6 +486,43 @@ Page {
     }
 
     DialogLoader {
+        id: editItemIdDialog
+
+        // The item-type of the (first) selected lot is kept when changing the item id
+        property string itemTypeId: root.document.selectedLots.length
+                                    ? root.document.selectedLots[0].itemType.id : "P"
+        property string currentItemId: root.document.selectedLots.length
+                                       ? root.document.selectedLots[0].itemId : ""
+
+        Component {
+            id: editItemId
+
+            InputDialog {
+                id: itemIdInput
+                title: qsTr("Set item")
+                text: qsTr("Item ID")
+
+                readonly property bool isValid: textValue.trim().length > 0
+                    && !BL.BrickLink.item(editItemIdDialog.itemTypeId, textValue.trim()).isNull
+
+                onIsValidChanged: updateOk()
+                Component.onCompleted: {
+                    textValue = editItemIdDialog.currentItemId
+                    updateOk()
+                }
+                function updateOk() {
+                    let ok = standardButton(Dialog.Ok)
+                    if (ok)
+                        ok.enabled = isValid
+                }
+            }
+        }
+
+        sourceComponent: editItemId
+        onAccepted: root.document.setItemId(item.textValue.trim())
+    }
+
+    DialogLoader {
         id: selectColorDialog
         source: "SelectColor.qml"
 
@@ -511,23 +583,39 @@ Page {
         }
         sourceComponent: addItems
         onClosed: {
-            if (!item.currentItem.isNull) {
-                let newItem = item.currentItem
-                let newColor = BL.BrickLink.color(0)
-                if (newItem.itemType.hasColors) {
-                    let knownColors = newItem.knownColors
-                    if (knownColors.length > 0)
-                        newColor = knownColors[0]
-                }
+            if (!item.currentItem.isNull)
+                root.addItemRow(item.currentItem)
+        }
+    }
 
-                let row = root.document.lots.add(newItem, newColor)
-                if (row !== -1) {
-                    let index = table.model.index(row, 0)
-                    table.selectionModel.select(index, ItemSelectionModel.Rows
-                                                | ItemSelectionModel.ClearAndSelect)
-                    table.positionViewAtRow(table.rowAtIndex(index), TableView.Contain)
+    DialogLoader {
+        id: addItemByIdDialog
+
+        Component {
+            id: addItemById
+
+            InputDialog {
+                id: addItemIdInput
+                title: qsTr("Add item")
+                text: qsTr("Item ID")
+
+                readonly property bool isValid: !root.findItemById(textValue).isNull
+
+                onIsValidChanged: updateOk()
+                Component.onCompleted: updateOk()
+                function updateOk() {
+                    let ok = standardButton(Dialog.Ok)
+                    if (ok)
+                        ok.enabled = isValid
                 }
             }
+        }
+
+        sourceComponent: addItemById
+        onAccepted: {
+            let newItem = root.findItemById(item.textValue)
+            if (!newItem.isNull)
+                root.addItemRow(newItem)
         }
     }
 
@@ -539,6 +627,7 @@ Page {
             connectionContext = BS.ActionManager.connectQuickActionTable
             ({
                  "edit_price_to_priceguide": () => { setToPGDialog.open() },
+                 "edit_item": () => { editItemIdDialog.open() },
                  "edit_color": () => { selectColorDialog.open() },
                  "edit_price_inc_dec": () => { adjustPriceDialog.open() },
                  "edit_cost_inc_dec": () => { adjustCostDialog.open() },
